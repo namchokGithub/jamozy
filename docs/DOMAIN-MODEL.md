@@ -87,6 +87,8 @@ Relationships: a `Lesson` belongs to a `Unit` via `Lesson.unitId`.
 
 Not persisted here: in-progress keystroke/session state. Per `AGENTS.md`, that stays in Zustand client state and is only written here at checkpoint (lesson complete / session end).
 
+**Unlock rule ([[DEC-009]]):** a lesson's `Progress.status` starts `'locked'`. It becomes `'unlocked'` when the previous lesson (by `Lesson.order` within the same `Unit`; first lesson of the next `Unit`/`Course` unlocks when the last lesson of the previous one completes) reaches `status === 'completed'`. The very first lesson overall is unlocked by default (seeded, not derived). This transition is written by the `complete-lesson` application use case, not computed on read.
+
 ---
 
 ## ReviewItem (per-user)
@@ -103,25 +105,30 @@ Not persisted here: in-progress keystroke/session state. Per `AGENTS.md`, that s
 | mistakeCount     | number  | incremented each time it's mistyped again                   |
 | lastMistakeAt    | Date    |                                                             |
 | resolved         | boolean | true once learner types it correctly in a review session    |
+| box              | number  | Leitner box, 1–5 ([[DEC-008]]); starts at 1, +1 on a correct review (capped at 5), resets to 1 on a mistake |
+| nextReviewAt     | Date    | when this item is next due; computed from `box` at write time |
+
+**Spaced repetition scheduling ([[DEC-008]]):** Leitner-style boxes. Box → interval: 1 → 1 day, 2 → 3 days, 3 → 7 days, 4 → 14 days, 5 → 30 days. A review session pulls `ReviewItem`s where `resolved === false` and `nextReviewAt <= now`. This is an MVP default, tunable without a schema change (only the interval table changes).
 
 ---
 
-## UserProfile (implied by README, not in its explicit domain file list)
+## UserProfile
 
 **Path:** `users/{userId}` (the parent doc of `lessonProgress`/`reviewItems` subcollections)
-**File:** not yet listed in README's folder structure — add `domain/models/user-profile.ts` when built
+**File:** `domain/models/user-profile.ts`
 
-README calls for a "Simple EXP and Level system" and "Configurable learning settings," but doesn't specify where they live. Proposed shape, pending confirmation (see Open Questions):
+Not in README's original domain file list, but required to home EXP/Level and Settings ([[DEC-006]], [[DEC-007]]).
 
-| Field     | Type           | Notes                                  |
-| --------- | -------------- | -------------------------------------- |
-| id        | string         | Firebase Anonymous Auth UID            |
-| exp       | number         | total accumulated EXP                  |
-| level     | number         | derived or stored — see Open Questions |
-| settings  | `UserSettings` | see below                              |
-| createdAt | Date           |                                        |
+| Field     | Type           | Notes                        |
+| --------- | -------------- | ----------------------------- |
+| id        | string         | Firebase Anonymous Auth UID  |
+| exp       | number         | total accumulated EXP, only stored value — `level` is never persisted |
+| settings  | `UserSettings` | see below                    |
+| createdAt | Date           |                               |
 
-`UserSettings` (embedded, tentative):
+**Level formula ([[DEC-006]]):** `level` is derived, not stored: `level = 1 + floor(exp / 100)`. Lives as a pure function (`levelFromExp(exp)`) next to `UserProfile` in `domain/models/user-profile.ts`. MVP placeholder — changing the curve later needs no data migration, since `exp` is the only persisted value.
+
+`UserSettings` (embedded on the user doc, [[DEC-007]]):
 
 | Field              | Type    | Notes                              |
 | ------------------ | ------- | ---------------------------------- |
@@ -130,11 +137,13 @@ README calls for a "Simple EXP and Level system" and "Configurable learning sett
 
 ---
 
-## Open Questions
+## Resolved Decisions
 
-Not decided yet — resolve before building the affected model, and record the resolution in `docs/DECISIONS.md`:
+Previously open, now decided — see `docs/DECISIONS.md` for full rationale:
 
-1. **EXP/Level storage** — is `level` stored directly or derived from `exp` via a formula? Where does the EXP-per-lesson formula live (domain service vs. static config)?
-2. **Settings location** — top-level field on the user doc (as proposed above) or a separate `users/{userId}/settings/{settingsId}` doc? Affects read cost on every screen that needs a setting.
-3. **Review scheduling** — is Review "Practice mode" just a flat list of unresolved `ReviewItem`s, or spaced-repetition scheduled (would need a `nextReviewAt` field)? README doesn't specify an algorithm.
-4. **Unlock rule** — what marks a `Lesson`/`Unit`/`Course` as `unlocked`? (e.g., previous lesson `completed`, or a minimum accuracy threshold). Not specified in README.
+1. **EXP/Level** ([[DEC-006]]) — `level` derived from `exp` via `level = 1 + floor(exp / 100)`, never stored.
+2. **Settings location** ([[DEC-007]]) — field on the `users/{userId}` doc, not a separate subcollection.
+3. **Review scheduling** ([[DEC-008]]) — Leitner-style spaced repetition, `box` + `nextReviewAt` on `ReviewItem`.
+4. **Unlock rule** ([[DEC-009]]) — next lesson unlocks when the previous lesson's `Progress.status` becomes `'completed'`; see the Progress section above.
+
+No open questions remain in this document. Add new ones here as they come up, and resolve the same way.
