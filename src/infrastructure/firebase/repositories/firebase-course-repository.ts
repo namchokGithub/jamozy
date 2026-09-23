@@ -58,4 +58,9 @@ export class FirebaseCourseRepository implements CourseRepository {
     )
     return snapshot.docs.map((d) => toUnit(d.id, d.data()))
   }
+
+  async getUnitById(unitId: string): Promise<Unit | null> {
+    const snapshot = await getDoc(doc(db, 'units', unitId))
+    return snapshot.exists() ? toUnit(snapshot.id, snapshot.data()) : null
+  }
 }

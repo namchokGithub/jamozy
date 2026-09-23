@@ -5,4 +5,5 @@ export interface CourseRepository {
   getCourses(): Promise<Course[]>
   getCourseById(courseId: string): Promise<Course | null>
   getUnitsByCourseId(courseId: string): Promise<Unit[]>
+  getUnitById(unitId: string): Promise<Unit | null>
 }

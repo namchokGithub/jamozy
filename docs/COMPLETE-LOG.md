@@ -67,3 +67,17 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Code updated: `src/domain/models/lesson.ts` (`ExerciseDifficulty`, `LessonExercise` fields), `src/domain/models/review-item.ts` (`ReviewReason`, `reason` field), `src/domain/models/user-profile.ts` (full `UserSettings`, new `UserStats`, `UserProfile.stats`), `src/infrastructure/firebase/repositories/firebase-review-repository.ts` (`reason` mapping).
 - `docs/requirement.md` left unedited — it's the user's source spec; `docs/DECISIONS.md`/`docs/DOMAIN-MODEL.md` are the authoritative resolved state where they disagree.
 - `pnpm build`, `pnpm lint`, `pnpm exec vitest run` all pass (9 tests, unchanged — no new pure logic added this pass, only data shapes).
+
+### 2026-09-23 — Updated docs/requirement.md to match resolved decisions
+
+- User asked for `docs/requirement.md` itself to be updated (superseding the "leave it unedited" call from the previous entry). Edited 4 spots, each cited with `[[DEC-xxx]]`: spaced repetition flipped from "not needed for MVP" to "in for MVP" ([[DEC-008]]), lesson status trimmed from 4 states to 3 (`locked/unlocked/completed`, [[DEC-009]]), EXP/Level example fixed to the flat formula (`Level 7, 50/100 EXP` at exp=650, [[DEC-006]]), "Level" removed from the Save System's stored list (derived only, [[DEC-006]]).
+
+### 2026-09-23 — Built application/ use cases, extended repositories, wrote seed content
+
+- Added `domain/repositories/user-profile-repository.ts` + `FirebaseUserProfileRepository`, and `CourseRepository.getUnitById` + its Firebase implementation — both needed by `complete-lesson` (not in README's original repository list, see [[DEC-014]]).
+- Built all 5 `application/` use cases from README plus a 6th (`submit-review-result.ts`, needed to actually drive spaced repetition — [[DEC-014]]): `get-course.ts`, `get-lesson.ts`, `update-progress.ts`, `complete-lesson.ts`, `get-review-items.ts`, `submit-review-result.ts`.
+- `complete-lesson.ts` wires together progress update, sequential unlock (same-unit and cross-unit, [[DEC-009]]), EXP award per `docs/requirement.md` #8 (100 base / +20 if accuracy>90 / +50 if perfect), and `UserStats` updates — skips EXP/unlock on a retry of an already-completed lesson ([[DEC-014]]).
+- Added `src/test/fakes.ts` (in-memory fakes for all 5 repositories) and 20 new unit tests across the 6 use cases — total 29 tests, all passing, no Firebase/network required.
+- Added sample seed content (`src/infrastructure/firebase/seed/sample-content.ts`: 1 course, 2 units, 2 lessons, 6 exercises) and a standalone seed script (`scripts/seed-firestore.ts`, `pnpm seed`, using `dotenv`+`tsx`, both added as devDependencies).
+- `pnpm build`, `pnpm lint`, `pnpm exec vitest run` all pass.
+- **Not yet run**: `pnpm seed` against the live Firestore database — writes to the real `jamozy` project, held pending explicit user go-ahead.
