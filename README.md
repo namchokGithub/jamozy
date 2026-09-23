@@ -1,4 +1,13 @@
-# Jamozy
+<h1>
+  Jamozy
+  <img
+    src="public/templates/jamozy-64x64.ico"
+    alt="Jamozy Logo"
+    width="48"
+    height="48"
+    align="center"
+  />
+</h1>
 
 [![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)](https://react.dev/) [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)](https://vite.dev/) [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/) [![Firebase](https://img.shields.io/badge/Firebase-12-DD2C00?logo=firebase&logoColor=white)](https://firebase.google.com/) [![Zustand](https://img.shields.io/badge/Zustand-State_Management-433E38)](https://zustand-demo.pmnd.rs/) [![Motion](https://img.shields.io/badge/Motion-Animation-FFEA00?logo=framer&logoColor=000000)](https://motion.dev/) [![Vitest](https://img.shields.io/badge/Vitest-Testing-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev/) [![pnpm](https://img.shields.io/badge/pnpm-Package_Manager-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/) [![Cloudflare Pages](https://img.shields.io/badge/Cloudflare_Pages-Deploy-F38020?logo=cloudflare&logoColor=white)](https://pages.cloudflare.com/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -114,6 +123,7 @@ Firestore
 ```
 
 ## Folder Structure
+
 ```
 src/
 ├── domain/
@@ -158,6 +168,7 @@ src/
 ## Theme Direction
 
 ### Core Theme
+
 Jamozy follows a cozy and playful visual style inspired by soft pastel colors,
 peaceful Korean-inspired scenery, and a relaxed learning atmosphere.
 
@@ -196,6 +207,7 @@ Animations should be subtle, smooth, and relaxing.
 
 ```md
 Examples include:
+
 - soft fade-ins
 - gentle hover motion
 - light button bounce
@@ -246,6 +258,7 @@ pnpm test
 ```
 
 ## Environment Variables
+
 ```md
 Create a `.env.local` file:
 ```
@@ -276,7 +289,7 @@ users/{userId}/reviewItems/{itemId}
 
 > Learning content and user progress are stored separately.
 > Lesson content is treated as shared application data, while progress, review
-history, EXP, levels, and statistics belong to individual users.
+> history, EXP, levels, and statistics belong to individual users.
 
 ## Project Status
 
@@ -318,4 +331,4 @@ Jamozy is currently in early development.
 
 ---
 
-© *2026 Namchok Singhachai*. Jamozy is released under the MIT License.
+© _2026 Namchok Singhachai_. Jamozy is released under the MIT License.
