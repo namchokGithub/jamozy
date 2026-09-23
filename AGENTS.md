@@ -92,6 +92,14 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 - `docs/COMPLETE-LOG.md` — chronological log of completed work
 - `docs/DOMAIN-MODEL.md` — field-level schema for Course/Unit/Lesson/Progress/ReviewItem/UserProfile
 
+## Data Fetching
+
+- Use React Router loaders for route-owned persisted data.
+- Route loaders must call application/use-case functions, not Firebase directly.
+- Do not mirror loader data into Zustand.
+- Use Zustand only for transient interactive session state such as typing input,
+  current exercise, mistakes, timers, and in-progress accuracy.
+
 ## Git Commit Message
 
 - For clear, small, low-risk changes within the current workspace, implement immediately.
