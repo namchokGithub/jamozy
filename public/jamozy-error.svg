@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none">
+  <defs>
+    <linearGradient id="slimeFill" x1="220" y1="240" x2="860" y2="930" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#BBF6E7"/>
+      <stop offset="0.52" stop-color="#AAF0DC"/>
+      <stop offset="1" stop-color="#8EE7D4"/>
+    </linearGradient>
+    <linearGradient id="slimeBorderFill" x1="150" y1="210" x2="905" y2="940" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1FD3C8"/>
+      <stop offset="1" stop-color="#12C9C0"/>
+    </linearGradient>
+    <linearGradient id="dropFill" x1="714" y1="95" x2="920" y2="306" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#BDF7E8"/>
+      <stop offset="1" stop-color="#95E8D5"/>
+    </linearGradient>
+    <linearGradient id="glyphCream" x1="435" y1="377" x2="640" y2="594" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F5F3EC"/>
+      <stop offset="1" stop-color="#EBE6DA"/>
+    </linearGradient>
+    <linearGradient id="navyFill" x1="350" y1="670" x2="700" y2="800" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1C3777"/>
+      <stop offset="1" stop-color="#182E67"/>
+    </linearGradient>
+    <linearGradient id="cheekFill" x1="180" y1="740" x2="840" y2="840" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF89AE"/>
+      <stop offset="1" stop-color="#FF8FAF"/>
+    </linearGradient>
+    <linearGradient id="tongueFill" x1="455" y1="740" x2="575" y2="818" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF87AB"/>
+      <stop offset="1" stop-color="#FF7FA6"/>
+    </linearGradient>
+    <filter id="softShadow" x="0" y="0" width="1024" height="1024" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#0ABCB8" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+
+  <g id="jamozy-simple-mark" filter="url(#softShadow)">
+    <g id="slime-mark">
+      <path id="body-outline" fill="url(#slimeBorderFill)" d="M129.08 831.51c-58.47-95.22-8.58-196.48 12.61-233.46 28.4-49.56 26.44-129.18 63.57-184.89 43.17-64.77 121.08-119.3 220.29-143.02 86.71-20.73 188.72-20.91 277.09 1.32 78.99 19.87 138.83 57.65 185.07 106.06 44.99 47.1 75.46 111.93 88.17 180.53 9.51 51.33 24.74 95.94 53.37 134.34 23.95 32.12 50.75 71.42 45.76 120.43-5.67 55.59-49.82 103.41-102.45 135.37-56.02 34.02-129.69 55.87-214.55 58.88-52.78 1.87-102.74-6.81-155.17-6.64-74.58.24-145.64 14.58-220.25 10.19-106.19-6.25-209.49-53.73-253.51-125.11Z"/>
+      <path id="body-fill" fill="url(#slimeFill)" d="M157.61 815.8c-49.36-84.2-6.55-173.85 11.31-206.43 23.47-42.83 21.86-113.35 54.56-163.1 37.95-57.78 106.81-106.57 194.89-127.93 77.02-18.67 167.58-18.92 246.06 1.04 70.17 17.84 123.29 51.8 164.53 95.32 40.05 42.26 67.24 100.41 78.68 161.97 8.57 46.16 22.41 86.33 48.08 120.79 21.41 28.74 45.36 63.89 40.91 107.76-5.05 49.78-44.3 92.61-91.02 121.26-49.75 30.52-115.11 50.1-190.43 52.91-46.85 1.75-91.23-6.13-137.76-5.94-66.14.27-129.22 13.16-195.39 9.31-94.17-5.49-185.76-48.28-224.42-112.97Z"/>
+      <path id="body-bottom-shadow" fill="#7EE1D1" fill-opacity="0.55" d="M193 906c59 31 130 52 191 54 66 2 129-10 195-10 47 0 91 8 138 6 84-3 145-25 194-54-18 45-84 78-163 92-53 9-110-1-166-1-76 0-144 14-220 9-78-5-136-33-169-67Z"/>
+    </g>
+
+    <g id="droplet">
+      <path id="droplet-outline" fill="url(#slimeBorderFill)" d="M752.28 145.62c49.74-18.29 105.66 1.03 142.87 28.44 35.81 26.39 70.82 71.17 66.92 117.72-3.25 38.71-34.93 67.88-67.59 87.3-33.01 19.62-71.47 28.54-108.92 18.71-37.94-9.95-67.14-44.14-83.35-79.91-16.32-36.01-17.47-78.15.45-111.52 11.82-22.01 26.47-48.44 49.62-60.74Z"/>
+      <path id="droplet-fill" fill="url(#dropFill)" d="M770.95 165.03c42.31-14.17 89.19 2.73 122.7 26.78 32.17 23.09 63.37 62.34 59.88 102.88-2.9 33.74-31.2 58.93-60.29 75.68-29.41 16.93-63.57 24.54-96.9 15.71-33.74-8.94-59.59-38.7-73.93-69.75-14.44-31.29-15.45-67.88.49-96.78 10.5-19.03 23.48-41.82 48.05-54.52Z"/>
+      <ellipse id="droplet-highlight-big" cx="814" cy="213" rx="40" ry="33" fill="#F9FCFF" opacity="0.95" transform="rotate(26 814 213)"/>
+      <ellipse id="droplet-highlight-small" cx="902" cy="307" rx="12" ry="24" fill="#FFFFFF" opacity="0.90" transform="rotate(28 902 307)"/>
+    </g>
+
+    <g id="highlights">
+      <ellipse id="highlight-top" cx="274" cy="382" rx="52" ry="102" fill="#F8FCFF" opacity="0.95" transform="rotate(34 274 382)"/>
+      <ellipse id="highlight-left" cx="195" cy="525" rx="24" ry="43" fill="#F8FCFF" opacity="0.95" transform="rotate(33 195 525)"/>
+    </g>
+
+    <g id="glyph-hieuh">
+      <rect id="glyph-top-bar" x="361" y="404" width="310" height="74" rx="37" fill="url(#glyphCream)" stroke="#1CCEC4" stroke-width="22"/>
+      <rect id="glyph-top-stem" x="482" y="344" width="84" height="125" rx="22" fill="url(#glyphCream)" stroke="#1CCEC4" stroke-width="22"/>
+      <path id="glyph-bottom-ring" fill="url(#glyphCream)" stroke="#1CCEC4" stroke-width="22" fill-rule="evenodd" d="M522.5 492c104.11 0 174.5 44.02 174.5 104 0 59.98-70.39 104-174.5 104S348 655.98 348 596c0-59.98 70.39-104 174.5-104Zm0 56c-68.61 0-115.5 23.42-115.5 48 0 24.58 46.89 48 115.5 48S638 620.58 638 596c0-24.58-46.89-48-115.5-48Z"/>
+    </g>
+
+    <g id="face">
+      <g id="left-eye">
+        <ellipse cx="377" cy="724" rx="44" ry="58" fill="url(#navyFill)" transform="rotate(-9 377 724)"/>
+        <ellipse cx="355" cy="690" rx="12" ry="16" fill="#FFFFFF" transform="rotate(26 355 690)"/>
+      </g>
+      <path id="wink-eye" d="M684 727c18-24 46-38 76-38 30 0 56 14 72 38" stroke="#1A3471" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+      <path id="mouth" d="M435 759c0-12 7-24 18-32 9-7 20-10 31-10 12 0 23 4 31 11 7 6 17 10 28 10s21-4 28-10c8-7 19-11 31-11 11 0 22 3 31 10 11 8 18 20 18 32 0 51-40 86-109 86-69 0-107-35-107-86Z" fill="url(#navyFill)"/>
+      <ellipse id="tongue" cx="512" cy="794" rx="57" ry="41" fill="url(#tongueFill)"/>
+    </g>
+
+    <g id="cheeks">
+      <ellipse id="left-cheek" cx="258" cy="790" rx="75" ry="52" fill="url(#cheekFill)"/>
+      <ellipse id="right-cheek" cx="767" cy="790" rx="75" ry="52" fill="url(#cheekFill)"/>
+      <ellipse cx="234" cy="789" rx="14" ry="24" fill="#FFF2F7" opacity="0.95" transform="rotate(27 234 789)"/>
+      <ellipse cx="269" cy="789" rx="14" ry="24" fill="#FFF2F7" opacity="0.95" transform="rotate(27 269 789)"/>
+      <ellipse cx="743" cy="789" rx="14" ry="24" fill="#FFF2F7" opacity="0.95" transform="rotate(27 743 789)"/>
+      <ellipse cx="778" cy="789" rx="14" ry="24" fill="#FFF2F7" opacity="0.95" transform="rotate(27 778 789)"/>
+    </g>
+  </g>
+</svg>
