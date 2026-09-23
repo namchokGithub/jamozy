@@ -61,12 +61,15 @@ Relationships: a `Lesson` belongs to a `Unit` via `Lesson.unitId`.
 
 `LessonExercise` (embedded, not a separate collection):
 
-| Field        | Type          | Notes                                            |
-| ------------ | ------------- | ------------------------------------------------ |
-| id           | string        | stable ID within the lesson (for review linking) |
-| targetText   | string        | the Korean text the learner must type            |
-| romanization | string\| null | optional pronunciation hint                      |
-| hint         | string\| null | optional extra hint (meaning, keyboard tip)      |
+| Field        | Type                          | Notes                                              |
+| ------------ | ----------------------------- | --------------------------------------------------- |
+| id           | string                        | stable ID within the lesson (for review linking)   |
+| targetText   | string                        | the Korean text the learner must type              |
+| romanization | string\| null                 | optional pronunciation hint                        |
+| meaningTh    | string                        | Thai meaning ([[DEC-010]])                         |
+| meaningEn    | string                        | English meaning ([[DEC-010]])                      |
+| difficulty   | `'easy' \| 'medium' \| 'hard'` | used by Practice Mode filtering ([[DEC-010]])      |
+| hint         | string\| null                 | optional extra hint (not meaning — see `meaningTh`/`meaningEn`) |
 
 ---
 
@@ -84,6 +87,8 @@ Relationships: a `Lesson` belongs to a `Unit` via `Lesson.unitId`.
 | attempts      | number                                  | total attempt count                                          |
 | lastAttemptAt | Date\| null                             |                                                              |
 | completedAt   | Date\| null                             | set on first`status === 'completed'`                         |
+
+**Cross-checked against `docs/requirement.md`:** that doc lists a 4th `Mastered` state and names `'unlocked'` as `Ready`. Kept the existing 3-state `locked/unlocked/completed` — no `Mastered` trigger was specified, and renaming is cosmetic. Reaffirmed 2026-09-23.
 
 Not persisted here: in-progress keystroke/session state. Per `AGENTS.md`, that stays in Zustand client state and is only written here at checkpoint (lesson complete / session end).
 
@@ -105,10 +110,13 @@ Not persisted here: in-progress keystroke/session state. Per `AGENTS.md`, that s
 | mistakeCount     | number  | incremented each time it's mistyped again                   |
 | lastMistakeAt    | Date    |                                                             |
 | resolved         | boolean | true once learner types it correctly in a review session    |
+| reason           | `'mistake' \| 'slow' \| 'low-accuracy'` | why this word entered review ([[DEC-012]]) |
 | box              | number  | Leitner box, 1–5 ([[DEC-008]]); starts at 1, +1 on a correct review (capped at 5), resets to 1 on a mistake |
 | nextReviewAt     | Date    | when this item is next due; computed from `box` at write time |
 
 **Spaced repetition scheduling ([[DEC-008]]):** Leitner-style boxes. Box → interval: 1 → 1 day, 2 → 3 days, 3 → 7 days, 4 → 14 days, 5 → 30 days. A review session pulls `ReviewItem`s where `resolved === false` and `nextReviewAt <= now`. This is an MVP default, tunable without a schema change (only the interval table changes).
+
+**Cross-checked against `docs/requirement.md`:** that doc says MVP doesn't need "full" spaced repetition, just a flat problem-word list. Kept Leitner-box scheduling ([[DEC-008]]) — reaffirmed 2026-09-23. Also added `reason` ([[DEC-012]]) since requirement.md wants review entries triggered by mistakes, slow typing, or low accuracy, not just mistakes.
 
 ---
 
@@ -124,16 +132,39 @@ Not in README's original domain file list, but required to home EXP/Level and Se
 | id        | string         | Firebase Anonymous Auth UID  |
 | exp       | number         | total accumulated EXP, only stored value — `level` is never persisted |
 | settings  | `UserSettings` | see below                    |
+| stats     | `UserStats`    | see below ([[DEC-011]])      |
 | createdAt | Date           |                               |
 
 **Level formula ([[DEC-006]]):** `level` is derived, not stored: `level = 1 + floor(exp / 100)`. Lives as a pure function (`levelFromExp(exp)`) next to `UserProfile` in `domain/models/user-profile.ts`. MVP placeholder — changing the curve later needs no data migration, since `exp` is the only persisted value.
 
+**Cross-checked against `docs/requirement.md`:** that doc's own example ("Level 7, 430/600 EXP") implies an increasing per-level curve (~`level × 100` to reach the next level), not this flat formula, and separately lists "Level" as something to save (implying a stored field). Both reaffirmed against the flat, derived-only formula — 2026-09-23. Revisit the curve shape later if game-design balance needs it; the derived approach means no migration either way.
+
 `UserSettings` (embedded on the user doc, [[DEC-007]]):
 
-| Field              | Type    | Notes                              |
-| ------------------ | ------- | ---------------------------------- |
-| soundEnabled       | boolean |                                    |
-| keyboardLayoutHint | boolean | show/hide virtual keyboard overlay |
+| Field               | Type                     | Notes                                         |
+| ------------------- | ------------------------ | ---------------------------------------------- |
+| soundEnabled        | boolean                  |                                                |
+| showKeyboard         | boolean                  | show/hide the virtual keyboard widget         |
+| showEnglishKeys      | boolean                  | show English-key hints, e.g. `ㅎ → g`          |
+| keyboardOpacity      | number                   | 0–1                                           |
+| romanizationEnabled  | boolean                  |                                                |
+| meaningLanguage      | `'th' \| 'en' \| 'both'` |                                                |
+| theme                | `'light' \| 'dark'`      |                                                |
+
+Replaces the earlier single `keyboardLayoutHint` field with the full requirement.md settings list ([[DEC-013]]) — `showKeyboard` and `showEnglishKeys` are two distinct settings, not one. "Reset Progress" (requirement.md #13) is an action, not a setting — it's a future `application/` use case, not a `UserSettings` field.
+
+`UserStats` (embedded on the user doc, [[DEC-011]]):
+
+| Field                  | Type   | Notes                                    |
+| ---------------------- | ------ | ------------------------------------------ |
+| lessonsCompleted       | number |                                            |
+| wordsPracticed         | number | cumulative exercises attempted             |
+| averageAccuracy        | number | 0–100, across all attempts                 |
+| bestAccuracy           | number | 0–100, best single-attempt, across all lessons (distinct from `Progress.bestAccuracy`, which is per-lesson) |
+| averageSpeedWpm        | number |                                            |
+| totalTypingTimeSeconds | number |                                            |
+
+`currentLevel` (requirement.md #9) is intentionally not stored here — it's `levelFromExp(exp)`, computed on read (see [[DEC-006]]).
 
 ---
 
@@ -141,9 +172,15 @@ Not in README's original domain file list, but required to home EXP/Level and Se
 
 Previously open, now decided — see `docs/DECISIONS.md` for full rationale:
 
-1. **EXP/Level** ([[DEC-006]]) — `level` derived from `exp` via `level = 1 + floor(exp / 100)`, never stored.
+1. **EXP/Level** ([[DEC-006]]) — `level` derived from `exp` via `level = 1 + floor(exp / 100)`, never stored. Reaffirmed against `docs/requirement.md`.
 2. **Settings location** ([[DEC-007]]) — field on the `users/{userId}` doc, not a separate subcollection.
-3. **Review scheduling** ([[DEC-008]]) — Leitner-style spaced repetition, `box` + `nextReviewAt` on `ReviewItem`.
-4. **Unlock rule** ([[DEC-009]]) — next lesson unlocks when the previous lesson's `Progress.status` becomes `'completed'`; see the Progress section above.
+3. **Review scheduling** ([[DEC-008]]) — Leitner-style spaced repetition, `box` + `nextReviewAt` on `ReviewItem`. Reaffirmed against `docs/requirement.md`.
+4. **Unlock rule** ([[DEC-009]]) — next lesson unlocks when the previous lesson's `Progress.status` becomes `'completed'`; 3-state status (`locked/unlocked/completed`) reaffirmed against `docs/requirement.md`'s 4-state suggestion.
+5. **`LessonExercise` fields** ([[DEC-010]]) — added `difficulty` and split `meaningTh`/`meaningEn`, per `docs/requirement.md`.
+6. **`UserStats`** ([[DEC-011]]) — new embedded entity on `UserProfile` for aggregate stats, per `docs/requirement.md`.
+7. **`ReviewItem.reason`** ([[DEC-012]]) — mistake/slow/low-accuracy trigger, per `docs/requirement.md`.
+8. **`UserSettings` expansion** ([[DEC-013]]) — full 7-field settings list, per `docs/requirement.md`.
 
 No open questions remain in this document. Add new ones here as they come up, and resolve the same way.
+
+**Note on `docs/requirement.md`:** that file is the original product spec and is left as-is (not edited to match resolutions above) — this file and `docs/DECISIONS.md` are the authoritative, up-to-date sources when they disagree with it.

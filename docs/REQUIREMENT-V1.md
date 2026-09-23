@@ -1,5 +1,7 @@
 **Korean Typing Learning**
 
+> อัปเดต 2026-09-23: ผ่านการเทียบกับ `docs/DOMAIN-MODEL.md`/`docs/DECISIONS.md` แล้ว จุดที่ปรับตามด้านล่างมีหมายเลข `[[DEC-xxx]]` กำกับ — ดูเหตุผลเต็มที่ `docs/DECISIONS.md`
+
 1. **Learning Flow**
 
    - เรียนจากง่าย → ยาก
@@ -77,7 +79,7 @@
 
    - หน้า `Review`
    - สามารถกดฝึกเฉพาะคำเหล่านั้นได้
-   - MVP ยังไม่ต้องทำ Spaced Repetition เต็มรูปแบบ
+   - **[[DEC-008]] ทำ Spaced Repetition เต็มรูปแบบตั้งแต่ MVP** — Leitner box (1–5), interval 1/3/7/14/30 วัน ตอบถูกเลื่อน box ขึ้น ตอบผิดรีเซ็ตกลับ box 1
 
 6. **Practice Mode**
 
@@ -93,13 +95,12 @@
 
 7. **Progression**
 
-   - แต่ละ Lesson มีสถานะ:
+   - แต่ละ Lesson มีสถานะ **[[DEC-009]] (3 สถานะ ไม่มี Mastered)**:
 
      ```text
-     Locked
-     Ready
-     Completed
-     Mastered
+     locked
+     unlocked
+     completed
      ```
 
    - แสดง progress ของแต่ละ Unit
@@ -124,11 +125,12 @@
 
    - Level ไม่ต้องปลด stat หรือ skill
    - ใช้เพื่อแสดง progression เท่านั้น
-   - เช่น:
+   - **[[DEC-006]] สูตร: `level = 1 + floor(exp / 100)` (flat 100 EXP ต่อ level, ไม่ใช่ curve เพิ่มขึ้นเรื่อยๆ), `level` ไม่ถูก store เก็บแต่ `exp` แล้ว derive ตอน read**
+   - เช่น (exp = 650):
 
      ```text
      Level 7
-     430 / 600 EXP
+     50 / 100 EXP
      ```
 
 9. **Stats**
@@ -219,10 +221,11 @@
 
       - Lesson progress
       - EXP
-      - Level
       - Stats
       - Mistakes
       - Settings
+
+    - **[[DEC-006]] Level ไม่ได้ save แยก** — derive จาก EXP ตอน read เสมอ (กัน level กับ exp ไม่ตรงกัน)
 
     - ยังไม่จำเป็นต้อง Login, Anonymous Auth
 

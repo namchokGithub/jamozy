@@ -82,6 +82,8 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 
 **Consequences:** The exact formula (`100` EXP per level) is an MVP placeholder, not confirmed game-design balance. Lives as `levelFromExp()` in `domain/models/user-profile.ts` — change it there, not in UI code.
 
+**Reaffirmed 2026-09-23:** cross-checked against `docs/requirement.md`, whose own example ("Level 7, 430/600 EXP") implies an increasing per-level curve and separately lists "Level" as a thing to save. User re-confirmed this decision stands as-is over that example.
+
 ---
 
 ## DEC-007 — Settings live as a field on the user doc
@@ -108,6 +110,8 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 
 **Consequences:** Adds `box`/`nextReviewAt` fields to `ReviewItem` (see `docs/DOMAIN-MODEL.md`). The interval table is an MVP placeholder — tunable later without a schema change.
 
+**Reaffirmed 2026-09-23:** cross-checked against `docs/requirement.md`, which says MVP doesn't need "full" spaced repetition (just a flat problem-word list). User re-confirmed this decision stands.
+
 ---
 
 ## DEC-009 — Sequential unlock: previous lesson completed unlocks the next
@@ -120,3 +124,57 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 **Why:** User's explicit choice — simplest rule matching the README's linear Learn → Unlock flow. No separate "unlock accuracy" product requirement exists yet.
 
 **Consequences:** This transition is written by the `complete-lesson` application use case (sets the next lesson's `Progress.status`), not computed on read — keeps read paths simple at the cost of a slightly more involved write.
+
+**Reaffirmed 2026-09-23:** cross-checked against `docs/requirement.md`'s 4-state (`Locked/Ready/Completed/Mastered`) suggestion. User re-confirmed the 3-state `locked/unlocked/completed` stands — no `Mastered` trigger defined, naming difference (`unlocked` vs `Ready`) is cosmetic.
+
+---
+
+## DEC-010 — `LessonExercise` gains `difficulty` and split Thai/English `meaning`
+
+**Date:** 2026-09-23
+**Status:** Accepted
+
+**Decision:** `LessonExercise` adds `difficulty: 'easy' | 'medium' | 'hard'`, `meaningTh: string`, `meaningEn: string`. The existing `hint` field stays for non-meaning extras (e.g. keyboard tips), no longer doubles as "meaning."
+
+**Why:** `docs/requirement.md`'s Vocabulary section (#3) stores Korean/Romanization/Thai-English-meaning/Difficulty/Lesson per word. Practice Mode (#6) filters by difficulty. Settings (#13) lets the learner pick meaning language (Thai/English/Both) — a single opaque `hint` string can't serve a language toggle.
+
+**Consequences:** `meaningTh`/`meaningEn` are required (not nullable) — every exercise needs both at content-authoring time. `difficulty` is a 3-tier MVP placeholder; widening the union later is not a breaking schema change.
+
+---
+
+## DEC-011 — `UserStats` added as an embedded entity on `UserProfile`
+
+**Date:** 2026-09-23
+**Status:** Accepted
+
+**Decision:** New `UserStats` shape (`lessonsCompleted`, `wordsPracticed`, `averageAccuracy`, `bestAccuracy`, `averageSpeedWpm`, `totalTypingTimeSeconds`), embedded as `UserProfile.stats`. `currentLevel` is deliberately excluded — it's `levelFromExp(exp)`, computed on read ([[DEC-006]]).
+
+**Why:** `docs/requirement.md`'s Stats (#9) and Save System (#14) sections want these aggregate numbers persisted; no entity for them existed before this pass.
+
+**Consequences:** Embedded on the user doc (same reasoning as [[DEC-007]] for settings — one read covers profile/settings/stats together). These counters need to be updated by whichever `application/` use case completes a lesson or a review attempt — not yet wired, since `application/` doesn't exist yet.
+
+---
+
+## DEC-012 — `ReviewItem.reason` field added
+
+**Date:** 2026-09-23
+**Status:** Accepted
+
+**Decision:** `ReviewItem` adds `reason: 'mistake' | 'slow' | 'low-accuracy'`.
+
+**Why:** `docs/requirement.md`'s Review System (#5) wants words entering review for three reasons — mistyped, took long, or low accuracy — not just mistakes. The prior model only had `mistakeCount`, implicitly mistake-only.
+
+**Consequences:** `mistakeCount`/`lastMistakeAt` are kept as-is (still meaningful for `reason: 'mistake'` items); for `'slow'`/`'low-accuracy'` items they're less central but not removed, to avoid a second near-duplicate shape. Revisit if that turns out awkward once `application/` use cases actually create these items.
+
+---
+
+## DEC-013 — `UserSettings` expanded to the full requirement.md list
+
+**Date:** 2026-09-23
+**Status:** Accepted
+
+**Decision:** `UserSettings` becomes `soundEnabled`, `showKeyboard`, `showEnglishKeys`, `keyboardOpacity`, `romanizationEnabled`, `meaningLanguage: 'th' | 'en' | 'both'`, `theme: 'light' | 'dark'` — replacing the earlier single `keyboardLayoutHint` boolean.
+
+**Why:** `docs/requirement.md` #13 (plus keyboard opacity from #10) lists 7 distinct settings; the placeholder 2-field version predated that spec. "Reset Progress" (also in #13) is excluded — it's an action/use case, not persisted state.
+
+**Consequences:** `keyboardLayoutHint` is removed, not deprecated-and-kept — no data exists yet to migrate (Firestore database has no seeded user docs). If that changes before this ships, revisit as a real migration.

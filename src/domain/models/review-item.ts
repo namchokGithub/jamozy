@@ -1,8 +1,11 @@
+export type ReviewReason = 'mistake' | 'slow' | 'low-accuracy'
+
 export interface ReviewItem {
   id: string
   sourceLessonId: string
   sourceExerciseId: string
   targetText: string
+  reason: ReviewReason
   mistakeCount: number
   lastMistakeAt: Date
   resolved: boolean

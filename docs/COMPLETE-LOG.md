@@ -58,3 +58,12 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Extended `src/domain/models/review-item.ts` with `box`/`nextReviewAt` fields and `nextBox`/`nextReviewDate` pure functions.
 - Changed `ReviewRepository.markResolved(userId, itemId)` → `updateReviewItem(userId, item)` (generic persist, since spaced repetition needs to write `box`/`nextReviewAt`/`resolved` together); updated `FirebaseReviewRepository` to match.
 - Added unit tests for `nextBox`, `nextReviewDate`, `levelFromExp`. `pnpm build`, `pnpm lint`, `pnpm exec vitest run` all pass (9 tests).
+
+### 2026-09-23 — Cross-checked docs/requirement.md against domain model
+
+- User provided `docs/requirement.md`, a detailed product spec. Cross-checked it against `docs/DOMAIN-MODEL.md`/`docs/DECISIONS.md`, found 8 discrepancies, user resolved each:
+  - Reaffirmed unchanged (requirement.md's suggestion rejected): spaced repetition stays Leitner-box ([[DEC-008]]), EXP/Level formula stays flat ([[DEC-006]]), lesson status stays 3-state `locked/unlocked/completed` ([[DEC-009]]), level stays derived-only (not a separately saved field, [[DEC-006]]).
+  - Adopted from requirement.md (schema changes, new decisions): `LessonExercise.difficulty`/`meaningTh`/`meaningEn` (DEC-010), new `UserStats` entity embedded on `UserProfile` (DEC-011), `ReviewItem.reason` (mistake/slow/low-accuracy, DEC-012), full 7-field `UserSettings` replacing the 2-field placeholder (DEC-013).
+- Code updated: `src/domain/models/lesson.ts` (`ExerciseDifficulty`, `LessonExercise` fields), `src/domain/models/review-item.ts` (`ReviewReason`, `reason` field), `src/domain/models/user-profile.ts` (full `UserSettings`, new `UserStats`, `UserProfile.stats`), `src/infrastructure/firebase/repositories/firebase-review-repository.ts` (`reason` mapping).
+- `docs/requirement.md` left unedited — it's the user's source spec; `docs/DECISIONS.md`/`docs/DOMAIN-MODEL.md` are the authoritative resolved state where they disagree.
+- `pnpm build`, `pnpm lint`, `pnpm exec vitest run` all pass (9 tests, unchanged — no new pure logic added this pass, only data shapes).
