@@ -1,0 +1,39 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Learning content. Readable by any signed-in (including Anonymous Auth)
+    // user. Writable by any signed-in user too — MVP-only compromise, since
+    // there's no admin/content-management auth tier yet. See docs/DECISIONS.md
+    // DEC-015: revisit before shipping, this currently lets any player rewrite
+    // course content via the client SDK.
+    match /courses/{courseId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+
+    match /units/{unitId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+
+    match /lessons/{lessonId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+
+    // Per-user data. Only the owning user may read or write their own doc
+    // and subcollections.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /lessonProgress/{lessonId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /reviewItems/{itemId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}

@@ -17,7 +17,7 @@ Last updated: 2026-09-23
 | Review system                     | In progress | `application/get-review-items.ts` + `application/submit-review-result.ts` done and unit-tested. No UI yet |
 | EXP and Level progression         | In progress | EXP awarded in `complete-lesson` per `docs/requirement.md` #8 (100 base / +20 acc>90 / +50 perfect); `levelFromExp` derives level. No UI yet |
 | Firebase Anonymous Authentication | In progress | SDK wired (`src/infrastructure/firebase/firebase.ts`, `signInAnonymouslyIfNeeded`), Anonymous provider enabled in console, not called from app UI yet. See [[DEC-001]]                                                                                                                          |
-| Firestore progress persistence    | In progress | All 5 `FirebaseXRepository` implementations done (course/lesson/progress/review/user-profile), wired to `application/` use cases. Not exercised against real data yet — seed script written (`pnpm seed`) but not run against the live Firestore database |
+| Firestore progress persistence    | In progress | All 5 `FirebaseXRepository` implementations done, wired to `application/` use cases. `pnpm seed` hit `PERMISSION_DENIED` (no rules deployed) — added `firestore.rules`/`firebase.json`/`.firebaserc` ([[DEC-015]]), pending `firebase deploy --only firestore:rules` by user, then re-run seed |
 | Settings                          | Not started | `UserSettings` schema done ([[DEC-013]]), no read/write use case or UI yet |
 
 ## Later (post-MVP)
@@ -47,8 +47,8 @@ Last updated: 2026-09-23
 
 `application/` layer built: `get-course.ts`, `get-lesson.ts`, `update-progress.ts`, `complete-lesson.ts`, `get-review-items.ts`, `submit-review-result.ts` (6th file beyond README's original 5 — see [[DEC-014]]). Each tested against in-memory fake repositories (`src/test/fakes.ts`) — 29 tests total, all passing, no Firebase/network needed for these tests. Also added `CourseRepository.getUnitById` and a full `UserProfileRepository`/`FirebaseUserProfileRepository` ([[DEC-014]]).
 
-Sample seed content written: 1 course, 2 units, 2 lessons, 6 vocabulary exercises (`src/infrastructure/firebase/seed/sample-content.ts`) + a standalone seed script (`pnpm seed`, `scripts/seed-firestore.ts`). **Not yet run against the live Firestore database** — pending user go-ahead before writing to the real `jamozy` project.
+Sample seed content written: 1 course, 2 units, 2 lessons, 6 vocabulary exercises (`src/infrastructure/firebase/seed/sample-content.ts`) + a standalone seed script (`pnpm seed`, `scripts/seed-firestore.ts`). User ran it against the live `jamozy` project — hit `PERMISSION_DENIED` (Firestore had no rules deployed, default deny-all). Added `firestore.rules` + `firebase.json` + `.firebaserc` ([[DEC-015]]) — **flags a real MVP-only security gap: any signed-in user can currently write `courses`/`units`/`lessons`, not just their own progress; must be replaced before any public launch.** User will deploy the rules themselves (`firebase login` then `firebase deploy --only firestore:rules`) and re-run `pnpm seed`.
 
 `pnpm build`/`lint`/`vitest run` all pass.
 
-Next real steps: (1) run `pnpm seed` against Firestore once approved, (2) start `features/` UI (course list, lesson flow) wired to these use cases, or (3) build the Korean typing engine core logic — none of these are blocked on each other.
+Next real steps once rules are deployed and seed succeeds: (1) start `features/` UI (course list, lesson flow) wired to these use cases, or (2) build the Korean typing engine core logic — not blocked on each other, or on the seed.

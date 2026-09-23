@@ -196,3 +196,18 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 **Why:** These are mechanical necessities to make already-decided behavior ([[DEC-008]], [[DEC-009]], [[DEC-006]]/[[DEC-011]] EXP+stats) actually executable, not new product scope.
 
 **Consequences:** `application/complete-lesson.ts` is the most complex use case (reads/writes across 4 repositories). `application/get-review-items.ts` filters `ReviewRepository.getReviewItems()` client-side rather than a server-side query — fine at MVP scale, revisit if a user's review list grows large.
+
+---
+
+## DEC-015 — Firestore rules: any signed-in user can write content (MVP-only)
+
+**Date:** 2026-09-23
+**Status:** Accepted (temporary — must revisit before shipping)
+
+**Decision:** Added `firestore.rules` (+ `firebase.json`, `.firebaserc`). `courses`/`units`/`lessons` are readable AND writable by any signed-in user (including Anonymous Auth). `users/{userId}` and its subcollections are readable/writable only by that same `uid`.
+
+**Why:** `pnpm seed` (client SDK) failed with `PERMISSION_DENIED` — the Firestore database had no rules deployed yet (default deny-all). There's no admin/content-management auth tier built yet (`docs/requirement.md` #15, "Content Management," isn't implemented), and the seed script authenticates the same way any player would (Anonymous Auth). User chose to unblock seeding this way rather than switch to an Admin SDK + service account.
+
+**Consequences — real security gap, not just theoretical:** any signed-in player can currently rewrite `courses`/`units`/`lessons` from the browser console via the Firestore client SDK (vandalize curriculum content, not just their own progress). Acceptable for local MVP development with no real users. **Must be replaced before any public launch** — either a custom-claims admin role, or move content writes to an Admin SDK/Cloud Function path and lock `courses`/`units`/`lessons` to `allow write: if false` for clients. User data rules (`users/{userId}/**`) are already correct/production-safe as written.
+
+**Deploy:** rules aren't live until run — `firebase login` (interactive, user runs this) then `firebase deploy --only firestore:rules`.

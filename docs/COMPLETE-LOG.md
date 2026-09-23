@@ -81,3 +81,11 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Added sample seed content (`src/infrastructure/firebase/seed/sample-content.ts`: 1 course, 2 units, 2 lessons, 6 exercises) and a standalone seed script (`scripts/seed-firestore.ts`, `pnpm seed`, using `dotenv`+`tsx`, both added as devDependencies).
 - `pnpm build`, `pnpm lint`, `pnpm exec vitest run` all pass.
 - **Not yet run**: `pnpm seed` against the live Firestore database — writes to the real `jamozy` project, held pending explicit user go-ahead.
+
+### 2026-09-23 — pnpm seed hit PERMISSION_DENIED, added Firestore rules
+
+- User ran `pnpm seed` themselves against the live `jamozy` project: failed with `FirebaseError: 7 PERMISSION_DENIED: Missing or insufficient permissions.` — the Firestore database had no rules deployed (default deny-all).
+- Asked user how to unblock (Admin SDK + service account, vs. open client rules); user chose to add `firestore.rules` and deploy it themselves.
+- Added `firestore.rules` (content collections readable/writable by any signed-in user; `users/{userId}` and subcollections restricted to the owning `uid`), `firebase.json`, `.firebaserc` (project alias `jamozy`).
+- Recorded `docs/DECISIONS.md` DEC-015: **flags a real, not just theoretical, security gap** — content write access isn't restricted to an admin role (none exists yet), so any signed-in player can currently rewrite `courses`/`units`/`lessons` via the client SDK. Must be replaced (custom-claims admin role, or Admin SDK/Cloud Function-only content writes) before any public launch. User-data rules are already correct/production-safe.
+- Did not run `firebase deploy` — user will run `firebase login` then `firebase deploy --only firestore:rules` themselves, then re-run `pnpm seed`.
