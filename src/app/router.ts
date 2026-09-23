@@ -1,0 +1,51 @@
+import { createBrowserRouter } from 'react-router'
+import {
+  courseRepo,
+  lessonRepo,
+  progressRepo,
+} from '../infrastructure/firebase/repositories'
+import { signInAnonymouslyIfNeeded } from '../infrastructure/firebase/firebase'
+import CourseListPage from '../features/course/CourseListPage'
+import { createCourseListLoader } from '../features/course/CourseListPage.loader'
+import CourseMapPage from '../features/course/CourseMapPage'
+import { createCourseMapLoader } from '../features/course/CourseMapPage.loader'
+import LessonDetailPage from '../features/lesson/LessonDetailPage'
+import { createLessonDetailLoader } from '../features/lesson/LessonDetailPage.loader'
+import RouteError from './RouteError'
+import NotFoundPage from './NotFoundPage'
+
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    Component: CourseListPage,
+    loader: createCourseListLoader({
+      courseRepo,
+      ensureUser: signInAnonymouslyIfNeeded,
+    }),
+    ErrorBoundary: RouteError,
+  },
+  {
+    path: '/courses/:courseId',
+    Component: CourseMapPage,
+    loader: createCourseMapLoader({
+      courseRepo,
+      lessonRepo,
+      progressRepo,
+      ensureUser: signInAnonymouslyIfNeeded,
+    }),
+    ErrorBoundary: RouteError,
+  },
+  {
+    path: '/lessons/:lessonId',
+    Component: LessonDetailPage,
+    loader: createLessonDetailLoader({
+      lessonRepo,
+      ensureUser: signInAnonymouslyIfNeeded,
+    }),
+    ErrorBoundary: RouteError,
+  },
+  {
+    path: '*',
+    Component: NotFoundPage,
+  },
+])

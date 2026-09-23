@@ -211,3 +211,19 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 **Consequences — real security gap, not just theoretical:** any signed-in player can currently rewrite `courses`/`units`/`lessons` from the browser console via the Firestore client SDK (vandalize curriculum content, not just their own progress). Acceptable for local MVP development with no real users. **Must be replaced before any public launch** — either a custom-claims admin role, or move content writes to an Admin SDK/Cloud Function path and lock `courses`/`units`/`lessons` to `allow write: if false` for clients. User data rules (`users/{userId}/**`) are already correct/production-safe as written.
 
 **Deploy:** rules aren't live until run — `firebase login` (interactive, user runs this) then `firebase deploy --only firestore:rules`.
+
+---
+
+## DEC-016 — Composite Firestore indexes, and `ensureUser` injected into loaders (not imported)
+
+**Date:** 2026-09-23
+**Status:** Accepted
+
+**Decision:** Two related fixes found via manual browser testing of the first UI feature (`docs/superpowers/plans/2026-09-23-course-lesson-ui.md`), both confirmed by a fresh whole-branch code review:
+
+1. **`firestore.indexes.json`** added (+ wired into `firebase.json`). `FirebaseCourseRepository.getUnitsByCourseId` and `FirebaseLessonRepository.getLessonsByUnitId` combine a `where()` equality filter with `orderBy()` on a different field — Firestore requires a composite index for that query shape. Two indexes: `units` (`courseId` + `order`), `lessons` (`unitId` + `order`).
+2. **`ensureUser: () => Promise<{ uid: string }>`** is now an injected dependency on every route loader (`CourseListPage.loader.ts`, `CourseMapPage.loader.ts`, `LessonDetailPage.loader.ts`), bound once in `src/app/router.ts` to `signInAnonymouslyIfNeeded` (`src/infrastructure/firebase/firebase.ts`). No file under `src/features/` imports `infrastructure/firebase` directly anymore.
+
+**Why:** (1) `firestore.rules` ([[DEC-015]]) requires `request.auth != null` for reading `courses`/`units`/`lessons` at all, not just per-user data — but only `CourseMapPage.loader.ts` originally called `signInAnonymouslyIfNeeded()`, so `CourseListPage`/`LessonDetailPage` hit `PERMISSION_DENIED` in the browser. The fix (adding the call) worked, but duplicated the precondition into every loader with no test, and each loader importing `infrastructure/firebase/firebase` directly violates `AGENTS.md`'s layering rule ("never through `infrastructure/firebase` directly from `features/`") — the original plan itself sanctioned that import, so this was a plan defect, not an implementer mistake. (2) The composite-index error only surfaces against real Firestore — none of the fakes-based unit tests model Firestore's index requirements, so nothing caught it before the browser.
+
+**Consequences:** Every loader now takes `ensureUser` as a constructor-style dependency and has a unit test (`*.loader.test.ts`) asserting it's called before any repository read — the exact bug class that broke in the browser is now pinned by a fast, no-network test, not just "eyeball it, low risk" as the original spec assumed. `NotFoundError` (`src/domain/errors.ts`) was added alongside this fix so `RouteError` can show "Not found." instead of a raw error message for a missing course/lesson — same review pass, same root cause category (spec under-tested the loader layer). **Deploy:** `firebase deploy --only firestore:indexes` (in addition to `firestore:rules`) is required before the course map works in any environment, including a fresh `firebase use` on another machine.

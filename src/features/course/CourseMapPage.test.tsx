@@ -71,7 +71,7 @@ describe('CourseMapPage', () => {
     expect(screen.getByText('Locked')).toBeInTheDocument()
   })
 
-  it('renders a unit with no lessons without crashing', async () => {
+  it('shows an empty-state message for a unit with no lessons, without crashing', async () => {
     const courseMap: CourseMap = {
       course: makeCourse(),
       units: [{ unit: makeUnit('u1', 1), lessons: [] }],
@@ -81,5 +81,13 @@ describe('CourseMapPage', () => {
     fireEvent.click(await screen.findByRole('button', { name: /Unit u1/i }))
 
     expect(screen.queryByRole('link')).not.toBeInTheDocument()
+    expect(await screen.findByText('No lessons yet.')).toBeInTheDocument()
+  })
+
+  it('shows an empty-state message for a course with no units, without crashing', async () => {
+    const courseMap: CourseMap = { course: makeCourse(), units: [] }
+    renderPage(courseMap)
+
+    expect(await screen.findByText('No units yet.')).toBeInTheDocument()
   })
 })

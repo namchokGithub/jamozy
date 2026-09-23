@@ -34,4 +34,15 @@ describe('CourseListPage', () => {
     expect(link).toHaveAttribute('href', '/courses/c1')
     expect(screen.getByText('Description for c1')).toBeInTheDocument()
   })
+
+  it('shows an empty-state message when there are no courses yet', async () => {
+    const router = createMemoryRouter(
+      [{ path: '/', Component: CourseListPage, loader: async () => ({ courses: [] }) }],
+      { initialEntries: ['/'] },
+    )
+
+    render(<RouterProvider router={router} />)
+
+    expect(await screen.findByText('No courses yet.')).toBeInTheDocument()
+  })
 })

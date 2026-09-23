@@ -1,8 +1,13 @@
 import { useRouteError } from 'react-router'
+import { NotFoundError } from '../domain/errors'
 
 export default function RouteError() {
   const error = useRouteError()
-  const message = error instanceof Error ? error.message : 'Something went wrong.'
+  const message = error instanceof NotFoundError
+    ? 'Not found.'
+    : error instanceof Error
+      ? error.message
+      : 'Something went wrong.'
 
   return (
     <main className="mx-auto max-w-2xl p-6">

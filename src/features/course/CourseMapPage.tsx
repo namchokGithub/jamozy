@@ -30,7 +30,13 @@ function UnitSection({ mapUnit }: { mapUnit: CourseMapUnit }) {
         </span>
       </button>
 
-      {open && (
+      {open && mapUnit.lessons.length === 0 && (
+        <p className="border-t border-slate-100 p-4 text-sm text-slate-500">
+          No lessons yet.
+        </p>
+      )}
+
+      {open && mapUnit.lessons.length > 0 && (
         <ul className="space-y-2 border-t border-slate-100 p-4">
           {mapUnit.lessons.map(({ lesson, progress }) => (
             <li key={lesson.id}>
@@ -59,11 +65,15 @@ export default function CourseMapPage() {
       <h1 className="text-2xl font-medium text-slate-900">{courseMap.course.title}</h1>
       <p className="mt-1 text-slate-600">{courseMap.course.description}</p>
 
-      <ul className="mt-6 space-y-3">
-        {courseMap.units.map((mapUnit) => (
-          <UnitSection key={mapUnit.unit.id} mapUnit={mapUnit} />
-        ))}
-      </ul>
+      {courseMap.units.length === 0 ? (
+        <p className="mt-6 text-sm text-slate-500">No units yet.</p>
+      ) : (
+        <ul className="mt-6 space-y-3">
+          {courseMap.units.map((mapUnit) => (
+            <UnitSection key={mapUnit.unit.id} mapUnit={mapUnit} />
+          ))}
+        </ul>
+      )}
     </main>
   )
 }

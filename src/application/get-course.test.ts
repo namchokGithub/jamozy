@@ -8,6 +8,7 @@ import {
 import type { Course } from '../domain/models/course'
 import type { Unit } from '../domain/models/unit'
 import type { Lesson } from '../domain/models/lesson'
+import { NotFoundError } from '../domain/errors'
 
 function makeCourse(id: string, order: number): Course {
   return { id, title: id, description: '', order, createdAt: new Date(), updatedAt: new Date() }
@@ -59,6 +60,9 @@ describe('getCourseMap', () => {
 
     await expect(getCourseMap(deps, 'user1', 'missing')).rejects.toThrow(
       'Course not found: missing',
+    )
+    await expect(getCourseMap(deps, 'user1', 'missing')).rejects.toBeInstanceOf(
+      NotFoundError,
     )
   })
 

@@ -5,6 +5,7 @@ import type { Course } from '../domain/models/course'
 import type { Unit } from '../domain/models/unit'
 import type { Lesson } from '../domain/models/lesson'
 import type { Progress } from '../domain/models/progress'
+import { NotFoundError } from '../domain/errors'
 
 export function getCourses(courseRepo: CourseRepository): Promise<Course[]> {
   return courseRepo.getCourses()
@@ -45,7 +46,7 @@ export async function getCourseMap(
 ): Promise<CourseMap> {
   const course = await deps.courseRepo.getCourseById(courseId)
   if (!course) {
-    throw new Error(`Course not found: ${courseId}`)
+    throw new NotFoundError(`Course not found: ${courseId}`)
   }
 
   const units = await deps.courseRepo.getUnitsByCourseId(courseId)
