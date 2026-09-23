@@ -257,6 +257,7 @@ VITE_FIREBASE_PROJECT_ID=
 VITE_FIREBASE_STORAGE_BUCKET=
 VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_APP_ID=
+VITE_FIREBASE_USE_EMULATOR=0
 ```
 
 > Never commit Firebase environment files containing project-specific configuration or secrets.
