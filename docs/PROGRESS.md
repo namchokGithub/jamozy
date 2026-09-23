@@ -35,14 +35,14 @@ Last updated: 2026-09-23
 
 | Item | Status | Notes |
 |---|---|---|
-| Vite + React + TypeScript scaffold | Not started | `src/` does not exist yet |
-| Tailwind CSS setup | Not started | |
-| Firebase project + SDK wiring | Not started | |
-| Domain/application/infrastructure folder skeleton | Not started | See [[DEC-002]] |
-| ESLint + Prettier config | Not started | |
-| Vitest + React Testing Library setup | Not started | |
+| Vite + React + TypeScript scaffold | Done | Vite 7.3.6, React 19.3, TypeScript 5.9.3 — matches README badges |
+| Tailwind CSS setup | Done | Tailwind 4 via `@tailwindcss/vite`, `src/index.css` |
+| Firebase project + SDK wiring | Not started | Blocked on a Firebase project + `.env.local` values from the user |
+| Domain/application/infrastructure folder skeleton | In progress | `domain/models` + `domain/repositories` done (see [[DEC-002]]); `application/`, `infrastructure/firebase/`, `features/` are empty dirs pending Firebase wiring + open decisions in `docs/DOMAIN-MODEL.md` |
+| ESLint + Prettier config | Done | Flat config `eslint.config.js`, `.prettierrc.json` |
+| Vitest + React Testing Library setup | Done | `pnpm test`; smoke test in `src/App.test.tsx` passing |
 | Cloudflare Pages deploy pipeline | Not started | |
 
 ## Current Focus
 
-Nothing started yet — repository has README, LICENSE, and agent docs only. Next reasonable step is the foundational scaffold section above.
+Scaffold verified: `pnpm build`, `pnpm lint`, `pnpm exec vitest run` all pass. Next: either wire Firebase (needs user's project credentials) or start on Course/unit structure once the open questions in `docs/DOMAIN-MODEL.md` are resolved.

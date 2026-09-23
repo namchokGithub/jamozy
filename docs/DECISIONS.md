@@ -55,3 +55,16 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 **Why:** Keeps the first version focused on the core solo learning loop (Learn → Type → Review → Improve → Unlock) and matches the calm, non-competitive theme direction.
 
 **Consequences:** Re-evaluate post-MVP; tracked under README "Later" (achievements, daily streaks).
+
+---
+
+## DEC-005 — Pin `@vitejs/plugin-react` to 5.2.0, not latest
+
+**Date:** 2026-09-23
+**Status:** Accepted
+
+**Decision:** Pin `@vitejs/plugin-react` to `5.2.0` instead of the latest `6.x`.
+
+**Why:** README pins Vite to major version 7. `@vitejs/plugin-react@6.x` requires Vite 8 as a peer (`vite: ^8.0.0`) and fails the build with `ERR_PACKAGE_PATH_NOT_EXPORTED` against Vite 7. `5.2.0` is the newest version whose peer range still includes `^7.0.0`.
+
+**Consequences:** Revisit this pin if/when the project intentionally upgrades to Vite 8 (would need its own decision entry — Vite major bumps can affect other tooling).
