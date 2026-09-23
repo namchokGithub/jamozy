@@ -89,3 +89,8 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Added `firestore.rules` (content collections readable/writable by any signed-in user; `users/{userId}` and subcollections restricted to the owning `uid`), `firebase.json`, `.firebaserc` (project alias `jamozy`).
 - Recorded `docs/DECISIONS.md` DEC-015: **flags a real, not just theoretical, security gap** — content write access isn't restricted to an admin role (none exists yet), so any signed-in player can currently rewrite `courses`/`units`/`lessons` via the client SDK. Must be replaced (custom-claims admin role, or Admin SDK/Cloud Function-only content writes) before any public launch. User-data rules are already correct/production-safe.
 - Did not run `firebase deploy` — user will run `firebase login` then `firebase deploy --only firestore:rules` themselves, then re-run `pnpm seed`.
+
+### 2026-09-23 — Seed succeeded
+
+- User deployed `firestore.rules` and re-ran `pnpm seed`: `Seed complete.` — `courses`/`units`/`lessons` now hold real sample content in the live `jamozy` Firestore database (1 course, 2 units, 2 lessons, 6 exercises).
+- [[DEC-015]]'s MVP-only security gap (any signed-in user can write content collections) still stands — not addressed, just deployed as-is per the earlier decision.
