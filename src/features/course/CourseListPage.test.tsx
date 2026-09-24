@@ -22,7 +22,7 @@ describe('CourseListPage', () => {
         {
           path: '/',
           Component: CourseListPage,
-          loader: async () => ({ courses: [makeCourse('c1')] }),
+          loader: async () => ({ courses: [makeCourse('c1')], dueReviewCount: 0 }),
         },
       ],
       { initialEntries: ['/'] },
@@ -37,12 +37,52 @@ describe('CourseListPage', () => {
 
   it('shows an empty-state message when there are no courses yet', async () => {
     const router = createMemoryRouter(
-      [{ path: '/', Component: CourseListPage, loader: async () => ({ courses: [] }) }],
+      [
+        {
+          path: '/',
+          Component: CourseListPage,
+          loader: async () => ({ courses: [], dueReviewCount: 0 }),
+        },
+      ],
       { initialEntries: ['/'] },
     )
 
     render(<RouterProvider router={router} />)
 
     expect(await screen.findByText('No courses yet.')).toBeInTheDocument()
+  })
+
+  it('shows a due-review link when items are due', async () => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/',
+          Component: CourseListPage,
+          loader: async () => ({ courses: [], dueReviewCount: 3 }),
+        },
+      ],
+      { initialEntries: ['/'] },
+    )
+    render(<RouterProvider router={router} />)
+
+    const link = await screen.findByRole('link', { name: /3 words due for review/i })
+    expect(link).toHaveAttribute('href', '/review')
+  })
+
+  it('hides the due-review link when nothing is due', async () => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/',
+          Component: CourseListPage,
+          loader: async () => ({ courses: [], dueReviewCount: 0 }),
+        },
+      ],
+      { initialEntries: ['/'] },
+    )
+    render(<RouterProvider router={router} />)
+
+    await screen.findByText('No courses yet.')
+    expect(screen.queryByRole('link', { name: /words due for review/i })).not.toBeInTheDocument()
   })
 })

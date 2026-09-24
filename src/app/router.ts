@@ -14,6 +14,9 @@ import { createCourseMapLoader } from '../features/course/CourseMapPage.loader'
 import LessonDetailPage from '../features/lesson/LessonDetailPage'
 import { createLessonDetailLoader } from '../features/lesson/LessonDetailPage.loader'
 import { createCompleteLessonSessionAction } from '../features/lesson/LessonDetailPage.action'
+import ReviewPage from '../features/review/ReviewPage'
+import { createReviewLoader } from '../features/review/ReviewPage.loader'
+import { createSubmitReviewSessionAction } from '../features/review/ReviewPage.action'
 import RouteError from './RouteError'
 import NotFoundPage from './NotFoundPage'
 
@@ -23,6 +26,7 @@ export const router = createBrowserRouter([
     Component: CourseListPage,
     loader: createCourseListLoader({
       courseRepo,
+      reviewRepo,
       ensureUser: signInAnonymouslyIfNeeded,
     }),
     ErrorBoundary: RouteError,
@@ -50,6 +54,19 @@ export const router = createBrowserRouter([
       lessonRepo,
       progressRepo,
       userProfileRepo,
+      reviewRepo,
+      ensureUser: signInAnonymouslyIfNeeded,
+    }),
+    ErrorBoundary: RouteError,
+  },
+  {
+    path: '/review',
+    Component: ReviewPage,
+    loader: createReviewLoader({
+      reviewRepo,
+      ensureUser: signInAnonymouslyIfNeeded,
+    }),
+    action: createSubmitReviewSessionAction({
       reviewRepo,
       ensureUser: signInAnonymouslyIfNeeded,
     }),

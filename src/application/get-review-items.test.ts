@@ -46,4 +46,25 @@ describe('getDueReviewItems', () => {
     )
     expect(await getDueReviewItems(repo, 'u1', now)).toEqual([])
   })
+
+  it('returns every due item when no limit is given (unbounded)', async () => {
+    const repo = new FakeReviewRepository()
+    for (let i = 0; i < 25; i++) {
+      await repo.addReviewItem('u1', makeItem(`due-${i}`, { nextReviewAt: now }))
+    }
+    const items = await getDueReviewItems(repo, 'u1', now)
+    expect(items).toHaveLength(25)
+  })
+
+  it('caps the returned items to an explicit limit, without dropping the rest from the repository', async () => {
+    const repo = new FakeReviewRepository()
+    for (let i = 0; i < 5; i++) {
+      await repo.addReviewItem('u1', makeItem(`due-${i}`, { nextReviewAt: now }))
+    }
+    const items = await getDueReviewItems(repo, 'u1', now, 3)
+    expect(items).toHaveLength(3)
+
+    const allStillThere = await repo.getReviewItems('u1')
+    expect(allStillThere.filter((i) => !i.resolved && i.nextReviewAt <= now)).toHaveLength(5)
+  })
 })

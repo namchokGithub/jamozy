@@ -2,11 +2,18 @@ import { Link, useLoaderData } from 'react-router'
 import type { CourseListLoaderData } from './CourseListPage.loader'
 
 export default function CourseListPage() {
-  const { courses } = useLoaderData() as CourseListLoaderData
+  const { courses, dueReviewCount } = useLoaderData() as CourseListLoaderData
 
   return (
     <main className="mx-auto max-w-2xl p-6">
       <h1 className="text-2xl font-medium text-slate-900">Jamozy</h1>
+
+      {dueReviewCount > 0 && (
+        <Link to="/review" className="mt-2 block text-sm text-amber-700 underline">
+          {dueReviewCount} words due for review
+        </Link>
+      )}
+
       {courses.length === 0 ? (
         <p className="mt-6 text-sm text-slate-500">No courses yet.</p>
       ) : (

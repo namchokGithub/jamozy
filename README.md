@@ -303,7 +303,7 @@ Jamozy is currently in early development.
 - [x] Virtual Korean keyboard
 - [x] Accuracy and speed tracking
 - [ ] Lesson results
-- [ ] Review system
+- [x] Review system
 - [ ] EXP and Level progression
 - [ ] Firebase Anonymous Authentication
 - [x] Firestore progress persistence
