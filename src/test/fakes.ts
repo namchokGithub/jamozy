@@ -76,6 +76,10 @@ export class FakeReviewRepository implements ReviewRepository {
       .map(([, value]) => value)
   }
 
+  async getReviewItem(userId: string, itemId: string): Promise<ReviewItem | null> {
+    return this.store.get(`${userId}:${itemId}`) ?? null
+  }
+
   async addReviewItem(userId: string, item: ReviewItem): Promise<void> {
     this.store.set(`${userId}:${item.id}`, item)
   }

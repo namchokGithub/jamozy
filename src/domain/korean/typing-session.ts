@@ -3,11 +3,20 @@ import { COMPOUND_JONGSEONG_PARTS, COMPOUND_JUNGSEONG_PARTS, composeSyllable } f
 
 export type CharacterState = 'correct' | 'current' | 'pending'
 
+export interface MistakeEvent {
+  syllableIndex: number
+  expectedCode: string
+  expectedShift: boolean
+  expectedJamo: string
+  pressedCode: string
+  pressedShift: boolean
+}
+
 export interface TypingSessionState {
   targetText: string
   expectedKeys: ExpectedKey[]
   keyIndex: number
-  mistakeCount: number
+  mistakes: MistakeEvent[]
   status: 'in-progress' | 'completed'
 }
 
@@ -17,7 +26,7 @@ export function startTypingSession(targetText: string): TypingSessionState {
     targetText,
     expectedKeys,
     keyIndex: 0,
-    mistakeCount: 0,
+    mistakes: [],
     status: expectedKeys.length === 0 ? 'completed' : 'in-progress',
   }
 }
@@ -46,7 +55,15 @@ export function pressKey(state: TypingSessionState, code: string, shiftKey: bool
     }
   }
 
-  return { ...state, mistakeCount: state.mistakeCount + 1 }
+  const mistake: MistakeEvent = {
+    syllableIndex: expected.syllableIndex,
+    expectedCode: expected.code,
+    expectedShift: expected.shift,
+    expectedJamo: expected.jamo,
+    pressedCode: code,
+    pressedShift: shiftKey,
+  }
+  return { ...state, mistakes: [...state.mistakes, mistake] }
 }
 
 function syllableIndexes(state: TypingSessionState): number[] {
@@ -139,7 +156,7 @@ export function getCharacterStates(state: TypingSessionState): CharacterState[] 
 }
 
 export function getAccuracy(state: TypingSessionState): number {
-  const attempts = state.keyIndex + state.mistakeCount
+  const attempts = state.keyIndex + state.mistakes.length
   return attempts === 0 ? 0 : state.keyIndex / attempts
 }
 

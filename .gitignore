@@ -149,3 +149,4 @@ vite.config.ts.timestamp-*
 .idea/
 .vscode/
 .local-task.md
+.local-tasks

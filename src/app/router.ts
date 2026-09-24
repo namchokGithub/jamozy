@@ -3,6 +3,8 @@ import {
   courseRepo,
   lessonRepo,
   progressRepo,
+  userProfileRepo,
+  reviewRepo,
 } from '../infrastructure/firebase/repositories'
 import { signInAnonymouslyIfNeeded } from '../infrastructure/firebase/firebase'
 import CourseListPage from '../features/course/CourseListPage'
@@ -11,6 +13,7 @@ import CourseMapPage from '../features/course/CourseMapPage'
 import { createCourseMapLoader } from '../features/course/CourseMapPage.loader'
 import LessonDetailPage from '../features/lesson/LessonDetailPage'
 import { createLessonDetailLoader } from '../features/lesson/LessonDetailPage.loader'
+import { createCompleteLessonSessionAction } from '../features/lesson/LessonDetailPage.action'
 import RouteError from './RouteError'
 import NotFoundPage from './NotFoundPage'
 
@@ -40,6 +43,14 @@ export const router = createBrowserRouter([
     Component: LessonDetailPage,
     loader: createLessonDetailLoader({
       lessonRepo,
+      ensureUser: signInAnonymouslyIfNeeded,
+    }),
+    action: createCompleteLessonSessionAction({
+      courseRepo,
+      lessonRepo,
+      progressRepo,
+      userProfileRepo,
+      reviewRepo,
       ensureUser: signInAnonymouslyIfNeeded,
     }),
     ErrorBoundary: RouteError,

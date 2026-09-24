@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, setDoc, Timestamp } from 'firebase/firestore'
+import { collection, doc, getDoc, getDocs, setDoc, Timestamp } from 'firebase/firestore'
 import { db } from '../firebase'
 import type { ReviewRepository } from '../../../domain/repositories/review-repository'
 import type { ReviewItem } from '../../../domain/models/review-item'
@@ -38,6 +38,11 @@ export class FirebaseReviewRepository implements ReviewRepository {
       collection(db, 'users', userId, 'reviewItems'),
     )
     return snapshot.docs.map((d) => toReviewItem(d.id, d.data()))
+  }
+
+  async getReviewItem(userId: string, itemId: string): Promise<ReviewItem | null> {
+    const snapshot = await getDoc(doc(db, 'users', userId, 'reviewItems', itemId))
+    return snapshot.exists() ? toReviewItem(snapshot.id, snapshot.data()) : null
   }
 
   async addReviewItem(userId: string, item: ReviewItem): Promise<void> {

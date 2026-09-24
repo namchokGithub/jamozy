@@ -13,7 +13,7 @@ describe('startTypingSession', () => {
     const state = startTypingSession('가')
     expect(state.status).toBe('in-progress')
     expect(state.keyIndex).toBe(0)
-    expect(state.mistakeCount).toBe(0)
+    expect(state.mistakes).toEqual([])
   })
 
   it('starts already completed for an empty target', () => {
@@ -35,15 +35,24 @@ describe('pressKey', () => {
     state = pressKey(state, 'KeyK', false)
     expect(state.keyIndex).toBe(2)
     expect(state.status).toBe('completed')
-    expect(state.mistakeCount).toBe(0)
+    expect(state.mistakes).toEqual([])
   })
 
-  it('rejects a wrong key: counts a mistake, does not advance or mutate composed text', () => {
-    let state = startTypingSession('가')
+  it('rejects a wrong key: records the full mistake detail, does not advance or mutate composed text', () => {
+    let state = startTypingSession('가') // ㄱ (KeyR) + ㅏ (KeyK)
     state = pressKey(state, 'KeyT', false) // wrong — ㅅ, not ㄱ
 
     expect(state.keyIndex).toBe(0)
-    expect(state.mistakeCount).toBe(1)
+    expect(state.mistakes).toEqual([
+      {
+        syllableIndex: 0,
+        expectedCode: 'KeyR',
+        expectedShift: false,
+        expectedJamo: 'ㄱ',
+        pressedCode: 'KeyT',
+        pressedShift: false,
+      },
+    ])
     expect(getComposedText(state)).toBe('')
   })
 
@@ -52,7 +61,7 @@ describe('pressKey', () => {
     state = pressKey(state, 'KeyQ', false) // right key, missing Shift
 
     expect(state.keyIndex).toBe(0)
-    expect(state.mistakeCount).toBe(1)
+    expect(state.mistakes).toHaveLength(1)
 
     state = pressKey(state, 'KeyQ', true) // now correct
     expect(state.keyIndex).toBe(1)
@@ -76,7 +85,7 @@ describe('pressKey', () => {
 
     state = pressKey(state, 'KeyK', true) // ㅏ, Shift still held from the previous key — should still match
     expect(state.keyIndex).toBe(2)
-    expect(state.mistakeCount).toBe(0)
+    expect(state.mistakes).toEqual([])
   })
 
   it('still requires the exact Shift state for a key that has a Shift variant', () => {
@@ -84,7 +93,7 @@ describe('pressKey', () => {
     state = pressKey(state, 'KeyR', true) // right key, wrong Shift state (asks for ㄲ, not ㄱ)
 
     expect(state.keyIndex).toBe(0)
-    expect(state.mistakeCount).toBe(1)
+    expect(state.mistakes).toHaveLength(1)
   })
 
   it('ignores a bare modifier keydown rather than counting it as a mistake', () => {
@@ -92,7 +101,7 @@ describe('pressKey', () => {
     state = pressKey(state, 'ShiftLeft', true)
 
     expect(state.keyIndex).toBe(0)
-    expect(state.mistakeCount).toBe(0)
+    expect(state.mistakes).toEqual([])
   })
 })
 

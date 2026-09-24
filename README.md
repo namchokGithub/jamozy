@@ -298,15 +298,15 @@ Jamozy is currently in early development.
 ### MVP
 
 - [ ] Course and unit structure
-- [ ] Lesson flow
-- [ ] Korean typing engine
-- [ ] Virtual Korean keyboard
-- [ ] Accuracy and speed tracking
+- [x] Lesson flow
+- [x] Korean typing engine
+- [x] Virtual Korean keyboard
+- [x] Accuracy and speed tracking
 - [ ] Lesson results
 - [ ] Review system
 - [ ] EXP and Level progression
 - [ ] Firebase Anonymous Authentication
-- [ ] Firestore progress persistence
+- [x] Firestore progress persistence
 - [ ] Settings
 
 ### Later
