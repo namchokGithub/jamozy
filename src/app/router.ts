@@ -17,6 +17,9 @@ import { createCompleteLessonSessionAction } from '../features/lesson/LessonDeta
 import ReviewPage from '../features/review/ReviewPage'
 import { createReviewLoader } from '../features/review/ReviewPage.loader'
 import { createSubmitReviewSessionAction } from '../features/review/ReviewPage.action'
+import SettingsPage from '../features/settings/SettingsPage'
+import { createSettingsLoader } from '../features/settings/SettingsPage.loader'
+import { createUpdateSettingsAction } from '../features/settings/SettingsPage.action'
 import RouteError from './RouteError'
 import NotFoundPage from './NotFoundPage'
 
@@ -68,6 +71,19 @@ export const router = createBrowserRouter([
     }),
     action: createSubmitReviewSessionAction({
       reviewRepo,
+      ensureUser: signInAnonymouslyIfNeeded,
+    }),
+    ErrorBoundary: RouteError,
+  },
+  {
+    path: '/settings',
+    Component: SettingsPage,
+    loader: createSettingsLoader({
+      userProfileRepo,
+      ensureUser: signInAnonymouslyIfNeeded,
+    }),
+    action: createUpdateSettingsAction({
+      userProfileRepo,
       ensureUser: signInAnonymouslyIfNeeded,
     }),
     ErrorBoundary: RouteError,

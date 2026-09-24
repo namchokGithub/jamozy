@@ -6,7 +6,12 @@ export default function CourseListPage() {
 
   return (
     <main className="mx-auto max-w-2xl p-6">
-      <h1 className="text-2xl font-medium text-slate-900">Jamozy</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-medium text-slate-900">Jamozy</h1>
+        <Link to="/settings" className="text-sm text-slate-600 underline">
+          Settings
+        </Link>
+      </div>
 
       {dueReviewCount > 0 && (
         <Link to="/review" className="mt-2 block text-sm text-amber-700 underline">

@@ -307,7 +307,7 @@ Jamozy is currently in early development.
 - [ ] EXP and Level progression
 - [ ] Firebase Anonymous Authentication
 - [x] Firestore progress persistence
-- [ ] Settings
+- [x] Settings
 
 ### Later
 

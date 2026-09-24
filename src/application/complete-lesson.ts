@@ -3,7 +3,7 @@ import type { LessonRepository } from '../domain/repositories/lesson-repository'
 import type { ProgressRepository } from '../domain/repositories/progress-repository'
 import type { UserProfileRepository } from '../domain/repositories/user-profile-repository'
 import type { Progress } from '../domain/models/progress'
-import { levelFromExp, type UserProfile } from '../domain/models/user-profile'
+import { defaultUserProfile, levelFromExp, type UserProfile } from '../domain/models/user-profile'
 import { updateProgress, type AttemptResult } from './update-progress'
 
 export interface CompleteLessonDeps {
@@ -29,31 +29,6 @@ function calculateExpGained(accuracy: number): number {
   if (accuracy > 90) exp += 20
   if (accuracy === 100) exp += 50
   return exp
-}
-
-function defaultUserProfile(userId: string, now: Date): UserProfile {
-  return {
-    id: userId,
-    exp: 0,
-    settings: {
-      soundEnabled: true,
-      showKeyboard: true,
-      showEnglishKeys: true,
-      keyboardOpacity: 1,
-      romanizationEnabled: true,
-      meaningLanguage: 'both',
-      theme: 'light',
-    },
-    stats: {
-      lessonsCompleted: 0,
-      wordsPracticed: 0,
-      averageAccuracy: 0,
-      bestAccuracy: 0,
-      averageSpeedWpm: 0,
-      totalTypingTimeSeconds: 0,
-    },
-    createdAt: now,
-  }
 }
 
 async function findNextLessonId(
