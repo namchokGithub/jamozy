@@ -3,6 +3,7 @@ import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import LessonDetailPage from './LessonDetailPage'
 import type { Lesson } from '../../domain/models/lesson'
+import type { UserSettings } from '../../domain/models/user-profile'
 import type { CompleteLessonOutcome } from '../../application/complete-lesson'
 
 function makeLesson(overrides: Partial<Lesson> = {}): Lesson {
@@ -29,9 +30,22 @@ function makeLesson(overrides: Partial<Lesson> = {}): Lesson {
   }
 }
 
-function renderPage(lesson: Lesson) {
+function makeSettings(overrides: Partial<UserSettings> = {}): UserSettings {
+  return {
+    soundEnabled: true,
+    showKeyboard: true,
+    showEnglishKeys: true,
+    keyboardOpacity: 1,
+    romanizationEnabled: true,
+    meaningLanguage: 'both',
+    theme: 'light',
+    ...overrides,
+  }
+}
+
+function renderPage(lesson: Lesson, settings: UserSettings = makeSettings()) {
   const router = createMemoryRouter(
-    [{ path: '/', Component: LessonDetailPage, loader: async () => ({ lesson }) }],
+    [{ path: '/', Component: LessonDetailPage, loader: async () => ({ lesson, settings }) }],
     { initialEntries: ['/'] },
   )
   return render(<RouterProvider router={router} />)
@@ -53,7 +67,7 @@ const fakeOutcome: CompleteLessonOutcome = {
 }
 
 describe('LessonDetailPage', () => {
-  it('renders each exercise', async () => {
+  it('renders each exercise, gated by settings', async () => {
     renderPage(
       makeLesson({
         exercises: [
@@ -68,10 +82,58 @@ describe('LessonDetailPage', () => {
           },
         ],
       }),
+      makeSettings({ romanizationEnabled: true, meaningLanguage: 'both' }),
     )
 
     expect(await screen.findByText('안녕')).toBeInTheDocument()
+    expect(screen.getByText('annyeong')).toBeInTheDocument()
     expect(screen.getByText('สวัสดี / Hello')).toBeInTheDocument()
+  })
+
+  it('hides romanization when romanizationEnabled is false', async () => {
+    renderPage(
+      makeLesson({
+        exercises: [
+          {
+            id: 'e1',
+            targetText: '안녕',
+            romanization: 'annyeong',
+            meaningTh: 'สวัสดี',
+            meaningEn: 'Hello',
+            difficulty: 'easy',
+            hint: null,
+          },
+        ],
+      }),
+      makeSettings({ romanizationEnabled: false }),
+    )
+
+    await screen.findByText('안녕')
+    expect(screen.queryByText('annyeong')).not.toBeInTheDocument()
+  })
+
+  it('shows only the Thai meaning when meaningLanguage is th', async () => {
+    renderPage(
+      makeLesson({
+        exercises: [
+          {
+            id: 'e1',
+            targetText: '안녕',
+            romanization: null,
+            meaningTh: 'สวัสดี',
+            meaningEn: 'Hello',
+            difficulty: 'easy',
+            hint: null,
+          },
+        ],
+      }),
+      makeSettings({ meaningLanguage: 'th' }),
+    )
+
+    await screen.findByText('안녕')
+    expect(screen.getByText('สวัสดี')).toBeInTheDocument()
+    expect(screen.queryByText('Hello')).not.toBeInTheDocument()
+    expect(screen.queryByText('สวัสดี / Hello')).not.toBeInTheDocument()
   })
 
   it('shows an empty-state message when there are no exercises yet', async () => {
@@ -86,7 +148,7 @@ describe('LessonDetailPage', () => {
         {
           path: '/',
           Component: LessonDetailPage,
-          loader: async () => ({ lesson: makeLesson() }),
+          loader: async () => ({ lesson: makeLesson(), settings: makeSettings() }),
           action: async () => fakeOutcome,
         },
       ],
@@ -105,7 +167,7 @@ describe('LessonDetailPage', () => {
         {
           path: '/',
           Component: LessonDetailPage,
-          loader: async () => ({ lesson: makeLesson() }),
+          loader: async () => ({ lesson: makeLesson(), settings: makeSettings() }),
           action: async () => fakeOutcome,
         },
       ],

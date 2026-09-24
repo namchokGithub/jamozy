@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { useLoaderData } from 'react-router'
 import type { LessonDetailLoaderData } from './LessonDetailPage.loader'
 import LessonTypingSession from './LessonTypingSession'
+import { formatExerciseMeaning } from './format-exercise-meaning'
 import type { CompleteLessonOutcome } from '../../application/complete-lesson'
 
 export default function LessonDetailPage() {
-  const { lesson } = useLoaderData() as LessonDetailLoaderData
+  const { lesson, settings } = useLoaderData() as LessonDetailLoaderData
   const [started, setStarted] = useState(false)
   const [outcome, setOutcome] = useState<CompleteLessonOutcome | null>(null)
 
@@ -42,17 +43,18 @@ export default function LessonDetailPage() {
       ) : (
         <>
           <ul className="mt-6 space-y-4">
-            {lesson.exercises.map((exercise) => (
-              <li key={exercise.id} className="rounded-lg border border-slate-200 p-4">
-                <div className="text-xl text-slate-900">{exercise.targetText}</div>
-                {exercise.romanization && (
-                  <div className="text-sm text-slate-500">{exercise.romanization}</div>
-                )}
-                <div className="mt-2 text-sm text-slate-700">
-                  {exercise.meaningTh} / {exercise.meaningEn}
-                </div>
-              </li>
-            ))}
+            {lesson.exercises.map((exercise) => {
+              const meaning = formatExerciseMeaning(exercise, settings.meaningLanguage)
+              return (
+                <li key={exercise.id} className="rounded-lg border border-slate-200 p-4">
+                  <div className="text-xl text-slate-900">{exercise.targetText}</div>
+                  {settings.romanizationEnabled && exercise.romanization && (
+                    <div className="text-sm text-slate-500">{exercise.romanization}</div>
+                  )}
+                  {meaning && <div className="mt-2 text-sm text-slate-700">{meaning}</div>}
+                </li>
+              )
+            })}
           </ul>
           <button
             type="button"

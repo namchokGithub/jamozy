@@ -158,3 +158,14 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Recorded `docs/DECISIONS.md` DEC-020 (the `defaultUserProfile` extraction, and the full narrative of both bugs). Ticked README's MVP checklist for Settings; updated `docs/PROGRESS.md` to match.
 - `pnpm build`/`lint`/`vitest run` all pass — 163 tests (up from 142).
 - Nothing committed via `git commit` this round — all files staged, user commits manually as before.
+
+### 2026-09-24 — Wire meaningLanguage/romanizationEnabled into LessonDetailPage
+
+- Bounded change (brainstorming skill classification): existing flow, existing settings data, no new subsystem. Scoped to `LessonDetailPage` only, not `ReviewPage`'s preview list, per explicit confirmation. In-chat design approved, no spec/plan document, implemented directly via TDD.
+- `LessonDetailPage.loader.ts` now also calls `application/get-settings.ts`, run in `Promise.all` alongside `getLesson` since neither depends on the other. `LessonDetailLoaderData` gains a `settings: UserSettings` field.
+- New `src/features/lesson/format-exercise-meaning.ts`: pure `formatExerciseMeaning(exercise, meaningLanguage)` — th/en/both, joins with `' / '`, omits an empty `meaningTh`/`meaningEn` rather than rendering a blank slot, returns `null` when nothing to show. `LessonDetailPage.tsx` uses it to render the meaning line and gates the existing romanization line on `settings.romanizationEnabled`.
+- The formatter was first defined inline in `LessonDetailPage.tsx` and exported for its own tests; that export tripped `react-refresh/only-export-components` (first lint warning of the whole session) since a component file can only export components for Fast Refresh to work. Extracted to its own file with its own test file to fix it.
+- No fresh-reviewer dispatch — not required for bounded-path work per the brainstorming skill; verified instead by TDD (7 new pure-function tests, 2 new component tests covering both-shown/romanization-hidden/th-only cases) plus manual live-browser verification against real Firestore data (toggled `meaningLanguage`/`romanizationEnabled` via Settings, confirmed the lesson page reflected both, then reverted and reconfirmed the original behavior — no console errors).
+- No `docs/DECISIONS.md` entry — no non-obvious tradeoff beyond the Fast-Refresh-driven file split, which is a mechanical lint fix, not a design decision. Updated `docs/PROGRESS.md`'s Settings row and Current Focus to match; README's Settings checkbox was already ticked, no new box for this.
+- `pnpm exec vitest run`/`tsc -b`/`pnpm lint` all pass — 173 tests (up from 163).
+- Nothing committed via `git commit` this round — all files staged, user commits manually as before.

@@ -50,6 +50,7 @@ export const router = createBrowserRouter([
     Component: LessonDetailPage,
     loader: createLessonDetailLoader({
       lessonRepo,
+      userProfileRepo,
       ensureUser: signInAnonymouslyIfNeeded,
     }),
     action: createCompleteLessonSessionAction({
