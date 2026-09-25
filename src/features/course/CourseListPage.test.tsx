@@ -16,13 +16,47 @@ function makeCourse(id: string): Course {
 }
 
 describe('CourseListPage', () => {
+  it('presents a welcoming hero and learning-path section around the course links', async () => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/',
+          Component: CourseListPage,
+          loader: async () => ({
+            courses: [makeCourse('c1')],
+            dueReviewCount: 0,
+          }),
+        },
+      ],
+      { initialEntries: ['/'] },
+    )
+
+    render(<RouterProvider router={router} />)
+
+    expect(
+      await screen.findByRole('heading', {
+        name: /learn hangul, at your pace/i,
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /your learning path/i }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /course c1/i })).toHaveAttribute(
+      'href',
+      '/courses/c1',
+    )
+  })
+
   it('renders each course as a link to its course map', async () => {
     const router = createMemoryRouter(
       [
         {
           path: '/',
           Component: CourseListPage,
-          loader: async () => ({ courses: [makeCourse('c1')], dueReviewCount: 0 }),
+          loader: async () => ({
+            courses: [makeCourse('c1')],
+            dueReviewCount: 0,
+          }),
         },
       ],
       { initialEntries: ['/'] },
@@ -65,7 +99,9 @@ describe('CourseListPage', () => {
     )
     render(<RouterProvider router={router} />)
 
-    const link = await screen.findByRole('link', { name: /3 words due for review/i })
+    const link = await screen.findByRole('link', {
+      name: /3 words due for review/i,
+    })
     expect(link).toHaveAttribute('href', '/review')
   })
 
@@ -83,7 +119,9 @@ describe('CourseListPage', () => {
     render(<RouterProvider router={router} />)
 
     await screen.findByText('No courses yet.')
-    expect(screen.queryByRole('link', { name: /words due for review/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: /words due for review/i }),
+    ).not.toBeInTheDocument()
   })
 
   it('always shows a Settings link', async () => {
