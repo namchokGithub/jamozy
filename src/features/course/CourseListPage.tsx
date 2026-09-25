@@ -8,9 +8,14 @@ export default function CourseListPage() {
     <main className="mx-auto max-w-2xl p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-medium text-slate-900">Jamozy</h1>
-        <Link to="/settings" className="text-sm text-slate-600 underline">
-          Settings
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link to="/profile" className="text-sm text-slate-600 underline">
+            Profile
+          </Link>
+          <Link to="/settings" className="text-sm text-slate-600 underline">
+            Settings
+          </Link>
+        </div>
       </div>
 
       {dueReviewCount > 0 && (

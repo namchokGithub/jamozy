@@ -20,6 +20,8 @@ import { createSubmitReviewSessionAction } from '../features/review/ReviewPage.a
 import SettingsPage from '../features/settings/SettingsPage'
 import { createSettingsLoader } from '../features/settings/SettingsPage.loader'
 import { createUpdateSettingsAction } from '../features/settings/SettingsPage.action'
+import ProfilePage from '../features/profile/ProfilePage'
+import { createProfileLoader } from '../features/profile/ProfilePage.loader'
 import RouteError from './RouteError'
 import NotFoundPage from './NotFoundPage'
 
@@ -84,6 +86,15 @@ export const router = createBrowserRouter([
       ensureUser: signInAnonymouslyIfNeeded,
     }),
     action: createUpdateSettingsAction({
+      userProfileRepo,
+      ensureUser: signInAnonymouslyIfNeeded,
+    }),
+    ErrorBoundary: RouteError,
+  },
+  {
+    path: '/profile',
+    Component: ProfilePage,
+    loader: createProfileLoader({
       userProfileRepo,
       ensureUser: signInAnonymouslyIfNeeded,
     }),

@@ -102,4 +102,21 @@ describe('CourseListPage', () => {
     const link = await screen.findByRole('link', { name: 'Settings' })
     expect(link).toHaveAttribute('href', '/settings')
   })
+
+  it('always shows a Profile link', async () => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/',
+          Component: CourseListPage,
+          loader: async () => ({ courses: [], dueReviewCount: 0 }),
+        },
+      ],
+      { initialEntries: ['/'] },
+    )
+    render(<RouterProvider router={router} />)
+
+    const link = await screen.findByRole('link', { name: 'Profile' })
+    expect(link).toHaveAttribute('href', '/profile')
+  })
 })

@@ -300,3 +300,14 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 **Why:** Both are integration details invisible from either function in isolation — they only exist at the seam between two different code paths (loader-read vs. Zod-parsed-write) producing objects that are semantically but not syntactically identical. A fresh whole-branch review independently re-derived both fixes' correctness by reverting each one and confirming its own regression test fails, and grepped the rest of `src/` confirming no other `JSON.stringify`-based equality check exists in shipped code.
 
 **Consequences:** Any future "did this change" check in this codebase must compare fields explicitly (or a stable/key-sorted serialization), never a raw `JSON.stringify` of two objects that could have originated from different code paths. Any future `useFetcher()`-driven UI feedback (a "Saved"/"Done" style indicator, not just a submit guard) must account for the `loading` revalidation phase, not just `submitting`, whenever the route also has a loader.
+
+## DEC-021 — Profile Dashboard: display-only rounding of running-average stats
+
+**Date:** 2026-09-25
+**Status:** Accepted
+
+**Decision:** `/profile` (`ProfilePage.tsx`, `application/get-profile-summary.ts`) shows level, an EXP progress bar, and all 6 `UserStats` fields, mirroring `get-settings.ts`'s read-only/default-fallback/never-write shape. `averageAccuracy`, `bestAccuracy`, and `averageSpeedWpm` are `Math.round()`ed at render time only — the stored `UserStats` values (running averages from `complete-lesson.ts`, essentially never whole numbers) are never mutated or re-persisted.
+
+**Why:** A fresh whole-branch review caught that the first implementation rendered these fields verbatim (e.g. `98.68421052631578%`), because every test fixture up to that point used tidy hand-picked numbers (`91.5`, `22`) that happened to look fine unrounded. Live verification against real Firestore data surfaced the actual long-decimal output, which the review then traced to the missing rounding step. The fix rounds only in the JSX, not in `get-profile-summary.ts` or anywhere in the domain/application layers — the underlying precision stays intact for any future consumer (e.g. an analytics export) that might want it.
+
+**Consequences:** Any future UI that displays a running-average or other float-valued stat (accuracy, WPM, or similar) should round at the display boundary the same way, and its tests should include at least one realistic non-round fixture (not just tidy numbers) to catch this class of bug before a live check has to.

@@ -304,7 +304,7 @@ Jamozy is currently in early development.
 - [x] Accuracy and speed tracking
 - [ ] Lesson results
 - [x] Review system
-- [ ] EXP and Level progression
+- [x] EXP and Level progression
 - [ ] Firebase Anonymous Authentication
 - [x] Firestore progress persistence
 - [x] Settings
