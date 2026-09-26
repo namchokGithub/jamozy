@@ -42,6 +42,15 @@ describe('ProfilePage', () => {
     expect(screen.getByText('1h 1m')).toBeInTheDocument()
   })
 
+  it('links back to the course list', async () => {
+    renderPage(makeSummary())
+
+    expect(await screen.findByRole('link', { name: 'Back to Course List' })).toHaveAttribute(
+      'href',
+      '/',
+    )
+  })
+
   it('rounds fractional accuracy/speed stats for display without rescaling them', async () => {
     renderPage(
       makeSummary({

@@ -192,3 +192,8 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Added RED→GREEN coverage for keyboard display settings, default profile opacity, source joins/deduplication/fallback, loader data, and preference-aware Review rendering.
 - Whole-branch review found and fixed a stale-source safeguard: an exercise must now match both its id and target text before supplying Review metadata, so edited source content cannot pair an old Korean target with new meaning/romanization. Regression test confirmed RED→GREEN.
 - Verified `pnpm test` (204/204), `pnpm exec tsc -b`, and `pnpm lint` all pass. No Git commit created.
+
+### 2026-09-27 — Profile and Settings back-links
+
+- Added a `Back to Course List` link to both `/profile` and `/settings`, returning learners to `/` without changing loaders or persisted data.
+- Added component tests for both links. Verified `pnpm test` (206/206), `pnpm exec tsc -b`, and `pnpm lint` all pass.

@@ -44,6 +44,15 @@ describe('SettingsPage', () => {
     expect(screen.getByLabelText('Meaning language')).toHaveValue('th')
   })
 
+  it('links back to the course list', async () => {
+    renderPage()
+
+    expect(await screen.findByRole('link', { name: 'Back to Course List' })).toHaveAttribute(
+      'href',
+      '/',
+    )
+  })
+
   it('disables Save while submitting and shows Saved once it succeeds', async () => {
     let resolveAction: (settings: UserSettings) => void
     const action = vi.fn(

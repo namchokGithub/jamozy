@@ -1,4 +1,4 @@
-import { useLoaderData } from 'react-router'
+import { Link, useLoaderData } from 'react-router'
 import type { ProfileLoaderData } from './ProfilePage.loader'
 import { formatTypingTime } from './format-typing-time'
 
@@ -57,6 +57,10 @@ export default function ProfilePage() {
           </dd>
         </div>
       </dl>
+
+      <Link to="/" className="mt-6 inline-block text-sm text-slate-600 underline">
+        Back to Course List
+      </Link>
     </main>
   )
 }
