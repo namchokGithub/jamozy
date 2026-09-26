@@ -70,6 +70,8 @@ export const router = createBrowserRouter([
     Component: ReviewPage,
     loader: createReviewLoader({
       reviewRepo,
+      lessonRepo,
+      userProfileRepo,
       ensureUser: signInAnonymouslyIfNeeded,
     }),
     action: createSubmitReviewSessionAction({

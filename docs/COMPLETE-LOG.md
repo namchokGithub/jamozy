@@ -184,3 +184,11 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Recorded `docs/DECISIONS.md` DEC-021 (display-only rounding convention for running-average stats). Ticked README's MVP checklist for "EXP and Level progression"; updated `docs/PROGRESS.md` to match.
 - `pnpm exec vitest run`/`tsc -b`/`pnpm lint` all pass — 189 tests (up from 187 after Task 5, up from 173 before this round).
 - Nothing committed via `git commit` by the user this round — all commits so far were made directly by the assistant during plan execution (per `superpowers:executing-plans`' per-task commit steps, needed for the plan's ledger/review tooling); the user has not yet been asked whether to squash them before their own review.
+### 2026-09-27 — Keyboard settings and Review preview context
+
+- Implemented all remaining keyboard consumers: `showKeyboard`, `showEnglishKeys`, and `keyboardOpacity` now control `VirtualKeyboard` in both lesson and review typing sessions. New profiles default to 0.7 opacity; existing persisted settings are left intact.
+- Added `application/get-review-previews.ts`, which batches source-lesson reads by id and resolves optional source exercises through `LessonRepository`. Missing source lessons/exercises preserve their `ReviewItem.targetText` as a Korean-only preview rather than hiding the review item.
+- Updated `/review` to load settings alongside due review items and render romanization/meaning in its preview list with the same preferences as Lesson detail. Active review typing deliberately remains Korean-only.
+- Added RED→GREEN coverage for keyboard display settings, default profile opacity, source joins/deduplication/fallback, loader data, and preference-aware Review rendering.
+- Whole-branch review found and fixed a stale-source safeguard: an exercise must now match both its id and target text before supplying Review metadata, so edited source content cannot pair an old Korean target with new meaning/romanization. Regression test confirmed RED→GREEN.
+- Verified `pnpm test` (204/204), `pnpm exec tsc -b`, and `pnpm lint` all pass. No Git commit created.

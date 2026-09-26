@@ -13,11 +13,17 @@ function englishLabel(code: string): string {
 
 interface VirtualKeyboardProps {
   nextKey?: { code: string; shift: boolean }
+  showEnglishKeys: boolean
+  opacity: number
 }
 
-export default function VirtualKeyboard({ nextKey }: VirtualKeyboardProps) {
+export default function VirtualKeyboard({
+  nextKey,
+  showEnglishKeys,
+  opacity,
+}: VirtualKeyboardProps) {
   return (
-    <div className="mt-6 select-none">
+    <div className="mt-6 select-none" aria-label="Virtual Korean keyboard" style={{ opacity }}>
       <div
         className={`mb-2 inline-block rounded-md border px-3 py-1 text-sm ${
           nextKey?.shift ? 'border-amber-400 bg-amber-100' : 'border-slate-200 text-slate-400'
@@ -38,7 +44,9 @@ export default function VirtualKeyboard({ nextKey }: VirtualKeyboardProps) {
                 }`}
               >
                 <span className="text-base">{jamo.base}</span>
-                <span className="text-[10px] text-slate-400">{englishLabel(code)}</span>
+                {showEnglishKeys && (
+                  <span className="text-[10px] text-slate-400">{englishLabel(code)}</span>
+                )}
               </div>
             )
           })}

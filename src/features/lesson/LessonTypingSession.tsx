@@ -7,13 +7,21 @@ import { KEY_TO_JAMO } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import type { Lesson } from '../../domain/models/lesson'
 import type { CompleteLessonOutcome } from '../../application/complete-lesson'
+import type { UserSettings } from '../../domain/models/user-profile'
+
+type KeyboardSettings = Pick<UserSettings, 'showKeyboard' | 'showEnglishKeys' | 'keyboardOpacity'>
 
 interface LessonTypingSessionProps {
   lesson: Lesson
   onComplete: (outcome: CompleteLessonOutcome) => void
+  keyboardSettings: KeyboardSettings
 }
 
-export default function LessonTypingSession({ lesson, onComplete }: LessonTypingSessionProps) {
+export default function LessonTypingSession({
+  lesson,
+  onComplete,
+  keyboardSettings,
+}: LessonTypingSessionProps) {
   const { session, start, pressKey, generation } = useLessonSessionStore()
   const fetcher = useFetcher<CompleteLessonOutcome>()
   const hasStarted = useRef(false)
@@ -110,7 +118,13 @@ export default function LessonTypingSession({ lesson, onComplete }: LessonTyping
         ))}
       </div>
       <p className="mt-2 text-sm text-slate-500">Typed: {composed}</p>
-      <VirtualKeyboard nextKey={nextKey} />
+      {keyboardSettings.showKeyboard && (
+        <VirtualKeyboard
+          nextKey={nextKey}
+          showEnglishKeys={keyboardSettings.showEnglishKeys}
+          opacity={keyboardSettings.keyboardOpacity}
+        />
+      )}
     </div>
   )
 }
