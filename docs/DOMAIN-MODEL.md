@@ -16,7 +16,7 @@ Conventions: all Firestore documents use `id` as the document ID (not stored as 
 | id          | string | Firestore doc ID                   |
 | title       | string | e.g. "Hangul Basics"               |
 | description | string | short summary shown on course list |
-| order       | number | display/unlock order among courses |
+| order       | number | canonical display/unlock order among courses; unique globally |
 | createdAt   | Date   |                                    |
 | updatedAt   | Date   |                                    |
 
@@ -35,7 +35,7 @@ Relationships: a `Unit` belongs to a `Course` via `Unit.courseId`. No nested sub
 | courseId    | string | parent`Course.id`                      |
 | title       | string | e.g. "Basic Vowels"                    |
 | description | string |                                        |
-| order       | number | display/unlock order within the course |
+| order       | number | canonical display/unlock order within the course; unique within `courseId` |
 | createdAt   | Date   |                                        |
 | updatedAt   | Date   |                                        |
 
@@ -54,7 +54,7 @@ Relationships: a `Lesson` belongs to a `Unit` via `Lesson.unitId`.
 | unitId    | string                                                          | parent`Unit.id`                            |
 | title     | string                                                          |                                            |
 | type      | `'character' \| 'syllable' \| 'word' \| 'phrase' \| 'sentence'` | matches README's progressive learning flow |
-| order     | number                                                          | display/unlock order within the unit       |
+| order     | number                                                          | canonical display/unlock order within the unit; unique within `unitId` |
 | exercises | `LessonExercise[]`                                              | ordered typing prompts for this lesson     |
 | createdAt | Date                                                            |                                            |
 | updatedAt | Date                                                            |                                            |
@@ -119,6 +119,10 @@ Not persisted here: in-progress keystroke/session state. Per `AGENTS.md`, that s
 
 **Unlock rule ([[DEC-009]]):** a lesson's `Progress.status` starts `'locked'`. It becomes `'unlocked'` when the previous lesson (by `Lesson.order` within the same `Unit`; first lesson of the next `Unit`/`Course` unlocks when the last lesson of the previous one completes) reaches `status === 'completed'`. The very first lesson overall is unlocked by default (seeded, not derived). This transition is written by the `complete-lesson` application use case, not computed on read.
 
+**Creation strategy and global ordering ([[DEC-023]]):** `Progress` is created lazily; a missing document means the lesson is locked. When a user profile is first persisted, the first lesson in the global sequence receives a new document with `status: 'unlocked'`. Completing a lesson creates the next lesson's `unlocked` document only if it does not already exist. No documents are seeded for still-locked lessons.
+
+The global sequence is the lexicographic order of `(Course.order, Unit.order, Lesson.order)`: courses sort by `Course.order`; units by `Unit.order` within their course; lessons by `Lesson.order` within their unit. The next lesson may therefore cross a Unit and then a Course boundary. Document IDs never determine progression order.
+
 ---
 
 ## ReviewItem (per-user)
@@ -161,6 +165,7 @@ Not in README's original domain file list, but required to home EXP/Level and Se
 | settings  | `UserSettings` | see below                    |
 | stats     | `UserStats`    | see below ([[DEC-011]])      |
 | createdAt | Date           |                               |
+| updatedAt | Date           | set with `createdAt` on creation; changed on every persisted profile mutation ([[DEC-023]]) |
 
 **Level formula ([[DEC-006]]):** `level` is derived, not stored: `level = 1 + floor(exp / 100)`. Lives as a pure function (`levelFromExp(exp)`) next to `UserProfile` in `domain/models/user-profile.ts`. MVP placeholder — changing the curve later needs no data migration, since `exp` is the only persisted value.
 
@@ -202,6 +207,8 @@ Return `0` for either value when its denominator is zero. WPM uses the existing 
 
 `currentLevel` (requirement.md #9) is intentionally not stored here — it's `levelFromExp(exp)`, computed on read (see [[DEC-006]]).
 
+`updatedAt` is an audit timestamp, not an activity timestamp: it changes when settings, EXP, or stats are persisted, but not for reads or anonymous sign-in alone. A future `lastActiveAt` must be a separate field if product analytics needs it.
+
 ---
 
 ## Resolved Decisions
@@ -216,6 +223,7 @@ Previously open, now decided — see `docs/DECISIONS.md` for full rationale:
 6. **`UserStats`** ([[DEC-011]], [[DEC-022]]) — embedded aggregate counters; accuracy and WPM are derived from raw counters, and `exercisesAttempted` replaces the ambiguous `wordsPracticed`.
 7. **`ReviewItem.reason`** ([[DEC-012]]) — mistake/slow/low-accuracy trigger, per `docs/requirement.md`.
 8. **`UserSettings` expansion** ([[DEC-013]]) — full 7-field settings list, per `docs/requirement.md`.
+9. **Progress creation, ordering, and profile auditing** ([[DEC-023]]) — missing Progress means locked; unlocks are lazy along the global course/unit/lesson ordering; `UserProfile.updatedAt` tracks persisted mutations.
 
 No open questions remain in this document. Add new ones here as they come up, and resolve the same way.
 

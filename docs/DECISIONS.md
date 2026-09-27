@@ -117,7 +117,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 ## DEC-009 — Sequential unlock: previous lesson completed unlocks the next
 
 **Date:** 2026-09-23
-**Status:** Accepted
+**Status:** Accepted (creation and ordering details superseded by DEC-023)
 
 **Decision:** A lesson's `Progress.status` moves from `'locked'` to `'unlocked'` when the previous lesson (by `Lesson.order`, carrying across `Unit`/`Course` boundaries) reaches `status === 'completed'`. No accuracy threshold gates unlocking. The first lesson overall is unlocked by default (seed data, not derived).
 
@@ -328,3 +328,20 @@ Replace `UserStats.wordsPracticed`, `averageAccuracy`, and `averageSpeedWpm` wit
 **Why:** `resolved` removed items from a Leitner schedule after one correct answer. Exercise-local IDs could not safely identify an item globally and could not combine a repeated word's history. Stored averages cannot remain correct without their raw denominators; `wordsPracticed` was inaccurate for characters, phrases, sentences, and retries.
 
 **Consequences:** [[DEC-011]]'s original stats field shape and [[DEC-018]]'s exercise-ID review identity are superseded. Existing code and persisted documents still use the old shape and require a separate implementation/migration change; this decision changes documentation only.
+
+---
+
+## DEC-023 — Lazy Progress creation, canonical progression ordering, and profile update timestamp
+
+**Date:** 2026-09-27
+**Status:** Accepted
+
+**Decision:** `users/{userId}/lessonProgress/{lessonId}` documents are created lazily. Their absence means the lesson is locked. Profile creation persists the global first lesson as `unlocked`; completing a lesson persists the next lesson as `unlocked` only when that document does not exist.
+
+The canonical progression order is `(Course.order, Unit.order, Lesson.order)`. `Course.order` is globally unique; `Unit.order` is unique within a course; `Lesson.order` is unique within a unit. The next lesson is the next element in that flattened sequence, including across Unit and Course boundaries. IDs do not supply ordering.
+
+Add `UserProfile.updatedAt`. It equals `createdAt` on initial creation and changes for every persisted profile mutation, including settings, EXP, and stats writes. It does not change on reads or sign-in alone.
+
+**Why:** Precreating locked Progress documents adds writes and makes newly added curriculum awkward. Defining a single cross-boundary ordering removes ambiguity about which lesson unlocks next. `updatedAt` provides an audit/synchronization timestamp without overloading a future activity metric.
+
+**Consequences:** [[DEC-009]] retains the rule that completion unlocks the next lesson, while this decision replaces its seed-based creation detail with lazy creation and makes ordering constraints explicit. Existing code and persisted documents require a separate implementation/migration change; this decision changes documentation only.

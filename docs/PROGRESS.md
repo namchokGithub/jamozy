@@ -45,7 +45,7 @@ Last updated: 2026-09-27 (keyboard settings, Review preview, and navigation)
 
 ## Current Focus
 
-**Pending model migration:** [[DEC-022]] defines the next target schema for vocabulary-backed review identity and raw `UserStats` counters. The current implementation and Firestore documents still use the prior `ReviewItem`/`UserStats` shape; no migration or code change has been made yet.
+**Pending model migration:** [[DEC-022]] and [[DEC-023]] define the next target schema for vocabulary-backed review identity, raw `UserStats` counters, lazy Progress creation, and `UserProfile.updatedAt`. The current implementation and Firestore documents still use the prior shape; no migration or code change has been made yet.
 
 Keyboard settings and Review preview context now ship through the full layered path. `showKeyboard`, `showEnglishKeys`, and `keyboardOpacity` flow from route-loaded `UserSettings` into both `LessonTypingSession` and `ReviewTypingSession`, then into `VirtualKeyboard`; new profiles default to `keyboardOpacity: 0.7`, while saved settings are unchanged. `ReviewPage.loader.ts` loads due items and settings in parallel, then calls `application/get-review-previews.ts`, which batches unique source-lesson reads and joins each item to an optional exercise. The Review preview applies the existing meaning/romanization preferences and retains Korean-only rows if a source lesson or exercise no longer exists. This round deliberately excludes sound, dark mode, and vocabulary metadata during an active typing session. Verification results are recorded in `docs/COMPLETE-LOG.md`.
 

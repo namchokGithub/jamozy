@@ -204,3 +204,10 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Removed the conflicting target-model concept of `ReviewItem.resolved`; all review items remain in the Leitner schedule, including box 5.
 - Replaced ambiguous/derived `UserStats` fields with raw aggregate counters: `exercisesAttempted`, accepted/rejected keystrokes, and typing duration. Accuracy and WPM are now explicitly derived; retries count as practice activity but not as newly completed lessons.
 - No application, domain TypeScript, Firestore, or migration code changed in this documentation pass.
+
+### 2026-09-27 — Progress creation, ordering, and profile audit model (documentation only)
+
+- Recorded [[DEC-023]] and updated the target domain model: missing Progress now means locked; Progress documents are created only for the initial unlocked lesson and newly unlocked next lessons.
+- Defined the canonical cross-course progression sequence as `Course.order → Unit.order → Lesson.order`, with scoped uniqueness requirements; document IDs do not define order.
+- Added target field `UserProfile.updatedAt`, updated only by persisted profile mutations and deliberately separate from any future activity timestamp.
+- No application, domain TypeScript, Firestore, or migration code changed in this documentation pass.
