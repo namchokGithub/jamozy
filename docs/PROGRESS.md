@@ -2,7 +2,7 @@
 
 Mirrors the MVP checklist in `README.md`. Update both when status changes. Statuses: `Not started`, `In progress`, `Blocked`, `Done`.
 
-Last updated: 2026-09-27 (keyboard settings, Review preview, and navigation)
+Last updated: 2026-09-27 (Learning Modes architecture documented; implementation pending)
 
 ## MVP
 
@@ -19,6 +19,16 @@ Last updated: 2026-09-27 (keyboard settings, Review preview, and navigation)
 | Firebase Anonymous Authentication | In progress | SDK wired (`src/infrastructure/firebase/firebase.ts`, `signInAnonymouslyIfNeeded`), Anonymous provider enabled in console. Now actually called from the app: every route loader signs in before reading Firestore (see [[DEC-016]]). See [[DEC-001]]                                                                                                                                                              |
 | Firestore progress persistence    | Done        | All 5 `FirebaseXRepository` implementations done, wired to `application/` use cases. Rules + composite indexes deployed ([[DEC-015]], [[DEC-016]]). Course list/map/lesson-detail read path AND lesson-completion write path (Progress/EXP/unlock/ReviewItem) both verified end-to-end against live Firestore data                                                                                                 |
 | Settings                          | Done        | `/settings` (`SettingsPage.tsx`) reads/writes `UserProfile.settings` via `get-settings.ts`/`update-settings.ts` (read-modify-write, never touches `exp`/`stats`/`createdAt`). All five learner-facing display preferences now have consumers: meaning/romanization in Lesson and Review previews; keyboard visibility, English labels, and opacity in both typing sessions. New profiles default to 0.7 keyboard opacity. Sound and theme remain persist-only. |
+
+## Planned Learning Modes
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| Contiguous Learning Path frontier | Not started | Soft-locked future lessons may complete early; the recommended lesson remains the first globally ordered lesson not completed ([[DEC-026]]). |
+| VocabularyProgress | Not started | Shared learner history for each VocabularyEntry; no mastery field in MVP. |
+| JamoStats and Keyboard Position | Not started | Expected-jamo raw counters shared by every experience; Position is a view/filter, not a separate progression system. |
+| Topic practice | Not started | Topic metadata plus VocabularyEntry membership; counts derive from global VocabularyProgress. |
+| Daily Quest | Not started | Stable 10-item per-day vocabulary set, idempotent EXP reward, dateKey timezone policy still to be decided. |
 
 ## Later (post-MVP)
 
@@ -45,7 +55,7 @@ Last updated: 2026-09-27 (keyboard settings, Review preview, and navigation)
 
 ## Current Focus
 
-**Pending model migration:** [[DEC-022]]–[[DEC-025]] define the next target schema for vocabulary-backed review identity, import provenance, raw `UserStats` counters, lazy Progress creation, `UserProfile.updatedAt`, and related validation/identity conventions. The current implementation and Firestore documents still use the prior shape; no migration or code change has been made yet.
+**Pending model migration:** [[DEC-022]]–[[DEC-026]] define the next target schema for vocabulary-backed review identity, import provenance, raw `UserStats` counters, lazy/contiguous LessonProgress creation, `UserProfile.updatedAt`, and Learning Modes shared learner state. The current implementation and Firestore documents still use the prior shape; no migration or code change has been made yet.
 
 Keyboard settings and Review preview context now ship through the full layered path. `showKeyboard`, `showEnglishKeys`, and `keyboardOpacity` flow from route-loaded `UserSettings` into both `LessonTypingSession` and `ReviewTypingSession`, then into `VirtualKeyboard`; new profiles default to `keyboardOpacity: 0.7`, while saved settings are unchanged. `ReviewPage.loader.ts` loads due items and settings in parallel, then calls `application/get-review-previews.ts`, which batches unique source-lesson reads and joins each item to an optional exercise. The Review preview applies the existing meaning/romanization preferences and retains Korean-only rows if a source lesson or exercise no longer exists. This round deliberately excludes sound, dark mode, and vocabulary metadata during an active typing session. Verification results are recorded in `docs/COMPLETE-LOG.md`.
 

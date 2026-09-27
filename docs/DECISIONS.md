@@ -383,3 +383,48 @@ The flat EXP curve remains in place and is deferred for future game-balance work
 **Why:** Frequency data and provenance are valuable import metadata that must not be discarded. Spelling alone cannot identify a Korean lexical entry. Requiring two translations for every character or syllable misrepresents the content. Storing both a missing-is-locked state and a stored locked status introduces an invalid duplicate state.
 
 **Consequences:** [[DEC-010]]'s required-meaning rule is superseded, and [[DEC-009]]'s three-state Progress model is superseded by the missing/unlocked/completed model. Existing code and persisted documents require a separate implementation/migration change; this decision changes documentation only.
+
+---
+
+## DEC-026 — Learning Modes, shared learner state, and contiguous progression frontier
+
+**Date:** 2026-09-27
+**Status:** Accepted
+
+**Decision:** Keep `Course → Unit → Lesson → LessonExercise` exclusively for
+the structured Learning Path. Daily Quest, Topic, Keyboard Position, Random
+Practice, and Review are separate experiences that select shared content rather
+than Course variants or duplicate curricula.
+
+Learning Path progression uses a contiguous completion frontier: the
+recommended lesson is the first lesson in global order that is not completed.
+A soft-locked future Learning Path lesson may be practiced and completed early;
+that completion is retained. When advancing after a Learning Path completion,
+skip already-completed future lessons but stop at the first missing or unlocked
+lesson. Practice Modes, Daily Quest, and Review never write LessonProgress or
+unlock Learning Path content.
+
+Topics are metadata plus `VocabularyEntry.topicIds` membership. Topic counts
+derive from global VocabularyProgress and use Practiced/Encountered wording;
+part-of-speech groups derive from VocabularyEntry metadata where possible.
+VocabularyProgress is limited to encounter timestamps, exercise count, and raw
+accepted/rejected keystroke counters. JamoStats uses the expected jamo as its
+identity and counter attribution; Keyboard Position only filters those shared
+stats.
+
+Daily Quest owns a stable daily vocabulary set and grants EXP once per quest;
+the dateKey timezone policy is deferred. MVP EXP remains conservative:
+Learning Path follows its existing rule, Daily Quest awards once, and Topic,
+Keyboard Position, Random Practice, and Review award none. All may update
+shared stats/progress/review state where applicable, but never curriculum
+progression.
+
+**Why:** These boundaries let learners revisit and practice shared content in
+multiple experiences without copying content, duplicating mastery systems, or
+letting optional practice bypass curriculum progression. A contiguous frontier
+preserves out-of-order Learning Path work without leaving learners stranded.
+
+**Consequences:** Adds target Topic, VocabularyProgress, JamoStat, and
+DailyQuestProgress documentation. The current code and Firestore data do not
+yet implement this decision; implementation requires separate domain,
+repository, mapper, use-case, migration, and test work.

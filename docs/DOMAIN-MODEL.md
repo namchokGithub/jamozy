@@ -2,7 +2,7 @@
 
 Field-level target schema for the entities referenced in `README.md`'s Firestore Data Model section. Fills the gap between collection paths (README) and actual `domain/models/*.ts` code. Update this file whenever a model's shape changes — it is the source of truth for field names/types, not the code comments. Where the current implementation differs, this document records the intended model and the implementation must be brought into line in a separate change.
 
-Conventions: document-backed domain entities (`Course`, `Unit`, `Lesson`, `VocabularyEntry`, `UserProfile`, and `ReviewItem`) expose `id`, which is exactly the Firestore document ID. It is never stored again as a document field; Firestore mappers derive it from the document snapshot and use it to address writes. `LessonExercise.id` is different: it is an embedded identifier stored inside a Lesson document, not a Firestore document ID. `Progress` has no independent `id`; its stored `lessonId` is both the document ID and the Lesson foreign key. All relationships use string IDs, never Firestore `DocumentReference` values. Timestamps are Firestore `Timestamp`, mapped to `Date` in the domain layer via `infrastructure/firebase/mappers`.
+Conventions: document-backed domain entities (`Course`, `Unit`, `Lesson`, `VocabularyEntry`, `Topic`, `UserProfile`, and `ReviewItem`) expose `id`, which is exactly the Firestore document ID. It is never stored again as a document field; Firestore mappers derive it from the document snapshot and use it to address writes. `LessonExercise.id` is different: it is an embedded identifier stored inside a Lesson document, not a Firestore document ID. Per-user state records use their target key as the document ID and stored field: `Progress.lessonId`, `VocabularyProgress.vocabularyId`, `JamoStat.jamoId`, and `DailyQuestProgress.dateKey`. All relationships use string IDs, never Firestore `DocumentReference` values. Timestamps are Firestore `Timestamp`, mapped to `Date` in the domain layer via `infrastructure/firebase/mappers`.
 
 ---
 
@@ -98,6 +98,7 @@ Vocabulary is a reusable learning target, not a replacement for every `LessonExe
 | meaningEn    | string\| null                 | English meaning                            |
 | frequencyRank | number\| null                | positive integer rank from the imported source; not globally unique |
 | difficulty   | `'easy' \| 'medium' \| 'hard'` | default content difficulty               |
+| topicIds     | string[]                      | IDs of Topic metadata that groups this shared vocabulary |
 | sourceId     | string                        | key into `docs/CREDITS.md`'s source registry |
 | sourceUrl    | string\| null                 | source or per-entry reference URL          |
 | createdAt    | Date                          |                                            |
@@ -108,6 +109,27 @@ Vocabulary is a reusable learning target, not a replacement for every `LessonExe
 **Identity and deduplication ([[DEC-025]]):** entries are unique by `(normalizedKorean, partOfSpeech, senseKey)`, where `normalizedKorean` is NFC-normalized and trimmed. A spelling may therefore have multiple entries when its part of speech or sense differs. `id` is a deterministic, collision-safe encoding of that identity, not raw Korean text. `senseKey` is required so the uniqueness rule still holds when part of speech is unavailable. Use `'default'` only when a spelling/POS pair has one imported sense; multiple senses under the same spelling/POS must use distinct, stable sense keys.
 
 Relationships: a `VocabularyEntry` may be referenced by many `LessonExercise`s. A word reused across lessons must reference the same `VocabularyEntry` so its review and learning history are combined. Vocabulary entries need at least one of `meaningTh` or `meaningEn`; `sourceId` is required, while a source may omit a per-entry `sourceUrl`.
+
+`topicIds` is membership metadata, not copied Topic content. Grammar filters should derive from `partOfSpeech` where possible. See `docs/LEARNING-MODES.md`.
+
+---
+
+## Topic
+
+**Path:** `topics/{topicId}`
+**Planned file:** `domain/models/topic.ts`
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| id | string | Firestore document ID |
+| title | string | e.g. `Food` |
+| order | number | display order among Topics |
+
+A Topic is metadata only. Its vocabulary membership is held by
+`VocabularyEntry.topicIds`; it never owns duplicate VocabularyEntry documents.
+Topic counts are derived from member VocabularyEntries and the learner's global
+VocabularyProgress. Label this state `Practiced` or `Encountered`, never
+`Learned`, until a mastery rule exists.
 
 ---
 
@@ -130,11 +152,69 @@ Relationships: a `VocabularyEntry` may be referenced by many `LessonExercise`s. 
 
 Not persisted here: in-progress keystroke/session state. Per `AGENTS.md`, that stays in Zustand client state and is only written here at checkpoint (lesson complete / session end).
 
-**Unlock rule ([[DEC-009]], [[DEC-025]]):** a missing Progress document represents a locked lesson. When a Progress document is created, its initial status is `'unlocked'`; it becomes `'completed'` when the learner completes the lesson. Completing a lesson creates or preserves the next lesson's unlocked Progress document. This transition is written by the `complete-lesson` application use case, not computed on read.
+**Unlock rule ([[DEC-009]], [[DEC-025]], [[DEC-026]]):** a missing Progress document represents a locked lesson. The lock is soft: a learner may practice a future Learning Path lesson after a warning. When a Progress document is created, its initial status is `'unlocked'`; a completed Learning Path lesson persists `'completed'`, even when done early. Practice Modes, Daily Quest, and Review never write LessonProgress. This transition is written by the Learning Path completion use case, not computed on read.
 
-**Creation strategy and global ordering ([[DEC-023]], [[DEC-025]]):** `Progress` is created lazily; a missing document means the lesson is locked. When a user profile is first persisted, the first lesson in the global sequence receives a new document with `status: 'unlocked'`. Completing a lesson creates the next lesson's `unlocked` document only if it does not already exist. No documents are created for still-locked lessons.
+**Creation strategy and global ordering ([[DEC-023]], [[DEC-025]], [[DEC-026]]):** `Progress` is created lazily; a missing document means the lesson is locked. When a user profile is first persisted, the first lesson in the global sequence receives a new document with `status: 'unlocked'`. The recommended lesson is the first lesson in global ordering that is not completed: the contiguous completion frontier. When a Learning Path lesson completes, scan forward through already-completed lessons and create or preserve `unlocked` Progress only for the first remaining lesson. Missing or merely unlocked lessons stop the frontier. No documents are created for still-locked lessons.
 
 The global sequence is the lexicographic order of `(Course.order, Unit.order, Lesson.order)`: courses sort by `Course.order`; units by `Unit.order` within their course; lessons by `Lesson.order` within their unit. The next lesson may therefore cross a Unit and then a Course boundary. Document IDs never determine progression order.
+
+---
+
+## VocabularyProgress (per-user)
+
+**Path:** `users/{userId}/vocabularyProgress/{vocabularyId}`
+**Planned file:** `domain/models/vocabulary-progress.ts`
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| vocabularyId | string | document ID and `VocabularyEntry.id` |
+| firstEncounteredAt | Date | first completed exercise using this vocabulary |
+| lastPracticedAt | Date | latest completed exercise using this vocabulary |
+| exercisesAttempted | number | completed exercises across all experiences |
+| acceptedKeystrokes | number | accepted input for this vocabulary |
+| rejectedKeystrokes | number | rejected input for this vocabulary |
+
+This is a learner's accumulated history for shared vocabulary, not a review
+queue. Accuracy is derived from the raw counters. No mastery or familiarity
+field exists in MVP.
+
+---
+
+## JamoStat (per-user)
+
+**Path:** `users/{userId}/jamoStats/{jamoId}`
+**Planned file:** `domain/models/jamo-stat.ts`
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| jamoId | string | document ID; expected Korean jamo |
+| acceptedKeystrokes | number | incremented for correct input of the expected jamo |
+| rejectedKeystrokes | number | incremented for rejected input while this jamo was expected |
+| lastPracticedAt | Date | latest input attempt for this expected jamo |
+
+Accuracy is derived from the raw counters. Keyboard Position is a view/filter
+over shared jamo and keyboard metadata; it has no separate progress entity.
+
+**Jamo and keyboard metadata:** the existing Korean typing domain is the
+canonical content source for jamo, physical key, Shift requirement, and keyboard
+row. This metadata is shared by all experiences and does not require a new
+Firestore collection in MVP.
+
+---
+
+## DailyQuestProgress (per-user)
+
+**Path:** `users/{userId}/dailyQuestProgress/{dateKey}`
+**Planned file:** `domain/models/daily-quest-progress.ts`
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| dateKey | string | document ID identifying the quest day; timezone policy is undecided |
+| vocabularyIds | string[] | stable set of exactly 10 `VocabularyEntry.id` values for that quest |
+| expAwarded | boolean | true once the quest's one allowed EXP reward has been granted |
+
+Reloading a dateKey reuses its vocabulary set. This entity records Daily Quest
+identity and idempotent rewards only; it never completes or unlocks a Lesson.
 
 ---
 
@@ -161,6 +241,9 @@ The global sequence is the lexicographic order of `(Course.order, Unit.order, Le
 **Spaced repetition scheduling ([[DEC-008]], [[DEC-022]]):** Leitner-style boxes. Box → interval: 1 → 1 day, 2 → 3 days, 3 → 7 days, 4 → 14 days, 5 → 30 days. A correct review advances the box and schedules the next review; a mistake resets it to box 1 and reschedules it. There is no `resolved` state: every `ReviewItem` remains active, including at box 5. A review session pulls items where `nextReviewAt <= now`. This is an MVP default, tunable without a schema change (only the interval table changes).
 
 **Reason priority ([[DEC-024]]):** when one exercise qualifies for review for multiple reasons in a submitted session, choose exactly one: `mistake` > `low-accuracy` > `slow`. `reason` records the highest-priority reason that first created the ReviewItem and is not overwritten on later triggers. Trigger thresholds for `low-accuracy` and `slow` are application policy, not persisted schema.
+
+All experiences may create or update the shared ReviewItem when their rules
+qualify an item. No experience owns a separate review queue.
 
 **Cross-checked against `docs/requirement.md`:** that doc says MVP doesn't need "full" spaced repetition, just a flat problem-word list. Kept Leitner-box scheduling ([[DEC-008]]) — reaffirmed 2026-09-23. Also added `reason` ([[DEC-012]]) since requirement.md wants review entries triggered by mistakes, slow typing, or low accuracy, not just mistakes.
 
@@ -241,6 +324,7 @@ Previously open, now decided — see `docs/DECISIONS.md` for full rationale:
 9. **Progress creation, ordering, and profile auditing** ([[DEC-023]]) — missing Progress means locked; unlocks are lazy along the global course/unit/lesson ordering; `UserProfile.updatedAt` tracks persisted mutations.
 10. **Identity, exercise count, review reason, and level curve** ([[DEC-024]]) — Firestore/document and domain ID semantics are explicit; lessons cap at 20 exercises; review reasons use a deterministic priority; EXP-to-level balance remains deferred.
 11. **Vocabulary import and Progress-state refinement** ([[DEC-025]]) — vocabulary identity includes spelling, part of speech, and sense; translations are nullable according to content type; Progress has only persisted unlocked/completed states.
+12. **Learning Modes** ([[DEC-026]]) — Learning Path progression, Daily Quest, and Practice Modes are distinct experiences over shared content and learner state.
 
 No open questions remain in this document. Add new ones here as they come up, and resolve the same way.
 

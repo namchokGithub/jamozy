@@ -40,6 +40,24 @@ and sentences while improving typing accuracy and speed.
 
 Learn → Type → Review → Improve → Unlock
 
+## Learning Modes
+
+Jamozy separates learner experiences from reusable content and learner state:
+
+```text
+Experience                    Content                    Learner State
+Daily Quest                   Course / Unit / Lesson     LessonProgress
+Learning Path                 LessonExercise              VocabularyProgress
+Practice: Topic / Position    Vocabulary / Topics         JamoStats / ReviewItem
+                                                          DailyQuestProgress / UserProfile
+```
+
+The structured `Course → Unit → Lesson → LessonExercise` hierarchy belongs only
+to the Learning Path. Daily Quest and Practice Modes reuse shared vocabulary
+and keyboard content; they do not unlock Learning Path lessons. See
+[Learning Modes Architecture](docs/LEARNING-MODES.md) for target behavior and
+implementation status.
+
 ## Initial Scope
 
 The first version focuses on the core Korean typing learning experience.
@@ -286,10 +304,14 @@ courses/{courseId}
 units/{unitId}
 lessons/{lessonId}
 vocabulary/{vocabularyId}
+topics/{topicId}
 
 users/{userId}
 users/{userId}/lessonProgress/{lessonId}
+users/{userId}/vocabularyProgress/{vocabularyId}
+users/{userId}/jamoStats/{jamoId}
 users/{userId}/reviewItems/{itemId}
+users/{userId}/dailyQuestProgress/{dateKey}
 ```
 
 > Learning content and user progress are stored separately.
@@ -312,7 +334,7 @@ Jamozy is currently in early development.
 ## Next Implementation Focus
 
 > [!NOTE]
-> The target data model is defined in `docs/DOMAIN-MODEL.md` and DEC-022 through DEC-025.
+> The target data model is defined in `docs/DOMAIN-MODEL.md` and DEC-022 through DEC-026.
 > The current implementation and persisted Firestore data are still being migrated to match it.
 
 Current work focuses on:
@@ -321,6 +343,8 @@ Current work focuses on:
 - simplified lesson-progress persistence (`missing` = locked);
 - raw typing-stat counters with derived accuracy and WPM;
 - updated `ReviewItem` identity and Leitner lifecycle.
+- Learning Modes shared-state architecture, including contiguous Learning Path
+  progression, VocabularyProgress, JamoStats, Topics, and Daily Quest.
 
 ### MVP
 

@@ -205,6 +205,14 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Replaced ambiguous/derived `UserStats` fields with raw aggregate counters: `exercisesAttempted`, accepted/rejected keystrokes, and typing duration. Accuracy and WPM are now explicitly derived; retries count as practice activity but not as newly completed lessons.
 - No application, domain TypeScript, Firestore, or migration code changed in this documentation pass.
 
+### 2026-09-27 — Learning Modes architecture (documentation only)
+
+- Added `docs/LEARNING-MODES.md` and recorded [[DEC-026]], separating Learning Path from Daily Quest and Practice Modes while reusing shared content and learner state.
+- Defined the contiguous completion frontier for soft-locked, out-of-order Learning Path completion; Practice Modes, Daily Quest, and Review do not write LessonProgress or unlock curriculum.
+- Added target documentation for Topic membership, VocabularyProgress, expected-jamo JamoStats, and DailyQuestProgress with stable daily content and idempotent EXP.
+- Documented conservative MVP EXP: Learning Path keeps its existing rule, Daily Quest awards once per quest, and Topic/Position/Random/Review award no EXP.
+- No application, domain TypeScript, Firestore, or migration code changed in this documentation pass.
+
 ### 2026-09-27 — Identity and content-boundary conventions (documentation only)
 
 - Recorded [[DEC-024]]: document-backed domain IDs equal Firestore document IDs without duplicated stored fields; embedded exercise IDs and `Progress.lessonId` are explicit exceptions.
