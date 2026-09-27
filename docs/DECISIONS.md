@@ -134,13 +134,13 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 ## DEC-010 — `LessonExercise` gains `difficulty` and split Thai/English `meaning`
 
 **Date:** 2026-09-23
-**Status:** Accepted
+**Status:** Accepted (meaning nullability superseded by DEC-025)
 
 **Decision:** `LessonExercise` adds `difficulty: 'easy' | 'medium' | 'hard'`, `meaningTh: string`, `meaningEn: string`. The existing `hint` field stays for non-meaning extras (e.g. keyboard tips), no longer doubles as "meaning."
 
 **Why:** `docs/requirement.md`'s Vocabulary section (#3) stores Korean/Romanization/Thai-English-meaning/Difficulty/Lesson per word. Practice Mode (#6) filters by difficulty. Settings (#13) lets the learner pick meaning language (Thai/English/Both) — a single opaque `hint` string can't serve a language toggle.
 
-**Consequences:** `meaningTh`/`meaningEn` are required (not nullable) — every exercise needs both at content-authoring time. `difficulty` is a 3-tier MVP placeholder; widening the union later is not a breaking schema change.
+**Consequences:** `meaningTh`/`meaningEn` nullability is superseded by [[DEC-025]]. `difficulty` is a 3-tier MVP placeholder; widening the union later is not a breaking schema change.
 
 ---
 
@@ -314,6 +314,8 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 
 **Consequences:** Any future UI that displays a running-average or other float-valued stat (accuracy, WPM, or similar) should round at the display boundary the same way, and its tests should include at least one realistic non-round fixture (not just tidy numbers) to catch this class of bug before a live check has to.
 
+**Superseded in part by [[DEC-022]]:** `averageAccuracy` and `averageSpeedWpm` are no longer persisted running averages; they are derived from raw counters. The display-rounding rule continues to apply to those derived values.
+
 ---
 
 ## DEC-022 — Vocabulary-backed review identity and raw aggregate typing counters
@@ -364,3 +366,20 @@ The flat EXP curve remains in place and is deferred for future game-balance work
 **Why:** Explicit identity rules prevent accidental duplication of document IDs or misuse of embedded IDs. A bounded exercise count preserves a focused lesson session. A deterministic reason preserves one meaningful value when trigger rules overlap. Deferring the level curve avoids speculative balance work before there is real learning data.
 
 **Consequences:** Content validation must enforce the exercise constraint before writing a Lesson. Review-creation code must evaluate all applicable triggers with the documented priority. Existing code and persisted documents require separate implementation/migration changes where they differ; this decision changes documentation only.
+
+---
+
+## DEC-025 — Vocabulary import identity and nullable meanings; simplify persisted Progress states
+
+**Date:** 2026-09-27
+**Status:** Accepted
+
+**Decision:** A `VocabularyEntry` is unique by normalized Korean spelling, part of speech, and a required `senseKey`. Identical spelling may therefore have multiple entries. Vocabulary adds `partOfSpeech`, `senseKey`, `frequencyRank`, `sourceId`, and optional `sourceUrl`; every import source must be registered with its license and attribution in `docs/CREDITS.md`.
+
+`meaningTh` and `meaningEn` become nullable. Vocabulary-backed word exercises and phrase/sentence exercises require at least one translation; character and syllable exercises may have none. `UserSettings.meaningLanguage` controls display preference, not whether content can be imported.
+
+`Progress.status` is reduced to `'unlocked' | 'completed'`. A missing Progress document is the only representation of locked, completing the lazy-creation design from [[DEC-023]].
+
+**Why:** Frequency data and provenance are valuable import metadata that must not be discarded. Spelling alone cannot identify a Korean lexical entry. Requiring two translations for every character or syllable misrepresents the content. Storing both a missing-is-locked state and a stored locked status introduces an invalid duplicate state.
+
+**Consequences:** [[DEC-010]]'s required-meaning rule is superseded, and [[DEC-009]]'s three-state Progress model is superseded by the missing/unlocked/completed model. Existing code and persisted documents require a separate implementation/migration change; this decision changes documentation only.

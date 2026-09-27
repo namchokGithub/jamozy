@@ -218,3 +218,11 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Defined the canonical cross-course progression sequence as `Course.order → Unit.order → Lesson.order`, with scoped uniqueness requirements; document IDs do not define order.
 - Added target field `UserProfile.updatedAt`, updated only by persisted profile mutations and deliberately separate from any future activity timestamp.
 - No application, domain TypeScript, Firestore, or migration code changed in this documentation pass.
+
+### 2026-09-27 — Vocabulary import and Progress-state refinement (documentation only)
+
+- Recorded [[DEC-025]]: vocabulary identity now distinguishes normalized spelling, part of speech, and sense; frequency rank and source provenance are retained before the planned 5,800-word import.
+- Added `docs/CREDITS.md` as the required source/license/attribution registry before external content is imported.
+- Made lesson meanings nullable according to content type and removed the duplicate persisted `'locked'` Progress state; a missing document is locked.
+- Corrected stale references in `DOMAIN-MODEL.md`, `PROGRESS.md`, and DEC-021's historical storage semantics.
+- No application, domain TypeScript, Firestore, or migration code changed in this documentation pass.

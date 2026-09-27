@@ -67,12 +67,14 @@ Relationships: a `Lesson` belongs to a `Unit` via `Lesson.unitId`.
 | vocabularyId | string\| null                 | linked `VocabularyEntry.id` for reusable vocabulary; `null` for characters, syllables, phrases, sentences, or lesson-specific content |
 | targetText   | string                        | the Korean text the learner must type              |
 | romanization | string\| null                 | optional pronunciation hint                        |
-| meaningTh    | string                        | Thai meaning ([[DEC-010]])                         |
-| meaningEn    | string                        | English meaning ([[DEC-010]])                      |
+| meaningTh    | string\| null                 | Thai meaning ([[DEC-025]])                         |
+| meaningEn    | string\| null                 | English meaning ([[DEC-025]])                      |
 | difficulty   | `'easy' \| 'medium' \| 'hard'` | used by Practice Mode filtering ([[DEC-010]])      |
 | hint         | string\| null                 | optional extra hint (not meaning — see `meaningTh`/`meaningEn`) |
 
 When `vocabularyId` is present, `targetText`, romanization, meanings, and difficulty are a denormalized lesson snapshot of that vocabulary entry. Content authoring must keep them aligned. This keeps a lesson self-contained at runtime while allowing a word to be reused and tracked across lessons.
+
+**Meaning constraint ([[DEC-025]]):** Word exercises backed by vocabulary, and phrase/sentence exercises, require at least one of `meaningTh` or `meaningEn`. Character and syllable exercises may set both to `null`. The UI must gracefully omit a requested language when that translation is unavailable.
 
 **Exercise-count constraint ([[DEC-024]]):** `exercises` is non-empty and its array order is the canonical typing sequence. MVP lessons normally contain 5–12 exercises and may not exceed 20. Content beyond that cap must be split into another lesson rather than making one session longer.
 
@@ -88,15 +90,24 @@ Vocabulary is a reusable learning target, not a replacement for every `LessonExe
 | Field        | Type                          | Notes                                      |
 | ------------ | ----------------------------- | ------------------------------------------ |
 | id           | string                        | Firestore doc ID                           |
-| korean       | string                        | canonical Korean word                      |
+| korean       | string                        | canonical Korean spelling                  |
+| partOfSpeech | `VocabularyPartOfSpeech`\| null | grammatical category; `null` only when the source does not provide it |
+| senseKey     | string                        | required stable sense identifier; use `'default'` for a primary sense |
 | romanization | string\| null                 | optional pronunciation hint                |
-| meaningTh    | string                        | Thai meaning                               |
-| meaningEn    | string                        | English meaning                            |
+| meaningTh    | string\| null                 | Thai meaning                               |
+| meaningEn    | string\| null                 | English meaning                            |
+| frequencyRank | number\| null                | positive integer rank from the imported source; not globally unique |
 | difficulty   | `'easy' \| 'medium' \| 'hard'` | default content difficulty               |
+| sourceId     | string                        | key into `docs/CREDITS.md`'s source registry |
+| sourceUrl    | string\| null                 | source or per-entry reference URL          |
 | createdAt    | Date                          |                                            |
 | updatedAt    | Date                          |                                            |
 
-Relationships: a `VocabularyEntry` may be referenced by many `LessonExercise`s. A word reused across lessons must reference the same `VocabularyEntry` so its review and learning history are combined.
+`VocabularyPartOfSpeech` is `'noun' | 'verb' | 'adjective' | 'adverb' | 'determiner' | 'pronoun' | 'numeral' | 'particle' | 'interjection' | 'other'`.
+
+**Identity and deduplication ([[DEC-025]]):** entries are unique by `(normalizedKorean, partOfSpeech, senseKey)`, where `normalizedKorean` is NFC-normalized and trimmed. A spelling may therefore have multiple entries when its part of speech or sense differs. `id` is a deterministic, collision-safe encoding of that identity, not raw Korean text. `senseKey` is required so the uniqueness rule still holds when part of speech is unavailable.
+
+Relationships: a `VocabularyEntry` may be referenced by many `LessonExercise`s. A word reused across lessons must reference the same `VocabularyEntry` so its review and learning history are combined. Vocabulary entries need at least one of `meaningTh` or `meaningEn`; `sourceId` is required, while a source may omit a per-entry `sourceUrl`.
 
 ---
 
@@ -108,7 +119,7 @@ Relationships: a `VocabularyEntry` may be referenced by many `LessonExercise`s. 
 | Field         | Type                                    | Notes                                                        |
 | ------------- | --------------------------------------- | ------------------------------------------------------------ |
 | lessonId      | string                                  | same as doc ID; also stored as a field for query convenience |
-| status        | `'locked' \| 'unlocked' \| 'completed'` | drives the Learn → Unlock flow                               |
+| status        | `'unlocked' \| 'completed'`              | persisted state; a missing document means locked             |
 | bestAccuracy  | number                                  | 0–100, best across attempts                                  |
 | bestSpeedWpm  | number                                  | best words-per-minute across attempts                        |
 | attempts      | number                                  | total attempt count                                          |
@@ -119,9 +130,9 @@ Relationships: a `VocabularyEntry` may be referenced by many `LessonExercise`s. 
 
 Not persisted here: in-progress keystroke/session state. Per `AGENTS.md`, that stays in Zustand client state and is only written here at checkpoint (lesson complete / session end).
 
-**Unlock rule ([[DEC-009]]):** a lesson's `Progress.status` starts `'locked'`. It becomes `'unlocked'` when the previous lesson (by `Lesson.order` within the same `Unit`; first lesson of the next `Unit`/`Course` unlocks when the last lesson of the previous one completes) reaches `status === 'completed'`. The very first lesson overall is unlocked by default (seeded, not derived). This transition is written by the `complete-lesson` application use case, not computed on read.
+**Unlock rule ([[DEC-009]], [[DEC-025]]):** a missing Progress document represents a locked lesson. When a Progress document is created, its initial status is `'unlocked'`; it becomes `'completed'` when the learner completes the lesson. Completing a lesson creates or preserves the next lesson's unlocked Progress document. This transition is written by the `complete-lesson` application use case, not computed on read.
 
-**Creation strategy and global ordering ([[DEC-023]]):** `Progress` is created lazily; a missing document means the lesson is locked. When a user profile is first persisted, the first lesson in the global sequence receives a new document with `status: 'unlocked'`. Completing a lesson creates the next lesson's `unlocked` document only if it does not already exist. No documents are seeded for still-locked lessons.
+**Creation strategy and global ordering ([[DEC-023]], [[DEC-025]]):** `Progress` is created lazily; a missing document means the lesson is locked. When a user profile is first persisted, the first lesson in the global sequence receives a new document with `status: 'unlocked'`. Completing a lesson creates the next lesson's `unlocked` document only if it does not already exist. No documents are created for still-locked lessons.
 
 The global sequence is the lexicographic order of `(Course.order, Unit.order, Lesson.order)`: courses sort by `Course.order`; units by `Unit.order` within their course; lessons by `Lesson.order` within their unit. The next lesson may therefore cross a Unit and then a Course boundary. Document IDs never determine progression order.
 
@@ -229,6 +240,7 @@ Previously open, now decided — see `docs/DECISIONS.md` for full rationale:
 8. **`UserSettings` expansion** ([[DEC-013]]) — full 7-field settings list, per `docs/requirement.md`.
 9. **Progress creation, ordering, and profile auditing** ([[DEC-023]]) — missing Progress means locked; unlocks are lazy along the global course/unit/lesson ordering; `UserProfile.updatedAt` tracks persisted mutations.
 10. **Identity, exercise count, review reason, and level curve** ([[DEC-024]]) — Firestore/document and domain ID semantics are explicit; lessons cap at 20 exercises; review reasons use a deterministic priority; EXP-to-level balance remains deferred.
+11. **Vocabulary import and Progress-state refinement** ([[DEC-025]]) — vocabulary identity includes spelling, part of speech, and sense; translations are nullable according to content type; Progress has only persisted unlocked/completed states.
 
 No open questions remain in this document. Add new ones here as they come up, and resolve the same way.
 
