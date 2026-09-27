@@ -235,3 +235,17 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Corrected stale references in `DOMAIN-MODEL.md`, `PROGRESS.md`, and DEC-021's historical storage semantics.
 - Removed the two remaining target-model references to a persisted three-state Progress status and constrained when the vocabulary `senseKey: 'default'` is valid.
 - No application, domain TypeScript, Firestore, or migration code changed in this documentation pass.
+
+### 2026-09-27 — Auth and persistence target architecture (documentation only)
+
+- Added `docs/AUTH-AND-PERSISTENCE.md` as the source of truth for Guest
+  lifecycle, IndexedDB persistence, authenticated Firebase persistence,
+  UserSession, migration boundaries, and unresolved merge policy.
+- Recorded [[DEC-027]], superseding Firebase Anonymous Auth as the target
+  model. Existing Anonymous Auth and Firestore-only implementation records are
+  explicitly legacy context until separate implementation work replaces them.
+- Updated the target UserProfile with `displayName`; removed the obsolete
+  `showEnglishKeys` setting because physical English labels are always shown.
+- Added planned work for Guest sessions, IndexedDB adapters, account auth, and
+  safe migration. No source code, Firebase configuration, Firestore rules, or
+  data migration changed in this documentation pass.

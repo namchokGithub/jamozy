@@ -9,13 +9,17 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 ## DEC-001 — Firebase Anonymous Auth for identity, no traditional sign-up
 
 **Date:** 2026-09-23
-**Status:** Accepted
+**Status:** Superseded by DEC-027
 
 **Decision:** Use Firebase Anonymous Authentication to identify learners for the MVP instead of email/password or social sign-up.
 
 **Why:** Removes friction for a casual, single-player typing-practice app. Learners can start practicing immediately without account creation. Cloud profile sync / Google account linking is deferred to a later phase (see README "Later" list).
 
 **Consequences:** User data is tied to a device-local anonymous UID until linking is added. Losing local auth state loses progress access until account linking ships.
+
+**Legacy implementation note:** Existing code, Firebase configuration, rules,
+and older implementation plans may still use this path. It is historical/current
+implementation context only, not the target architecture.
 
 ---
 
@@ -173,7 +177,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 ## DEC-013 — `UserSettings` expanded to the full requirement.md list
 
 **Date:** 2026-09-23
-**Status:** Accepted
+**Status:** Accepted (field shape superseded in part by DEC-027)
 
 **Decision:** `UserSettings` becomes `soundEnabled`, `showKeyboard`, `showEnglishKeys`, `keyboardOpacity`, `romanizationEnabled`, `meaningLanguage: 'th' | 'en' | 'both'`, `theme: 'light' | 'dark'` — replacing the earlier single `keyboardLayoutHint` boolean.
 
@@ -204,7 +208,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 ## DEC-015 — Firestore rules: any signed-in user can write content (MVP-only)
 
 **Date:** 2026-09-23
-**Status:** Accepted (temporary — must revisit before shipping)
+**Status:** Accepted (legacy implementation — must be replaced before the target auth model ships)
 
 **Decision:** Added `firestore.rules` (+ `firebase.json`, `.firebaserc`). `courses`/`units`/`lessons` are readable AND writable by any signed-in user (including Anonymous Auth). `users/{userId}` and its subcollections are readable/writable only by that same `uid`.
 
@@ -213,6 +217,10 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 **Consequences — real security gap, not just theoretical:** any signed-in player can currently rewrite `courses`/`units`/`lessons` from the browser console via the Firestore client SDK (vandalize curriculum content, not just their own progress). Acceptable for local MVP development with no real users. **Must be replaced before any public launch** — either a custom-claims admin role, or move content writes to an Admin SDK/Cloud Function path and lock `courses`/`units`/`lessons` to `allow write: if false` for clients. User data rules (`users/{userId}/**`) are already correct/production-safe as written.
 
 **Deploy:** rules aren't live until run — `firebase login` (interactive, user runs this) then `firebase deploy --only firestore:rules`.
+
+**Legacy implementation note:** This rule set assumes the Anonymous Auth path
+from [[DEC-001]]. It remains recorded for the existing implementation but does
+not define the target Guest/Authenticated architecture in [[DEC-027]].
 
 ---
 
@@ -229,6 +237,11 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 **Why:** (1) `firestore.rules` ([[DEC-015]]) requires `request.auth != null` for reading `courses`/`units`/`lessons` at all, not just per-user data — but only `CourseMapPage.loader.ts` originally called `signInAnonymouslyIfNeeded()`, so `CourseListPage`/`LessonDetailPage` hit `PERMISSION_DENIED` in the browser. The fix (adding the call) worked, but duplicated the precondition into every loader with no test, and each loader importing `infrastructure/firebase/firebase` directly violates `AGENTS.md`'s layering rule ("never through `infrastructure/firebase` directly from `features/`") — the original plan itself sanctioned that import, so this was a plan defect, not an implementer mistake. (2) The composite-index error only surfaces against real Firestore — none of the fakes-based unit tests model Firestore's index requirements, so nothing caught it before the browser.
 
 **Consequences:** Every loader now takes `ensureUser` as a constructor-style dependency and has a unit test (`*.loader.test.ts`) asserting it's called before any repository read — the exact bug class that broke in the browser is now pinned by a fast, no-network test, not just "eyeball it, low risk" as the original spec assumed. `NotFoundError` (`src/domain/errors.ts`) was added alongside this fix so `RouteError` can show "Not found." instead of a raw error message for a missing course/lesson — same review pass, same root cause category (spec under-tested the loader layer). **Deploy:** `firebase deploy --only firestore:indexes` (in addition to `firestore:rules`) is required before the course map works in any environment, including a fresh `firebase use` on another machine.
+
+**Legacy implementation note:** `ensureUser` and `signInAnonymouslyIfNeeded` are
+current implementation wiring for the superseded Anonymous Auth path. The
+target design in [[DEC-027]] replaces this with session-aware persistence while
+retaining the repository/application boundary.
 
 ---
 
@@ -428,3 +441,46 @@ preserves out-of-order Learning Path work without leaving learners stranded.
 DailyQuestProgress documentation. The current code and Firestore data do not
 yet implement this decision; implementation requires separate domain,
 repository, mapper, use-case, migration, and test work.
+
+---
+
+## DEC-027 — Guest local persistence and migration to authenticated accounts
+
+**Date:** 2026-09-27
+**Status:** Accepted
+
+**Decision:** Guest learners do not use Firebase Authentication. They provide a
+display name and receive a locally generated stable guest ID; their learner
+state is stored in IndexedDB and becomes eligible for cleanup after 90 days
+since the last persisted guest activity. Authenticated learners use
+Email/password or Google Sign-In with Firebase Authentication and persist
+learner state in Firestore.
+
+Authentication chooses repository implementations, not learning behavior. The
+same domain models and application use cases serve Guest and authenticated
+sessions through local IndexedDB or Firebase repository adapters. `UserProfile`
+holds a display name and learner data, never authentication provider state.
+`showEnglishKeys` is removed from target UserSettings because English physical
+key labels are always visible with Hangul labels.
+
+Signing in from a Guest state eventually invokes an application-level,
+provider-neutral `MigrateGuestDataToAccount` use case. It copies through
+repository boundaries and is non-destructive, idempotent, and retry-safe.
+Existing cloud data is a merge scenario: local data remains until success, cloud
+state is never blindly replaced, deterministic IDs remain authoritative, and
+duplicate EXP, Daily Quest rewards, or vocabulary-backed ReviewItems are not
+created.
+
+**Why:** A learner can begin without an account while retaining a clear,
+privacy-friendly local persistence boundary. Repository substitution preserves
+the existing clean architecture and avoids teaching every learning feature two
+different behaviors. Safe migration prevents account creation from discarding
+work or overwriting established cloud progress.
+
+**Consequences:** [[DEC-001]] is superseded as the target identity and
+persistence decision. Existing Anonymous Auth, Firestore rules, Firebase
+adapters, and plans that depend on them are legacy implementation records until
+separate implementation work replaces them. Exact field-level merge formulas
+for EXP, counters, scheduling, settings, and best results remain intentionally
+unresolved; implementation must obtain a follow-up migration-policy decision.
+See `docs/AUTH-AND-PERSISTENCE.md`.

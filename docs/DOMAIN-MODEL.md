@@ -2,7 +2,7 @@
 
 Field-level target schema for the entities referenced in `README.md`'s Firestore Data Model section. Fills the gap between collection paths (README) and actual `domain/models/*.ts` code. Update this file whenever a model's shape changes — it is the source of truth for field names/types, not the code comments. Where the current implementation differs, this document records the intended model and the implementation must be brought into line in a separate change.
 
-Conventions: document-backed domain entities (`Course`, `Unit`, `Lesson`, `VocabularyEntry`, `Topic`, `UserProfile`, and `ReviewItem`) expose `id`, which is exactly the Firestore document ID. It is never stored again as a document field; Firestore mappers derive it from the document snapshot and use it to address writes. `LessonExercise.id` is different: it is an embedded identifier stored inside a Lesson document, not a Firestore document ID. Per-user state records use their target key as the document ID and stored field: `Progress.lessonId`, `VocabularyProgress.vocabularyId`, `JamoStat.jamoId`, and `DailyQuestProgress.dateKey`. All relationships use string IDs, never Firestore `DocumentReference` values. Timestamps are Firestore `Timestamp`, mapped to `Date` in the domain layer via `infrastructure/firebase/mappers`.
+Conventions: document-backed cloud entities (`Course`, `Unit`, `Lesson`, `VocabularyEntry`, `Topic`, `UserProfile`, and `ReviewItem`) expose `id`, which is exactly the Firestore document ID. It is never stored again as a cloud document field; Firestore mappers derive it from the document snapshot and use it to address writes. The same domain entities may be persisted locally for a Guest using their stable IDs. `LessonExercise.id` is different: it is an embedded identifier stored inside a Lesson document, not a Firestore document ID. Per-user state records use their target key as the document ID and stored field: `Progress.lessonId`, `VocabularyProgress.vocabularyId`, `JamoStat.jamoId`, and `DailyQuestProgress.dateKey`. All relationships use string IDs, never Firestore `DocumentReference` values. Persistence adapters map their timestamp format to `Date` in the domain layer. See `docs/AUTH-AND-PERSISTENCE.md` for persistence selection.
 
 ---
 
@@ -251,14 +251,15 @@ qualify an item. No experience owns a separate review queue.
 
 ## UserProfile
 
-**Path:** `users/{userId}` (the parent doc of `lessonProgress`/`reviewItems` subcollections)
+**Authenticated path:** `users/{userId}` (the parent doc of `lessonProgress`/`reviewItems` subcollections)
 **File:** `domain/models/user-profile.ts`
 
 Not in README's original domain file list, but required to home EXP/Level and Settings ([[DEC-006]], [[DEC-007]]).
 
 | Field     | Type           | Notes                        |
 | --------- | -------------- | ----------------------------- |
-| id        | string         | Firebase Anonymous Auth UID  |
+| id        | string         | Firebase Auth UID for an authenticated user; locally generated `guestId` for a Guest |
+| displayName | string       | required player-facing name; never auth identity |
 | exp       | number         | total accumulated EXP, only stored value — `level` is never persisted |
 | settings  | `UserSettings` | see below                    |
 | stats     | `UserStats`    | see below ([[DEC-011]])      |
@@ -269,21 +270,25 @@ Not in README's original domain file list, but required to home EXP/Level and Se
 
 **Cross-checked against `docs/requirement.md`:** that doc's own example ("Level 7, 430/600 EXP") implies an increasing per-level curve (~`level × 100` to reach the next level), not this flat formula, and separately lists "Level" as something to save (implying a stored field). Both reaffirmed against the flat, derived-only formula — 2026-09-23. Revisit the curve shape later if game-design balance needs it; the derived approach means no migration either way.
 
-`UserSettings` (embedded on the user doc, [[DEC-007]]):
+For authenticated users the profile is stored in Firestore; for Guests it is
+stored in IndexedDB with the same domain shape. Authentication/session details
+are separate from `UserProfile`; do not store `email`, provider details, or
+`isGuest` here. See `docs/AUTH-AND-PERSISTENCE.md`.
+
+`UserSettings` (embedded in the profile, [[DEC-007]]):
 
 | Field               | Type                     | Notes                                         |
 | ------------------- | ------------------------ | ---------------------------------------------- |
 | soundEnabled        | boolean                  |                                                |
 | showKeyboard         | boolean                  | show/hide the virtual keyboard widget         |
-| showEnglishKeys      | boolean                  | show English-key hints, e.g. `ㅎ → g`          |
 | keyboardOpacity      | number                   | 0–1                                           |
 | romanizationEnabled  | boolean                  |                                                |
 | meaningLanguage      | `'th' \| 'en' \| 'both'` |                                                |
 | theme                | `'light' \| 'dark'`      |                                                |
 
-Replaces the earlier single `keyboardLayoutHint` field with the full requirement.md settings list ([[DEC-013]]) — `showKeyboard` and `showEnglishKeys` are two distinct settings, not one. "Reset Progress" (requirement.md #13) is an action, not a setting — it's a future `application/` use case, not a `UserSettings` field.
+Replaces the earlier single `keyboardLayoutHint` field with the current settings list. English physical-key labels are always shown alongside Hangul labels, so `showEnglishKeys` is not a user setting ([[DEC-027]]). "Reset Progress" (requirement.md #13) is an action, not a setting — it's a future `application/` use case, not a `UserSettings` field.
 
-`UserStats` (embedded on the user doc, [[DEC-011]]):
+`UserStats` (embedded on `UserProfile`, [[DEC-011]]):
 
 | Field                  | Type   | Notes                                    |
 | ---------------------- | ------ | ------------------------------------------ |
@@ -305,7 +310,7 @@ Return `0` for either value when its denominator is zero. WPM uses the existing 
 
 `currentLevel` (requirement.md #9) is intentionally not stored here — it's `levelFromExp(exp)`, computed on read (see [[DEC-006]]).
 
-`updatedAt` is an audit timestamp, not an activity timestamp: it changes when settings, EXP, or stats are persisted, but not for reads or anonymous sign-in alone. A future `lastActiveAt` must be a separate field if product analytics needs it.
+`updatedAt` is an audit timestamp, not an activity timestamp: it changes when settings, EXP, or stats are persisted, but not for reads or session activation alone. Guest retention uses the separate local `GuestSession.lastActiveAt` field in `docs/AUTH-AND-PERSISTENCE.md`.
 
 ---
 
@@ -314,18 +319,20 @@ Return `0` for either value when its denominator is zero. WPM uses the existing 
 Previously open, now decided — see `docs/DECISIONS.md` for full rationale:
 
 1. **EXP/Level** ([[DEC-006]]) — `level` derived from `exp` via `level = 1 + floor(exp / 100)`, never stored. Reaffirmed against `docs/requirement.md`.
-2. **Settings location** ([[DEC-007]]) — field on the `users/{userId}` doc, not a separate subcollection.
+2. **Settings location** ([[DEC-007]], [[DEC-027]]) — embedded in `UserProfile`, whether that profile is stored in Guest IndexedDB or authenticated Firestore; never a separate settings collection.
 3. **Review scheduling and identity** ([[DEC-008]], [[DEC-022]]) — Leitner-style spaced repetition, `box` + `nextReviewAt`, no `resolved` state; vocabulary-backed items are deduplicated by `vocabularyId`, other items by lesson/exercise identity.
 4. **Unlock rule** ([[DEC-009]], [[DEC-025]]) — next lesson unlocks when the previous lesson's Progress becomes `'completed'`; a missing document represents locked, while persisted states are `'unlocked'/'completed'`.
 5. **Vocabulary reuse** ([[DEC-022]]) — reusable words live in `VocabularyEntry`; a `LessonExercise` may link one via `vocabularyId` while remaining self-contained.
 6. **`UserStats`** ([[DEC-011]], [[DEC-022]]) — embedded aggregate counters; accuracy and WPM are derived from raw counters, and `exercisesAttempted` replaces the ambiguous `wordsPracticed`.
 7. **`ReviewItem.reason`** ([[DEC-012]]) — mistake/slow/low-accuracy trigger, per `docs/requirement.md`.
-8. **`UserSettings` expansion** ([[DEC-013]]) — full 7-field settings list, per `docs/requirement.md`.
+8. **`UserSettings` expansion** ([[DEC-013]], [[DEC-027]]) — profile settings; English physical-key labels are always shown, so no `showEnglishKeys` field remains.
 9. **Progress creation, ordering, and profile auditing** ([[DEC-023]]) — missing Progress means locked; unlocks are lazy along the global course/unit/lesson ordering; `UserProfile.updatedAt` tracks persisted mutations.
 10. **Identity, exercise count, review reason, and level curve** ([[DEC-024]]) — Firestore/document and domain ID semantics are explicit; lessons cap at 20 exercises; review reasons use a deterministic priority; EXP-to-level balance remains deferred.
 11. **Vocabulary import and Progress-state refinement** ([[DEC-025]]) — vocabulary identity includes spelling, part of speech, and sense; translations are nullable according to content type; Progress has only persisted unlocked/completed states.
 12. **Learning Modes** ([[DEC-026]]) — Learning Path progression, Daily Quest, and Practice Modes are distinct experiences over shared content and learner state.
+13. **Authentication and persistence** ([[DEC-027]]) — Guest and authenticated sessions use the same learner model with IndexedDB or Firestore persistence; Guest-to-account migration has safety principles but deliberately unresolved field-level merge rules.
 
-No open questions remain in this document. Add new ones here as they come up, and resolve the same way.
+The unresolved Guest-to-account field-level merge policy is intentionally held in
+`docs/AUTH-AND-PERSISTENCE.md`, not decided in this schema document.
 
 **Note on `docs/requirement.md`:** that file is the original product spec and is left as-is (not edited to match resolutions above) — this file and `docs/DECISIONS.md` are the authoritative, up-to-date sources when they disagree with it.
