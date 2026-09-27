@@ -190,10 +190,13 @@ field exists in MVP.
 | jamoId | string | document ID; expected Korean jamo |
 | acceptedKeystrokes | number | incremented for correct input of the expected jamo |
 | rejectedKeystrokes | number | incremented for rejected input while this jamo was expected |
-| lastPracticedAt | Date | latest input attempt for this expected jamo |
+| firstPracticedAt | Date | first submitted session containing this expected jamo |
+| lastPracticedAt | Date | latest submitted session containing this expected jamo |
 
 Accuracy is derived from the raw counters. Keyboard Position is a view/filter
 over shared jamo and keyboard metadata; it has no separate progress entity.
+All counters and timestamps are aggregated from a submitted session result,
+never persisted per keystroke.
 
 **Jamo and keyboard metadata:** the existing Korean typing domain is the
 canonical content source for jamo, physical key, Shift requirement, and keyboard
@@ -211,10 +214,14 @@ Firestore collection in MVP.
 | --- | --- | --- |
 | dateKey | string | document ID identifying the quest day; timezone policy is undecided |
 | vocabularyIds | string[] | stable set of exactly 10 `VocabularyEntry.id` values for that quest |
+| completedAt | Date\| null | set once when the learner first completes that date's quest; independent from reward persistence |
 | expAwarded | boolean | true once the quest's one allowed EXP reward has been granted |
 
 Reloading a dateKey reuses its vocabulary set. This entity records Daily Quest
-identity and idempotent rewards only; it never completes or unlocks a Lesson.
+identity, completion, and idempotent rewards only; it never completes or
+unlocks a Lesson. `completedAt` may be non-null only once that quest is
+completed; retries may still update shared learner state but cannot grant EXP
+again after `expAwarded` is true.
 
 ---
 
@@ -331,6 +338,7 @@ Previously open, now decided — see `docs/DECISIONS.md` for full rationale:
 11. **Vocabulary import and Progress-state refinement** ([[DEC-025]]) — vocabulary identity includes spelling, part of speech, and sense; translations are nullable according to content type; Progress has only persisted unlocked/completed states.
 12. **Learning Modes** ([[DEC-026]]) — Learning Path progression, Daily Quest, and Practice Modes are distinct experiences over shared content and learner state.
 13. **Authentication and persistence** ([[DEC-027]]) — Guest and authenticated sessions use the same learner model with IndexedDB or Firestore persistence; Guest-to-account migration has safety principles but deliberately unresolved field-level merge rules.
+14. **Shared learner-state checkpoint semantics** ([[DEC-028]]) — VocabularyProgress and JamoStat aggregate submitted results across modes; DailyQuestProgress distinguishes completion from its idempotent EXP reward.
 
 The unresolved Guest-to-account field-level merge policy is intentionally held in
 `docs/AUTH-AND-PERSISTENCE.md`, not decided in this schema document.

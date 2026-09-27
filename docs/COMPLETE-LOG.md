@@ -249,3 +249,16 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Added planned work for Guest sessions, IndexedDB adapters, account auth, and
   safe migration. No source code, Firebase configuration, Firestore rules, or
   data migration changed in this documentation pass.
+
+### 2026-09-27 — Shared learner-state semantics (documentation only)
+
+- Recorded [[DEC-028]], confirming that VocabularyProgress and JamoStat are
+  global per underlying learning target across every learning mode and aggregate
+  only submitted session results.
+- Added `JamoStat.firstPracticedAt` and clarified its first/latest timestamps
+  are based on submitted sessions, not individual persisted keystrokes.
+- Added `DailyQuestProgress.completedAt`, separate from `expAwarded`, while
+  preserving the `dailyQuestProgress/{dateKey}` path and once-per-day EXP rule.
+- Expanded planned work for shared result aggregation, derived Topic/Position
+  displays, Daily Quest persistence, and idempotent rewards. No source code,
+  Firebase configuration, Firestore rules, adapters, or migrations changed.

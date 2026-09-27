@@ -344,7 +344,7 @@ Jamozy is currently in early development.
 
 > [!NOTE]
 > The target data model is defined in `docs/DOMAIN-MODEL.md`,
-> [Authentication and Persistence](docs/AUTH-AND-PERSISTENCE.md), and DEC-022 through DEC-027.
+> [Authentication and Persistence](docs/AUTH-AND-PERSISTENCE.md), and DEC-022 through DEC-028.
 > The current implementation and persisted Firestore data are still being migrated to match it.
 
 Current work focuses on:

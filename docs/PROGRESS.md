@@ -25,10 +25,13 @@ Last updated: 2026-09-27 (Learning Modes and auth/persistence target architectur
 | Item | Status | Notes |
 | --- | --- | --- |
 | Contiguous Learning Path frontier | Not started | Soft-locked future lessons may complete early; the recommended lesson remains the first globally ordered lesson not completed ([[DEC-026]]). |
-| VocabularyProgress | Not started | Shared learner history for each VocabularyEntry; no mastery field in MVP. |
-| JamoStats and Keyboard Position | Not started | Expected-jamo raw counters shared by every experience; Position is a view/filter, not a separate progression system. |
-| Topic practice | Not started | Topic metadata plus VocabularyEntry membership; counts derive from global VocabularyProgress. |
-| Daily Quest | Not started | Stable 10-item per-day vocabulary set, idempotent EXP reward, dateKey timezone policy still to be decided. |
+| VocabularyProgress domain/repository support | Not started | One raw-counter history per VocabularyEntry across modes; no mastery field in MVP ([[DEC-028]]). |
+| JamoStats domain/repository support | Not started | Expected-jamo raw counters and first/latest submitted-practice timestamps across modes ([[DEC-028]]). |
+| Shared session-result aggregation | Not started | Aggregate VocabularyProgress, JamoStats, and UserStats only at submitted checkpoints; never persist per keystroke. |
+| Topic progress derived from VocabularyProgress | Not started | Topic metadata plus VocabularyEntry membership; display Practiced/Encountered counts, not TopicProgress. |
+| Keyboard Position stats derived from JamoStats | Not started | Position is a view/filter over expected-jamo records; no PositionProgress. |
+| DailyQuestProgress persistence | Not started | Stable 10-item `dailyQuestProgress/{dateKey}` record with completion and reward state; timezone policy still to be decided. |
+| Daily Quest idempotent EXP reward | Not started | Grant EXP once per dateKey; retries still update shared state but cannot award again. |
 
 ## Planned Authentication and Persistence
 
@@ -66,7 +69,7 @@ Last updated: 2026-09-27 (Learning Modes and auth/persistence target architectur
 
 ## Current Focus
 
-**Pending model and persistence migration:** [[DEC-022]]–[[DEC-027]] define the target vocabulary, progress, Learning Modes, and Guest/authenticated persistence architecture. The current Firebase Anonymous Auth / Firestore-only path is legacy implementation; no migration or code change has been made in this documentation pass. See `docs/AUTH-AND-PERSISTENCE.md`.
+**Pending model and persistence migration:** [[DEC-022]]–[[DEC-028]] define the target vocabulary, shared learner-state checkpoints, Learning Modes, and Guest/authenticated persistence architecture. The current Firebase Anonymous Auth / Firestore-only path is legacy implementation; no migration or code change has been made in this documentation pass. See `docs/AUTH-AND-PERSISTENCE.md`.
 
 **Legacy implementation detail:** Keyboard settings and Review preview context currently ship through the Firestore-only path. `showKeyboard`, `showEnglishKeys`, and `keyboardOpacity` flow from route-loaded `UserSettings` into both `LessonTypingSession` and `ReviewTypingSession`, then into `VirtualKeyboard`; new profiles default to `keyboardOpacity: 0.7`, while saved settings are unchanged. `showEnglishKeys` is removed from the target model by [[DEC-027]]. `ReviewPage.loader.ts` loads due items and settings in parallel, then calls `application/get-review-previews.ts`, which batches unique source-lesson reads and joins each item to an optional exercise. The Review preview applies the existing meaning/romanization preferences and retains Korean-only rows if a source lesson or exercise no longer exists. This round deliberately excludes sound, dark mode, and vocabulary metadata during an active typing session. Verification results are recorded in `docs/COMPLETE-LOG.md`.
 

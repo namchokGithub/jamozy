@@ -107,7 +107,8 @@ familiarity fields yet.
 JamoStats is shared across all experiences. Counters belong to the expected
 jamo: correct input increments its accepted count; a rejected input increments
 the rejected count of the jamo expected at that sequence position. Accuracy is
-derived from those counters.
+derived from those counters. It records first and latest submitted practice for
+that expected jamo; no input is persisted per keystroke.
 
 ### ReviewItem
 
@@ -118,8 +119,10 @@ VocabularyEntry identity; no mode owns a separate review queue.
 ### DailyQuestProgress
 
 One learner has one DailyQuestProgress record per `dateKey`. It keeps that
-day's selected VocabularyEntry IDs and whether its EXP reward was granted.
-The concrete timezone policy remains undecided.
+day's selected VocabularyEntry IDs, first completion time, and whether its EXP
+reward was granted. Completion and reward are distinct state: `completedAt`
+supports quest status, while `expAwarded` prevents duplicate rewards. The
+concrete timezone policy remains undecided.
 
 ## EXP Policy
 

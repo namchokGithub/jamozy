@@ -484,3 +484,43 @@ separate implementation work replaces them. Exact field-level merge formulas
 for EXP, counters, scheduling, settings, and best results remain intentionally
 unresolved; implementation must obtain a follow-up migration-policy decision.
 See `docs/AUTH-AND-PERSISTENCE.md`.
+
+---
+
+## DEC-028 — Shared learner-state checkpoints and Daily Quest completion
+
+**Date:** 2026-09-27
+**Status:** Accepted
+
+**Decision:** VocabularyProgress is one accumulated record per learner and
+VocabularyEntry across Learning Path, Daily Quest, Topic, Keyboard Position,
+Review, and future practice modes. It records encounter/practice timestamps and
+raw exercise/keystroke counters only; it has no mastery, familiarity, level,
+score, or streak semantics. Topic displays therefore derive `Practiced` or
+`Encountered` counts from these records rather than owning progress.
+
+JamoStat is likewise one accumulated record per learner and expected jamo.
+Correct input increments its accepted counter; rejected input increments the
+counter for the jamo expected at that position, never the incorrectly pressed
+jamo. Keyboard Position remains a filter over these records. JamoStat records
+both first and latest submitted practice timestamps.
+
+Shared learner-state counters and timestamps are aggregated from submitted
+session results, never written per keystroke. DailyQuestProgress retains the
+existing `dailyQuestProgress/{dateKey}` identity and adds `completedAt` in
+addition to `expAwarded`: completion represents quest status, while
+`expAwarded` makes the once-per-dateKey EXP grant idempotent. A Daily Quest
+retry may update shared learner state and review scheduling, but never grants
+that EXP twice or changes Learning Path progression.
+
+**Why:** One record per underlying target avoids fragmenting learning history by
+mode while retaining distinct responsibilities for curriculum progress, review
+scheduling, global statistics, and quest rewards. Separating completion from
+reward makes a failed/retried reward write observable without treating reward
+status as course progression.
+
+**Consequences:** Extends the target schemas in `docs/DOMAIN-MODEL.md` and the
+shared-state rules in `docs/LEARNING-MODES.md`. The `dateKey` timezone policy,
+vocabulary-selection algorithm, and Guest-to-account field-level merge formulas
+remain unresolved. This is documentation only; no persistence, migration, or
+typing-engine implementation changes.
