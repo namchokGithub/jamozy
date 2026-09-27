@@ -1,6 +1,6 @@
 # Domain Model
 
-Field-level schema for the entities referenced in `README.md`'s Firestore Data Model section. Fills the gap between collection paths (README) and actual `domain/models/*.ts` code. Update this file whenever a model's shape changes — it is the source of truth for field names/types, not the code comments.
+Field-level target schema for the entities referenced in `README.md`'s Firestore Data Model section. Fills the gap between collection paths (README) and actual `domain/models/*.ts` code. Update this file whenever a model's shape changes — it is the source of truth for field names/types, not the code comments. Where the current implementation differs, this document records the intended model and the implementation must be brought into line in a separate change.
 
 Conventions: all Firestore documents use `id` as the document ID (not stored as a field unless noted). Timestamps are Firestore `Timestamp`, mapped to `Date` in the domain layer via `infrastructure/firebase/mappers`.
 
@@ -64,12 +64,37 @@ Relationships: a `Lesson` belongs to a `Unit` via `Lesson.unitId`.
 | Field        | Type                          | Notes                                              |
 | ------------ | ----------------------------- | --------------------------------------------------- |
 | id           | string                        | stable ID within the lesson (for review linking)   |
+| vocabularyId | string\| null                 | linked `VocabularyEntry.id` for reusable vocabulary; `null` for characters, syllables, phrases, sentences, or lesson-specific content |
 | targetText   | string                        | the Korean text the learner must type              |
 | romanization | string\| null                 | optional pronunciation hint                        |
 | meaningTh    | string                        | Thai meaning ([[DEC-010]])                         |
 | meaningEn    | string                        | English meaning ([[DEC-010]])                      |
 | difficulty   | `'easy' \| 'medium' \| 'hard'` | used by Practice Mode filtering ([[DEC-010]])      |
 | hint         | string\| null                 | optional extra hint (not meaning — see `meaningTh`/`meaningEn`) |
+
+When `vocabularyId` is present, `targetText`, romanization, meanings, and difficulty are a denormalized lesson snapshot of that vocabulary entry. Content authoring must keep them aligned. This keeps a lesson self-contained at runtime while allowing a word to be reused and tracked across lessons.
+
+---
+
+## VocabularyEntry
+
+**Path:** `vocabulary/{vocabularyId}`
+**Planned file:** `domain/models/vocabulary-entry.ts`
+
+Vocabulary is a reusable learning target, not a replacement for every `LessonExercise`. Characters, syllables, phrases, sentences, and one-off prompts remain lesson-owned.
+
+| Field        | Type                          | Notes                                      |
+| ------------ | ----------------------------- | ------------------------------------------ |
+| id           | string                        | Firestore doc ID                           |
+| korean       | string                        | canonical Korean word                      |
+| romanization | string\| null                 | optional pronunciation hint                |
+| meaningTh    | string                        | Thai meaning                               |
+| meaningEn    | string                        | English meaning                            |
+| difficulty   | `'easy' \| 'medium' \| 'hard'` | default content difficulty               |
+| createdAt    | Date                          |                                            |
+| updatedAt    | Date                          |                                            |
+
+Relationships: a `VocabularyEntry` may be referenced by many `LessonExercise`s. A word reused across lessons must reference the same `VocabularyEntry` so its review and learning history are combined.
 
 ---
 
@@ -103,18 +128,20 @@ Not persisted here: in-progress keystroke/session state. Per `AGENTS.md`, that s
 
 | Field            | Type    | Notes                                                       |
 | ---------------- | ------- | ----------------------------------------------------------- |
-| id               | string  | Firestore doc ID                                            |
-| sourceLessonId   | string  | `Lesson.id` this item came from                             |
-| sourceExerciseId | string  | `LessonExercise.id` this item came from                     |
+| id               | string  | Firestore doc ID; deterministic identity, defined below     |
+| sourceLessonId   | string  | `Lesson.id` that first created this item                    |
+| sourceExerciseId | string  | `LessonExercise.id` that first created this item            |
+| vocabularyId     | string\| null | linked `VocabularyEntry.id`; `null` for non-vocabulary content |
 | targetText       | string  | the mistyped Korean text (denormalized for quick review UI) |
 | mistakeCount     | number  | incremented each time it's mistyped again                   |
 | lastMistakeAt    | Date    |                                                             |
-| resolved         | boolean | true once learner types it correctly in a review session    |
 | reason           | `'mistake' \| 'slow' \| 'low-accuracy'` | why this word entered review ([[DEC-012]]) |
 | box              | number  | Leitner box, 1–5 ([[DEC-008]]); starts at 1, +1 on a correct review (capped at 5), resets to 1 on a mistake |
 | nextReviewAt     | Date    | when this item is next due; computed from `box` at write time |
 
-**Spaced repetition scheduling ([[DEC-008]]):** Leitner-style boxes. Box → interval: 1 → 1 day, 2 → 3 days, 3 → 7 days, 4 → 14 days, 5 → 30 days. A review session pulls `ReviewItem`s where `resolved === false` and `nextReviewAt <= now`. This is an MVP default, tunable without a schema change (only the interval table changes).
+**Identity and deduplication ([[DEC-022]]):** a vocabulary-backed item has `id === vocabularyId`, yielding one review history per learner per reusable word across all lessons. A non-vocabulary item has `id === \`${sourceLessonId}:${sourceExerciseId}\``, yielding one review history per lesson exercise. Therefore the deduplication rule is one active item per vocabulary entry, or one active item per non-vocabulary exercise.
+
+**Spaced repetition scheduling ([[DEC-008]], [[DEC-022]]):** Leitner-style boxes. Box → interval: 1 → 1 day, 2 → 3 days, 3 → 7 days, 4 → 14 days, 5 → 30 days. A correct review advances the box and schedules the next review; a mistake resets it to box 1 and reschedules it. There is no `resolved` state: every `ReviewItem` remains active, including at box 5. A review session pulls items where `nextReviewAt <= now`. This is an MVP default, tunable without a schema change (only the interval table changes).
 
 **Cross-checked against `docs/requirement.md`:** that doc says MVP doesn't need "full" spaced repetition, just a flat problem-word list. Kept Leitner-box scheduling ([[DEC-008]]) — reaffirmed 2026-09-23. Also added `reason` ([[DEC-012]]) since requirement.md wants review entries triggered by mistakes, slow typing, or low accuracy, not just mistakes.
 
@@ -157,12 +184,21 @@ Replaces the earlier single `keyboardLayoutHint` field with the full requirement
 
 | Field                  | Type   | Notes                                    |
 | ---------------------- | ------ | ------------------------------------------ |
-| lessonsCompleted       | number |                                            |
-| wordsPracticed         | number | cumulative exercises attempted             |
-| averageAccuracy        | number | 0–100, across all attempts                 |
-| bestAccuracy           | number | 0–100, best single-attempt, across all lessons (distinct from `Progress.bestAccuracy`, which is per-lesson) |
-| averageSpeedWpm        | number |                                            |
-| totalTypingTimeSeconds | number |                                            |
+| lessonsCompleted       | number | unique lessons completed; retries do not increment it |
+| exercisesAttempted     | number | total exercises completed in submitted lesson, practice, or review sessions; retries count |
+| totalAcceptedKeystrokes | number | accepted Korean keyboard input events across all submitted sessions |
+| totalRejectedKeystrokes | number | rejected/wrong Korean keyboard input events across all submitted sessions |
+| bestAccuracy           | number | 0–100, best single submitted session across all modes (distinct from `Progress.bestAccuracy`, which is per-lesson) |
+| totalTypingTimeSeconds | number | total active typing duration across all submitted sessions |
+
+`averageAccuracy` and `averageSpeedWpm` are derived, never stored ([[DEC-022]]):
+
+```text
+averageAccuracy = totalAcceptedKeystrokes / (totalAcceptedKeystrokes + totalRejectedKeystrokes) × 100
+averageSpeedWpm = (totalAcceptedKeystrokes / 5) / (totalTypingTimeSeconds / 60)
+```
+
+Return `0` for either value when its denominator is zero. WPM uses the existing keyboard-engine convention of five accepted physical keystrokes per word; it is not a count of Korean whitespace-delimited words. All counters change only when a session is submitted, never per keystroke.
 
 `currentLevel` (requirement.md #9) is intentionally not stored here — it's `levelFromExp(exp)`, computed on read (see [[DEC-006]]).
 
@@ -174,10 +210,10 @@ Previously open, now decided — see `docs/DECISIONS.md` for full rationale:
 
 1. **EXP/Level** ([[DEC-006]]) — `level` derived from `exp` via `level = 1 + floor(exp / 100)`, never stored. Reaffirmed against `docs/requirement.md`.
 2. **Settings location** ([[DEC-007]]) — field on the `users/{userId}` doc, not a separate subcollection.
-3. **Review scheduling** ([[DEC-008]]) — Leitner-style spaced repetition, `box` + `nextReviewAt` on `ReviewItem`. Reaffirmed against `docs/requirement.md`.
+3. **Review scheduling and identity** ([[DEC-008]], [[DEC-022]]) — Leitner-style spaced repetition, `box` + `nextReviewAt`, no `resolved` state; vocabulary-backed items are deduplicated by `vocabularyId`, other items by lesson/exercise identity.
 4. **Unlock rule** ([[DEC-009]]) — next lesson unlocks when the previous lesson's `Progress.status` becomes `'completed'`; 3-state status (`locked/unlocked/completed`) reaffirmed against `docs/requirement.md`'s 4-state suggestion.
-5. **`LessonExercise` fields** ([[DEC-010]]) — added `difficulty` and split `meaningTh`/`meaningEn`, per `docs/requirement.md`.
-6. **`UserStats`** ([[DEC-011]]) — new embedded entity on `UserProfile` for aggregate stats, per `docs/requirement.md`.
+5. **Vocabulary reuse** ([[DEC-022]]) — reusable words live in `VocabularyEntry`; a `LessonExercise` may link one via `vocabularyId` while remaining self-contained.
+6. **`UserStats`** ([[DEC-011]], [[DEC-022]]) — embedded aggregate counters; accuracy and WPM are derived from raw counters, and `exercisesAttempted` replaces the ambiguous `wordsPracticed`.
 7. **`ReviewItem.reason`** ([[DEC-012]]) — mistake/slow/low-accuracy trigger, per `docs/requirement.md`.
 8. **`UserSettings` expansion** ([[DEC-013]]) — full 7-field settings list, per `docs/requirement.md`.
 

@@ -145,9 +145,9 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 ## DEC-011 — `UserStats` added as an embedded entity on `UserProfile`
 
 **Date:** 2026-09-23
-**Status:** Accepted
+**Status:** Accepted (field shape superseded by DEC-022)
 
-**Decision:** New `UserStats` shape (`lessonsCompleted`, `wordsPracticed`, `averageAccuracy`, `bestAccuracy`, `averageSpeedWpm`, `totalTypingTimeSeconds`), embedded as `UserProfile.stats`. `currentLevel` is deliberately excluded — it's `levelFromExp(exp)`, computed on read ([[DEC-006]]).
+**Decision:** `UserStats` is embedded as `UserProfile.stats`. Its original field shape was superseded by [[DEC-022]]; `currentLevel` remains excluded — it's `levelFromExp(exp)`, computed on read ([[DEC-006]]).
 
 **Why:** `docs/requirement.md`'s Stats (#9) and Save System (#14) sections want these aggregate numbers persisted; no entity for them existed before this pass.
 
@@ -190,7 +190,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 
 1. **`UserProfileRepository`** (`domain/repositories/user-profile-repository.ts` + `FirebaseUserProfileRepository`) — not in README's original repository file list, but `complete-lesson` needs to read/write `UserProfile.exp`/`stats`. Same shape as the other repositories (`getUserProfile`, `saveUserProfile`).
 2. **`CourseRepository.getUnitById(unitId)`** — added alongside `getUnitsByCourseId`. Needed to walk unit → course → next unit when unlocking the first lesson of the next unit ([[DEC-009]]'s cross-boundary case).
-3. **`submit-review-result.ts`** (6th `application/` file, beyond README's 5) — advances a `ReviewItem`'s `box`/`nextReviewAt`/`resolved` via `nextBox`/`nextReviewDate` ([[DEC-008]]). Without it, `ReviewRepository.updateReviewItem` had no caller and spaced repetition couldn't actually progress.
+3. **`submit-review-result.ts`** (6th `application/` file, beyond README's 5) — advances a `ReviewItem`'s `box`/`nextReviewAt` via `nextBox`/`nextReviewDate` ([[DEC-008]]). Without it, `ReviewRepository.updateReviewItem` had no caller and spaced repetition couldn't actually progress. `resolved` was later removed from the target model by [[DEC-022]].
 4. **No repeat EXP/unlock on lesson retry** — `complete-lesson` checks whether the lesson was already `'completed'` before this call; if so, it still records the attempt (via `update-progress`) but skips awarding EXP and re-unlocking the next lesson. Not specified anywhere; chosen to avoid EXP farming via repeated retries.
 
 **Why:** These are mechanical necessities to make already-decided behavior ([[DEC-008]], [[DEC-009]], [[DEC-006]]/[[DEC-011]] EXP+stats) actually executable, not new product scope.
@@ -258,12 +258,12 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 **Decision:** Wired the Korean typing engine ([[DEC-017]]) into an interactive "Start Lesson" flow (`src/domain/korean/lesson-session.ts`, `src/features/lesson/LessonTypingSession.tsx`, `src/features/lesson/LessonDetailPage.action.ts`). Three non-obvious choices from this pass:
 
 1. **Accuracy is converted from a 0–1 fraction to a 0–100 scale at the `lesson-session.ts` boundary.** `typing-session.ts`'s own `getAccuracy()` returns 0–1 (an internal, per-exercise concern, left unchanged), but `application/complete-lesson.ts`'s `calculateExpGained` (`accuracy > 90`, `accuracy === 100`) and every other accuracy field in the app (`Progress.bestAccuracy`, `UserStats.averageAccuracy`) are 0–100. `lesson-session.ts`'s `getLessonResult()` does the ×100 conversion once, so nothing downstream needs to know the engine's internal scale differs.
-2. **`ReviewItem.id` is set to `LessonExercise.id` (deterministic), not a generated id.** Lets `create-review-items.ts` look up an existing item with a single `getReviewItem(userId, exerciseId)` point read instead of `getReviewItems()` + a client-side scan — matches `docs/DOMAIN-MODEL.md`'s existing deterministic-id note. Documented constraint: this assumes exercise ids are unique across the whole app, not just within their own lesson (`DOMAIN-MODEL.md` only documents lesson-local uniqueness) — true of the current seed data, but not enforced. Two lessons that ever reused an exercise id would have their `ReviewItem`s merge under the first lesson's `sourceLessonId`. Flagged, not fixed, since changing the id shape now (e.g. `${lessonId}:${exerciseId}`) would need a migration for any existing data and the spec chose this id shape deliberately for the MVP.
+2. **`ReviewItem.id` was set to `LessonExercise.id` (deterministic), not a generated id.** This avoided a client-side scan but assumed exercise IDs were unique across the whole app. This identity rule is superseded by [[DEC-022]]: vocabulary-backed items use `vocabularyId`, while non-vocabulary items use `${lessonId}:${exerciseId}`.
 3. **`lesson-session-store.ts` (Zustand) exposes a `generation` counter, incremented on every `start()` call and untouched by `pressKey()`.** `LessonTypingSession` needs to know whether the store's current `session` belongs to *this* mount or is a previous lesson's leftover (the store is a module-level singleton, so nothing resets it between lessons). A first attempt used a one-shot ref flag to skip exactly the render where `start()` was first called — this passed every Vitest test, but still broke live in the browser: `src/main.tsx` wraps the app in `<StrictMode>`, whose dev-mode double-invoke of mount effects consumes a one-shot flag on its thrown-away first pass, leaving the kept second pass to read the stale session and submit it. The `generation` counter fixes this by tracking identity rather than a run count — the submit effect only fires once the store's live `generation` equals the value this mount's own `start()` call returned, which holds regardless of how many times StrictMode re-invokes the effects. `LessonTypingSession.test.tsx` now renders through `<StrictMode>` (matching `main.tsx`) specifically so this class of bug is caught by the unit suite, not only by manual browser testing.
 
 **Why:** All three surfaced only when checking this pass's code against surrounding, already-established contracts (the rest of the app's accuracy scale, `DOMAIN-MODEL.md`'s existing id note, and the app's actual render tree) rather than treating this feature as an isolated unit — the kind of integration detail a fresh whole-branch review is specifically for. Full details, including the exact repro, in `.superpowers/sdd/2026-09-24-lesson-typing-session/progress.md`.
 
-**Consequences:** Any future code that computes accuracy must go through `getLessonResult()` (or otherwise multiply by 100), not read `typing-session.ts`'s internal fraction directly. Any future `ReviewItem`-creating code must keep ids exercise-scoped-globally-unique or accept the merge risk in point 2. Any future Zustand store shared across mounted components with StrictMode active should default to an identity/generation check rather than a one-shot ref flag when gating "did *my* mount's own action already take effect."
+**Consequences:** Any future code that computes accuracy must go through `getLessonResult()` (or otherwise multiply by 100), not read `typing-session.ts`'s internal fraction directly. The `ReviewItem` identity consequence in point 2 is superseded by [[DEC-022]]. Any future Zustand store shared across mounted components with StrictMode active should default to an identity/generation check rather than a one-shot ref flag when gating "did *my* mount's own action already take effect."
 
 ---
 
@@ -311,3 +311,20 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 **Why:** A fresh whole-branch review caught that the first implementation rendered these fields verbatim (e.g. `98.68421052631578%`), because every test fixture up to that point used tidy hand-picked numbers (`91.5`, `22`) that happened to look fine unrounded. Live verification against real Firestore data surfaced the actual long-decimal output, which the review then traced to the missing rounding step. The fix rounds only in the JSX, not in `get-profile-summary.ts` or anywhere in the domain/application layers — the underlying precision stays intact for any future consumer (e.g. an analytics export) that might want it.
 
 **Consequences:** Any future UI that displays a running-average or other float-valued stat (accuracy, WPM, or similar) should round at the display boundary the same way, and its tests should include at least one realistic non-round fixture (not just tidy numbers) to catch this class of bug before a live check has to.
+
+---
+
+## DEC-022 — Vocabulary-backed review identity and raw aggregate typing counters
+
+**Date:** 2026-09-27
+**Status:** Accepted
+
+**Decision:** Add reusable `VocabularyEntry` content at `vocabulary/{vocabularyId}`. A `LessonExercise` may reference it with `vocabularyId`; lesson content remains self-contained and other exercise types do not require a vocabulary entry. A vocabulary-backed `ReviewItem` uses `vocabularyId` as its document ID, combining review history across lessons. A non-vocabulary item uses `${sourceLessonId}:${sourceExerciseId}`.
+
+`ReviewItem.resolved` is removed. Leitner scheduling alone governs the lifecycle: correct answers advance the box and reschedule; mistakes reset it to box 1 and reschedule; box 5 remains active.
+
+Replace `UserStats.wordsPracticed`, `averageAccuracy`, and `averageSpeedWpm` with `exercisesAttempted`, `totalAcceptedKeystrokes`, and `totalRejectedKeystrokes`. Keep `lessonsCompleted`, `bestAccuracy`, and `totalTypingTimeSeconds`. Derive accuracy from accepted/rejected keystrokes and WPM from accepted keystrokes and total typing duration using the existing five-keystrokes-per-word convention. Increment these counters only when a lesson, practice, or review session is submitted; retries count as practice activity but do not increment `lessonsCompleted`.
+
+**Why:** `resolved` removed items from a Leitner schedule after one correct answer. Exercise-local IDs could not safely identify an item globally and could not combine a repeated word's history. Stored averages cannot remain correct without their raw denominators; `wordsPracticed` was inaccurate for characters, phrases, sentences, and retries.
+
+**Consequences:** [[DEC-011]]'s original stats field shape and [[DEC-018]]'s exercise-ID review identity are superseded. Existing code and persisted documents still use the old shape and require a separate implementation/migration change; this decision changes documentation only.

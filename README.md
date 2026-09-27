@@ -281,6 +281,7 @@ VITE_FIREBASE_USE_EMULATOR=0
 courses/{courseId}
 units/{unitId}
 lessons/{lessonId}
+vocabulary/{vocabularyId}
 
 users/{userId}
 users/{userId}/lessonProgress/{lessonId}

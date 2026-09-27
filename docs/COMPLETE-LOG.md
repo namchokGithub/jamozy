@@ -197,3 +197,10 @@ Chronological log of completed units of work. One entry per meaningful change (n
 
 - Added a `Back to Course List` link to both `/profile` and `/settings`, returning learners to `/` without changing loaders or persisted data.
 - Added component tests for both links. Verified `pnpm test` (206/206), `pnpm exec tsc -b`, and `pnpm lint` all pass.
+
+### 2026-09-27 — Domain-model refinements (documentation only)
+
+- Recorded [[DEC-022]] and updated `docs/DOMAIN-MODEL.md`: reusable `VocabularyEntry` records can link multiple lesson exercises; vocabulary review history deduplicates by `vocabularyId`, while non-vocabulary review remains lesson/exercise-scoped.
+- Removed the conflicting target-model concept of `ReviewItem.resolved`; all review items remain in the Leitner schedule, including box 5.
+- Replaced ambiguous/derived `UserStats` fields with raw aggregate counters: `exercisesAttempted`, accepted/rejected keystrokes, and typing duration. Accuracy and WPM are now explicitly derived; retries count as practice activity but not as newly completed lessons.
+- No application, domain TypeScript, Firestore, or migration code changed in this documentation pass.
