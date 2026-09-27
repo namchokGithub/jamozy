@@ -11,6 +11,10 @@
 
 [![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)](https://react.dev/) [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)](https://vite.dev/) [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/) [![Firebase](https://img.shields.io/badge/Firebase-12-DD2C00?logo=firebase&logoColor=white)](https://firebase.google.com/) [![Zustand](https://img.shields.io/badge/Zustand-State_Management-433E38)](https://zustand-demo.pmnd.rs/) [![Motion](https://img.shields.io/badge/Motion-Animation-FFEA00?logo=framer&logoColor=000000)](https://motion.dev/) [![Vitest](https://img.shields.io/badge/Vitest-Testing-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev/) [![pnpm](https://img.shields.io/badge/pnpm-Package_Manager-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/) [![Cloudflare Pages](https://img.shields.io/badge/Cloudflare_Pages-Deploy-F38020?logo=cloudflare&logoColor=white)](https://pages.cloudflare.com/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+> [!IMPORTANT]
+> Jamozy is still _**under active development**_ and is not yet considered production-ready.
+> Some features and data migrations are still in progress.
+
 Jamozy is a web-based Korean typing learning app designed to help learners
 become familiar with Hangul and the Korean keyboard through structured practice.
 
@@ -297,12 +301,26 @@ For document-backed domain entities, the domain `id` is the Firestore document I
 ## Content Credits
 
 Vocabulary sources, attribution, and licenses are recorded in [docs/CREDITS.md](docs/CREDITS.md) before their data is imported.
+
 > Lesson content is treated as shared application data, while progress, review
 > history, EXP, levels, and statistics belong to individual users.
 
 ## Project Status
 
 Jamozy is currently in early development.
+
+## Next Implementation Focus
+
+> [!NOTE]
+> The target data model is defined in `docs/DOMAIN-MODEL.md` and DEC-022 through DEC-025.
+> The current implementation and persisted Firestore data are still being migrated to match it.
+
+Current work focuses on:
+
+- vocabulary import with source/license attribution and deduplication rules;
+- simplified lesson-progress persistence (`missing` = locked);
+- raw typing-stat counters with derived accuracy and WPM;
+- updated `ReviewItem` identity and Leitner lifecycle.
 
 ### MVP
 

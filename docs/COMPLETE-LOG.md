@@ -225,4 +225,5 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Added `docs/CREDITS.md` as the required source/license/attribution registry before external content is imported.
 - Made lesson meanings nullable according to content type and removed the duplicate persisted `'locked'` Progress state; a missing document is locked.
 - Corrected stale references in `DOMAIN-MODEL.md`, `PROGRESS.md`, and DEC-021's historical storage semantics.
+- Removed the two remaining target-model references to a persisted three-state Progress status and constrained when the vocabulary `senseKey: 'default'` is valid.
 - No application, domain TypeScript, Firestore, or migration code changed in this documentation pass.

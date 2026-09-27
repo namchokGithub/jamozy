@@ -119,7 +119,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 ## DEC-009 — Sequential unlock: previous lesson completed unlocks the next
 
 **Date:** 2026-09-23
-**Status:** Accepted (creation and ordering details superseded by DEC-023)
+**Status:** Accepted (creation/ordering details superseded by DEC-023; Progress-state shape superseded by DEC-025)
 
 **Decision:** A lesson's `Progress.status` moves from `'locked'` to `'unlocked'` when the previous lesson (by `Lesson.order`, carrying across `Unit`/`Course` boundaries) reaches `status === 'completed'`. No accuracy threshold gates unlocking. The first lesson overall is unlocked by default (seed data, not derived).
 
@@ -127,7 +127,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 
 **Consequences:** This transition is written by the `complete-lesson` application use case (sets the next lesson's `Progress.status`), not computed on read — keeps read paths simple at the cost of a slightly more involved write.
 
-**Reaffirmed 2026-09-23:** cross-checked against `docs/requirement.md`'s 4-state (`Locked/Ready/Completed/Mastered`) suggestion. User re-confirmed the 3-state `locked/unlocked/completed` stands — no `Mastered` trigger defined, naming difference (`unlocked` vs `Ready`) is cosmetic.
+**Reaffirmed 2026-09-23:** cross-checked against `docs/requirement.md`'s 4-state (`Locked/Ready/Completed/Mastered`) suggestion. At that time the user retained `locked/unlocked/completed`; [[DEC-025]] later superseded that persisted-state shape with missing/unlocked/completed, while still leaving no `Mastered` trigger.
 
 ---
 
@@ -374,7 +374,7 @@ The flat EXP curve remains in place and is deferred for future game-balance work
 **Date:** 2026-09-27
 **Status:** Accepted
 
-**Decision:** A `VocabularyEntry` is unique by normalized Korean spelling, part of speech, and a required `senseKey`. Identical spelling may therefore have multiple entries. Vocabulary adds `partOfSpeech`, `senseKey`, `frequencyRank`, `sourceId`, and optional `sourceUrl`; every import source must be registered with its license and attribution in `docs/CREDITS.md`.
+**Decision:** A `VocabularyEntry` is unique by normalized Korean spelling, part of speech, and a required `senseKey`. Identical spelling may therefore have multiple entries. Use `senseKey: 'default'` only when a spelling/POS pair has a single imported sense; multiple senses under that pair must use distinct stable sense keys. Vocabulary adds `partOfSpeech`, `senseKey`, `frequencyRank`, `sourceId`, and optional `sourceUrl`; every import source must be registered with its license and attribution in `docs/CREDITS.md`.
 
 `meaningTh` and `meaningEn` become nullable. Vocabulary-backed word exercises and phrase/sentence exercises require at least one translation; character and syllable exercises may have none. `UserSettings.meaningLanguage` controls display preference, not whether content can be imported.
 
