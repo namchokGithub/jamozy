@@ -291,6 +291,8 @@ users/{userId}/reviewItems/{itemId}
 > Learning content and user progress are stored separately.
 
 Progress documents are created lazily: a missing `lessonProgress` document means a lesson is locked. Learning order is `Course.order → Unit.order → Lesson.order`; document IDs do not determine which lesson unlocks next.
+
+For document-backed domain entities, the domain `id` is the Firestore document ID and is not duplicated in document data. Embedded exercise IDs and Progress's `lessonId` follow the exceptions documented in `docs/DOMAIN-MODEL.md`.
 > Lesson content is treated as shared application data, while progress, review
 > history, EXP, levels, and statistics belong to individual users.
 

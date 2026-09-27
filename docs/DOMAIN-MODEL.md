@@ -2,7 +2,7 @@
 
 Field-level target schema for the entities referenced in `README.md`'s Firestore Data Model section. Fills the gap between collection paths (README) and actual `domain/models/*.ts` code. Update this file whenever a model's shape changes — it is the source of truth for field names/types, not the code comments. Where the current implementation differs, this document records the intended model and the implementation must be brought into line in a separate change.
 
-Conventions: all Firestore documents use `id` as the document ID (not stored as a field unless noted). Timestamps are Firestore `Timestamp`, mapped to `Date` in the domain layer via `infrastructure/firebase/mappers`.
+Conventions: document-backed domain entities (`Course`, `Unit`, `Lesson`, `VocabularyEntry`, `UserProfile`, and `ReviewItem`) expose `id`, which is exactly the Firestore document ID. It is never stored again as a document field; Firestore mappers derive it from the document snapshot and use it to address writes. `LessonExercise.id` is different: it is an embedded identifier stored inside a Lesson document, not a Firestore document ID. `Progress` has no independent `id`; its stored `lessonId` is both the document ID and the Lesson foreign key. All relationships use string IDs, never Firestore `DocumentReference` values. Timestamps are Firestore `Timestamp`, mapped to `Date` in the domain layer via `infrastructure/firebase/mappers`.
 
 ---
 
@@ -73,6 +73,8 @@ Relationships: a `Lesson` belongs to a `Unit` via `Lesson.unitId`.
 | hint         | string\| null                 | optional extra hint (not meaning — see `meaningTh`/`meaningEn`) |
 
 When `vocabularyId` is present, `targetText`, romanization, meanings, and difficulty are a denormalized lesson snapshot of that vocabulary entry. Content authoring must keep them aligned. This keeps a lesson self-contained at runtime while allowing a word to be reused and tracked across lessons.
+
+**Exercise-count constraint ([[DEC-024]]):** `exercises` is non-empty and its array order is the canonical typing sequence. MVP lessons normally contain 5–12 exercises and may not exceed 20. Content beyond that cap must be split into another lesson rather than making one session longer.
 
 ---
 
@@ -147,6 +149,8 @@ The global sequence is the lexicographic order of `(Course.order, Unit.order, Le
 
 **Spaced repetition scheduling ([[DEC-008]], [[DEC-022]]):** Leitner-style boxes. Box → interval: 1 → 1 day, 2 → 3 days, 3 → 7 days, 4 → 14 days, 5 → 30 days. A correct review advances the box and schedules the next review; a mistake resets it to box 1 and reschedules it. There is no `resolved` state: every `ReviewItem` remains active, including at box 5. A review session pulls items where `nextReviewAt <= now`. This is an MVP default, tunable without a schema change (only the interval table changes).
 
+**Reason priority ([[DEC-024]]):** when one exercise qualifies for review for multiple reasons in a submitted session, choose exactly one: `mistake` > `low-accuracy` > `slow`. `reason` records the highest-priority reason that first created the ReviewItem and is not overwritten on later triggers. Trigger thresholds for `low-accuracy` and `slow` are application policy, not persisted schema.
+
 **Cross-checked against `docs/requirement.md`:** that doc says MVP doesn't need "full" spaced repetition, just a flat problem-word list. Kept Leitner-box scheduling ([[DEC-008]]) — reaffirmed 2026-09-23. Also added `reason` ([[DEC-012]]) since requirement.md wants review entries triggered by mistakes, slow typing, or low accuracy, not just mistakes.
 
 ---
@@ -167,7 +171,7 @@ Not in README's original domain file list, but required to home EXP/Level and Se
 | createdAt | Date           |                               |
 | updatedAt | Date           | set with `createdAt` on creation; changed on every persisted profile mutation ([[DEC-023]]) |
 
-**Level formula ([[DEC-006]]):** `level` is derived, not stored: `level = 1 + floor(exp / 100)`. Lives as a pure function (`levelFromExp(exp)`) next to `UserProfile` in `domain/models/user-profile.ts`. MVP placeholder — changing the curve later needs no data migration, since `exp` is the only persisted value.
+**Level formula ([[DEC-006]], [[DEC-024]]):** `level` is derived, not stored: `level = 1 + floor(exp / 100)`. Lives as a pure function (`levelFromExp(exp)`) next to `UserProfile` in `domain/models/user-profile.ts`. This flat curve remains the MVP placeholder and is deferred for later game-balance work; changing it needs no data migration, since `exp` is the only persisted value.
 
 **Cross-checked against `docs/requirement.md`:** that doc's own example ("Level 7, 430/600 EXP") implies an increasing per-level curve (~`level × 100` to reach the next level), not this flat formula, and separately lists "Level" as something to save (implying a stored field). Both reaffirmed against the flat, derived-only formula — 2026-09-23. Revisit the curve shape later if game-design balance needs it; the derived approach means no migration either way.
 
@@ -224,6 +228,7 @@ Previously open, now decided — see `docs/DECISIONS.md` for full rationale:
 7. **`ReviewItem.reason`** ([[DEC-012]]) — mistake/slow/low-accuracy trigger, per `docs/requirement.md`.
 8. **`UserSettings` expansion** ([[DEC-013]]) — full 7-field settings list, per `docs/requirement.md`.
 9. **Progress creation, ordering, and profile auditing** ([[DEC-023]]) — missing Progress means locked; unlocks are lazy along the global course/unit/lesson ordering; `UserProfile.updatedAt` tracks persisted mutations.
+10. **Identity, exercise count, review reason, and level curve** ([[DEC-024]]) — Firestore/document and domain ID semantics are explicit; lessons cap at 20 exercises; review reasons use a deterministic priority; EXP-to-level balance remains deferred.
 
 No open questions remain in this document. Add new ones here as they come up, and resolve the same way.
 

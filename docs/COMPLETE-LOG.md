@@ -205,6 +205,13 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Replaced ambiguous/derived `UserStats` fields with raw aggregate counters: `exercisesAttempted`, accepted/rejected keystrokes, and typing duration. Accuracy and WPM are now explicitly derived; retries count as practice activity but not as newly completed lessons.
 - No application, domain TypeScript, Firestore, or migration code changed in this documentation pass.
 
+### 2026-09-27 — Identity and content-boundary conventions (documentation only)
+
+- Recorded [[DEC-024]]: document-backed domain IDs equal Firestore document IDs without duplicated stored fields; embedded exercise IDs and `Progress.lessonId` are explicit exceptions.
+- Added MVP authoring constraints for Lesson exercises (non-empty, normally 5–12, maximum 20) and the `mistake > low-accuracy > slow` review-reason priority.
+- Deferred level-curve balance work while retaining the derived flat EXP formula, so a future formula change requires no migration.
+- No application, domain TypeScript, Firestore, or migration code changed in this documentation pass.
+
 ### 2026-09-27 — Progress creation, ordering, and profile audit model (documentation only)
 
 - Recorded [[DEC-023]] and updated the target domain model: missing Progress now means locked; Progress documents are created only for the initial unlocked lesson and newly unlocked next lessons.

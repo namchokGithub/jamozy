@@ -84,6 +84,8 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 
 **Reaffirmed 2026-09-23:** cross-checked against `docs/requirement.md`, whose own example ("Level 7, 430/600 EXP") implies an increasing per-level curve and separately lists "Level" as a thing to save. User re-confirmed this decision stands as-is over that example.
 
+**Deferred 2026-09-27 ([[DEC-024]]):** retain the flat 100-EXP curve until later game-balance work has real learning-volume and EXP-rate data. This is deliberately not a schema change: `level` remains derived from the only persisted value, `exp`.
+
 ---
 
 ## DEC-007 — Settings live as a field on the user doc
@@ -345,3 +347,20 @@ Add `UserProfile.updatedAt`. It equals `createdAt` on initial creation and chang
 **Why:** Precreating locked Progress documents adds writes and makes newly added curriculum awkward. Defining a single cross-boundary ordering removes ambiguity about which lesson unlocks next. `updatedAt` provides an audit/synchronization timestamp without overloading a future activity metric.
 
 **Consequences:** [[DEC-009]] retains the rule that completion unlocks the next lesson, while this decision replaces its seed-based creation detail with lazy creation and makes ordering constraints explicit. Existing code and persisted documents require a separate implementation/migration change; this decision changes documentation only.
+
+---
+
+## DEC-024 — ID conventions, bounded lessons, deterministic review reasons, and deferred level balancing
+
+**Date:** 2026-09-27
+**Status:** Accepted
+
+**Decision:** Document-backed domain `id` values equal their Firestore document IDs and are not duplicated in document data. Embedded `LessonExercise.id` is stored in its parent document. `Progress.lessonId` is the sole exception: it is both the Progress document ID and a stored Lesson foreign key. All relationships are string IDs, not Firestore `DocumentReference`s.
+
+`Lesson.exercises` is a non-empty, ordered array. MVP content should normally have 5–12 exercises and cannot exceed 20; authors split larger content into another lesson. If a submitted exercise qualifies for several review triggers, `ReviewItem.reason` chooses `mistake` over `low-accuracy` over `slow`; that creation reason is retained on later triggers.
+
+The flat EXP curve remains in place and is deferred for future game-balance work. No level field is persisted, so a later curve change requires no data migration.
+
+**Why:** Explicit identity rules prevent accidental duplication of document IDs or misuse of embedded IDs. A bounded exercise count preserves a focused lesson session. A deterministic reason preserves one meaningful value when trigger rules overlap. Deferring the level curve avoids speculative balance work before there is real learning data.
+
+**Consequences:** Content validation must enforce the exercise constraint before writing a Lesson. Review-creation code must evaluate all applicable triggers with the documented priority. Existing code and persisted documents require separate implementation/migration changes where they differ; this decision changes documentation only.
