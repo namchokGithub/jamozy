@@ -161,6 +161,29 @@ describe('LessonDetailPage', () => {
     expect(await screen.findByText('가')).toBeInTheDocument()
   })
 
+  it('passes keyboard settings into the typing session', async () => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/',
+          Component: LessonDetailPage,
+          loader: async () => ({
+            lesson: makeLesson(),
+            settings: makeSettings({ showKeyboard: false }),
+          }),
+          action: async () => fakeOutcome,
+        },
+      ],
+      { initialEntries: ['/'] },
+    )
+    render(<RouterProvider router={router} />)
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
+
+    expect(await screen.findByText('가')).toBeInTheDocument()
+    expect(screen.queryByText('ㅂ')).not.toBeInTheDocument()
+  })
+
   it('shows the inline completion block once the lesson finishes', async () => {
     const router = createMemoryRouter(
       [

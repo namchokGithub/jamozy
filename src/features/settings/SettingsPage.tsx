@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useFetcher, useLoaderData } from 'react-router'
+import { Link, useFetcher, useLoaderData } from 'react-router'
 import type { SettingsLoaderData } from './SettingsPage.loader'
 import type { UserSettings } from '../../domain/models/user-profile'
 
@@ -132,6 +132,10 @@ export default function SettingsPage() {
         </button>
         {isSaved && fetcher.data && <span className="text-sm text-emerald-600">Saved</span>}
       </div>
+
+      <Link to="/" className="mt-6 inline-block text-sm text-slate-600 underline">
+        Back to Course List
+      </Link>
     </main>
   )
 }

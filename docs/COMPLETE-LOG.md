@@ -184,3 +184,46 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Recorded `docs/DECISIONS.md` DEC-021 (display-only rounding convention for running-average stats). Ticked README's MVP checklist for "EXP and Level progression"; updated `docs/PROGRESS.md` to match.
 - `pnpm exec vitest run`/`tsc -b`/`pnpm lint` all pass — 189 tests (up from 187 after Task 5, up from 173 before this round).
 - Nothing committed via `git commit` by the user this round — all commits so far were made directly by the assistant during plan execution (per `superpowers:executing-plans`' per-task commit steps, needed for the plan's ledger/review tooling); the user has not yet been asked whether to squash them before their own review.
+### 2026-09-27 — Keyboard settings and Review preview context
+
+- Implemented all remaining keyboard consumers: `showKeyboard`, `showEnglishKeys`, and `keyboardOpacity` now control `VirtualKeyboard` in both lesson and review typing sessions. New profiles default to 0.7 opacity; existing persisted settings are left intact.
+- Added `application/get-review-previews.ts`, which batches source-lesson reads by id and resolves optional source exercises through `LessonRepository`. Missing source lessons/exercises preserve their `ReviewItem.targetText` as a Korean-only preview rather than hiding the review item.
+- Updated `/review` to load settings alongside due review items and render romanization/meaning in its preview list with the same preferences as Lesson detail. Active review typing deliberately remains Korean-only.
+- Added RED→GREEN coverage for keyboard display settings, default profile opacity, source joins/deduplication/fallback, loader data, and preference-aware Review rendering.
+- Whole-branch review found and fixed a stale-source safeguard: an exercise must now match both its id and target text before supplying Review metadata, so edited source content cannot pair an old Korean target with new meaning/romanization. Regression test confirmed RED→GREEN.
+- Verified `pnpm test` (204/204), `pnpm exec tsc -b`, and `pnpm lint` all pass. No Git commit created.
+
+### 2026-09-27 — Profile and Settings back-links
+
+- Added a `Back to Course List` link to both `/profile` and `/settings`, returning learners to `/` without changing loaders or persisted data.
+- Added component tests for both links. Verified `pnpm test` (206/206), `pnpm exec tsc -b`, and `pnpm lint` all pass.
+
+### 2026-09-27 — Domain-model refinements (documentation only)
+
+- Recorded [[DEC-022]] and updated `docs/DOMAIN-MODEL.md`: reusable `VocabularyEntry` records can link multiple lesson exercises; vocabulary review history deduplicates by `vocabularyId`, while non-vocabulary review remains lesson/exercise-scoped.
+- Removed the conflicting target-model concept of `ReviewItem.resolved`; all review items remain in the Leitner schedule, including box 5.
+- Replaced ambiguous/derived `UserStats` fields with raw aggregate counters: `exercisesAttempted`, accepted/rejected keystrokes, and typing duration. Accuracy and WPM are now explicitly derived; retries count as practice activity but not as newly completed lessons.
+- No application, domain TypeScript, Firestore, or migration code changed in this documentation pass.
+
+### 2026-09-27 — Identity and content-boundary conventions (documentation only)
+
+- Recorded [[DEC-024]]: document-backed domain IDs equal Firestore document IDs without duplicated stored fields; embedded exercise IDs and `Progress.lessonId` are explicit exceptions.
+- Added MVP authoring constraints for Lesson exercises (non-empty, normally 5–12, maximum 20) and the `mistake > low-accuracy > slow` review-reason priority.
+- Deferred level-curve balance work while retaining the derived flat EXP formula, so a future formula change requires no migration.
+- No application, domain TypeScript, Firestore, or migration code changed in this documentation pass.
+
+### 2026-09-27 — Progress creation, ordering, and profile audit model (documentation only)
+
+- Recorded [[DEC-023]] and updated the target domain model: missing Progress now means locked; Progress documents are created only for the initial unlocked lesson and newly unlocked next lessons.
+- Defined the canonical cross-course progression sequence as `Course.order → Unit.order → Lesson.order`, with scoped uniqueness requirements; document IDs do not define order.
+- Added target field `UserProfile.updatedAt`, updated only by persisted profile mutations and deliberately separate from any future activity timestamp.
+- No application, domain TypeScript, Firestore, or migration code changed in this documentation pass.
+
+### 2026-09-27 — Vocabulary import and Progress-state refinement (documentation only)
+
+- Recorded [[DEC-025]]: vocabulary identity now distinguishes normalized spelling, part of speech, and sense; frequency rank and source provenance are retained before the planned 5,800-word import.
+- Added `docs/CREDITS.md` as the required source/license/attribution registry before external content is imported.
+- Made lesson meanings nullable according to content type and removed the duplicate persisted `'locked'` Progress state; a missing document is locked.
+- Corrected stale references in `DOMAIN-MODEL.md`, `PROGRESS.md`, and DEC-021's historical storage semantics.
+- Removed the two remaining target-model references to a persisted three-state Progress status and constrained when the vocabulary `senseKey: 'default'` is valid.
+- No application, domain TypeScript, Firestore, or migration code changed in this documentation pass.

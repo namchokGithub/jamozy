@@ -84,6 +84,8 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 
 **Reaffirmed 2026-09-23:** cross-checked against `docs/requirement.md`, whose own example ("Level 7, 430/600 EXP") implies an increasing per-level curve and separately lists "Level" as a thing to save. User re-confirmed this decision stands as-is over that example.
 
+**Deferred 2026-09-27 ([[DEC-024]]):** retain the flat 100-EXP curve until later game-balance work has real learning-volume and EXP-rate data. This is deliberately not a schema change: `level` remains derived from the only persisted value, `exp`.
+
 ---
 
 ## DEC-007 — Settings live as a field on the user doc
@@ -117,7 +119,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 ## DEC-009 — Sequential unlock: previous lesson completed unlocks the next
 
 **Date:** 2026-09-23
-**Status:** Accepted
+**Status:** Accepted (creation/ordering details superseded by DEC-023; Progress-state shape superseded by DEC-025)
 
 **Decision:** A lesson's `Progress.status` moves from `'locked'` to `'unlocked'` when the previous lesson (by `Lesson.order`, carrying across `Unit`/`Course` boundaries) reaches `status === 'completed'`. No accuracy threshold gates unlocking. The first lesson overall is unlocked by default (seed data, not derived).
 
@@ -125,29 +127,29 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 
 **Consequences:** This transition is written by the `complete-lesson` application use case (sets the next lesson's `Progress.status`), not computed on read — keeps read paths simple at the cost of a slightly more involved write.
 
-**Reaffirmed 2026-09-23:** cross-checked against `docs/requirement.md`'s 4-state (`Locked/Ready/Completed/Mastered`) suggestion. User re-confirmed the 3-state `locked/unlocked/completed` stands — no `Mastered` trigger defined, naming difference (`unlocked` vs `Ready`) is cosmetic.
+**Reaffirmed 2026-09-23:** cross-checked against `docs/requirement.md`'s 4-state (`Locked/Ready/Completed/Mastered`) suggestion. At that time the user retained `locked/unlocked/completed`; [[DEC-025]] later superseded that persisted-state shape with missing/unlocked/completed, while still leaving no `Mastered` trigger.
 
 ---
 
 ## DEC-010 — `LessonExercise` gains `difficulty` and split Thai/English `meaning`
 
 **Date:** 2026-09-23
-**Status:** Accepted
+**Status:** Accepted (meaning nullability superseded by DEC-025)
 
 **Decision:** `LessonExercise` adds `difficulty: 'easy' | 'medium' | 'hard'`, `meaningTh: string`, `meaningEn: string`. The existing `hint` field stays for non-meaning extras (e.g. keyboard tips), no longer doubles as "meaning."
 
 **Why:** `docs/requirement.md`'s Vocabulary section (#3) stores Korean/Romanization/Thai-English-meaning/Difficulty/Lesson per word. Practice Mode (#6) filters by difficulty. Settings (#13) lets the learner pick meaning language (Thai/English/Both) — a single opaque `hint` string can't serve a language toggle.
 
-**Consequences:** `meaningTh`/`meaningEn` are required (not nullable) — every exercise needs both at content-authoring time. `difficulty` is a 3-tier MVP placeholder; widening the union later is not a breaking schema change.
+**Consequences:** `meaningTh`/`meaningEn` nullability is superseded by [[DEC-025]]. `difficulty` is a 3-tier MVP placeholder; widening the union later is not a breaking schema change.
 
 ---
 
 ## DEC-011 — `UserStats` added as an embedded entity on `UserProfile`
 
 **Date:** 2026-09-23
-**Status:** Accepted
+**Status:** Accepted (field shape superseded by DEC-022)
 
-**Decision:** New `UserStats` shape (`lessonsCompleted`, `wordsPracticed`, `averageAccuracy`, `bestAccuracy`, `averageSpeedWpm`, `totalTypingTimeSeconds`), embedded as `UserProfile.stats`. `currentLevel` is deliberately excluded — it's `levelFromExp(exp)`, computed on read ([[DEC-006]]).
+**Decision:** `UserStats` is embedded as `UserProfile.stats`. Its original field shape was superseded by [[DEC-022]]; `currentLevel` remains excluded — it's `levelFromExp(exp)`, computed on read ([[DEC-006]]).
 
 **Why:** `docs/requirement.md`'s Stats (#9) and Save System (#14) sections want these aggregate numbers persisted; no entity for them existed before this pass.
 
@@ -190,7 +192,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 
 1. **`UserProfileRepository`** (`domain/repositories/user-profile-repository.ts` + `FirebaseUserProfileRepository`) — not in README's original repository file list, but `complete-lesson` needs to read/write `UserProfile.exp`/`stats`. Same shape as the other repositories (`getUserProfile`, `saveUserProfile`).
 2. **`CourseRepository.getUnitById(unitId)`** — added alongside `getUnitsByCourseId`. Needed to walk unit → course → next unit when unlocking the first lesson of the next unit ([[DEC-009]]'s cross-boundary case).
-3. **`submit-review-result.ts`** (6th `application/` file, beyond README's 5) — advances a `ReviewItem`'s `box`/`nextReviewAt`/`resolved` via `nextBox`/`nextReviewDate` ([[DEC-008]]). Without it, `ReviewRepository.updateReviewItem` had no caller and spaced repetition couldn't actually progress.
+3. **`submit-review-result.ts`** (6th `application/` file, beyond README's 5) — advances a `ReviewItem`'s `box`/`nextReviewAt` via `nextBox`/`nextReviewDate` ([[DEC-008]]). Without it, `ReviewRepository.updateReviewItem` had no caller and spaced repetition couldn't actually progress. `resolved` was later removed from the target model by [[DEC-022]].
 4. **No repeat EXP/unlock on lesson retry** — `complete-lesson` checks whether the lesson was already `'completed'` before this call; if so, it still records the attempt (via `update-progress`) but skips awarding EXP and re-unlocking the next lesson. Not specified anywhere; chosen to avoid EXP farming via repeated retries.
 
 **Why:** These are mechanical necessities to make already-decided behavior ([[DEC-008]], [[DEC-009]], [[DEC-006]]/[[DEC-011]] EXP+stats) actually executable, not new product scope.
@@ -258,12 +260,12 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 **Decision:** Wired the Korean typing engine ([[DEC-017]]) into an interactive "Start Lesson" flow (`src/domain/korean/lesson-session.ts`, `src/features/lesson/LessonTypingSession.tsx`, `src/features/lesson/LessonDetailPage.action.ts`). Three non-obvious choices from this pass:
 
 1. **Accuracy is converted from a 0–1 fraction to a 0–100 scale at the `lesson-session.ts` boundary.** `typing-session.ts`'s own `getAccuracy()` returns 0–1 (an internal, per-exercise concern, left unchanged), but `application/complete-lesson.ts`'s `calculateExpGained` (`accuracy > 90`, `accuracy === 100`) and every other accuracy field in the app (`Progress.bestAccuracy`, `UserStats.averageAccuracy`) are 0–100. `lesson-session.ts`'s `getLessonResult()` does the ×100 conversion once, so nothing downstream needs to know the engine's internal scale differs.
-2. **`ReviewItem.id` is set to `LessonExercise.id` (deterministic), not a generated id.** Lets `create-review-items.ts` look up an existing item with a single `getReviewItem(userId, exerciseId)` point read instead of `getReviewItems()` + a client-side scan — matches `docs/DOMAIN-MODEL.md`'s existing deterministic-id note. Documented constraint: this assumes exercise ids are unique across the whole app, not just within their own lesson (`DOMAIN-MODEL.md` only documents lesson-local uniqueness) — true of the current seed data, but not enforced. Two lessons that ever reused an exercise id would have their `ReviewItem`s merge under the first lesson's `sourceLessonId`. Flagged, not fixed, since changing the id shape now (e.g. `${lessonId}:${exerciseId}`) would need a migration for any existing data and the spec chose this id shape deliberately for the MVP.
+2. **`ReviewItem.id` was set to `LessonExercise.id` (deterministic), not a generated id.** This avoided a client-side scan but assumed exercise IDs were unique across the whole app. This identity rule is superseded by [[DEC-022]]: vocabulary-backed items use `vocabularyId`, while non-vocabulary items use `${lessonId}:${exerciseId}`.
 3. **`lesson-session-store.ts` (Zustand) exposes a `generation` counter, incremented on every `start()` call and untouched by `pressKey()`.** `LessonTypingSession` needs to know whether the store's current `session` belongs to *this* mount or is a previous lesson's leftover (the store is a module-level singleton, so nothing resets it between lessons). A first attempt used a one-shot ref flag to skip exactly the render where `start()` was first called — this passed every Vitest test, but still broke live in the browser: `src/main.tsx` wraps the app in `<StrictMode>`, whose dev-mode double-invoke of mount effects consumes a one-shot flag on its thrown-away first pass, leaving the kept second pass to read the stale session and submit it. The `generation` counter fixes this by tracking identity rather than a run count — the submit effect only fires once the store's live `generation` equals the value this mount's own `start()` call returned, which holds regardless of how many times StrictMode re-invokes the effects. `LessonTypingSession.test.tsx` now renders through `<StrictMode>` (matching `main.tsx`) specifically so this class of bug is caught by the unit suite, not only by manual browser testing.
 
 **Why:** All three surfaced only when checking this pass's code against surrounding, already-established contracts (the rest of the app's accuracy scale, `DOMAIN-MODEL.md`'s existing id note, and the app's actual render tree) rather than treating this feature as an isolated unit — the kind of integration detail a fresh whole-branch review is specifically for. Full details, including the exact repro, in `.superpowers/sdd/2026-09-24-lesson-typing-session/progress.md`.
 
-**Consequences:** Any future code that computes accuracy must go through `getLessonResult()` (or otherwise multiply by 100), not read `typing-session.ts`'s internal fraction directly. Any future `ReviewItem`-creating code must keep ids exercise-scoped-globally-unique or accept the merge risk in point 2. Any future Zustand store shared across mounted components with StrictMode active should default to an identity/generation check rather than a one-shot ref flag when gating "did *my* mount's own action already take effect."
+**Consequences:** Any future code that computes accuracy must go through `getLessonResult()` (or otherwise multiply by 100), not read `typing-session.ts`'s internal fraction directly. The `ReviewItem` identity consequence in point 2 is superseded by [[DEC-022]]. Any future Zustand store shared across mounted components with StrictMode active should default to an identity/generation check rather than a one-shot ref flag when gating "did *my* mount's own action already take effect."
 
 ---
 
@@ -311,3 +313,73 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 **Why:** A fresh whole-branch review caught that the first implementation rendered these fields verbatim (e.g. `98.68421052631578%`), because every test fixture up to that point used tidy hand-picked numbers (`91.5`, `22`) that happened to look fine unrounded. Live verification against real Firestore data surfaced the actual long-decimal output, which the review then traced to the missing rounding step. The fix rounds only in the JSX, not in `get-profile-summary.ts` or anywhere in the domain/application layers — the underlying precision stays intact for any future consumer (e.g. an analytics export) that might want it.
 
 **Consequences:** Any future UI that displays a running-average or other float-valued stat (accuracy, WPM, or similar) should round at the display boundary the same way, and its tests should include at least one realistic non-round fixture (not just tidy numbers) to catch this class of bug before a live check has to.
+
+**Superseded in part by [[DEC-022]]:** `averageAccuracy` and `averageSpeedWpm` are no longer persisted running averages; they are derived from raw counters. The display-rounding rule continues to apply to those derived values.
+
+---
+
+## DEC-022 — Vocabulary-backed review identity and raw aggregate typing counters
+
+**Date:** 2026-09-27
+**Status:** Accepted
+
+**Decision:** Add reusable `VocabularyEntry` content at `vocabulary/{vocabularyId}`. A `LessonExercise` may reference it with `vocabularyId`; lesson content remains self-contained and other exercise types do not require a vocabulary entry. A vocabulary-backed `ReviewItem` uses `vocabularyId` as its document ID, combining review history across lessons. A non-vocabulary item uses `${sourceLessonId}:${sourceExerciseId}`.
+
+`ReviewItem.resolved` is removed. Leitner scheduling alone governs the lifecycle: correct answers advance the box and reschedule; mistakes reset it to box 1 and reschedule; box 5 remains active.
+
+Replace `UserStats.wordsPracticed`, `averageAccuracy`, and `averageSpeedWpm` with `exercisesAttempted`, `totalAcceptedKeystrokes`, and `totalRejectedKeystrokes`. Keep `lessonsCompleted`, `bestAccuracy`, and `totalTypingTimeSeconds`. Derive accuracy from accepted/rejected keystrokes and WPM from accepted keystrokes and total typing duration using the existing five-keystrokes-per-word convention. Increment these counters only when a lesson, practice, or review session is submitted; retries count as practice activity but do not increment `lessonsCompleted`.
+
+**Why:** `resolved` removed items from a Leitner schedule after one correct answer. Exercise-local IDs could not safely identify an item globally and could not combine a repeated word's history. Stored averages cannot remain correct without their raw denominators; `wordsPracticed` was inaccurate for characters, phrases, sentences, and retries.
+
+**Consequences:** [[DEC-011]]'s original stats field shape and [[DEC-018]]'s exercise-ID review identity are superseded. Existing code and persisted documents still use the old shape and require a separate implementation/migration change; this decision changes documentation only.
+
+---
+
+## DEC-023 — Lazy Progress creation, canonical progression ordering, and profile update timestamp
+
+**Date:** 2026-09-27
+**Status:** Accepted
+
+**Decision:** `users/{userId}/lessonProgress/{lessonId}` documents are created lazily. Their absence means the lesson is locked. Profile creation persists the global first lesson as `unlocked`; completing a lesson persists the next lesson as `unlocked` only when that document does not exist.
+
+The canonical progression order is `(Course.order, Unit.order, Lesson.order)`. `Course.order` is globally unique; `Unit.order` is unique within a course; `Lesson.order` is unique within a unit. The next lesson is the next element in that flattened sequence, including across Unit and Course boundaries. IDs do not supply ordering.
+
+Add `UserProfile.updatedAt`. It equals `createdAt` on initial creation and changes for every persisted profile mutation, including settings, EXP, and stats writes. It does not change on reads or sign-in alone.
+
+**Why:** Precreating locked Progress documents adds writes and makes newly added curriculum awkward. Defining a single cross-boundary ordering removes ambiguity about which lesson unlocks next. `updatedAt` provides an audit/synchronization timestamp without overloading a future activity metric.
+
+**Consequences:** [[DEC-009]] retains the rule that completion unlocks the next lesson, while this decision replaces its seed-based creation detail with lazy creation and makes ordering constraints explicit. Existing code and persisted documents require a separate implementation/migration change; this decision changes documentation only.
+
+---
+
+## DEC-024 — ID conventions, bounded lessons, deterministic review reasons, and deferred level balancing
+
+**Date:** 2026-09-27
+**Status:** Accepted
+
+**Decision:** Document-backed domain `id` values equal their Firestore document IDs and are not duplicated in document data. Embedded `LessonExercise.id` is stored in its parent document. `Progress.lessonId` is the sole exception: it is both the Progress document ID and a stored Lesson foreign key. All relationships are string IDs, not Firestore `DocumentReference`s.
+
+`Lesson.exercises` is a non-empty, ordered array. MVP content should normally have 5–12 exercises and cannot exceed 20; authors split larger content into another lesson. If a submitted exercise qualifies for several review triggers, `ReviewItem.reason` chooses `mistake` over `low-accuracy` over `slow`; that creation reason is retained on later triggers.
+
+The flat EXP curve remains in place and is deferred for future game-balance work. No level field is persisted, so a later curve change requires no data migration.
+
+**Why:** Explicit identity rules prevent accidental duplication of document IDs or misuse of embedded IDs. A bounded exercise count preserves a focused lesson session. A deterministic reason preserves one meaningful value when trigger rules overlap. Deferring the level curve avoids speculative balance work before there is real learning data.
+
+**Consequences:** Content validation must enforce the exercise constraint before writing a Lesson. Review-creation code must evaluate all applicable triggers with the documented priority. Existing code and persisted documents require separate implementation/migration changes where they differ; this decision changes documentation only.
+
+---
+
+## DEC-025 — Vocabulary import identity and nullable meanings; simplify persisted Progress states
+
+**Date:** 2026-09-27
+**Status:** Accepted
+
+**Decision:** A `VocabularyEntry` is unique by normalized Korean spelling, part of speech, and a required `senseKey`. Identical spelling may therefore have multiple entries. Use `senseKey: 'default'` only when a spelling/POS pair has a single imported sense; multiple senses under that pair must use distinct stable sense keys. Vocabulary adds `partOfSpeech`, `senseKey`, `frequencyRank`, `sourceId`, and optional `sourceUrl`; every import source must be registered with its license and attribution in `docs/CREDITS.md`.
+
+`meaningTh` and `meaningEn` become nullable. Vocabulary-backed word exercises and phrase/sentence exercises require at least one translation; character and syllable exercises may have none. `UserSettings.meaningLanguage` controls display preference, not whether content can be imported.
+
+`Progress.status` is reduced to `'unlocked' | 'completed'`. A missing Progress document is the only representation of locked, completing the lazy-creation design from [[DEC-023]].
+
+**Why:** Frequency data and provenance are valuable import metadata that must not be discarded. Spelling alone cannot identify a Korean lexical entry. Requiring two translations for every character or syllable misrepresents the content. Storing both a missing-is-locked state and a stored locked status introduces an invalid duplicate state.
+
+**Consequences:** [[DEC-010]]'s required-meaning rule is superseded, and [[DEC-009]]'s three-state Progress model is superseded by the missing/unlocked/completed model. Existing code and persisted documents require a separate implementation/migration change; this decision changes documentation only.

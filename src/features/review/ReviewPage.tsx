@@ -3,9 +3,11 @@ import { Link, useLoaderData } from 'react-router'
 import type { ReviewLoaderData } from './ReviewPage.loader'
 import ReviewTypingSession from './ReviewTypingSession'
 import type { SubmitReviewSessionOutcome } from '../../application/submit-review-session'
+import { formatExerciseMeaning } from '../lesson/format-exercise-meaning'
 
 export default function ReviewPage() {
-  const { items } = useLoaderData() as ReviewLoaderData
+  const { previews, settings } = useLoaderData() as ReviewLoaderData
+  const items = previews.map((preview) => preview.item)
   const [started, setStarted] = useState(false)
   const [outcome, setOutcome] = useState<SubmitReviewSessionOutcome | null>(null)
 
@@ -27,7 +29,7 @@ export default function ReviewPage() {
     return (
       <main className="mx-auto max-w-2xl p-6">
         <h1 className="text-2xl font-medium text-slate-900">Review</h1>
-        <ReviewTypingSession items={items} onComplete={setOutcome} />
+        <ReviewTypingSession items={items} onComplete={setOutcome} keyboardSettings={settings} />
       </main>
     )
   }
@@ -41,11 +43,18 @@ export default function ReviewPage() {
       ) : (
         <>
           <ul className="mt-6 space-y-2">
-            {items.map((item) => (
-              <li key={item.id} className="rounded-lg border border-slate-200 p-3 text-slate-900">
-                {item.targetText}
-              </li>
-            ))}
+            {previews.map(({ item, exercise }) => {
+              const meaning = exercise && formatExerciseMeaning(exercise, settings.meaningLanguage)
+              return (
+                <li key={item.id} className="rounded-lg border border-slate-200 p-3 text-slate-900">
+                  <div>{item.targetText}</div>
+                  {settings.romanizationEnabled && exercise?.romanization && (
+                    <div className="text-sm text-slate-500">{exercise.romanization}</div>
+                  )}
+                  {meaning && <div className="mt-1 text-sm text-slate-700">{meaning}</div>}
+                </li>
+              )
+            })}
           </ul>
           <button
             type="button"

@@ -6,6 +6,7 @@ import ReviewTypingSession from './ReviewTypingSession'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
 import type { ReviewItem } from '../../domain/models/review-item'
 import type { SubmitReviewSessionOutcome } from '../../application/submit-review-session'
+import type { UserSettings } from '../../domain/models/user-profile'
 
 function makeItem(id: string, overrides: Partial<ReviewItem> = {}): ReviewItem {
   return {
@@ -25,16 +26,25 @@ function makeItem(id: string, overrides: Partial<ReviewItem> = {}): ReviewItem {
 
 const fakeOutcome: SubmitReviewSessionOutcome = { correctCount: 1, needsPracticeCount: 0 }
 
+function makeKeyboardSettings(
+  overrides: Partial<Pick<UserSettings, 'showKeyboard' | 'showEnglishKeys' | 'keyboardOpacity'>> = {},
+) {
+  return { showKeyboard: true, showEnglishKeys: true, keyboardOpacity: 1, ...overrides }
+}
+
 function renderSession(
   onComplete: (outcome: SubmitReviewSessionOutcome) => void,
   items: ReviewItem[] = [makeItem('a')],
   action: (args: { request: Request }) => Promise<SubmitReviewSessionOutcome> = async () => fakeOutcome,
+  keyboardSettings = makeKeyboardSettings(),
 ) {
   const router = createMemoryRouter(
     [
       {
         path: '/',
-        Component: () => <ReviewTypingSession items={items} onComplete={onComplete} />,
+        Component: () => (
+          <ReviewTypingSession items={items} onComplete={onComplete} keyboardSettings={keyboardSettings} />
+        ),
         action,
       },
     ],
@@ -60,6 +70,26 @@ describe('ReviewTypingSession', () => {
 
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
     expect(await screen.findByText('Typed: ㄱ')).toBeInTheDocument()
+  })
+
+  it('hides the keyboard guide when showKeyboard is false', async () => {
+    renderSession(vi.fn(), [makeItem('a')], undefined, makeKeyboardSettings({ showKeyboard: false }))
+
+    await screen.findByText('가')
+    expect(screen.queryByText('ㅂ')).not.toBeInTheDocument()
+  })
+
+  it('passes English-label and opacity settings to a visible keyboard guide', async () => {
+    renderSession(
+      vi.fn(),
+      [makeItem('a')],
+      undefined,
+      makeKeyboardSettings({ showEnglishKeys: false, keyboardOpacity: 0 }),
+    )
+
+    await screen.findByText('가')
+    expect(screen.queryByText('r')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Virtual Korean keyboard')).toHaveStyle({ opacity: '0' })
   })
 
   it('submits the result and calls onComplete once the review session finishes', async () => {

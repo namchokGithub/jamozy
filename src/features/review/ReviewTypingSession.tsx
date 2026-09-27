@@ -7,13 +7,27 @@ import { KEY_TO_JAMO } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import type { ReviewItem } from '../../domain/models/review-item'
 import type { SubmitReviewSessionOutcome } from '../../application/submit-review-session'
+import type { UserSettings } from '../../domain/models/user-profile'
+
+type KeyboardSettings = Pick<UserSettings, 'showKeyboard' | 'showEnglishKeys' | 'keyboardOpacity'>
+
+const defaultKeyboardSettings: KeyboardSettings = {
+  showKeyboard: true,
+  showEnglishKeys: true,
+  keyboardOpacity: 0.7,
+}
 
 interface ReviewTypingSessionProps {
   items: ReviewItem[]
   onComplete: (outcome: SubmitReviewSessionOutcome) => void
+  keyboardSettings?: KeyboardSettings
 }
 
-export default function ReviewTypingSession({ items, onComplete }: ReviewTypingSessionProps) {
+export default function ReviewTypingSession({
+  items,
+  onComplete,
+  keyboardSettings = defaultKeyboardSettings,
+}: ReviewTypingSessionProps) {
   const { session, start, pressKey, generation } = useLessonSessionStore()
   const fetcher = useFetcher<SubmitReviewSessionOutcome>()
   const hasStarted = useRef(false)
@@ -97,7 +111,13 @@ export default function ReviewTypingSession({ items, onComplete }: ReviewTypingS
         ))}
       </div>
       <p className="mt-2 text-sm text-slate-500">Typed: {composed}</p>
-      <VirtualKeyboard nextKey={nextKey} />
+      {keyboardSettings.showKeyboard && (
+        <VirtualKeyboard
+          nextKey={nextKey}
+          showEnglishKeys={keyboardSettings.showEnglishKeys}
+          opacity={keyboardSettings.keyboardOpacity}
+        />
+      )}
     </div>
   )
 }

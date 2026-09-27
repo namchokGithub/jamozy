@@ -6,6 +6,7 @@ import LessonTypingSession from './LessonTypingSession'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
 import type { Lesson } from '../../domain/models/lesson'
 import type { CompleteLessonOutcome } from '../../application/complete-lesson'
+import type { UserSettings } from '../../domain/models/user-profile'
 
 function makeLesson(overrides: Partial<Lesson> = {}): Lesson {
   return {
@@ -46,16 +47,25 @@ const fakeOutcome: CompleteLessonOutcome = {
   unlockedNextLessonId: null,
 }
 
+function makeKeyboardSettings(
+  overrides: Partial<Pick<UserSettings, 'showKeyboard' | 'showEnglishKeys' | 'keyboardOpacity'>> = {},
+) {
+  return { showKeyboard: true, showEnglishKeys: true, keyboardOpacity: 1, ...overrides }
+}
+
 function renderSession(
   onComplete: (outcome: CompleteLessonOutcome) => void,
   lesson: Lesson = makeLesson(),
   action: () => Promise<CompleteLessonOutcome> = async () => fakeOutcome,
+  keyboardSettings = makeKeyboardSettings(),
 ) {
   const router = createMemoryRouter(
     [
       {
         path: '/',
-        Component: () => <LessonTypingSession lesson={lesson} onComplete={onComplete} />,
+        Component: () => (
+          <LessonTypingSession lesson={lesson} onComplete={onComplete} keyboardSettings={keyboardSettings} />
+        ),
         action,
       },
     ],
@@ -83,6 +93,26 @@ describe('LessonTypingSession', () => {
 
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
     expect(await screen.findByText('Typed: ㄱ')).toBeInTheDocument()
+  })
+
+  it('hides the keyboard guide when showKeyboard is false', async () => {
+    renderSession(vi.fn(), makeLesson(), undefined, makeKeyboardSettings({ showKeyboard: false }))
+
+    await screen.findByText('가')
+    expect(screen.queryByText('ㅂ')).not.toBeInTheDocument()
+  })
+
+  it('passes English-label and opacity settings to a visible keyboard guide', async () => {
+    renderSession(
+      vi.fn(),
+      makeLesson(),
+      undefined,
+      makeKeyboardSettings({ showEnglishKeys: false, keyboardOpacity: 0 }),
+    )
+
+    await screen.findByText('가')
+    expect(screen.queryByText('r')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Virtual Korean keyboard')).toHaveStyle({ opacity: '0' })
   })
 
   it('submits the aggregated result and calls onComplete once the lesson finishes', async () => {

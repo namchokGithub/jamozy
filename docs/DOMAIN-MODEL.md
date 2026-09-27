@@ -1,8 +1,8 @@
 # Domain Model
 
-Field-level schema for the entities referenced in `README.md`'s Firestore Data Model section. Fills the gap between collection paths (README) and actual `domain/models/*.ts` code. Update this file whenever a model's shape changes — it is the source of truth for field names/types, not the code comments.
+Field-level target schema for the entities referenced in `README.md`'s Firestore Data Model section. Fills the gap between collection paths (README) and actual `domain/models/*.ts` code. Update this file whenever a model's shape changes — it is the source of truth for field names/types, not the code comments. Where the current implementation differs, this document records the intended model and the implementation must be brought into line in a separate change.
 
-Conventions: all Firestore documents use `id` as the document ID (not stored as a field unless noted). Timestamps are Firestore `Timestamp`, mapped to `Date` in the domain layer via `infrastructure/firebase/mappers`.
+Conventions: document-backed domain entities (`Course`, `Unit`, `Lesson`, `VocabularyEntry`, `UserProfile`, and `ReviewItem`) expose `id`, which is exactly the Firestore document ID. It is never stored again as a document field; Firestore mappers derive it from the document snapshot and use it to address writes. `LessonExercise.id` is different: it is an embedded identifier stored inside a Lesson document, not a Firestore document ID. `Progress` has no independent `id`; its stored `lessonId` is both the document ID and the Lesson foreign key. All relationships use string IDs, never Firestore `DocumentReference` values. Timestamps are Firestore `Timestamp`, mapped to `Date` in the domain layer via `infrastructure/firebase/mappers`.
 
 ---
 
@@ -16,7 +16,7 @@ Conventions: all Firestore documents use `id` as the document ID (not stored as 
 | id          | string | Firestore doc ID                   |
 | title       | string | e.g. "Hangul Basics"               |
 | description | string | short summary shown on course list |
-| order       | number | display/unlock order among courses |
+| order       | number | canonical display/unlock order among courses; unique globally |
 | createdAt   | Date   |                                    |
 | updatedAt   | Date   |                                    |
 
@@ -35,7 +35,7 @@ Relationships: a `Unit` belongs to a `Course` via `Unit.courseId`. No nested sub
 | courseId    | string | parent`Course.id`                      |
 | title       | string | e.g. "Basic Vowels"                    |
 | description | string |                                        |
-| order       | number | display/unlock order within the course |
+| order       | number | canonical display/unlock order within the course; unique within `courseId` |
 | createdAt   | Date   |                                        |
 | updatedAt   | Date   |                                        |
 
@@ -54,7 +54,7 @@ Relationships: a `Lesson` belongs to a `Unit` via `Lesson.unitId`.
 | unitId    | string                                                          | parent`Unit.id`                            |
 | title     | string                                                          |                                            |
 | type      | `'character' \| 'syllable' \| 'word' \| 'phrase' \| 'sentence'` | matches README's progressive learning flow |
-| order     | number                                                          | display/unlock order within the unit       |
+| order     | number                                                          | canonical display/unlock order within the unit; unique within `unitId` |
 | exercises | `LessonExercise[]`                                              | ordered typing prompts for this lesson     |
 | createdAt | Date                                                            |                                            |
 | updatedAt | Date                                                            |                                            |
@@ -64,12 +64,50 @@ Relationships: a `Lesson` belongs to a `Unit` via `Lesson.unitId`.
 | Field        | Type                          | Notes                                              |
 | ------------ | ----------------------------- | --------------------------------------------------- |
 | id           | string                        | stable ID within the lesson (for review linking)   |
+| vocabularyId | string\| null                 | linked `VocabularyEntry.id` for reusable vocabulary; `null` for characters, syllables, phrases, sentences, or lesson-specific content |
 | targetText   | string                        | the Korean text the learner must type              |
 | romanization | string\| null                 | optional pronunciation hint                        |
-| meaningTh    | string                        | Thai meaning ([[DEC-010]])                         |
-| meaningEn    | string                        | English meaning ([[DEC-010]])                      |
+| meaningTh    | string\| null                 | Thai meaning ([[DEC-025]])                         |
+| meaningEn    | string\| null                 | English meaning ([[DEC-025]])                      |
 | difficulty   | `'easy' \| 'medium' \| 'hard'` | used by Practice Mode filtering ([[DEC-010]])      |
 | hint         | string\| null                 | optional extra hint (not meaning — see `meaningTh`/`meaningEn`) |
+
+When `vocabularyId` is present, `targetText`, romanization, meanings, and difficulty are a denormalized lesson snapshot of that vocabulary entry. Content authoring must keep them aligned. This keeps a lesson self-contained at runtime while allowing a word to be reused and tracked across lessons.
+
+**Meaning constraint ([[DEC-025]]):** Word exercises backed by vocabulary, and phrase/sentence exercises, require at least one of `meaningTh` or `meaningEn`. Character and syllable exercises may set both to `null`. The UI must gracefully omit a requested language when that translation is unavailable.
+
+**Exercise-count constraint ([[DEC-024]]):** `exercises` is non-empty and its array order is the canonical typing sequence. MVP lessons normally contain 5–12 exercises and may not exceed 20. Content beyond that cap must be split into another lesson rather than making one session longer.
+
+---
+
+## VocabularyEntry
+
+**Path:** `vocabulary/{vocabularyId}`
+**Planned file:** `domain/models/vocabulary-entry.ts`
+
+Vocabulary is a reusable learning target, not a replacement for every `LessonExercise`. Characters, syllables, phrases, sentences, and one-off prompts remain lesson-owned.
+
+| Field        | Type                          | Notes                                      |
+| ------------ | ----------------------------- | ------------------------------------------ |
+| id           | string                        | Firestore doc ID                           |
+| korean       | string                        | canonical Korean spelling                  |
+| partOfSpeech | `VocabularyPartOfSpeech`\| null | grammatical category; `null` only when the source does not provide it |
+| senseKey     | string                        | required stable sense identifier; use `'default'` for a primary sense |
+| romanization | string\| null                 | optional pronunciation hint                |
+| meaningTh    | string\| null                 | Thai meaning                               |
+| meaningEn    | string\| null                 | English meaning                            |
+| frequencyRank | number\| null                | positive integer rank from the imported source; not globally unique |
+| difficulty   | `'easy' \| 'medium' \| 'hard'` | default content difficulty               |
+| sourceId     | string                        | key into `docs/CREDITS.md`'s source registry |
+| sourceUrl    | string\| null                 | source or per-entry reference URL          |
+| createdAt    | Date                          |                                            |
+| updatedAt    | Date                          |                                            |
+
+`VocabularyPartOfSpeech` is `'noun' | 'verb' | 'adjective' | 'adverb' | 'determiner' | 'pronoun' | 'numeral' | 'particle' | 'interjection' | 'other'`.
+
+**Identity and deduplication ([[DEC-025]]):** entries are unique by `(normalizedKorean, partOfSpeech, senseKey)`, where `normalizedKorean` is NFC-normalized and trimmed. A spelling may therefore have multiple entries when its part of speech or sense differs. `id` is a deterministic, collision-safe encoding of that identity, not raw Korean text. `senseKey` is required so the uniqueness rule still holds when part of speech is unavailable. Use `'default'` only when a spelling/POS pair has one imported sense; multiple senses under the same spelling/POS must use distinct, stable sense keys.
+
+Relationships: a `VocabularyEntry` may be referenced by many `LessonExercise`s. A word reused across lessons must reference the same `VocabularyEntry` so its review and learning history are combined. Vocabulary entries need at least one of `meaningTh` or `meaningEn`; `sourceId` is required, while a source may omit a per-entry `sourceUrl`.
 
 ---
 
@@ -81,18 +119,22 @@ Relationships: a `Lesson` belongs to a `Unit` via `Lesson.unitId`.
 | Field         | Type                                    | Notes                                                        |
 | ------------- | --------------------------------------- | ------------------------------------------------------------ |
 | lessonId      | string                                  | same as doc ID; also stored as a field for query convenience |
-| status        | `'locked' \| 'unlocked' \| 'completed'` | drives the Learn → Unlock flow                               |
+| status        | `'unlocked' \| 'completed'`              | persisted state; a missing document means locked             |
 | bestAccuracy  | number                                  | 0–100, best across attempts                                  |
 | bestSpeedWpm  | number                                  | best words-per-minute across attempts                        |
 | attempts      | number                                  | total attempt count                                          |
 | lastAttemptAt | Date\| null                             |                                                              |
 | completedAt   | Date\| null                             | set on first`status === 'completed'`                         |
 
-**Cross-checked against `docs/requirement.md`:** that doc lists a 4th `Mastered` state and names `'unlocked'` as `Ready`. Kept the existing 3-state `locked/unlocked/completed` — no `Mastered` trigger was specified, and renaming is cosmetic. Reaffirmed 2026-09-23.
+**Cross-checked against `docs/requirement.md`:** that doc lists a 4th `Mastered` state and names `'unlocked'` as `Ready`. The target model keeps only persisted `'unlocked'/'completed'`; locked is represented by a missing document, and no `Mastered` trigger is specified.
 
 Not persisted here: in-progress keystroke/session state. Per `AGENTS.md`, that stays in Zustand client state and is only written here at checkpoint (lesson complete / session end).
 
-**Unlock rule ([[DEC-009]]):** a lesson's `Progress.status` starts `'locked'`. It becomes `'unlocked'` when the previous lesson (by `Lesson.order` within the same `Unit`; first lesson of the next `Unit`/`Course` unlocks when the last lesson of the previous one completes) reaches `status === 'completed'`. The very first lesson overall is unlocked by default (seeded, not derived). This transition is written by the `complete-lesson` application use case, not computed on read.
+**Unlock rule ([[DEC-009]], [[DEC-025]]):** a missing Progress document represents a locked lesson. When a Progress document is created, its initial status is `'unlocked'`; it becomes `'completed'` when the learner completes the lesson. Completing a lesson creates or preserves the next lesson's unlocked Progress document. This transition is written by the `complete-lesson` application use case, not computed on read.
+
+**Creation strategy and global ordering ([[DEC-023]], [[DEC-025]]):** `Progress` is created lazily; a missing document means the lesson is locked. When a user profile is first persisted, the first lesson in the global sequence receives a new document with `status: 'unlocked'`. Completing a lesson creates the next lesson's `unlocked` document only if it does not already exist. No documents are created for still-locked lessons.
+
+The global sequence is the lexicographic order of `(Course.order, Unit.order, Lesson.order)`: courses sort by `Course.order`; units by `Unit.order` within their course; lessons by `Lesson.order` within their unit. The next lesson may therefore cross a Unit and then a Course boundary. Document IDs never determine progression order.
 
 ---
 
@@ -103,18 +145,22 @@ Not persisted here: in-progress keystroke/session state. Per `AGENTS.md`, that s
 
 | Field            | Type    | Notes                                                       |
 | ---------------- | ------- | ----------------------------------------------------------- |
-| id               | string  | Firestore doc ID                                            |
-| sourceLessonId   | string  | `Lesson.id` this item came from                             |
-| sourceExerciseId | string  | `LessonExercise.id` this item came from                     |
+| id               | string  | Firestore doc ID; deterministic identity, defined below     |
+| sourceLessonId   | string  | `Lesson.id` that first created this item                    |
+| sourceExerciseId | string  | `LessonExercise.id` that first created this item            |
+| vocabularyId     | string\| null | linked `VocabularyEntry.id`; `null` for non-vocabulary content |
 | targetText       | string  | the mistyped Korean text (denormalized for quick review UI) |
 | mistakeCount     | number  | incremented each time it's mistyped again                   |
 | lastMistakeAt    | Date    |                                                             |
-| resolved         | boolean | true once learner types it correctly in a review session    |
 | reason           | `'mistake' \| 'slow' \| 'low-accuracy'` | why this word entered review ([[DEC-012]]) |
 | box              | number  | Leitner box, 1–5 ([[DEC-008]]); starts at 1, +1 on a correct review (capped at 5), resets to 1 on a mistake |
 | nextReviewAt     | Date    | when this item is next due; computed from `box` at write time |
 
-**Spaced repetition scheduling ([[DEC-008]]):** Leitner-style boxes. Box → interval: 1 → 1 day, 2 → 3 days, 3 → 7 days, 4 → 14 days, 5 → 30 days. A review session pulls `ReviewItem`s where `resolved === false` and `nextReviewAt <= now`. This is an MVP default, tunable without a schema change (only the interval table changes).
+**Identity and deduplication ([[DEC-022]]):** a vocabulary-backed item has `id === vocabularyId`, yielding one review history per learner per reusable word across all lessons. A non-vocabulary item has `id === \`${sourceLessonId}:${sourceExerciseId}\``, yielding one review history per lesson exercise. Therefore the deduplication rule is one active item per vocabulary entry, or one active item per non-vocabulary exercise.
+
+**Spaced repetition scheduling ([[DEC-008]], [[DEC-022]]):** Leitner-style boxes. Box → interval: 1 → 1 day, 2 → 3 days, 3 → 7 days, 4 → 14 days, 5 → 30 days. A correct review advances the box and schedules the next review; a mistake resets it to box 1 and reschedules it. There is no `resolved` state: every `ReviewItem` remains active, including at box 5. A review session pulls items where `nextReviewAt <= now`. This is an MVP default, tunable without a schema change (only the interval table changes).
+
+**Reason priority ([[DEC-024]]):** when one exercise qualifies for review for multiple reasons in a submitted session, choose exactly one: `mistake` > `low-accuracy` > `slow`. `reason` records the highest-priority reason that first created the ReviewItem and is not overwritten on later triggers. Trigger thresholds for `low-accuracy` and `slow` are application policy, not persisted schema.
 
 **Cross-checked against `docs/requirement.md`:** that doc says MVP doesn't need "full" spaced repetition, just a flat problem-word list. Kept Leitner-box scheduling ([[DEC-008]]) — reaffirmed 2026-09-23. Also added `reason` ([[DEC-012]]) since requirement.md wants review entries triggered by mistakes, slow typing, or low accuracy, not just mistakes.
 
@@ -134,8 +180,9 @@ Not in README's original domain file list, but required to home EXP/Level and Se
 | settings  | `UserSettings` | see below                    |
 | stats     | `UserStats`    | see below ([[DEC-011]])      |
 | createdAt | Date           |                               |
+| updatedAt | Date           | set with `createdAt` on creation; changed on every persisted profile mutation ([[DEC-023]]) |
 
-**Level formula ([[DEC-006]]):** `level` is derived, not stored: `level = 1 + floor(exp / 100)`. Lives as a pure function (`levelFromExp(exp)`) next to `UserProfile` in `domain/models/user-profile.ts`. MVP placeholder — changing the curve later needs no data migration, since `exp` is the only persisted value.
+**Level formula ([[DEC-006]], [[DEC-024]]):** `level` is derived, not stored: `level = 1 + floor(exp / 100)`. Lives as a pure function (`levelFromExp(exp)`) next to `UserProfile` in `domain/models/user-profile.ts`. This flat curve remains the MVP placeholder and is deferred for later game-balance work; changing it needs no data migration, since `exp` is the only persisted value.
 
 **Cross-checked against `docs/requirement.md`:** that doc's own example ("Level 7, 430/600 EXP") implies an increasing per-level curve (~`level × 100` to reach the next level), not this flat formula, and separately lists "Level" as something to save (implying a stored field). Both reaffirmed against the flat, derived-only formula — 2026-09-23. Revisit the curve shape later if game-design balance needs it; the derived approach means no migration either way.
 
@@ -157,14 +204,25 @@ Replaces the earlier single `keyboardLayoutHint` field with the full requirement
 
 | Field                  | Type   | Notes                                    |
 | ---------------------- | ------ | ------------------------------------------ |
-| lessonsCompleted       | number |                                            |
-| wordsPracticed         | number | cumulative exercises attempted             |
-| averageAccuracy        | number | 0–100, across all attempts                 |
-| bestAccuracy           | number | 0–100, best single-attempt, across all lessons (distinct from `Progress.bestAccuracy`, which is per-lesson) |
-| averageSpeedWpm        | number |                                            |
-| totalTypingTimeSeconds | number |                                            |
+| lessonsCompleted       | number | unique lessons completed; retries do not increment it |
+| exercisesAttempted     | number | total exercises completed in submitted lesson, practice, or review sessions; retries count |
+| totalAcceptedKeystrokes | number | accepted Korean keyboard input events across all submitted sessions |
+| totalRejectedKeystrokes | number | rejected/wrong Korean keyboard input events across all submitted sessions |
+| bestAccuracy           | number | 0–100, best single submitted session across all modes (distinct from `Progress.bestAccuracy`, which is per-lesson) |
+| totalTypingTimeSeconds | number | total active typing duration across all submitted sessions |
+
+`averageAccuracy` and `averageSpeedWpm` are derived, never stored ([[DEC-022]]):
+
+```text
+averageAccuracy = totalAcceptedKeystrokes / (totalAcceptedKeystrokes + totalRejectedKeystrokes) × 100
+averageSpeedWpm = (totalAcceptedKeystrokes / 5) / (totalTypingTimeSeconds / 60)
+```
+
+Return `0` for either value when its denominator is zero. WPM uses the existing keyboard-engine convention of five accepted physical keystrokes per word; it is not a count of Korean whitespace-delimited words. All counters change only when a session is submitted, never per keystroke.
 
 `currentLevel` (requirement.md #9) is intentionally not stored here — it's `levelFromExp(exp)`, computed on read (see [[DEC-006]]).
+
+`updatedAt` is an audit timestamp, not an activity timestamp: it changes when settings, EXP, or stats are persisted, but not for reads or anonymous sign-in alone. A future `lastActiveAt` must be a separate field if product analytics needs it.
 
 ---
 
@@ -174,12 +232,15 @@ Previously open, now decided — see `docs/DECISIONS.md` for full rationale:
 
 1. **EXP/Level** ([[DEC-006]]) — `level` derived from `exp` via `level = 1 + floor(exp / 100)`, never stored. Reaffirmed against `docs/requirement.md`.
 2. **Settings location** ([[DEC-007]]) — field on the `users/{userId}` doc, not a separate subcollection.
-3. **Review scheduling** ([[DEC-008]]) — Leitner-style spaced repetition, `box` + `nextReviewAt` on `ReviewItem`. Reaffirmed against `docs/requirement.md`.
-4. **Unlock rule** ([[DEC-009]]) — next lesson unlocks when the previous lesson's `Progress.status` becomes `'completed'`; 3-state status (`locked/unlocked/completed`) reaffirmed against `docs/requirement.md`'s 4-state suggestion.
-5. **`LessonExercise` fields** ([[DEC-010]]) — added `difficulty` and split `meaningTh`/`meaningEn`, per `docs/requirement.md`.
-6. **`UserStats`** ([[DEC-011]]) — new embedded entity on `UserProfile` for aggregate stats, per `docs/requirement.md`.
+3. **Review scheduling and identity** ([[DEC-008]], [[DEC-022]]) — Leitner-style spaced repetition, `box` + `nextReviewAt`, no `resolved` state; vocabulary-backed items are deduplicated by `vocabularyId`, other items by lesson/exercise identity.
+4. **Unlock rule** ([[DEC-009]], [[DEC-025]]) — next lesson unlocks when the previous lesson's Progress becomes `'completed'`; a missing document represents locked, while persisted states are `'unlocked'/'completed'`.
+5. **Vocabulary reuse** ([[DEC-022]]) — reusable words live in `VocabularyEntry`; a `LessonExercise` may link one via `vocabularyId` while remaining self-contained.
+6. **`UserStats`** ([[DEC-011]], [[DEC-022]]) — embedded aggregate counters; accuracy and WPM are derived from raw counters, and `exercisesAttempted` replaces the ambiguous `wordsPracticed`.
 7. **`ReviewItem.reason`** ([[DEC-012]]) — mistake/slow/low-accuracy trigger, per `docs/requirement.md`.
 8. **`UserSettings` expansion** ([[DEC-013]]) — full 7-field settings list, per `docs/requirement.md`.
+9. **Progress creation, ordering, and profile auditing** ([[DEC-023]]) — missing Progress means locked; unlocks are lazy along the global course/unit/lesson ordering; `UserProfile.updatedAt` tracks persisted mutations.
+10. **Identity, exercise count, review reason, and level curve** ([[DEC-024]]) — Firestore/document and domain ID semantics are explicit; lessons cap at 20 exercises; review reasons use a deterministic priority; EXP-to-level balance remains deferred.
+11. **Vocabulary import and Progress-state refinement** ([[DEC-025]]) — vocabulary identity includes spelling, part of speech, and sense; translations are nullable according to content type; Progress has only persisted unlocked/completed states.
 
 No open questions remain in this document. Add new ones here as they come up, and resolve the same way.
 

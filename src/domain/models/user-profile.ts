@@ -39,7 +39,7 @@ export function defaultUserProfile(userId: string, now: Date): UserProfile {
       soundEnabled: true,
       showKeyboard: true,
       showEnglishKeys: true,
-      keyboardOpacity: 1,
+      keyboardOpacity: 0.7,
       romanizationEnabled: true,
       meaningLanguage: 'both',
       theme: 'light',
