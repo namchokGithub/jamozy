@@ -349,7 +349,7 @@ Jamozy is currently in early development.
 
 > [!NOTE]
 > The target data model is defined in `docs/DOMAIN-MODEL.md`,
-> [Authentication and Persistence](docs/AUTH-AND-PERSISTENCE.md), and DEC-022 through DEC-029.
+> [Authentication and Persistence](docs/AUTH-AND-PERSISTENCE.md), and DEC-022 through DEC-031.
 > The current implementation and persisted Firestore data are still being migrated to match it.
 
 Current work focuses on:
@@ -360,8 +360,8 @@ Current work focuses on:
 - updated `ReviewItem` identity and Leitner lifecycle.
 - Learning Modes shared-state architecture, including contiguous Learning Path
   progression, VocabularyProgress, JamoStats, Topics, and Daily Quest.
-- Guest-local persistence and authenticated accounts; safe Guest-to-account
-  migration remains a separate task.
+- Guest-local persistence, authenticated accounts, and safe automatic
+  Guest-to-account migration. Cleanup remains deferred.
 - Shared LearningSession history and its exactly-once submission boundary for
   Lesson and Review; history read/UI and other modes remain deferred.
 
@@ -376,7 +376,7 @@ Current work focuses on:
 - [x] Review system
 - [x] EXP and Level progression
 - [x] Guest local persistence and authenticated accounts
-- [ ] Authenticated Firestore persistence migration
+- [x] Authenticated Firestore persistence migration
 - [x] Settings
 
 ### Later

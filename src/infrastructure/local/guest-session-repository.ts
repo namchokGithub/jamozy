@@ -8,8 +8,13 @@ const ACTIVE_KEY = 'active'
 
 export class GuestSessionRepository implements UserSessionRepository {
   constructor(private database: GuestDatabase = guestDatabase, private cryptoApi: Crypto = crypto, private profiles?: UserProfileRepository) {}
+
+  async getStoredGuestSession(): Promise<GuestSession | null> {
+    return this.database.get<GuestSession>('guestSessions', ACTIVE_KEY)
+  }
+
   async getActiveSession(): Promise<UserSession> {
-    const existing = await this.database.get<GuestSession>('guestSessions', ACTIVE_KEY)
+    const existing = await this.getStoredGuestSession()
     if (existing) return { kind: 'guest', userId: existing.guestId }
     const identity = createGuestIdentity(this.cryptoApi)
     const now = new Date()

@@ -330,3 +330,23 @@ Chronological log of completed units of work. One entry per meaningful change (n
   application use cases. Firebase profile mapping preserves the compatibility
   layer on later profile writes.
 - User verified focused tests, full `pnpm test`, `pnpm build`, and `pnpm lint`.
+
+### 2026-09-28 — Automatic Guest-to-account migration
+
+- Added provider-neutral `MigrateGuestDataToAccount` orchestration over narrow
+  local-snapshot and Firebase-account migration repositories. The auth action
+  captures the pre-auth Guest identity, starts migration after successful
+  Email/password or Google authentication, and keeps authentication successful
+  if migration must retry.
+- Added deterministic Profile, Progress, and ReviewItem merge functions for
+  [[DEC-030]]/[[DEC-031]]. Existing Cloud display names and compatibility
+  baselines win; session receipts gate aggregate, progress, and review effects
+  so retries cannot duplicate a submitted session.
+- Added IndexedDB `migrationCheckpoints`, terminal Cloud markers at
+  `users/{uid}/migrations/{guestId}`, and owner-only Firestore rules for
+  LearningSession history, session receipts, and markers. Guest records are
+  retained; cleanup, future-mode records, and history UI remain deferred.
+- Preserved the `legacyBaseline` / `sessionAggregate` compatibility layer. A
+  Guest migration does not attempt to reconstruct or retire historical totals.
+- User reported focused/full tests, `pnpm build`, and `pnpm lint` pass. Rules
+  are checked in but require user deployment.

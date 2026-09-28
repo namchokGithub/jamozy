@@ -592,10 +592,10 @@ avoid duplicate rewards and lifetime totals, prevent review regressions, and
 avoid overwriting established account preferences without reliable recency
 information.
 
-**Consequences:** `MigrateGuestDataToAccount` must track whether a session's
-effects have already been aggregated before applying EXP or raw counters. This
-resolves the merge-policy blocker in `docs/PROGRESS.md`; the separate
-exactly-once persistence mechanism remains an implementation decision.
+**Consequences:** `MigrateGuestDataToAccount` tracks destination session
+receipts before applying EXP or raw counters. The implemented protocol writes
+one terminal Cloud marker per `(guestId, uid)` only after all receipt
+transactions complete; Guest data remains local for later cleanup.
 
 ---
 
@@ -609,7 +609,7 @@ immutable `legacyBaseline`; they are not retroactively interpreted as raw
 LearningSession counters. New Lesson/Review submissions update a separate raw
 `sessionAggregate`. The profile read model combines both for display.
 
-During a future Guest-to-account migration, a Cloud baseline wins
+During Guest-to-account migration, a Cloud baseline wins
 unconditionally when both sources have one. Session history continues to union
 by `sessionId` under [[DEC-030]].
 
@@ -618,6 +618,8 @@ reconstruct exact raw counters or determine whether Guest and Cloud activity
 overlaps. Treating them as raw would silently alter learner totals.
 
 **Consequences:** Compatibility mapping is required in local/Firebase profile
-adapters and profile summaries. The legacy baseline remains until a separate,
-safe migration retires it. Legacy average accuracy/WPM are not combined with
-new raw values; the profile shows session-tracked metrics separately.
+adapters and profile summaries. The Guest-to-account migration preserves this
+layer rather than attempting to reconstruct historical sessions. The legacy
+baseline remains until a separate, safe migration retires it. Legacy average
+accuracy/WPM are not combined with new raw values; the profile shows
+session-tracked metrics separately.

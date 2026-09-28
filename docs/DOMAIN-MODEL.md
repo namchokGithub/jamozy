@@ -367,6 +367,9 @@ Return `0` for either value when its denominator is zero. WPM uses the existing 
 converted into raw counters. New submitted sessions contribute only to
 `sessionAggregate`; profile summaries combine the two. This layer remains until
 an explicit data migration can safely retire the legacy presentation fields.
+Guest-to-account migration preserves this compatibility layer: a Cloud baseline
+wins when both profiles have one, and newly submitted session effects remain
+receipt-gated.
 
 ---
 
@@ -386,11 +389,12 @@ Previously open, now decided — see `docs/DECISIONS.md` for full rationale:
 10. **Identity, exercise count, review reason, and level curve** ([[DEC-024]]) — Firestore/document and domain ID semantics are explicit; lessons cap at 20 exercises; review reasons use a deterministic priority; EXP-to-level balance remains deferred.
 11. **Vocabulary import and Progress-state refinement** ([[DEC-025]]) — vocabulary identity includes spelling, part of speech, and sense; translations are nullable according to content type; Progress has only persisted unlocked/completed states.
 12. **Learning Modes** ([[DEC-026]]) — Learning Path progression, Daily Quest, and Practice Modes are distinct experiences over shared content and learner state.
-13. **Authentication and persistence** ([[DEC-027]]) — Guest and authenticated sessions use the same learner model with IndexedDB or Firestore persistence; Guest-to-account migration has safety principles but deliberately unresolved field-level merge rules.
+13. **Authentication and persistence** ([[DEC-027]], [[DEC-030]], [[DEC-031]]) — Guest and authenticated sessions use the same learner model with IndexedDB or Firestore persistence; automatic migration merges the currently persisted entities with receipt-gated session effects and preserves the legacy-baseline compatibility layer.
 14. **Shared learner-state checkpoint semantics** ([[DEC-028]]) — VocabularyProgress and JamoStat aggregate submitted results across modes; DailyQuestProgress distinguishes completion from its idempotent EXP reward.
 15. **Session history** ([[DEC-029]]) — LearningSession records submitted activity once per logical session, independently of current learner state and lifetime aggregates.
 
-The unresolved Guest-to-account field-level merge policy is intentionally held in
-`docs/AUTH-AND-PERSISTENCE.md`, not decided in this schema document.
+Guest-to-account field-level rules are decided in [[DEC-030]] and implemented
+for the entities currently persisted on this branch. Future-mode records remain
+out of scope until their models and adapters exist.
 
 **Note on `docs/requirement.md`:** that file is the original product spec and is left as-is (not edited to match resolutions above) — this file and `docs/DECISIONS.md` are the authoritative, up-to-date sources when they disagree with it.

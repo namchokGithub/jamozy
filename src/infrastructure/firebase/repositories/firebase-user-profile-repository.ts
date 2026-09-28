@@ -3,7 +3,7 @@ import { db } from '../firebase'
 import type { UserProfileRepository } from '../../../domain/repositories/user-profile-repository'
 import type { UserProfile } from '../../../domain/models/user-profile'
 
-function toUserProfile(id: string, data: Record<string, unknown>): UserProfile {
+export function toUserProfile(id: string, data: Record<string, unknown>): UserProfile {
   return {
     id,
     displayName: typeof data.displayName === 'string' ? data.displayName : 'Guest',
@@ -19,14 +19,14 @@ function toUserProfile(id: string, data: Record<string, unknown>): UserProfile {
   }
 }
 
-function toUserProfileDoc(profile: UserProfile) {
+export function toUserProfileDoc(profile: UserProfile) {
   return {
     displayName: profile.displayName ?? 'Guest',
     exp: profile.exp,
     settings: profile.settings,
     stats: profile.stats,
-    legacyBaseline: profile.legacyBaseline,
-    sessionAggregate: profile.sessionAggregate,
+    ...(profile.legacyBaseline ? { legacyBaseline: profile.legacyBaseline } : {}),
+    ...(profile.sessionAggregate ? { sessionAggregate: profile.sessionAggregate } : {}),
     createdAt: profile.createdAt,
     updatedAt: profile.updatedAt ?? profile.createdAt,
   }

@@ -1,9 +1,9 @@
 # Authentication and Persistence
 
-Target architecture for learner identity, persistence selection, and the future
+Target architecture for learner identity, persistence selection, and
 Guest-to-account migration. This document supersedes Firebase Anonymous Auth as
-the target model. The current Anonymous Auth / Firestore implementation is a
-legacy implementation until the planned migration is built.
+the target model. The current Anonymous Auth / Firestore implementation is
+historical legacy context.
 
 Authentication selects persistence; it does not change learning behavior.
 Learning Path, Practice Modes, Review, shared learner state, and their use
@@ -94,8 +94,8 @@ record remains eligible for account migration until cleanup occurs.
 
 ## Guest-to-account migration
 
-After Email/password or Google authentication succeeds, the future application
-use case `MigrateGuestDataToAccount` moves data across the repository boundary:
+After Email/password or Google authentication succeeds, the application use
+case `MigrateGuestDataToAccount` moves data across the repository boundary:
 
 ```text
 Local Guest repositories
@@ -108,9 +108,12 @@ Firebase repositories
 ```
 
 The use case—not a React component—owns orchestration. It is provider-neutral,
-idempotent, retry-safe, and non-destructive. A failed or interrupted attempt
-must retain the local Guest data. Local data may be marked migrated and later
-cleaned up only after migration succeeds; it must never be deleted first.
+idempotent, retry-safe, and non-destructive. It stores a local IndexedDB
+checkpoint keyed by `(guestId, uid)` and writes the terminal Cloud marker at
+`users/{uid}/migrations/{guestId}` only after every session receipt succeeds.
+A failed or interrupted attempt retains the local Guest data and is retried on
+the next authenticated session. Cleanup is separately deferred: this feature
+never deletes or makes Guest data unavailable.
 
 An existing cloud account is a merge scenario, not an empty target. A migration
 must not replace cloud learner state wholesale with a Guest snapshot. A future
@@ -144,10 +147,15 @@ before a successful, durable Cloud write.
 
 Guest IndexedDB persistence plus Email/password and Google Sign-In now ship.
 They select local or Firebase learner repositories through the active session.
-Guest-to-account migration and cleanup remain pending. Lesson/Review
-LearningSession history, aggregate, and exactly-once checkpoint persistence now
-ship for both adapters. Firebase Console provider configuration remains
-user-owned. See `docs/PROGRESS.md`.
+Automatic Guest-to-account migration now ships for the entities present on this
+branch: UserProfile, Progress, ReviewItem, LearningSession, and session
+receipts. Lesson/Review LearningSession history, aggregate, and exactly-once
+checkpoint persistence ship for both adapters. The `legacyBaseline` /
+`sessionAggregate` profile compatibility layer remains intentionally in place;
+it is not retired by a Guest migration. Cleanup, future-mode records, account
+linking, and history UI remain deferred. Firebase Console provider configuration
+and deployment of the checked-in Firestore rules remain user-owned. See
+`docs/PROGRESS.md`.
 
 ## Historical implementation
 

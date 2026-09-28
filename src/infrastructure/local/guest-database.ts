@@ -2,8 +2,8 @@ import { addSessionAggregate, emptySessionAggregate, type SessionAggregate } fro
 import type { UserProfile } from '../../domain/models/user-profile'
 
 const DB_NAME = 'jamozy-guest'
-const VERSION = 2
-const stores = ['guestSessions', 'profiles', 'progress', 'reviewItems', 'learningSessions', 'sessionOutcomes'] as const
+const VERSION = 3
+const stores = ['guestSessions', 'profiles', 'progress', 'reviewItems', 'learningSessions', 'sessionOutcomes', 'migrationCheckpoints'] as const
 type StoreName = (typeof stores)[number]
 
 export class GuestDatabase {
