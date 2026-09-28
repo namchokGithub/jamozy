@@ -372,7 +372,7 @@ Current work focuses on:
 - [x] Korean typing engine
 - [x] Virtual Korean keyboard
 - [x] Accuracy and speed tracking
-- [ ] Lesson results (in progress)
+- [x] Lesson results
 - [x] Review system
 - [x] EXP and Level progression
 - [x] Guest local persistence and authenticated accounts
