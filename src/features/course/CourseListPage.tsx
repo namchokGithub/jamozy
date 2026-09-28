@@ -14,7 +14,8 @@ import mascot from '../../assets/jamozy-mascot.png'
 import { AuthModal } from '../auth/AuthModal'
 
 export default function CourseListPage() {
-  const { courses, dueReviewCount, displayName, isAuthenticated } = useLoaderData() as CourseListLoaderData
+  const { courses, dueReviewCount, displayName, isAuthenticated } =
+    useLoaderData() as CourseListLoaderData
   const fetcher = useFetcher<{ displayName: string }>()
   const name = fetcher.data?.displayName ?? displayName
   const [editingName, setEditingName] = useState(false)
@@ -24,7 +25,7 @@ export default function CourseListPage() {
   return (
     <main className="min-h-screen overflow-hidden bg-[#fffaf1] px-4 py-5 text-[#253247] sm:px-6 sm:py-8">
       <div
-        className="pointer-events-none fixed inset-0 -z-0 overflow-hidden"
+        className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
         aria-hidden="true"
       >
         <div className="absolute -left-24 top-12 h-72 w-72 rounded-full bg-[#f8d9d4]/50 blur-3xl" />
@@ -47,18 +48,68 @@ export default function CourseListPage() {
             className="flex items-center gap-2"
             aria-label="Account navigation"
           >
-            {!isAuthenticated && (editingName ? (
-              <form onSubmit={(event) => { event.preventDefault(); fetcher.submit({ displayName: draftName }, { method: 'post', encType: 'application/json' }); setEditingName(false) }}>
-                <input aria-label="Display name" value={draftName} onChange={(event) => setDraftName(event.target.value)} className="w-28 rounded-full border px-3 py-2 text-sm" autoFocus />
-              </form>
-            ) : (
-              <button type="button" aria-label="Edit display name" onClick={() => { setDraftName(name); setEditingName(true) }} className="flex items-center gap-1 rounded-full border border-[#eadfd4] bg-white/80 px-3 py-2 text-sm shadow-sm">
-                {name}<Pencil aria-hidden="true" size={14} />
+            {!isAuthenticated &&
+              (editingName ? (
+                <form
+                  onSubmit={(event) => {
+                    event.preventDefault()
+                    fetcher.submit(
+                      { displayName: draftName },
+                      { method: 'post', encType: 'application/json' },
+                    )
+                    setEditingName(false)
+                  }}
+                >
+                  <input
+                    aria-label="Display name"
+                    value={draftName}
+                    onChange={(event) => setDraftName(event.target.value)}
+                    className="w-28 rounded-full border px-3 py-2 text-sm"
+                    autoFocus
+                  />
+                </form>
+              ) : (
+                <button
+                  type="button"
+                  aria-label="Edit display name"
+                  onClick={() => {
+                    setDraftName(name)
+                    setEditingName(true)
+                  }}
+                  className="flex items-center gap-1 rounded-full border border-[#eadfd4] bg-white/80 px-3 py-2 text-sm shadow-sm"
+                >
+                  {name}
+                  <Pencil aria-hidden="true" size={14} />
+                </button>
+              ))}
+            {!isAuthenticated && !editingName && (
+              <button
+                type="button"
+                onClick={() => setShowAuth(true)}
+                className="rounded-full border px-3 py-2 text-sm"
+              >
+                Sign in
               </button>
-            ))}
-            {!isAuthenticated && !editingName && <button type="button" onClick={() => setShowAuth(true)} className="rounded-full border px-3 py-2 text-sm">Sign in</button>}
-            {isAuthenticated && <span className="rounded-full border px-3 py-2 text-sm">{name}</span>}
-            {isAuthenticated && <button type="button" onClick={() => fetcher.submit({ intent: 'sign-out' }, { method: 'post', encType: 'application/json' })} className="rounded-full border px-3 py-2 text-sm">Sign out</button>}
+            )}
+            {isAuthenticated && (
+              <span className="rounded-full border px-3 py-2 text-sm">
+                {name}
+              </span>
+            )}
+            {isAuthenticated && (
+              <button
+                type="button"
+                onClick={() =>
+                  fetcher.submit(
+                    { intent: 'sign-out' },
+                    { method: 'post', encType: 'application/json' },
+                  )
+                }
+                className="rounded-full border px-3 py-2 text-sm"
+              >
+                Sign out
+              </button>
+            )}
             <Link
               to="/profile"
               aria-label="Profile"
@@ -76,7 +127,7 @@ export default function CourseListPage() {
           </nav>
         </header>
 
-        <section className="relative mt-8 overflow-hidden rounded-[2rem] border border-[#f0dfd1] bg-[#fffdf9] px-6 py-8 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:px-10 sm:py-11">
+        <section className="relative mt-8 overflow-hidden rounded-4xl border border-[#f0dfd1] bg-[#fffdf9] px-6 py-8 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:px-10 sm:py-11">
           <div
             className="absolute -right-10 -top-12 h-52 w-52 rounded-full bg-[#f5dfb7]/50"
             aria-hidden="true"

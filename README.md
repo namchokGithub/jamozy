@@ -367,26 +367,21 @@ Current work focuses on:
 
 ### MVP
 
-- [x] Course and unit structure
-- [x] Lesson flow
-- [x] Korean typing engine
-- [x] Virtual Korean keyboard
-- [x] Accuracy and speed tracking
-- [x] Lesson results
-- [x] Review system
-- [x] EXP and Level progression
-- [x] Guest local persistence and authenticated accounts
-- [x] Authenticated Firestore persistence migration
-- [x] Settings
+MVP is complete. See [Progress Tracker](docs/PROGRESS.md) for
+implementation status and the post-MVP roadmap.
 
-### Later
+### Next / Post-MVP
 
-- [ ] Account linking between authentication providers
-- [ ] History, summaries, and analytics for authenticated accounts
-- [ ] Achievements
-- [ ] Daily streaks
-- [ ] Pronunciation audio
-- [ ] More courses and lesson types
+- Admin BO content management (admin-only UI, Firebase Auth custom claims, and
+  Firestore Rules; no Cloud Function planned)
+- Decide whether sound feedback ships or is deferred, then implement the
+  selected behavior
+- Dark-mode CSS
+- Dedicated Lesson Result visual redesign
+- History, summaries, and analytics
+- Learning Modes: VocabularyProgress, JamoStats, Practice, and Daily Quest
+- Account linking between authentication providers
+- Achievements, daily streaks, pronunciation audio, and additional curriculum
 
 ## Development Principles
 
