@@ -360,9 +360,10 @@ Current work focuses on:
 - updated `ReviewItem` identity and Leitner lifecycle.
 - Learning Modes shared-state architecture, including contiguous Learning Path
   progression, VocabularyProgress, JamoStats, Topics, and Daily Quest.
-- Guest-local persistence, authenticated accounts, and safe Guest-to-account
-  migration.
-- Shared LearningSession history and its exactly-once submission boundary.
+- Guest-local persistence and authenticated accounts; safe Guest-to-account
+  migration remains a separate task.
+- Shared LearningSession history and its exactly-once submission boundary for
+  Lesson and Review; history read/UI and other modes remain deferred.
 
 ### MVP
 
@@ -374,7 +375,7 @@ Current work focuses on:
 - [ ] Lesson results
 - [x] Review system
 - [x] EXP and Level progression
-- [ ] Guest local persistence and authenticated accounts
+- [x] Guest local persistence and authenticated accounts
 - [ ] Authenticated Firestore persistence migration
 - [x] Settings
 

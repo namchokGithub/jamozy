@@ -111,7 +111,7 @@ describe('getLessonResult', () => {
   it('returns all zeros for a lesson with no exercises', () => {
     const state = startLessonSession([])
     const result = getLessonResult(state, state.startedAt) // same instant, duration 0
-    expect(result).toEqual({ accuracy: 0, speedWpm: 0, durationSeconds: 0, mistakes: [] })
+    expect(result).toEqual({ accuracy: 0, speedWpm: 0, durationSeconds: 0, startedAtMs: state.startedAt.getTime(), exercisesAttempted: 0, acceptedKeystrokes: 0, rejectedKeystrokes: 0, mistakes: [] })
   })
 })
 
@@ -132,13 +132,13 @@ describe('getLessonProgress', () => {
 describe('lessonResultSchema', () => {
   it('accepts a valid result', () => {
     expect(() =>
-      lessonResultSchema.parse({ accuracy: 90, speedWpm: 2, durationSeconds: 60, mistakes: [] }),
+      lessonResultSchema.parse({ accuracy: 90, speedWpm: 2, durationSeconds: 60, startedAtMs: 0, exercisesAttempted: 1, acceptedKeystrokes: 10, rejectedKeystrokes: 0, mistakes: [] }),
     ).not.toThrow()
   })
 
   it('rejects an out-of-range accuracy', () => {
     expect(() =>
-      lessonResultSchema.parse({ accuracy: 150, speedWpm: 2, durationSeconds: 60, mistakes: [] }),
+      lessonResultSchema.parse({ accuracy: 150, speedWpm: 2, durationSeconds: 60, startedAtMs: 0, exercisesAttempted: 1, acceptedKeystrokes: 10, rejectedKeystrokes: 0, mistakes: [] }),
     ).toThrow()
   })
 })

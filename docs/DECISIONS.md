@@ -596,3 +596,28 @@ information.
 effects have already been aggregated before applying EXP or raw counters. This
 resolves the merge-policy blocker in `docs/PROGRESS.md`; the separate
 exactly-once persistence mechanism remains an implementation decision.
+
+---
+
+## DEC-031 — Preserve pre-session learner values as a compatibility baseline
+
+**Date:** 2026-09-28
+**Status:** Accepted
+
+**Decision:** Existing `UserProfile.exp` and `UserProfile.stats` values are an
+immutable `legacyBaseline`; they are not retroactively interpreted as raw
+LearningSession counters. New Lesson/Review submissions update a separate raw
+`sessionAggregate`. The profile read model combines both for display.
+
+During a future Guest-to-account migration, a Cloud baseline wins
+unconditionally when both sources have one. Session history continues to union
+by `sessionId` under [[DEC-030]].
+
+**Why:** Historical aggregate values do not contain sufficient session data to
+reconstruct exact raw counters or determine whether Guest and Cloud activity
+overlaps. Treating them as raw would silently alter learner totals.
+
+**Consequences:** Compatibility mapping is required in local/Firebase profile
+adapters and profile summaries. The legacy baseline remains until a separate,
+safe migration retires it. Legacy average accuracy/WPM are not combined with
+new raw values; the profile shows session-tracked metrics separately.

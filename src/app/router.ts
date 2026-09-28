@@ -2,6 +2,8 @@ import { createBrowserRouter } from 'react-router'
 import { courseRepo, lessonRepo, progressRepo as firebaseProgressRepo, userProfileRepo as firebaseUserProfileRepo, reviewRepo as firebaseReviewRepo } from '../infrastructure/firebase/repositories'
 import { GuestSessionRepository } from '../infrastructure/local/guest-session-repository'
 import { LocalProgressRepository, LocalReviewRepository, LocalUserProfileRepository } from '../infrastructure/local/local-repositories'
+import { LocalSessionSubmissionRepository } from '../infrastructure/local/local-session-submission-repository'
+import { FirebaseSessionSubmissionRepository } from '../infrastructure/firebase/repositories/firebase-session-submission-repository'
 import { createLearnerRepositories } from './learner-repositories'
 import { FirebaseAuthRepository } from '../infrastructure/firebase/firebase-auth-repository'
 import { SessionManager } from '../application/session-manager'
@@ -30,10 +32,10 @@ const firebaseAuthRepo = new FirebaseAuthRepository()
 const sessionManager = new SessionManager(firebaseAuthRepo, guestSessions)
 const learners = createLearnerRepositories({
   sessions: sessionManager,
-  guest: { progressRepo: new LocalProgressRepository(), reviewRepo: new LocalReviewRepository(), userProfileRepo: localUserProfileRepo },
-  authenticated: { progressRepo: firebaseProgressRepo, reviewRepo: firebaseReviewRepo, userProfileRepo: firebaseUserProfileRepo },
+  guest: { progressRepo: new LocalProgressRepository(), reviewRepo: new LocalReviewRepository(), userProfileRepo: localUserProfileRepo, sessionSubmissionRepo: new LocalSessionSubmissionRepository() },
+  authenticated: { progressRepo: firebaseProgressRepo, reviewRepo: firebaseReviewRepo, userProfileRepo: firebaseUserProfileRepo, sessionSubmissionRepo: new FirebaseSessionSubmissionRepository() },
 })
-const { progressRepo, reviewRepo, userProfileRepo, getActiveUser } = learners
+const { progressRepo, reviewRepo, userProfileRepo, sessionSubmissionRepo, getActiveUser } = learners
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -73,6 +75,7 @@ export const router = createBrowserRouter([
       progressRepo,
       userProfileRepo,
       reviewRepo,
+      sessionSubmissionRepo,
       ensureUser: getActiveUser,
     }),
     ErrorBoundary: RouteError,
@@ -88,6 +91,7 @@ export const router = createBrowserRouter([
     }),
     action: createSubmitReviewSessionAction({
       reviewRepo,
+      sessionSubmissionRepo,
       ensureUser: getActiveUser,
     }),
     ErrorBoundary: RouteError,

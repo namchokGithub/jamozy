@@ -1,9 +1,8 @@
 # Session and History Architecture
 
-Target architecture for historical learning activity. This document separates
-what happened in one submitted practice activity from current learner state and
-lifetime aggregates. It is a documentation design, not an implementation
-claim.
+Historical activity architecture. Lesson and Review now implement the
+checkpoint/receipt boundary described here; other modes and history read/UI
+remain target work.
 
 ## Boundaries
 
@@ -37,11 +36,10 @@ Submitted Session Result
         +--> LearningSession history record
 ```
 
-All effects above belong to one logical submission. A submitted session must
-have logical exactly-once effects across its `LearningSession` record and
-aggregate learner-state updates. The concrete idempotency/atomicity mechanism
-(for example a transaction, receipt, or another persistence-specific design)
-is intentionally deferred to implementation.
+All effects above belong to one logical submission. Lesson and Review use a
+receipt keyed by `sessionId`: Guest storage uses one IndexedDB transaction and
+authenticated storage uses one Firestore transaction. Other modes must adopt
+the same checkpoint boundary when implemented.
 
 No record is written per keystroke. MVP history contains submitted/completed
 sessions only; abandoned or incomplete sessions are not persisted unless a

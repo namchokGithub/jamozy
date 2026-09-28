@@ -144,8 +144,10 @@ before a successful, durable Cloud write.
 
 Guest IndexedDB persistence plus Email/password and Google Sign-In now ship.
 They select local or Firebase learner repositories through the active session.
-Guest-to-account migration, cleanup, LearningSession/aggregate idempotency, and
-Firebase Console provider configuration remain pending. See `docs/PROGRESS.md`.
+Guest-to-account migration and cleanup remain pending. Lesson/Review
+LearningSession history, aggregate, and exactly-once checkpoint persistence now
+ship for both adapters. Firebase Console provider configuration remains
+user-owned. See `docs/PROGRESS.md`.
 
 ## Historical implementation
 

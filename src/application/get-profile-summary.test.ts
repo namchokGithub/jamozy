@@ -6,6 +6,7 @@ import {
   type UserProfile,
   type UserStats,
 } from '../domain/models/user-profile'
+import { emptySessionAggregate } from '../domain/models/session-aggregate'
 
 const sampleStats: UserStats = {
   lessonsCompleted: 12,
@@ -27,6 +28,7 @@ describe('getProfileSummary', () => {
       exp: 0,
       level: 1,
       stats: defaultUserProfile('user1', now).stats,
+      sessionAggregate: emptySessionAggregate(),
     })
   })
 
@@ -41,7 +43,24 @@ describe('getProfileSummary', () => {
 
     const summary = await getProfileSummary(userProfileRepo, 'user1')
 
-    expect(summary).toEqual({ exp: 250, level: 3, stats: sampleStats })
+    expect(summary).toEqual({ exp: 250, level: 3, stats: sampleStats, sessionAggregate: emptySessionAggregate() })
+  })
+
+  it('adds raw session counters to compatible totals without averaging legacy values', async () => {
+    const userProfileRepo = new FakeUserProfileRepository()
+    await userProfileRepo.saveUserProfile('user1', {
+      ...defaultUserProfile('user1', new Date('2025-01-01')),
+      exp: 250,
+      stats: sampleStats,
+      sessionAggregate: { exp: 120, exercisesAttempted: 4, acceptedKeystrokes: 30, rejectedKeystrokes: 2, totalTypingTimeSeconds: 90, bestAccuracy: 93.75 },
+    })
+
+    const summary = await getProfileSummary(userProfileRepo, 'user1')
+
+    expect(summary.exp).toBe(370)
+    expect(summary.stats.wordsPracticed).toBe(88)
+    expect(summary.stats.totalTypingTimeSeconds).toBe(3690)
+    expect(summary.stats.averageAccuracy).toBe(91.5)
   })
 
   it('derives level 1 at exp 99 and level 2 at exp 100 (the 100-EXP-per-level boundary)', async () => {

@@ -78,6 +78,10 @@ export interface LessonResult {
   accuracy: number
   speedWpm: number
   durationSeconds: number
+  startedAtMs: number
+  exercisesAttempted: number
+  acceptedKeystrokes: number
+  rejectedKeystrokes: number
   mistakes: MistakeReport[]
 }
 
@@ -96,7 +100,16 @@ export function getLessonResult(state: LessonSessionState, now: Date = new Date(
     .filter((r) => r.mistakes.length > 0)
     .map((r) => ({ sourceExerciseId: r.exerciseId, targetText: r.targetText }))
 
-  return { accuracy, speedWpm, durationSeconds, mistakes }
+  return {
+    accuracy,
+    speedWpm,
+    durationSeconds,
+    startedAtMs: state.startedAt.getTime(),
+    exercisesAttempted: state.completedResults.length,
+    acceptedKeystrokes: totalCorrectKeystrokes,
+    rejectedKeystrokes: totalMistakes,
+    mistakes,
+  }
 }
 
 export function getLessonProgress(state: LessonSessionState): { current: number; total: number } {
@@ -107,6 +120,10 @@ export const lessonResultSchema = z.object({
   accuracy: z.number().min(0).max(100),
   speedWpm: z.number().min(0),
   durationSeconds: z.number().min(0),
+  startedAtMs: z.number().int().nonnegative(),
+  exercisesAttempted: z.number().int().min(0),
+  acceptedKeystrokes: z.number().int().min(0),
+  rejectedKeystrokes: z.number().int().min(0),
   mistakes: z.array(
     z.object({
       sourceExerciseId: z.string(),

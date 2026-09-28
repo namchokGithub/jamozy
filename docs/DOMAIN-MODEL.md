@@ -228,7 +228,9 @@ again after `expAwarded` is true.
 ## LearningSession (per-user history)
 
 **Authenticated path:** `users/{userId}/learningSessions/{sessionId}`
-**Planned file:** `domain/models/learning-session.ts`
+**Implemented file:** `src/domain/models/learning-session.ts` (currently
+supports Learning Path and Review; other contexts below remain target-model
+work).
 
 | Field | Type | Notes |
 | --- | --- | --- |
@@ -359,6 +361,12 @@ Return `0` for either value when its denominator is zero. WPM uses the existing 
 `currentLevel` (requirement.md #9) is intentionally not stored here — it's `levelFromExp(exp)`, computed on read (see [[DEC-006]]).
 
 `updatedAt` is an audit timestamp, not an activity timestamp: it changes when settings, EXP, or stats are persisted, but not for reads or session activation alone. Guest retention uses the separate local `GuestSession.lastActiveAt` field in `docs/AUTH-AND-PERSISTENCE.md`.
+
+**Session-foundation compatibility ([[DEC-031]]):** pre-LearningSession
+`exp`/`stats` values are retained as an immutable `legacyBaseline`, not
+converted into raw counters. New submitted sessions contribute only to
+`sessionAggregate`; profile summaries combine the two. This layer remains until
+an explicit data migration can safely retire the legacy presentation fields.
 
 ---
 

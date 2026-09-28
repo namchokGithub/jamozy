@@ -8,6 +8,7 @@ import type { LessonExercise } from '../../domain/models/lesson'
 
 interface LessonSessionStore {
   session: LessonSessionState | null
+  submissionId: string | null
   // Incremented on every start() call, and never touched by pressKey().
   // This store is a module-level singleton shared across every mounted
   // LessonTypingSession, so a consumer that captures the generation number
@@ -20,10 +21,11 @@ interface LessonSessionStore {
 
 export const useLessonSessionStore = create<LessonSessionStore>((set, get) => ({
   session: null,
+  submissionId: null,
   generation: 0,
   start: (exercises) => {
     const generation = get().generation + 1
-    set({ session: startLessonSession(exercises), generation })
+    set({ session: startLessonSession(exercises), submissionId: crypto.randomUUID(), generation })
     return generation
   },
   pressKey: (code, shiftKey) => {

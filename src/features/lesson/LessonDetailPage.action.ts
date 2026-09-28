@@ -14,8 +14,10 @@ export function createCompleteLessonSessionAction(
     if (!lessonId) {
       throw new Error('Lesson id is required')
     }
-    const result = lessonResultSchema.parse(await request.json())
+    const body = await request.json() as Record<string, unknown>
+    const result = lessonResultSchema.parse(body)
+    if (typeof body.submissionId !== 'string') throw new Error('Submission id is required')
     const user = await deps.ensureUser()
-    return completeLessonSession(deps, user.uid, lessonId, result)
+    return completeLessonSession(deps, user.uid, lessonId, result, body.submissionId)
   }
 }

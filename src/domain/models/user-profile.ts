@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { LegacyBaseline, SessionAggregate } from './session-aggregate'
 
 export interface UserSettings {
   soundEnabled: boolean
@@ -27,6 +28,8 @@ export interface UserProfile {
   stats: UserStats
   createdAt: Date
   updatedAt?: Date
+  legacyBaseline?: LegacyBaseline
+  sessionAggregate?: SessionAggregate
 }
 
 export function levelFromExp(exp: number): number {

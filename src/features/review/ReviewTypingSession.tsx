@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useFetcher } from 'react-router'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
 import { getCharacterStates, getComposedText } from '../../domain/korean/typing-session'
-import { getLessonProgress } from '../../domain/korean/lesson-session'
+import { getLessonProgress, getLessonResult } from '../../domain/korean/lesson-session'
 import { KEY_TO_JAMO } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import type { ReviewItem } from '../../domain/models/review-item'
@@ -28,7 +28,7 @@ export default function ReviewTypingSession({
   onComplete,
   keyboardSettings = defaultKeyboardSettings,
 }: ReviewTypingSessionProps) {
-  const { session, start, pressKey, generation } = useLessonSessionStore()
+  const { session, start, pressKey, generation, submissionId } = useLessonSessionStore()
   const fetcher = useFetcher<SubmitReviewSessionOutcome>()
   const hasStarted = useRef(false)
   const hasSubmitted = useRef(false)
@@ -62,15 +62,24 @@ export default function ReviewTypingSession({
     if (generation !== myGenerationRef.current) {
       return
     }
-    if (session?.status === 'completed' && !hasSubmitted.current) {
+    if (session?.status === 'completed' && submissionId && !hasSubmitted.current) {
       hasSubmitted.current = true
+      const metrics = getLessonResult(session)
       const results = session.completedResults.map((result) => ({
         itemId: result.exerciseId,
         wasCorrect: result.mistakes.length === 0,
       }))
-      fetcher.submit({ results }, { method: 'post', encType: 'application/json' })
+      fetcher.submit({
+        submissionId,
+        durationSeconds: metrics.durationSeconds,
+        startedAtMs: metrics.startedAtMs,
+        exercisesAttempted: metrics.exercisesAttempted,
+        acceptedKeystrokes: metrics.acceptedKeystrokes,
+        rejectedKeystrokes: metrics.rejectedKeystrokes,
+        results: results.map((result) => ({ itemId: result.itemId, wasCorrect: result.wasCorrect })),
+      }, { method: 'post', encType: 'application/json' })
     }
-  }, [session, generation, fetcher])
+  }, [session, generation, submissionId, fetcher])
 
   useEffect(() => {
     if (fetcher.state === 'idle' && fetcher.data) {

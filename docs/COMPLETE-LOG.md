@@ -316,3 +316,17 @@ Chronological log of completed units of work. One entry per meaningful change (n
   Anonymous-Auth-as-target guidance, and to route each task to its authoritative
   architecture, model, persistence, learning-mode, session-history, decision,
   requirement, or credit document.
+
+### 2026-09-28 — Lesson and Review session foundation
+
+- Added `LearningSession`, raw session aggregates, immutable legacy-baseline
+  compatibility fields, and profile presentation that keeps legacy averages
+  separate from session-tracked accuracy/WPM.
+- Added a session-ID receipt/checkpoint boundary for Guest IndexedDB and
+  authenticated Firestore. Each new Lesson/Review submission writes its history,
+  aggregate, progress, and review effects once; same-ID retries return the
+  stored outcome, while real replays receive a new ID.
+- Wired the ID and raw metrics from the typing store through route actions and
+  application use cases. Firebase profile mapping preserves the compatibility
+  layer on later profile writes.
+- User verified focused tests, full `pnpm test`, `pnpm build`, and `pnpm lint`.

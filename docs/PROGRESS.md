@@ -2,7 +2,7 @@
 
 Mirrors the MVP checklist in `README.md`. Update both when status changes. Statuses: `Not started`, `In progress`, `Blocked`, `Done`.
 
-Last updated: 2026-09-28 (Guest-local persistence foundation verified; authenticated account work pending)
+Last updated: 2026-09-28 (Session foundation verified for Lesson and Review)
 
 ## MVP
 
@@ -16,8 +16,8 @@ Last updated: 2026-09-28 (Guest-local persistence foundation verified; authentic
 | Lesson results                    | Not started | `LessonDetailPage` shows a minimal inline completion block (EXP gained, new level, unlock notice) — no dedicated Lesson Result screen yet, deliberately deferred per the feature spec's Scope section                                                                                                                                                                                                              |
 | Review system                     | Done        | `/review` (`ReviewPage.tsx`) ships end to end: shows due `ReviewItem`s (`getDueReviewItems`, unbounded by default, `limit: 20` for a session — [[DEC-019]]), practices them via `ReviewTypingSession.tsx` (reuses the Korean typing engine/keyboard/store), then `application/submit-review-session.ts` advances/resets each item's Leitner box. `CourseListPage` shows a due-count badge linking to it. Live-verified (empty state, and a genuine mistake correctly staying not-yet-due)                                |
 | EXP and Level progression         | Done        | EXP awarded in `complete-lesson` per `docs/requirement.md` #8 (100 base / +20 acc>90 / +50 perfect); `levelFromExp` derives level. Surfaced in the post-lesson inline block ("+X EXP — now level Y") and now persistently via `/profile` (`ProfilePage.tsx`, `application/get-profile-summary.ts`) — level, an EXP progress bar, and all 6 `UserStats` fields. Live-verified (zero-state and real-data rendering)                                                                                                                            |
-| Guest local persistence and authenticated accounts | In progress | Guest IndexedDB, Email/password, and Google Sign-In now select the active persistence adapter. Guest-to-account migration remains deferred ([[DEC-027]], [[DEC-030]]). User-reported verification: 214/214 tests and build passed. |
-| Authenticated Firestore learner persistence | In progress | Authenticated session selects Firebase learner repositories; migration and its exactly-once aggregate/history mechanism remain deferred. |
+| Guest local persistence and authenticated accounts | Done | Guest IndexedDB plus Email/password and Google Sign-In select the active persistence adapter. Guest-to-account migration remains deferred ([[DEC-027]], [[DEC-030]]). |
+| Authenticated Firestore learner persistence | Done | Authenticated sessions use Firebase learner repositories. Lesson/Review session history and exactly-once checkpoint effects are verified; Guest migration remains separate. |
 | Settings                          | Done        | `/settings` (`SettingsPage.tsx`) reads/writes `UserProfile.settings` via `get-settings.ts`/`update-settings.ts` (read-modify-write, never touches `exp`/`stats`/`createdAt`). All five learner-facing display preferences now have consumers: meaning/romanization in Lesson and Review previews; keyboard visibility, English labels, and opacity in both typing sessions. New profiles default to 0.7 keyboard opacity. Sound and theme remain persist-only. |
 
 ## Planned Learning Modes
@@ -37,12 +37,12 @@ Last updated: 2026-09-28 (Guest-local persistence foundation verified; authentic
 
 | Item | Status | Notes |
 | --- | --- | --- |
-| LearningSession domain model | Not started | One submitted historical activity record with stable start-time session ID and discriminated context ([[DEC-029]]). |
-| LearningSession repository interface | Not started | Shared application contract for local and Firebase history adapters. |
-| Local IndexedDB session persistence | Not started | Guest session history under the existing 90-day inactivity retention policy. |
-| Firestore session persistence | Not started | Authenticated history at `users/{userId}/learningSessions/{sessionId}`. |
-| Exactly-once submission integration | Blocked | Implementation must choose an idempotency/atomicity mechanism spanning history and aggregate learner-state updates. |
-| Session history recording | Not started | Create a LearningSession from each successfully submitted logical session. |
+| LearningSession domain model | Done | Lesson and Review submitted activity with stable session IDs and raw counters; remaining modes are deferred ([[DEC-029]]). |
+| LearningSession repository interface | Done | Shared local/Firebase history and checkpoint contracts. |
+| Local IndexedDB session persistence | Done | Guest session history, receipt, aggregate, progress, and review effects share one IndexedDB transaction. |
+| Firestore session persistence | Done | Authenticated history at `users/{userId}/learningSessions/{sessionId}` is written in a Firestore transaction. |
+| Exactly-once submission integration | Done | A receipt keyed by `sessionId` returns the original outcome and prevents duplicate aggregate/progress/review effects for Lesson and Review retries. |
+| Session history recording | Done | Lesson and Review create one LearningSession per logical submitted session; a real replay creates a new ID. |
 | History read/query use case | Not started | Future read model over LearningSession records; no UI in this task. |
 | History UI | Not started | Future presentation of session history. |
 | Summary and analytics | Not started | Future consumers of LearningSession; no persisted period aggregates or analytics schema yet. |
