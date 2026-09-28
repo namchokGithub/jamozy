@@ -4,14 +4,20 @@ Claude Code specific guidance for the Jamozy repository. Shared agent rules (arc
 
 ## Before Starting Work
 
-1. Read `README.md` for product scope and current MVP checklist.
-2. Read `AGENTS.md` for architecture rules and working conventions.
-3. Check `docs/PROGRESS.md` for what's already done vs. still open.
-4. Check `docs/DECISIONS.md` before revisiting a choice that may already be settled.
+1. Read `AGENTS.md`, then `README.md` for shared rules, product scope, and the MVP checklist.
+2. Check `docs/PROGRESS.md` for current status, blockers, and next work.
+3. Read the document that owns the task's topic before changing it:
+   - model shape, IDs, or Firestore/IndexedDB paths → `docs/DOMAIN-MODEL.md`
+   - Guest/account authentication, persistence, retention, or migration → `docs/AUTH-AND-PERSISTENCE.md`
+   - sessions, aggregates, history, or retries → `docs/SESSION-AND-HISTORY.md`
+   - Learning Path, Review, Practice, or Daily Quest boundaries → `docs/LEARNING-MODES.md`
+   - original MVP requirement wording → `docs/REQUIREMENT-V1.md`
+   - content attribution → `docs/CREDITS.md`
+4. Check `docs/DECISIONS.md` before revisiting a choice that may already be settled. An accepted decision takes precedence over older plans or requirements where they conflict.
 
 ## Project State
 
-Pre-MVP, no `src/` yet. Treat any task that scaffolds the app (Vite setup, Firebase init, first routes) as foundational — get confirmation on structure choices that aren't already dictated by `README.md`/`AGENTS.md` before generating a large number of files.
+Pre-MVP, with core lesson, review, profile, and settings flows already present. The active Firebase Anonymous Auth / Firestore-only path is legacy implementation context; do not extend it as the target persistence design. Follow `docs/AUTH-AND-PERSISTENCE.md` for new learner-state persistence work.
 
 ## Documentation Upkeep
 
@@ -20,8 +26,9 @@ When you complete a meaningful unit of work in this repo:
 - Tick the relevant box(es) in `README.md`'s MVP checklist and mirror the change in `docs/PROGRESS.md`.
 - Append an entry to `docs/COMPLETE-LOG.md` (date, what shipped, relevant commit).
 - If the work involved a non-obvious tradeoff (library choice, data-model shape, layering exception), add an entry to `docs/DECISIONS.md`.
+- Keep the owning topic document aligned with an accepted decision: schema in `DOMAIN-MODEL`, persistence/migration in `AUTH-AND-PERSISTENCE`, learning-mode behavior in `LEARNING-MODES`, and historical-session semantics in `SESSION-AND-HISTORY`.
 
-Keep these docs terse — status and rationale, not narrative.
+Keep status docs terse. Put durable rules in their topic document and rationale/trade-offs in `DECISIONS.md`; do not create competing copies of a schema or policy.
 
 ## Testing
 
@@ -29,4 +36,4 @@ Use Vitest + React Testing Library once test infra exists (`pnpm test`). Favor t
 
 ## Firebase Caution
 
-Firebase is a shared, real backend once configured — schema changes to `courses`/`units`/`lessons`/`users` collections affect real data paths. Confirm before writing migration/backfill scripts or altering Firestore security rules.
+Firebase is a shared, real backend once configured — schema changes, backfills, and security rules affect real data paths. Confirm before writing migration/backfill scripts or altering Firestore security rules. In particular, do not modify data to test Guest-to-account migration; use isolated test doubles until an approved migration plan exists.

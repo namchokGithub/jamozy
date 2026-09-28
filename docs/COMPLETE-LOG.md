@@ -286,3 +286,10 @@ Chronological log of completed units of work. One entry per meaningful change (n
   session-ID union.
 - Marked the migration conflict-policy decision done in `docs/PROGRESS.md`.
   The concrete exactly-once persistence mechanism remains implementation work.
+
+### 2026-09-28 — Agent documentation routing
+
+- Updated `AGENTS.md` and `CLAUDE.md` to remove stale pre-scaffold and
+  Anonymous-Auth-as-target guidance, and to route each task to its authoritative
+  architecture, model, persistence, learning-mode, session-history, decision,
+  requirement, or credit document.
