@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import LessonTypingSession from './LessonTypingSession'
+import LessonTypingSession, { type LessonCompletion } from './LessonTypingSession'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
 import type { Lesson } from '../../domain/models/lesson'
 import type { CompleteLessonOutcome } from '../../application/complete-lesson'
@@ -54,7 +54,7 @@ function makeKeyboardSettings(
 }
 
 function renderSession(
-  onComplete: (outcome: CompleteLessonOutcome) => void,
+  onComplete: (completion: LessonCompletion) => void,
   lesson: Lesson = makeLesson(),
   action: () => Promise<CompleteLessonOutcome> = async () => fakeOutcome,
   keyboardSettings = makeKeyboardSettings(),
@@ -124,7 +124,10 @@ describe('LessonTypingSession', () => {
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
 
     await waitFor(() => expect(onComplete).toHaveBeenCalledOnce())
-    expect(onComplete).toHaveBeenCalledWith(expect.objectContaining({ expGained: 100, level: 2 }))
+    expect(onComplete).toHaveBeenCalledWith(expect.objectContaining({
+      outcome: expect.objectContaining({ expGained: 100, level: 2 }),
+      result: expect.objectContaining({ accuracy: 100, mistakes: [] }),
+    }))
   })
 
   it('submits the action exactly once even if extra keydowns fire after completion', async () => {

@@ -24,9 +24,15 @@ function makeItem(id: string, overrides: Partial<ReviewItem> = {}): ReviewItem {
   }
 }
 
-const fakeOutcome: SubmitReviewSessionOutcome = { correctCount: 1, needsPracticeCount: 0 }
+const fakeOutcome: SubmitReviewSessionOutcome = {
+  correctCount: 1,
+  needsPracticeCount: 0,
+}
 
-function makePreview(id: string, overrides: Partial<ReviewPreview> = {}): ReviewPreview {
+function makePreview(
+  id: string,
+  overrides: Partial<ReviewPreview> = {},
+): ReviewPreview {
   return {
     item: makeItem(id),
     exercise: {
@@ -62,12 +68,22 @@ describe('ReviewPage', () => {
 
   it('shows an empty state when nothing is due', async () => {
     const router = createMemoryRouter(
-      [{ path: '/', Component: ReviewPage, loader: async () => ({ previews: [], settings: makeSettings() }) }],
+      [
+        {
+          path: '/',
+          Component: ReviewPage,
+          loader: async () => ({ previews: [], settings: makeSettings() }),
+        },
+      ],
       { initialEntries: ['/'] },
     )
     render(<RouterProvider router={router} />)
 
-    expect(await screen.findByText('Nothing due right now.')).toBeInTheDocument()
+    expect(
+      await screen.findByText(
+        'Mistyped words are added to your Review queue and become available when due.',
+      ),
+    ).toBeInTheDocument()
   })
 
   it('shows preference-aware metadata in the preview list', async () => {
@@ -76,7 +92,10 @@ describe('ReviewPage', () => {
         {
           path: '/',
           Component: ReviewPage,
-          loader: async () => ({ previews: [makePreview('a')], settings: makeSettings() }),
+          loader: async () => ({
+            previews: [makePreview('a')],
+            settings: makeSettings(),
+          }),
           action: async () => fakeOutcome,
         },
       ],
@@ -98,9 +117,15 @@ describe('ReviewPage', () => {
           loader: async () => ({
             previews: [
               makePreview('a'),
-              makePreview('missing', { item: makeItem('missing', { targetText: '안녕' }), exercise: null }),
+              makePreview('missing', {
+                item: makeItem('missing', { targetText: '안녕' }),
+                exercise: null,
+              }),
             ],
-            settings: makeSettings({ romanizationEnabled: false, meaningLanguage: 'th' }),
+            settings: makeSettings({
+              romanizationEnabled: false,
+              meaningLanguage: 'th',
+            }),
           }),
           action: async () => fakeOutcome,
         },
@@ -145,7 +170,10 @@ describe('ReviewPage', () => {
         {
           path: '/',
           Component: ReviewPage,
-          loader: async () => ({ previews: [makePreview('a')], settings: makeSettings() }),
+          loader: async () => ({
+            previews: [makePreview('a')],
+            settings: makeSettings(),
+          }),
           action: async () => fakeOutcome,
         },
       ],
@@ -159,6 +187,8 @@ describe('ReviewPage', () => {
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
 
     expect(await screen.findByText('Review complete!')).toBeInTheDocument()
-    expect(screen.getByText('1 correct, 0 need more practice')).toBeInTheDocument()
+    expect(
+      screen.getByText('1 correct, 0 need more practice'),
+    ).toBeInTheDocument()
   })
 })

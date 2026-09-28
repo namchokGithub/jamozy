@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 import LessonDetailPage from './LessonDetailPage'
@@ -221,6 +221,83 @@ describe('LessonDetailPage', () => {
     expect(await screen.findByText('Lesson complete!')).toBeInTheDocument()
     expect(screen.getByText(/\+100 EXP/)).toBeInTheDocument()
     expect(screen.getByText('Next lesson unlocked.')).toBeInTheDocument()
+    const summary = screen.getByLabelText('Lesson results')
+    expect(summary).toHaveTextContent('Accuracy 100%')
+    expect(summary).toHaveTextContent(/Typing speed \d+ WPM/)
+    expect(summary).toHaveTextContent(/Time \d+s/)
+    expect(summary).toHaveTextContent('Mistakes 0')
+    expect(within(summary).getByText('No mistakes — nice work!')).toBeInTheDocument()
+  })
+
+  it('counts every wrong keystroke while listing a mistyped word once', async () => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/',
+          Component: LessonDetailPage,
+          loader: async () => ({
+            lesson: makeLesson(),
+            settings: makeSettings(),
+            courseId: 'c1',
+          }),
+          action: async () => fakeOutcome,
+        },
+      ],
+      { initialEntries: ['/'] },
+    )
+    render(<RouterProvider router={router} />)
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
+    await screen.findByText('가')
+    fireEvent.keyDown(window, { code: 'KeyQ', shiftKey: false })
+    fireEvent.keyDown(window, { code: 'KeyW', shiftKey: false })
+    fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
+    fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
+
+    const summary = await screen.findByLabelText('Lesson results')
+    expect(summary).toHaveTextContent('Accuracy 50%')
+    expect(summary).toHaveTextContent('Mistakes 2')
+    expect(within(summary).getByText('가')).toBeInTheDocument()
+  })
+
+  it('shows the same mistyped target only once across exercises', async () => {
+    const duplicateExercise = {
+      id: 'e2',
+      targetText: '가',
+      romanization: null,
+      meaningTh: '',
+      meaningEn: '',
+      difficulty: 'easy' as const,
+      hint: null,
+    }
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/',
+          Component: LessonDetailPage,
+          loader: async () => ({
+            lesson: makeLesson({ exercises: [makeLesson().exercises[0], duplicateExercise] }),
+            settings: makeSettings(),
+            courseId: 'c1',
+          }),
+          action: async () => fakeOutcome,
+        },
+      ],
+      { initialEntries: ['/'] },
+    )
+    render(<RouterProvider router={router} />)
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
+    await screen.findByText('가')
+    fireEvent.keyDown(window, { code: 'KeyQ', shiftKey: false })
+    fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
+    fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
+    fireEvent.keyDown(window, { code: 'KeyQ', shiftKey: false })
+    fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
+    fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
+
+    const summary = await screen.findByLabelText('Lesson results')
+    expect(within(summary).getAllByText('가')).toHaveLength(1)
   })
 
   it('restarts the current lesson from the completion block', async () => {
@@ -281,7 +358,7 @@ describe('LessonDetailPage', () => {
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
     await screen.findByText('Lesson complete!')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Review mistakes' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Go to Review' }))
 
     expect(await screen.findByRole('heading', { name: 'Review queue' })).toBeInTheDocument()
   })

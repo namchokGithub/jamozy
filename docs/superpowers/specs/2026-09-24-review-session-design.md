@@ -18,7 +18,7 @@ CourseListPage ("N words due for review" link, only shown when N > 0)
 GET /review route loader → getDueReviewItems(reviewRepo, uid, now, limit=20)
    ↓
 ReviewPage.tsx
-   ├── 0 due items → empty state ("Nothing due right now.")
+   ├── 0 due items → empty state ("Mistyped words are added to your Review queue and become available when due.")
    ├── N due items, not started → preview list + "Start Review" button
    ├── started → <ReviewTypingSession items={dueItems} onComplete={setSummary} />
    └── summary set → "Review complete! N correct, M need more practice" + link back to Course List
@@ -47,11 +47,11 @@ application/submit-review-session.ts (new)
 
 ## Key decisions
 
-1. **Session composition:** all due items in one session (not an artificial multi-page flow), but `getDueReviewItems` gains a `limit` parameter so a learner who has fallen behind never faces an unbounded review queue in one sitting — items beyond the cap simply stay due and appear in a later session. **`limit` defaults to `Infinity` (unbounded), not 20** — `CourseListPage`'s "N words due" link needs the *true* total due count (calling with no `limit` argument), while the `/review` route's own loader is the one that explicitly passes `limit: 20` to cap the actual session. Defaulting to 20 instead would silently under-report the badge count once a learner has more than 20 items due. Ordering is whatever `getReviewItems` already returns (insertion order in the fake/Firestore doc order) — no explicit sort requirement surfaced.
+1. **Session composition:** all due items in one session (not an artificial multi-page flow), but `getDueReviewItems` gains a `limit` parameter so a learner who has fallen behind never faces an unbounded review queue in one sitting — items beyond the cap simply stay due and appear in a later session. **`limit` defaults to `Infinity` (unbounded), not 20** — `CourseListPage`'s "N words due" link needs the _true_ total due count (calling with no `limit` argument), while the `/review` route's own loader is the one that explicitly passes `limit: 20` to cap the actual session. Defaulting to 20 instead would silently under-report the badge count once a learner has more than 20 items due. Ordering is whatever `getReviewItems` already returns (insertion order in the fake/Firestore doc order) — no explicit sort requirement surfaced.
 
-2. **`wasCorrect` semantics — stated explicitly because it's easy to misread:** the typing engine blocks wrong keys (a learner cannot *finish* an item with an incorrect keystroke sequence baked into the composed text — [[DEC-017]]'s jamo-level blocking). "Correct" for review purposes is **stricter** than "eventually finished": `wasCorrect = completedResult.mistakes.length === 0`. A single rejected keystroke anywhere while typing an item — even if the learner immediately corrects it and finishes the item — makes that whole item `wasCorrect: false`, resetting its box to 1. This is the same rule already used for the reverse case (creating a `ReviewItem` from a lesson mistake, [[DEC-018]]) — any mistake at all is a mistake, full stop.
+2. **`wasCorrect` semantics — stated explicitly because it's easy to misread:** the typing engine blocks wrong keys (a learner cannot _finish_ an item with an incorrect keystroke sequence baked into the composed text — [[DEC-017]]'s jamo-level blocking). "Correct" for review purposes is **stricter** than "eventually finished": `wasCorrect = completedResult.mistakes.length === 0`. A single rejected keystroke anywhere while typing an item — even if the learner immediately corrects it and finishes the item — makes that whole item `wasCorrect: false`, resetting its box to 1. This is the same rule already used for the reverse case (creating a `ReviewItem` from a lesson mistake, [[DEC-018]]) — any mistake at all is a mistake, full stop.
 
-3. **No same-session requeue on a wrong item.** A single linear pass through the session's items (exactly like `lesson-session.ts` already sequences a lesson's exercises — no new domain logic). An item typed with a mistake still has its box reset to 1 and a new (soon) `nextReviewAt` computed by `submitReviewResult`; it does not reappear later in *this* session, only in a future one.
+3. **No same-session requeue on a wrong item.** A single linear pass through the session's items (exactly like `lesson-session.ts` already sequences a lesson's exercises — no new domain logic). An item typed with a mistake still has its box reset to 1 and a new (soon) `nextReviewAt` computed by `submitReviewResult`; it does not reappear later in _this_ session, only in a future one.
 
 4. **Ownership is structural, not an extra check.** The route action's payload is exactly `{ results: [{ itemId: string, wasCorrect: boolean }] }` — never a full `ReviewItem`, and never a `userId` (the client can't influence which user's data is touched). `submitReviewSession` looks up every item via `reviewRepo.getReviewItem(userId, itemId)`, where `userId` is always the value `ensureUser()` returns for the authenticated request, matching the Firestore path (`users/{userId}/reviewItems/{itemId}`) that already scopes every read/write to that same uid. An `itemId` that doesn't exist under this uid (whether it's a typo, stale client state, or a deliberately forged id from another user's item) resolves to `null` from `getReviewItem` and is silently skipped — never thrown, and never able to touch another user's document, because the lookup path itself is uid-scoped before the id is ever consulted.
 
@@ -65,7 +65,7 @@ application/submit-review-session.ts (new)
 
 ```ts
 interface ExerciseResult {
-  exerciseId: string       // === the ReviewItem's own id, since it was seeded from item.id
+  exerciseId: string // === the ReviewItem's own id, since it was seeded from item.id
   targetText: string
   correctKeyCount: number
   mistakes: MistakeEvent[] // already tracked per item by typing-session.ts, unchanged

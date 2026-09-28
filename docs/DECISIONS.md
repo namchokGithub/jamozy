@@ -225,11 +225,14 @@ authenticated player, can write those collections. Owner-only rules remain for
 `users/{userId}/**`.
 
 **Consequences:** the client-SDK `pnpm seed` script is no longer a valid way to
-change production content. Future content administration must use an Admin SDK,
-Cloud Function, or Firebase Console procedure with appropriate operational
-access; that authoring path is intentionally out of MVP scope.
+change production content. The planned post-MVP authoring path is an Admin BO
+whose browser writes are gated by an `admin` Firebase Auth custom claim and
+Firestore Rules; a controlled Admin SDK operator script provisions claims. No
+Cloud Function is planned. Until that BO exists, Firebase Console procedures
+remain an operational fallback.
 
-**Deploy:** rules aren't live until run — `firebase login` (interactive, user runs this) then `firebase deploy --only firestore:rules`.
+**Deploy:** the restrictive rules are deployed. Any future rules change still
+requires an explicit Firebase Console deployment procedure.
 
 **Legacy implementation note:** the original permissive rule is historical and
 does not define the Guest/Authenticated architecture in [[DEC-027]].
@@ -635,3 +638,23 @@ layer rather than attempting to reconstruct historical sessions. The legacy
 baseline remains until a separate, safe migration retires it. Legacy average
 accuracy/WPM are not combined with new raw values; the profile shows
 session-tracked metrics separately.
+
+---
+
+## DEC-032 — Lesson Result review action opens the due Review queue
+
+**Date:** 2026-09-28
+**Status:** Accepted
+
+**Decision:** The Lesson Result action is labelled `Go to Review` and navigates
+to `/review`, the existing Leitner-scheduled Review queue. A word mistyped in
+the completed lesson is not guaranteed to appear there immediately; it appears
+only when its `nextReviewAt` is due. MVP does not introduce an immediate-mistake
+practice flow.
+
+**Why:** The Review queue has one established scheduling contract. A separate
+immediate-practice flow would create a second, ambiguous review experience and
+needs its own exercise-selection and scheduling rules.
+
+**Consequences:** The Lesson Result button is navigation only. `ReviewItem`
+creation and its Leitner schedule remain unchanged.
