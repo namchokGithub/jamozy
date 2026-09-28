@@ -350,3 +350,11 @@ Chronological log of completed units of work. One entry per meaningful change (n
   Guest migration does not attempt to reconstruct or retire historical totals.
 - User reported focused/full tests, `pnpm build`, and `pnpm lint` pass. Rules
   are checked in but require user deployment.
+
+### 2026-09-28 — Firestore content writes locked
+
+- Closed [[DEC-015]] before launch: browser clients can read learning content
+  but cannot write `courses`, `units`, or `lessons`, including when signed in.
+- Documented that the old client-SDK seed script is not a production content
+  administration path; future authoring requires an Admin SDK, Cloud Function,
+  or controlled Firebase Console procedure.

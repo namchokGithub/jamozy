@@ -205,22 +205,34 @@ implementation context only, not the target architecture.
 
 ---
 
-## DEC-015 — Firestore rules: any signed-in user can write content (MVP-only)
+## DEC-015 — Firestore content-write security boundary
 
 **Date:** 2026-09-23
-**Status:** Accepted (legacy implementation — must be replaced before the target auth model ships)
+**Status:** Superseded — client content writes locked before launch
 
-**Decision:** Added `firestore.rules` (+ `firebase.json`, `.firebaserc`). `courses`/`units`/`lessons` are readable AND writable by any signed-in user (including Anonymous Auth). `users/{userId}` and its subcollections are readable/writable only by that same `uid`.
+**Original decision:** `courses`/`units`/`lessons` were readable and writable by
+any signed-in user to unblock client-SDK seeding. `users/{userId}` and its
+subcollections were readable/writable only by that same `uid`.
 
-**Why:** `pnpm seed` (client SDK) failed with `PERMISSION_DENIED` — the Firestore database had no rules deployed yet (default deny-all). There's no admin/content-management auth tier built yet (`docs/requirement.md` #15, "Content Management," isn't implemented), and the seed script authenticates the same way any player would (Anonymous Auth). User chose to unblock seeding this way rather than switch to an Admin SDK + service account.
+**Why:** `pnpm seed` (client SDK) initially failed with `PERMISSION_DENIED` —
+the Firestore database had no rules deployed yet. There is no
+admin/content-management tier, and the initial script used the same client SDK
+as a player.
 
-**Consequences — real security gap, not just theoretical:** any signed-in player can currently rewrite `courses`/`units`/`lessons` from the browser console via the Firestore client SDK (vandalize curriculum content, not just their own progress). Acceptable for local MVP development with no real users. **Must be replaced before any public launch** — either a custom-claims admin role, or move content writes to an Admin SDK/Cloud Function path and lock `courses`/`units`/`lessons` to `allow write: if false` for clients. User data rules (`users/{userId}/**`) are already correct/production-safe as written.
+**Implemented replacement:** before launch, client rules were changed to make
+`courses`, `units`, and `lessons` public read-only. No client, including an
+authenticated player, can write those collections. Owner-only rules remain for
+`users/{userId}/**`.
+
+**Consequences:** the client-SDK `pnpm seed` script is no longer a valid way to
+change production content. Future content administration must use an Admin SDK,
+Cloud Function, or Firebase Console procedure with appropriate operational
+access; that authoring path is intentionally out of MVP scope.
 
 **Deploy:** rules aren't live until run — `firebase login` (interactive, user runs this) then `firebase deploy --only firestore:rules`.
 
-**Legacy implementation note:** This rule set assumes the Anonymous Auth path
-from [[DEC-001]]. It remains recorded for the existing implementation but does
-not define the target Guest/Authenticated architecture in [[DEC-027]].
+**Legacy implementation note:** the original permissive rule is historical and
+does not define the Guest/Authenticated architecture in [[DEC-027]].
 
 ---
 

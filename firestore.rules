@@ -2,11 +2,9 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Learning content. Readable by any signed-in (including Anonymous Auth)
-    // user. Writable by any signed-in user too — MVP-only compromise, since
-    // there's no admin/content-management auth tier yet. See docs/DECISIONS.md
-    // DEC-015: revisit before shipping, this currently lets any player rewrite
-    // course content via the client SDK.
+    // Learning content is public read-only. There is no client write rule, so
+    // course content must be administered outside this browser application.
+    // See DEC-015 for the retired MVP client-write exception.
     match /courses/{courseId} {
       allow read: if true;
     }

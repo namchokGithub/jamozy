@@ -99,6 +99,11 @@ A fresh whole-branch review (Opus) found no Critical issues. The one Important f
 
 **Still open, not forgotten:** [[DEC-015]]'s MVP-only security gap. [[DEC-022]]'s vocabulary-backed `ReviewItem` identity is documented but not yet implemented or migrated. [[DEC-019]]'s review-system Minor findings (still deferred, unchanged this round). Settings round's Minor findings (still deferred, unchanged): Save re-enables during the post-save loader revalidation; "Saved" can show a moment early when nothing was actually edited; `getSettings` doesn't merge stored settings over defaults field-by-field; a Save failure replaces the whole page via `RouteError`; no Firestore transaction around the settings read-modify-write; the multi-phase fetcher-state test doesn't separately assert the Save button was disabled mid-flight; "Saved" has no `aria-live`, opacity slider shows no numeric value. `ProfileSummary.exp`/`stats` default to zero for a hypothetical profile document written before those fields existed (theoretical — every real writer writes a full profile); `ProfilePage.loader.test.ts`'s first test omits `now`, making `createdAt` nondeterministic (harmless, not asserted on).
 
+**Correction (2026-09-28):** [[DEC-015]] is closed. The deployed rules make
+learning content public read-only; no browser client can write `courses`,
+`units`, or `lessons`. Future content administration needs an Admin SDK, Cloud
+Function, or controlled Firebase Console procedure.
+
 `pnpm test`/`pnpm exec tsc -b`/`pnpm lint` all pass (206 tests).
 
-Next real steps, not blocked on each other: (1) decide whether to defer the misleading sound control to post-MVP or implement real sound; build real dark-mode CSS as a separate cross-cutting change, (2) a proper Lesson Result screen (currently just an inline block), (3) revisit [[DEC-015]]'s security gap before any real launch.
+Next real steps, not blocked on each other: (1) decide whether to defer the misleading sound control to post-MVP or implement real sound; build real dark-mode CSS as a separate cross-cutting change, (2) a proper Lesson Result screen (currently just an inline block), (3) establish an Admin SDK/Cloud Function content-authoring path when curriculum editing moves beyond manual operations.
