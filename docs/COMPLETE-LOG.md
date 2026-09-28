@@ -375,3 +375,6 @@ Chronological log of completed units of work. One entry per meaningful change (n
   new generation and submission ID for the retry attempt.
 - Added `Review mistakes`, which routes to the existing `/review` queue without
   changing its Leitner scheduling or persistence behavior.
+- Added the inline lesson Result summary from the transient `LessonResult`:
+  accuracy, WPM, duration, all rejected keystrokes, and unique mistyped words.
+  The action response and persisted learner state remain unchanged.

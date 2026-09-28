@@ -2,7 +2,11 @@ import { useEffect, useRef } from 'react'
 import { useFetcher } from 'react-router'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
 import { getCharacterStates, getComposedText } from '../../domain/korean/typing-session'
-import { getLessonProgress, getLessonResult } from '../../domain/korean/lesson-session'
+import {
+  getLessonProgress,
+  getLessonResult,
+  type LessonResult,
+} from '../../domain/korean/lesson-session'
 import { KEY_TO_JAMO } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import type { Lesson } from '../../domain/models/lesson'
@@ -11,9 +15,14 @@ import type { UserSettings } from '../../domain/models/user-profile'
 
 type KeyboardSettings = Pick<UserSettings, 'showKeyboard' | 'showEnglishKeys' | 'keyboardOpacity'>
 
+export interface LessonCompletion {
+  outcome: CompleteLessonOutcome
+  result: LessonResult
+}
+
 interface LessonTypingSessionProps {
   lesson: Lesson
-  onComplete: (outcome: CompleteLessonOutcome) => void
+  onComplete: (completion: LessonCompletion) => void
   keyboardSettings: KeyboardSettings
 }
 
@@ -26,6 +35,7 @@ export default function LessonTypingSession({
   const fetcher = useFetcher<CompleteLessonOutcome>()
   const hasStarted = useRef(false)
   const hasSubmitted = useRef(false)
+  const completedResult = useRef<LessonResult | null>(null)
   // useLessonSessionStore is a module-level singleton, so `session`/`generation`
   // may still belong to a previous lesson's mount (possibly already completed)
   // until this mount's own start() call lands. myGenerationRef pins the exact
@@ -64,6 +74,7 @@ export default function LessonTypingSession({
     if (session?.status === 'completed' && submissionId && !hasSubmitted.current) {
       hasSubmitted.current = true
       const result = getLessonResult(session)
+      completedResult.current = result
       fetcher.submit({
         submissionId,
         accuracy: result.accuracy,
@@ -82,8 +93,8 @@ export default function LessonTypingSession({
   }, [session, generation, submissionId, fetcher])
 
   useEffect(() => {
-    if (fetcher.state === 'idle' && fetcher.data) {
-      onComplete(fetcher.data)
+    if (fetcher.state === 'idle' && fetcher.data && completedResult.current) {
+      onComplete({ outcome: fetcher.data, result: completedResult.current })
     }
   }, [fetcher.state, fetcher.data, onComplete])
 
