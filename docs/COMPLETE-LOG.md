@@ -262,3 +262,17 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Expanded planned work for shared result aggregation, derived Topic/Position
   displays, Daily Quest persistence, and idempotent rewards. No source code,
   Firebase configuration, Firestore rules, adapters, or migrations changed.
+
+### 2026-09-28 — Session and History architecture (documentation only)
+
+- Added `docs/SESSION-AND-HISTORY.md` and recorded [[DEC-029]], separating
+  submitted activity history from current learner state and lifetime UserStats.
+- Defined one discriminated LearningSession context across Learning Path and all
+  practice modes; raw counters and timing derive accuracy/WPM without detailed
+  event persistence.
+- Defined start-time session IDs, reuse on the same logical-submit retry, new
+  IDs for real replays, and logical exactly-once effects across history and
+  shared learner-state aggregation. The persistence mechanism remains deferred.
+- Added planned domain, repository, local/Firebase persistence, history query,
+  and future presentation work. No source code, Firebase configuration,
+  Firestore rules, adapters, or migrations changed.

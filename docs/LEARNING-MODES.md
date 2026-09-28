@@ -44,6 +44,11 @@ shared content. They do not write `LessonProgress` and never unlock Learning
 Path progression. They may update shared statistics, vocabulary progress,
 jamo statistics, and review scheduling according to their rules.
 
+Every submitted experience creates one `LearningSession` history record through
+the shared submission boundary. That record describes the activity; it does not
+control EXP, review scheduling, or Learning Path progression. See
+`docs/SESSION-AND-HISTORY.md`.
+
 Initial practice experiences are:
 
 - Topics

@@ -2,7 +2,7 @@
 
 Mirrors the MVP checklist in `README.md`. Update both when status changes. Statuses: `Not started`, `In progress`, `Blocked`, `Done`.
 
-Last updated: 2026-09-27 (Learning Modes and auth/persistence target architectures documented; implementation pending)
+Last updated: 2026-09-28 (Learning Modes, auth/persistence, and session-history target architectures documented; implementation pending)
 
 ## MVP
 
@@ -32,6 +32,20 @@ Last updated: 2026-09-27 (Learning Modes and auth/persistence target architectur
 | Keyboard Position stats derived from JamoStats | Not started | Position is a view/filter over expected-jamo records; no PositionProgress. |
 | DailyQuestProgress persistence | Not started | Stable 10-item `dailyQuestProgress/{dateKey}` record with completion and reward state; timezone policy still to be decided. |
 | Daily Quest idempotent EXP reward | Not started | Grant EXP once per dateKey; retries still update shared state but cannot award again. |
+
+## Planned Session History
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| LearningSession domain model | Not started | One submitted historical activity record with stable start-time session ID and discriminated context ([[DEC-029]]). |
+| LearningSession repository interface | Not started | Shared application contract for local and Firebase history adapters. |
+| Local IndexedDB session persistence | Not started | Guest session history under the existing 90-day inactivity retention policy. |
+| Firestore session persistence | Not started | Authenticated history at `users/{userId}/learningSessions/{sessionId}`. |
+| Exactly-once submission integration | Blocked | Implementation must choose an idempotency/atomicity mechanism spanning history and aggregate learner-state updates. |
+| Session history recording | Not started | Create a LearningSession from each successfully submitted logical session. |
+| History read/query use case | Not started | Future read model over LearningSession records; no UI in this task. |
+| History UI | Not started | Future presentation of session history. |
+| Summary and analytics | Not started | Future consumers of LearningSession; no persisted period aggregates or analytics schema yet. |
 
 ## Planned Authentication and Persistence
 
@@ -69,7 +83,7 @@ Last updated: 2026-09-27 (Learning Modes and auth/persistence target architectur
 
 ## Current Focus
 
-**Pending model and persistence migration:** [[DEC-022]]–[[DEC-028]] define the target vocabulary, shared learner-state checkpoints, Learning Modes, and Guest/authenticated persistence architecture. The current Firebase Anonymous Auth / Firestore-only path is legacy implementation; no migration or code change has been made in this documentation pass. See `docs/AUTH-AND-PERSISTENCE.md`.
+**Pending model and persistence migration:** [[DEC-022]]–[[DEC-029]] define the target vocabulary, shared learner-state checkpoints, Learning Modes, Session History, and Guest/authenticated persistence architecture. The current Firebase Anonymous Auth / Firestore-only path is legacy implementation; no migration or code change has been made in this documentation pass. See `docs/AUTH-AND-PERSISTENCE.md`.
 
 **Legacy implementation detail:** Keyboard settings and Review preview context currently ship through the Firestore-only path. `showKeyboard`, `showEnglishKeys`, and `keyboardOpacity` flow from route-loaded `UserSettings` into both `LessonTypingSession` and `ReviewTypingSession`, then into `VirtualKeyboard`; new profiles default to `keyboardOpacity: 0.7`, while saved settings are unchanged. `showEnglishKeys` is removed from the target model by [[DEC-027]]. `ReviewPage.loader.ts` loads due items and settings in parallel, then calls `application/get-review-previews.ts`, which batches unique source-lesson reads and joins each item to an optional exercise. The Review preview applies the existing meaning/romanization preferences and retains Korean-only rows if a source lesson or exercise no longer exists. This round deliberately excludes sound, dark mode, and vocabulary metadata during an active typing session. Verification results are recorded in `docs/COMPLETE-LOG.md`.
 

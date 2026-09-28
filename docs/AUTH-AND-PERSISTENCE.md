@@ -71,8 +71,9 @@ React components must not copy IndexedDB records into Firestore. Content
 repositories remain shared read access; learner-state repositories select the
 local or Firebase adapter based on the session. IndexedDB, not `localStorage`,
 is the primary local store for guest lesson progress, vocabulary progress,
-review items, jamo stats, daily quests, user stats, and profile. `localStorage`
-may hold only small UI/session hints where appropriate.
+review items, jamo stats, daily quests, learning-session history, user stats,
+and profile. `localStorage` may hold only small UI/session hints where
+appropriate.
 
 Because Guests do not authenticate with Firebase yet access the same learning
 content, a future Firestore-rules implementation must permit the required
@@ -114,7 +115,8 @@ cleaned up only after migration succeeds; it must never be deleted first.
 An existing cloud account is a merge scenario, not an empty target. A migration
 must not replace cloud learner state wholesale with a Guest snapshot. A future
 implementation must preserve the deterministic identities already defined for
-Progress, VocabularyProgress, JamoStats, DailyQuestProgress, and ReviewItems.
+Progress, VocabularyProgress, JamoStats, DailyQuestProgress, ReviewItems, and
+LearningSessions.
 
 ### Minimum merge principles
 
@@ -123,6 +125,7 @@ Progress, VocabularyProgress, JamoStats, DailyQuestProgress, and ReviewItems.
 - Never award EXP twice because data was migrated.
 - Never create duplicate Daily Quest rewards.
 - Never create duplicate vocabulary-backed ReviewItems.
+- Preserve a Guest LearningSession ID when it is migrated.
 - Retain local Guest data until the migration has succeeded.
 
 ## Unresolved migration policy

@@ -2,7 +2,7 @@
 
 Field-level target schema for the entities referenced in `README.md`'s Firestore Data Model section. Fills the gap between collection paths (README) and actual `domain/models/*.ts` code. Update this file whenever a model's shape changes — it is the source of truth for field names/types, not the code comments. Where the current implementation differs, this document records the intended model and the implementation must be brought into line in a separate change.
 
-Conventions: document-backed cloud entities (`Course`, `Unit`, `Lesson`, `VocabularyEntry`, `Topic`, `UserProfile`, and `ReviewItem`) expose `id`, which is exactly the Firestore document ID. It is never stored again as a cloud document field; Firestore mappers derive it from the document snapshot and use it to address writes. The same domain entities may be persisted locally for a Guest using their stable IDs. `LessonExercise.id` is different: it is an embedded identifier stored inside a Lesson document, not a Firestore document ID. Per-user state records use their target key as the document ID and stored field: `Progress.lessonId`, `VocabularyProgress.vocabularyId`, `JamoStat.jamoId`, and `DailyQuestProgress.dateKey`. All relationships use string IDs, never Firestore `DocumentReference` values. Persistence adapters map their timestamp format to `Date` in the domain layer. See `docs/AUTH-AND-PERSISTENCE.md` for persistence selection.
+Conventions: document-backed cloud entities (`Course`, `Unit`, `Lesson`, `VocabularyEntry`, `Topic`, `UserProfile`, `ReviewItem`, and `LearningSession`) expose `id`, which is exactly the Firestore document ID. It is never stored again as a cloud document field; Firestore mappers derive it from the document snapshot and use it to address writes. The same domain entities may be persisted locally for a Guest using their stable IDs. `LessonExercise.id` is different: it is an embedded identifier stored inside a Lesson document, not a Firestore document ID. Per-user state records use their target key as the document ID and stored field: `Progress.lessonId`, `VocabularyProgress.vocabularyId`, `JamoStat.jamoId`, and `DailyQuestProgress.dateKey`. All relationships use string IDs, never Firestore `DocumentReference` values. Persistence adapters map their timestamp format to `Date` in the domain layer. See `docs/AUTH-AND-PERSISTENCE.md` for persistence selection.
 
 ---
 
@@ -225,6 +225,47 @@ again after `expAwarded` is true.
 
 ---
 
+## LearningSession (per-user history)
+
+**Authenticated path:** `users/{userId}/learningSessions/{sessionId}`
+**Planned file:** `domain/models/learning-session.ts`
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| id | string | document ID, generated when the active session starts; retained when its logical submit retries |
+| context | `LearningSessionContext` | discriminated source/mode context below |
+| startedAt | Date | active session start time |
+| completedAt | Date | submitted completion time |
+| durationSeconds | number | non-negative active-session duration |
+| exercisesAttempted | number | submitted exercises in this activity |
+| acceptedKeystrokes | number | raw accepted input in this activity |
+| rejectedKeystrokes | number | raw rejected input in this activity |
+| expGained | number | EXP actually awarded by this submitted activity; `0` when none is awarded |
+
+`LearningSessionContext` is a discriminated union, persisted as an embedded
+object:
+
+```ts
+type LearningSessionContext =
+  | { mode: 'learning-path'; lessonId: string }
+  | { mode: 'daily-quest'; dateKey: string }
+  | { mode: 'topic'; topicId: string }
+  | { mode: 'keyboard-position'; positionId: string }
+  | { mode: 'review' }
+  | { mode: 'random' };
+```
+
+Accuracy and WPM are derived from the raw counters and duration using the same
+zero guards and five-keystrokes-per-word convention as `UserStats`. This is a
+historical activity record, not a source of truth for current learner state,
+rewards, or curriculum progression. A retry after a failed logical submission
+uses the same `id`; a real replay starts a new session and receives a new ID.
+No raw keystrokes, `MistakeEvent` arrays, exercise snapshots, or per-jamo maps
+are persisted in MVP. Guest records use the equivalent IndexedDB adapter and
+retain the same ID for future account migration. See `docs/SESSION-AND-HISTORY.md`.
+
+---
+
 ## ReviewItem (per-user)
 
 **Path:** `users/{userId}/reviewItems/{itemId}`
@@ -339,6 +380,7 @@ Previously open, now decided — see `docs/DECISIONS.md` for full rationale:
 12. **Learning Modes** ([[DEC-026]]) — Learning Path progression, Daily Quest, and Practice Modes are distinct experiences over shared content and learner state.
 13. **Authentication and persistence** ([[DEC-027]]) — Guest and authenticated sessions use the same learner model with IndexedDB or Firestore persistence; Guest-to-account migration has safety principles but deliberately unresolved field-level merge rules.
 14. **Shared learner-state checkpoint semantics** ([[DEC-028]]) — VocabularyProgress and JamoStat aggregate submitted results across modes; DailyQuestProgress distinguishes completion from its idempotent EXP reward.
+15. **Session history** ([[DEC-029]]) — LearningSession records submitted activity once per logical session, independently of current learner state and lifetime aggregates.
 
 The unresolved Guest-to-account field-level merge policy is intentionally held in
 `docs/AUTH-AND-PERSISTENCE.md`, not decided in this schema document.

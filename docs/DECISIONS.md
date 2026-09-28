@@ -524,3 +524,45 @@ shared-state rules in `docs/LEARNING-MODES.md`. The `dateKey` timezone policy,
 vocabulary-selection algorithm, and Guest-to-account field-level merge formulas
 remain unresolved. This is documentation only; no persistence, migration, or
 typing-engine implementation changes.
+
+---
+
+## DEC-029 — Session history separated from learner state and lifetime aggregates
+
+**Date:** 2026-09-28
+**Status:** Accepted
+
+**Decision:** `LearningSession` is the single historical record for a submitted
+Learning Path, Daily Quest, Topic, Keyboard Position, Review, or Random
+Practice activity. It records raw session totals, timing, actual EXP gained,
+and a discriminated `LearningSessionContext` for source context. Accuracy and
+WPM are derived from raw counters and duration. It does not persist detailed
+keystrokes, `MistakeEvent` arrays, exercise snapshots, or per-jamo maps.
+
+LearningSession is distinct from current learner state (`LessonProgress`,
+`VocabularyProgress`, `JamoStat`, `ReviewItem`, and `DailyQuestProgress`) and
+from lifetime aggregate `UserStats`. A shared submitted-session aggregation
+updates all applicable records and creates history. Learning Path may also
+update LessonProgress; Daily Quest may update DailyQuestProgress. History never
+decides rewards, spaced-repetition scheduling, or curriculum progression.
+
+`sessionId` is generated when active practice begins. A retry of the same
+logical submission reuses it; an intentional replay starts a new ID. The
+submitted session must therefore have logical exactly-once effects across its
+LearningSession record and aggregate learner-state updates. The concrete
+idempotency/atomicity mechanism is deferred to implementation.
+
+Guest and authenticated learners share these semantics. Guest sessions persist
+in IndexedDB under the existing 90-day inactivity retention policy;
+authenticated sessions persist at `users/{userId}/learningSessions/{sessionId}`.
+Migration preserves their IDs and must not create duplicate history records.
+
+**Why:** Session records answer what happened during an activity without
+overloading current state or forcing lifetime totals to be recomputed from an
+unbounded history. A single model prevents mode-specific history silos while
+stable IDs make retries and Guest-to-account migration safe.
+
+**Consequences:** History and future Summary can query LearningSession records;
+they do not introduce persisted period aggregates, a detailed analytics schema,
+or a History UI. Only submitted/completed sessions are stored in MVP; abandoned
+session recovery is deferred. See `docs/SESSION-AND-HISTORY.md`.

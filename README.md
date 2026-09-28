@@ -50,6 +50,7 @@ Daily Quest                   Course / Unit / Lesson     LessonProgress
 Learning Path                 LessonExercise              VocabularyProgress
 Practice: Topic / Position    Vocabulary / Topics         JamoStats / ReviewItem
                                                           DailyQuestProgress / UserProfile
+                                                          LearningSession (history)
 ```
 
 The structured `Course → Unit → Lesson → LessonExercise` hierarchy belongs only
@@ -57,6 +58,10 @@ to the Learning Path. Daily Quest and Practice Modes reuse shared vocabulary
 and keyboard content; they do not unlock Learning Path lessons. See
 [Learning Modes Architecture](docs/LEARNING-MODES.md) for target behavior and
 implementation status.
+
+Each submitted learning activity also creates a historical `LearningSession`.
+It is separate from current learner state and lifetime `UserStats`; see
+[Session and History Architecture](docs/SESSION-AND-HISTORY.md).
 
 ## Initial Scope
 
@@ -344,7 +349,7 @@ Jamozy is currently in early development.
 
 > [!NOTE]
 > The target data model is defined in `docs/DOMAIN-MODEL.md`,
-> [Authentication and Persistence](docs/AUTH-AND-PERSISTENCE.md), and DEC-022 through DEC-028.
+> [Authentication and Persistence](docs/AUTH-AND-PERSISTENCE.md), and DEC-022 through DEC-029.
 > The current implementation and persisted Firestore data are still being migrated to match it.
 
 Current work focuses on:
@@ -357,6 +362,7 @@ Current work focuses on:
   progression, VocabularyProgress, JamoStats, Topics, and Daily Quest.
 - Guest-local persistence, authenticated accounts, and safe Guest-to-account
   migration.
+- Shared LearningSession history and its exactly-once submission boundary.
 
 ### MVP
 
