@@ -3,6 +3,8 @@ import { courseRepo, lessonRepo, progressRepo as firebaseProgressRepo, userProfi
 import { GuestSessionRepository } from '../infrastructure/local/guest-session-repository'
 import { LocalProgressRepository, LocalReviewRepository, LocalUserProfileRepository } from '../infrastructure/local/local-repositories'
 import { createLearnerRepositories } from './learner-repositories'
+import { FirebaseAuthRepository } from '../infrastructure/firebase/firebase-auth-repository'
+import { SessionManager } from '../application/session-manager'
 import CourseListPage from '../features/course/CourseListPage'
 import { createCourseListLoader } from '../features/course/CourseListPage.loader'
 import { createCourseListAction } from '../features/course/CourseListPage.action'
@@ -23,8 +25,11 @@ import RouteError from './RouteError'
 import NotFoundPage from './NotFoundPage'
 
 const localUserProfileRepo = new LocalUserProfileRepository()
+const guestSessions = new GuestSessionRepository(undefined, crypto, localUserProfileRepo)
+const firebaseAuthRepo = new FirebaseAuthRepository()
+const sessionManager = new SessionManager(firebaseAuthRepo, guestSessions)
 const learners = createLearnerRepositories({
-  sessions: new GuestSessionRepository(undefined, crypto, localUserProfileRepo),
+  sessions: sessionManager,
   guest: { progressRepo: new LocalProgressRepository(), reviewRepo: new LocalReviewRepository(), userProfileRepo: localUserProfileRepo },
   authenticated: { progressRepo: firebaseProgressRepo, reviewRepo: firebaseReviewRepo, userProfileRepo: firebaseUserProfileRepo },
 })
@@ -38,8 +43,9 @@ export const router = createBrowserRouter([
       reviewRepo,
       userProfileRepo,
       ensureUser: getActiveUser,
+      getSession: () => sessionManager.getActiveSession(),
     }),
-    action: createCourseListAction({ userProfileRepo, ensureUser: getActiveUser }),
+    action: createCourseListAction({ userProfileRepo, ensureUser: getActiveUser, auth: firebaseAuthRepo }),
     ErrorBoundary: RouteError,
   },
   {
@@ -113,3 +119,5 @@ export const router = createBrowserRouter([
     Component: NotFoundPage,
   },
 ])
+
+sessionManager.onChange(() => router.revalidate())

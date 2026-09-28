@@ -142,10 +142,10 @@ before a successful, durable Cloud write.
 
 ## Implementation status
 
-This is a documentation-only target design. It does not implement IndexedDB
-repositories, Email/password authentication, Google Sign-In, migration, a
-cleanup worker, Firebase configuration changes, or Firestore rule changes.
-Those tasks are tracked in `docs/PROGRESS.md`.
+Guest IndexedDB persistence plus Email/password and Google Sign-In now ship.
+They select local or Firebase learner repositories through the active session.
+Guest-to-account migration, cleanup, LearningSession/aggregate idempotency, and
+Firebase Console provider configuration remain pending. See `docs/PROGRESS.md`.
 
 ## Historical implementation
 

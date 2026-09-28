@@ -9,6 +9,7 @@ export interface CourseListLoaderData {
   courses: Course[]
   dueReviewCount: number
   displayName: string
+  isAuthenticated: boolean
 }
 
 export function createCourseListLoader(deps: {
@@ -16,10 +17,12 @@ export function createCourseListLoader(deps: {
   reviewRepo: ReviewRepository
   userProfileRepo?: UserProfileRepository
   ensureUser: () => Promise<{ uid: string }>
+  getSession?: () => Promise<{ kind: string }>
 }) {
   return async (): Promise<CourseListLoaderData> => {
     const user = await deps.ensureUser()
     const [courses, items, profile] = await Promise.all([getCourses(deps.courseRepo), getDueReviewItems(deps.reviewRepo, user.uid), deps.userProfileRepo?.getUserProfile(user.uid) ?? null])
-    return { courses, dueReviewCount: items.length, displayName: profile?.displayName ?? 'Guest' }
+    const session = await deps.getSession?.()
+    return { courses, dueReviewCount: items.length, displayName: profile?.displayName ?? 'Guest', isAuthenticated: session?.kind === 'authenticated' }
   }
 }

@@ -287,7 +287,7 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Marked the migration conflict-policy decision done in `docs/PROGRESS.md`.
   The concrete exactly-once persistence mechanism remains implementation work.
 
-### 2026-09-28 — Guest-local persistence foundation (verification pending)
+### 2026-09-28 — Guest-local persistence foundation
 
 - Replaced route-time Firebase Anonymous Auth with a generated local Guest
   session, native IndexedDB adapters for current learner state, and
@@ -296,7 +296,19 @@ Chronological log of completed units of work. One entry per meaningful change (n
   checked-in Firestore rules for unauthenticated content reads only. Rules were
   deployed by the user.
 - Added local-adapter, session-composition, and Course List loader regression
-  tests. Full test verification remains pending user-run results.
+  tests. User ran `pnpm test`: 50 test files and 212 tests passed.
+
+### 2026-09-28 — Authenticated session without Guest migration
+
+- Added Email/password and Google popup authentication behind a Firebase Auth
+  adapter, with a session manager that selects Firebase learner repositories
+  while authenticated and restores the existing Guest session after sign-out.
+- Added the Course List sign-in modal and revalidation on auth-state changes.
+  A first cloud profile uses a Google display name when available, otherwise
+  `Learner`; no Guest data is copied, deleted, or otherwise migrated.
+- User verified `pnpm test` (51 files, 214 tests) and `pnpm build` pass. Vite
+  warned that a minified chunk exceeds 500 kB; this is a non-blocking
+  performance follow-up.
 
 ### 2026-09-28 — Agent documentation routing
 
