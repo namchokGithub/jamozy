@@ -256,6 +256,36 @@ describe('LessonDetailPage', () => {
     await waitFor(() => expect(action).toHaveBeenCalledTimes(2))
   })
 
+  it('opens the review queue from the completion block', async () => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/',
+          Component: LessonDetailPage,
+          loader: async () => ({
+            lesson: makeLesson(),
+            settings: makeSettings(),
+            courseId: 'c1',
+          }),
+          action: async () => fakeOutcome,
+        },
+        { path: '/review', Component: () => <h1>Review queue</h1> },
+      ],
+      { initialEntries: ['/'] },
+    )
+    render(<RouterProvider router={router} />)
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
+    await screen.findByText('가')
+    fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
+    fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
+    await screen.findByText('Lesson complete!')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Review mistakes' }))
+
+    expect(await screen.findByRole('heading', { name: 'Review queue' })).toBeInTheDocument()
+  })
+
   it('continues to the newly unlocked lesson from the completion block', async () => {
     const router = createMemoryRouter(
       [

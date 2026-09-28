@@ -52,6 +52,13 @@ function LessonDetailContent({
         </button>
         <button
           type="button"
+          onClick={() => navigate('/review')}
+          className="ml-3 rounded-lg border border-slate-300 px-4 py-2 text-slate-900"
+        >
+          Review mistakes
+        </button>
+        <button
+          type="button"
           onClick={() =>
             navigate(
               outcome.unlockedNextLessonId
