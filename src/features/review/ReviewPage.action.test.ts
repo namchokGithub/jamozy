@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createSubmitReviewSessionAction } from './ReviewPage.action'
-import { FakeReviewRepository } from '../../test/fakes'
+import { FakeReviewRepository, FakeSessionSubmissionRepository } from '../../test/fakes'
 import type { ReviewItem } from '../../domain/models/review-item'
 
 function makeItem(id: string, overrides: Partial<ReviewItem> = {}): ReviewItem {
@@ -24,11 +24,11 @@ describe('createSubmitReviewSessionAction', () => {
     const reviewRepo = new FakeReviewRepository()
     await reviewRepo.addReviewItem('user1', makeItem('a'))
     const ensureUser = vi.fn().mockResolvedValue({ uid: 'user1' })
-    const action = createSubmitReviewSessionAction({ reviewRepo, ensureUser })
+    const action = createSubmitReviewSessionAction({ reviewRepo, sessionSubmissionRepo: new FakeSessionSubmissionRepository(), ensureUser })
 
     const request = new Request('http://localhost/review', {
       method: 'POST',
-      body: JSON.stringify({ results: [{ itemId: 'a', wasCorrect: true }] }),
+      body: JSON.stringify({ submissionId: 'review-1', startedAtMs: 0, durationSeconds: 30, exercisesAttempted: 1, acceptedKeystrokes: 2, rejectedKeystrokes: 0, results: [{ itemId: 'a', wasCorrect: true }] }),
     })
 
     const outcome = await action({ request } as never)
@@ -41,6 +41,7 @@ describe('createSubmitReviewSessionAction', () => {
     const reviewRepo = new FakeReviewRepository()
     const action = createSubmitReviewSessionAction({
       reviewRepo,
+      sessionSubmissionRepo: new FakeSessionSubmissionRepository(),
       ensureUser: vi.fn().mockResolvedValue({ uid: 'user1' }),
     })
     const request = new Request('http://localhost/review', {

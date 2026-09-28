@@ -3,6 +3,7 @@ import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import ProfilePage from './ProfilePage'
 import type { ProfileSummary } from '../../application/get-profile-summary'
+import { emptySessionAggregate } from '../../domain/models/session-aggregate'
 
 function makeSummary(overrides: Partial<ProfileSummary> = {}): ProfileSummary {
   return {
@@ -16,6 +17,7 @@ function makeSummary(overrides: Partial<ProfileSummary> = {}): ProfileSummary {
       averageSpeedWpm: 23.84729,
       totalTypingTimeSeconds: 3665,
     },
+    sessionAggregate: emptySessionAggregate(),
     ...overrides,
   }
 }

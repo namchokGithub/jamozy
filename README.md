@@ -33,20 +33,44 @@ and sentences while improving typing accuracy and speed.
 - Practice mode
 - Learning progress tracking
 - Simple EXP and Level system
-- Persistent learning progress with Firebase
+- Guest-local or account-backed learning progress
 - Configurable learning settings
 
 ## Learning Flow
 
 Learn → Type → Review → Improve → Unlock
 
+## Learning Modes
+
+Jamozy separates learner experiences from reusable content and learner state:
+
+```text
+Experience                    Content                    Learner State
+Daily Quest                   Course / Unit / Lesson     LessonProgress
+Learning Path                 LessonExercise              VocabularyProgress
+Practice: Topic / Position    Vocabulary / Topics         JamoStats / ReviewItem
+                                                          DailyQuestProgress / UserProfile
+                                                          LearningSession (history)
+```
+
+The structured `Course → Unit → Lesson → LessonExercise` hierarchy belongs only
+to the Learning Path. Daily Quest and Practice Modes reuse shared vocabulary
+and keyboard content; they do not unlock Learning Path lessons. See
+[Learning Modes Architecture](docs/LEARNING-MODES.md) for target behavior and
+implementation status.
+
+Each submitted learning activity also creates a historical `LearningSession`.
+It is separate from current learner state and lifetime `UserStats`; see
+[Session and History Architecture](docs/SESSION-AND-HISTORY.md).
+
 ## Initial Scope
 
 The first version focuses on the core Korean typing learning experience.
 
-Firebase Anonymous Authentication is used to identify learners without requiring
-a traditional sign-up flow, while Cloud Firestore stores learning content and
-user progress.
+Guests use a required display name and device-local persistence. Learners who
+create or sign in to an account use Email/password or Google Sign-In with
+cloud-backed Firestore persistence. Authentication selects persistence; it does
+not change learning behavior. See [Authentication and Persistence](docs/AUTH-AND-PERSISTENCE.md).
 
 The MVP does not include multiplayer, leaderboards, social features, or other
 competitive systems.
@@ -73,43 +97,49 @@ Package Manager: pnpm
 ```mermaid
 flowchart TD
     A[Jamozy]
-    B[Firebase Anonymous Auth]
-    C[Cloud Firestore]
+    B[Guest session]
+    C[IndexedDB]
+    D[Firebase Auth]
+    E[Cloud Firestore]
 
-    D[Learning Content]
-    E[User Data]
+    F[Learning Content]
+    G[User Data]
 
-    F[Courses]
-    G[Units]
-    H[Lessons]
+    H[Courses]
+    I[Units]
+    J[Lessons]
 
-    I[Progress]
-    J[Review]
-    K[Stats]
+    K[Progress]
+    L[Review]
+    M[Stats]
 
-    L[React App]
-    M[Zustand]
-    N[Current Session]
+    N[React App]
+    O[Zustand]
+    P[Current Session]
 
     A --> B
     B --> C
+    A --> D
+    D --> E
+    A --> F
 
-    C --> D
-    C --> E
+    E --> F
+    C --> G
+    E --> G
 
-    D --> F
-    D --> G
-    D --> H
+    F --> H
+    F --> I
+    F --> J
 
-    E --> I
-    E --> J
-    E --> K
+    G --> K
+    G --> L
+    G --> M
 
-    D --> L
-    E --> L
+    F --> N
+    G --> N
 
-    L --> M
-    M --> N
+    N --> O
+    O --> P
 ```
 
 ## Data Layer
@@ -121,9 +151,7 @@ Application / Use Cases
    ↓
 Repository Interfaces
    ↓
-Firebase Repositories
-   ↓
-Firestore
+Local Guest Repositories (IndexedDB)  |  Firebase Repositories (Firestore)
 ```
 
 ## Folder Structure
@@ -281,20 +309,28 @@ VITE_FIREBASE_USE_EMULATOR=0
 
 ## Firestore Data Model
 
+Learning content collections are shared by both learner modes. The `users` tree
+is authenticated learner state only; the equivalent Guest state is stored in
+IndexedDB. See [Authentication and Persistence](docs/AUTH-AND-PERSISTENCE.md).
+
 ```text
 courses/{courseId}
 units/{unitId}
 lessons/{lessonId}
 vocabulary/{vocabularyId}
+topics/{topicId}
 
-users/{userId}
+users/{userId} (authenticated Firebase Auth UID only)
 users/{userId}/lessonProgress/{lessonId}
+users/{userId}/vocabularyProgress/{vocabularyId}
+users/{userId}/jamoStats/{jamoId}
 users/{userId}/reviewItems/{itemId}
+users/{userId}/dailyQuestProgress/{dateKey}
 ```
 
 > Learning content and user progress are stored separately.
 
-Progress documents are created lazily: a missing `lessonProgress` document means a lesson is locked. Learning order is `Course.order → Unit.order → Lesson.order`; document IDs do not determine which lesson unlocks next.
+Progress documents are created lazily: a missing `lessonProgress` document means a lesson is locked. Learning order is `Course.order → Unit.order → Lesson.order`; document IDs do not determine which lesson unlocks next. Guest learner state has the same domain shape but is stored in IndexedDB, not in Firestore.
 
 For document-backed domain entities, the domain `id` is the Firestore document ID and is not duplicated in document data. Embedded exercise IDs and Progress's `lessonId` follow the exceptions documented in `docs/DOMAIN-MODEL.md`.
 
@@ -312,7 +348,8 @@ Jamozy is currently in early development.
 ## Next Implementation Focus
 
 > [!NOTE]
-> The target data model is defined in `docs/DOMAIN-MODEL.md` and DEC-022 through DEC-025.
+> The target data model is defined in `docs/DOMAIN-MODEL.md`,
+> [Authentication and Persistence](docs/AUTH-AND-PERSISTENCE.md), and DEC-022 through DEC-031.
 > The current implementation and persisted Firestore data are still being migrated to match it.
 
 Current work focuses on:
@@ -321,6 +358,12 @@ Current work focuses on:
 - simplified lesson-progress persistence (`missing` = locked);
 - raw typing-stat counters with derived accuracy and WPM;
 - updated `ReviewItem` identity and Leitner lifecycle.
+- Learning Modes shared-state architecture, including contiguous Learning Path
+  progression, VocabularyProgress, JamoStats, Topics, and Daily Quest.
+- Guest-local persistence, authenticated accounts, and safe automatic
+  Guest-to-account migration. Cleanup remains deferred.
+- Shared LearningSession history and its exactly-once submission boundary for
+  Lesson and Review; history read/UI and other modes remain deferred.
 
 ### MVP
 
@@ -332,14 +375,14 @@ Current work focuses on:
 - [ ] Lesson results
 - [x] Review system
 - [x] EXP and Level progression
-- [ ] Firebase Anonymous Authentication
-- [x] Firestore progress persistence
+- [x] Guest local persistence and authenticated accounts
+- [x] Authenticated Firestore persistence migration
 - [x] Settings
 
 ### Later
 
-- [ ] Google account linking
-- [ ] Cloud profile sync
+- [ ] Account linking between authentication providers
+- [ ] History, summaries, and analytics for authenticated accounts
 - [ ] Achievements
 - [ ] Daily streaks
 - [ ] Pronunciation audio

@@ -58,6 +58,13 @@ export default function ProfilePage() {
         </div>
       </dl>
 
+      {summary.sessionAggregate.exercisesAttempted > 0 && (
+        <section className="mt-6">
+          <h2 className="text-lg font-medium text-slate-900">Since session tracking</h2>
+          <p className="mt-1 text-sm text-slate-600">+{summary.sessionAggregate.exp} EXP · {Math.round((summary.sessionAggregate.acceptedKeystrokes / (summary.sessionAggregate.acceptedKeystrokes + summary.sessionAggregate.rejectedKeystrokes)) * 100 || 0)}% accuracy · {Math.round((summary.sessionAggregate.acceptedKeystrokes / 5) / (summary.sessionAggregate.totalTypingTimeSeconds / 60) || 0)} WPM</p>
+        </section>
+      )}
+
       <Link to="/" className="mt-6 inline-block text-sm text-slate-600 underline">
         Back to Course List
       </Link>

@@ -9,6 +9,9 @@ import type { Lesson } from '../domain/models/lesson'
 import type { Progress } from '../domain/models/progress'
 import type { ReviewItem } from '../domain/models/review-item'
 import type { UserProfile } from '../domain/models/user-profile'
+import type { LearningSession } from '../domain/models/learning-session'
+import { aggregateFromSession } from '../domain/models/session-aggregate'
+import type { SessionSubmissionEffects, SessionSubmissionOutcome, SessionSubmissionRepository } from '../domain/repositories/session-submission-repository'
 
 export class FakeCourseRepository implements CourseRepository {
   constructor(
@@ -98,5 +101,20 @@ export class FakeUserProfileRepository implements UserProfileRepository {
 
   async saveUserProfile(userId: string, profile: UserProfile): Promise<void> {
     this.store.set(userId, profile)
+  }
+}
+
+export class FakeSessionSubmissionRepository implements SessionSubmissionRepository {
+  readonly submissions: Array<{ userId: string; session: LearningSession; effects: SessionSubmissionEffects }> = []
+  private outcomes = new Map<string, SessionSubmissionOutcome>()
+
+  async submit(userId: string, session: LearningSession, effects: SessionSubmissionEffects): Promise<SessionSubmissionOutcome> {
+    const key = `${userId}:${session.id}`
+    const existing = this.outcomes.get(key)
+    if (existing) return { ...existing, wasDuplicate: true }
+    const outcome = { session, aggregate: aggregateFromSession(session), effects, wasDuplicate: false }
+    this.outcomes.set(key, outcome)
+    this.submissions.push({ userId, session, effects })
+    return outcome
   }
 }

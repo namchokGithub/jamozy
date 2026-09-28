@@ -6,6 +6,7 @@ import {
   FakeProgressRepository,
   FakeUserProfileRepository,
   FakeReviewRepository,
+  FakeSessionSubmissionRepository,
 } from '../../test/fakes'
 import type { Lesson } from '../../domain/models/lesson'
 import type { Unit } from '../../domain/models/unit'
@@ -25,6 +26,7 @@ function makeDeps() {
     progressRepo: new FakeProgressRepository(),
     userProfileRepo: new FakeUserProfileRepository(),
     reviewRepo: new FakeReviewRepository(),
+    sessionSubmissionRepo: new FakeSessionSubmissionRepository(),
     ensureUser: vi.fn().mockResolvedValue({ uid: 'user1' }),
   }
 }
@@ -35,7 +37,7 @@ describe('createCompleteLessonSessionAction', () => {
     const action = createCompleteLessonSessionAction(deps)
     const request = new Request('http://localhost/lessons/l1', {
       method: 'POST',
-      body: JSON.stringify({ accuracy: 100, speedWpm: 20, durationSeconds: 30, mistakes: [] }),
+      body: JSON.stringify({ submissionId: 'session-1', accuracy: 100, speedWpm: 20, durationSeconds: 30, startedAtMs: 0, exercisesAttempted: 0, acceptedKeystrokes: 0, rejectedKeystrokes: 0, mistakes: [] }),
     })
 
     const outcome = await action({ params: { lessonId: 'l1' }, request } as never)

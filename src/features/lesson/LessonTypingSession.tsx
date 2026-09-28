@@ -22,7 +22,7 @@ export default function LessonTypingSession({
   onComplete,
   keyboardSettings,
 }: LessonTypingSessionProps) {
-  const { session, start, pressKey, generation } = useLessonSessionStore()
+  const { session, start, pressKey, generation, submissionId } = useLessonSessionStore()
   const fetcher = useFetcher<CompleteLessonOutcome>()
   const hasStarted = useRef(false)
   const hasSubmitted = useRef(false)
@@ -61,23 +61,25 @@ export default function LessonTypingSession({
     if (generation !== myGenerationRef.current) {
       return
     }
-    if (session?.status === 'completed' && !hasSubmitted.current) {
+    if (session?.status === 'completed' && submissionId && !hasSubmitted.current) {
       hasSubmitted.current = true
       const result = getLessonResult(session)
-      fetcher.submit(
-        {
-          accuracy: result.accuracy,
-          speedWpm: result.speedWpm,
-          durationSeconds: result.durationSeconds,
-          mistakes: result.mistakes.map((m) => ({
-            sourceExerciseId: m.sourceExerciseId,
-            targetText: m.targetText,
-          })),
-        },
-        { method: 'post', encType: 'application/json' },
-      )
+      fetcher.submit({
+        submissionId,
+        accuracy: result.accuracy,
+        speedWpm: result.speedWpm,
+        durationSeconds: result.durationSeconds,
+        startedAtMs: result.startedAtMs,
+        exercisesAttempted: result.exercisesAttempted,
+        acceptedKeystrokes: result.acceptedKeystrokes,
+        rejectedKeystrokes: result.rejectedKeystrokes,
+        mistakes: result.mistakes.map((mistake) => ({
+          sourceExerciseId: mistake.sourceExerciseId,
+          targetText: mistake.targetText,
+        })),
+      }, { method: 'post', encType: 'application/json' })
     }
-  }, [session, generation, fetcher])
+  }, [session, generation, submissionId, fetcher])
 
   useEffect(() => {
     if (fetcher.state === 'idle' && fetcher.data) {

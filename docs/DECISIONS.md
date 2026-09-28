@@ -9,13 +9,17 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 ## DEC-001 — Firebase Anonymous Auth for identity, no traditional sign-up
 
 **Date:** 2026-09-23
-**Status:** Accepted
+**Status:** Superseded by DEC-027
 
 **Decision:** Use Firebase Anonymous Authentication to identify learners for the MVP instead of email/password or social sign-up.
 
 **Why:** Removes friction for a casual, single-player typing-practice app. Learners can start practicing immediately without account creation. Cloud profile sync / Google account linking is deferred to a later phase (see README "Later" list).
 
 **Consequences:** User data is tied to a device-local anonymous UID until linking is added. Losing local auth state loses progress access until account linking ships.
+
+**Legacy implementation note:** Existing code, Firebase configuration, rules,
+and older implementation plans may still use this path. It is historical/current
+implementation context only, not the target architecture.
 
 ---
 
@@ -173,7 +177,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 ## DEC-013 — `UserSettings` expanded to the full requirement.md list
 
 **Date:** 2026-09-23
-**Status:** Accepted
+**Status:** Accepted (field shape superseded in part by DEC-027)
 
 **Decision:** `UserSettings` becomes `soundEnabled`, `showKeyboard`, `showEnglishKeys`, `keyboardOpacity`, `romanizationEnabled`, `meaningLanguage: 'th' | 'en' | 'both'`, `theme: 'light' | 'dark'` — replacing the earlier single `keyboardLayoutHint` boolean.
 
@@ -201,18 +205,34 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 
 ---
 
-## DEC-015 — Firestore rules: any signed-in user can write content (MVP-only)
+## DEC-015 — Firestore content-write security boundary
 
 **Date:** 2026-09-23
-**Status:** Accepted (temporary — must revisit before shipping)
+**Status:** Superseded — client content writes locked before launch
 
-**Decision:** Added `firestore.rules` (+ `firebase.json`, `.firebaserc`). `courses`/`units`/`lessons` are readable AND writable by any signed-in user (including Anonymous Auth). `users/{userId}` and its subcollections are readable/writable only by that same `uid`.
+**Original decision:** `courses`/`units`/`lessons` were readable and writable by
+any signed-in user to unblock client-SDK seeding. `users/{userId}` and its
+subcollections were readable/writable only by that same `uid`.
 
-**Why:** `pnpm seed` (client SDK) failed with `PERMISSION_DENIED` — the Firestore database had no rules deployed yet (default deny-all). There's no admin/content-management auth tier built yet (`docs/requirement.md` #15, "Content Management," isn't implemented), and the seed script authenticates the same way any player would (Anonymous Auth). User chose to unblock seeding this way rather than switch to an Admin SDK + service account.
+**Why:** `pnpm seed` (client SDK) initially failed with `PERMISSION_DENIED` —
+the Firestore database had no rules deployed yet. There is no
+admin/content-management tier, and the initial script used the same client SDK
+as a player.
 
-**Consequences — real security gap, not just theoretical:** any signed-in player can currently rewrite `courses`/`units`/`lessons` from the browser console via the Firestore client SDK (vandalize curriculum content, not just their own progress). Acceptable for local MVP development with no real users. **Must be replaced before any public launch** — either a custom-claims admin role, or move content writes to an Admin SDK/Cloud Function path and lock `courses`/`units`/`lessons` to `allow write: if false` for clients. User data rules (`users/{userId}/**`) are already correct/production-safe as written.
+**Implemented replacement:** before launch, client rules were changed to make
+`courses`, `units`, and `lessons` public read-only. No client, including an
+authenticated player, can write those collections. Owner-only rules remain for
+`users/{userId}/**`.
+
+**Consequences:** the client-SDK `pnpm seed` script is no longer a valid way to
+change production content. Future content administration must use an Admin SDK,
+Cloud Function, or Firebase Console procedure with appropriate operational
+access; that authoring path is intentionally out of MVP scope.
 
 **Deploy:** rules aren't live until run — `firebase login` (interactive, user runs this) then `firebase deploy --only firestore:rules`.
+
+**Legacy implementation note:** the original permissive rule is historical and
+does not define the Guest/Authenticated architecture in [[DEC-027]].
 
 ---
 
@@ -229,6 +249,11 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 **Why:** (1) `firestore.rules` ([[DEC-015]]) requires `request.auth != null` for reading `courses`/`units`/`lessons` at all, not just per-user data — but only `CourseMapPage.loader.ts` originally called `signInAnonymouslyIfNeeded()`, so `CourseListPage`/`LessonDetailPage` hit `PERMISSION_DENIED` in the browser. The fix (adding the call) worked, but duplicated the precondition into every loader with no test, and each loader importing `infrastructure/firebase/firebase` directly violates `AGENTS.md`'s layering rule ("never through `infrastructure/firebase` directly from `features/`") — the original plan itself sanctioned that import, so this was a plan defect, not an implementer mistake. (2) The composite-index error only surfaces against real Firestore — none of the fakes-based unit tests model Firestore's index requirements, so nothing caught it before the browser.
 
 **Consequences:** Every loader now takes `ensureUser` as a constructor-style dependency and has a unit test (`*.loader.test.ts`) asserting it's called before any repository read — the exact bug class that broke in the browser is now pinned by a fast, no-network test, not just "eyeball it, low risk" as the original spec assumed. `NotFoundError` (`src/domain/errors.ts`) was added alongside this fix so `RouteError` can show "Not found." instead of a raw error message for a missing course/lesson — same review pass, same root cause category (spec under-tested the loader layer). **Deploy:** `firebase deploy --only firestore:indexes` (in addition to `firestore:rules`) is required before the course map works in any environment, including a fresh `firebase use` on another machine.
+
+**Legacy implementation note:** `ensureUser` and `signInAnonymouslyIfNeeded` are
+current implementation wiring for the superseded Anonymous Auth path. The
+target design in [[DEC-027]] replaces this with session-aware persistence while
+retaining the repository/application boundary.
 
 ---
 
@@ -383,3 +408,230 @@ The flat EXP curve remains in place and is deferred for future game-balance work
 **Why:** Frequency data and provenance are valuable import metadata that must not be discarded. Spelling alone cannot identify a Korean lexical entry. Requiring two translations for every character or syllable misrepresents the content. Storing both a missing-is-locked state and a stored locked status introduces an invalid duplicate state.
 
 **Consequences:** [[DEC-010]]'s required-meaning rule is superseded, and [[DEC-009]]'s three-state Progress model is superseded by the missing/unlocked/completed model. Existing code and persisted documents require a separate implementation/migration change; this decision changes documentation only.
+
+---
+
+## DEC-026 — Learning Modes, shared learner state, and contiguous progression frontier
+
+**Date:** 2026-09-27
+**Status:** Accepted
+
+**Decision:** Keep `Course → Unit → Lesson → LessonExercise` exclusively for
+the structured Learning Path. Daily Quest, Topic, Keyboard Position, Random
+Practice, and Review are separate experiences that select shared content rather
+than Course variants or duplicate curricula.
+
+Learning Path progression uses a contiguous completion frontier: the
+recommended lesson is the first lesson in global order that is not completed.
+A soft-locked future Learning Path lesson may be practiced and completed early;
+that completion is retained. When advancing after a Learning Path completion,
+skip already-completed future lessons but stop at the first missing or unlocked
+lesson. Practice Modes, Daily Quest, and Review never write LessonProgress or
+unlock Learning Path content.
+
+Topics are metadata plus `VocabularyEntry.topicIds` membership. Topic counts
+derive from global VocabularyProgress and use Practiced/Encountered wording;
+part-of-speech groups derive from VocabularyEntry metadata where possible.
+VocabularyProgress is limited to encounter timestamps, exercise count, and raw
+accepted/rejected keystroke counters. JamoStats uses the expected jamo as its
+identity and counter attribution; Keyboard Position only filters those shared
+stats.
+
+Daily Quest owns a stable daily vocabulary set and grants EXP once per quest;
+the dateKey timezone policy is deferred. MVP EXP remains conservative:
+Learning Path follows its existing rule, Daily Quest awards once, and Topic,
+Keyboard Position, Random Practice, and Review award none. All may update
+shared stats/progress/review state where applicable, but never curriculum
+progression.
+
+**Why:** These boundaries let learners revisit and practice shared content in
+multiple experiences without copying content, duplicating mastery systems, or
+letting optional practice bypass curriculum progression. A contiguous frontier
+preserves out-of-order Learning Path work without leaving learners stranded.
+
+**Consequences:** Adds target Topic, VocabularyProgress, JamoStat, and
+DailyQuestProgress documentation. The current code and Firestore data do not
+yet implement this decision; implementation requires separate domain,
+repository, mapper, use-case, migration, and test work.
+
+---
+
+## DEC-027 — Guest local persistence and migration to authenticated accounts
+
+**Date:** 2026-09-27
+**Status:** Accepted
+
+**Decision:** Guest learners do not use Firebase Authentication. They provide a
+display name and receive a locally generated stable guest ID; their learner
+state is stored in IndexedDB and becomes eligible for cleanup after 90 days
+since the last persisted guest activity. Authenticated learners use
+Email/password or Google Sign-In with Firebase Authentication and persist
+learner state in Firestore.
+
+Authentication chooses repository implementations, not learning behavior. The
+same domain models and application use cases serve Guest and authenticated
+sessions through local IndexedDB or Firebase repository adapters. `UserProfile`
+holds a display name and learner data, never authentication provider state.
+`showEnglishKeys` is removed from target UserSettings because English physical
+key labels are always visible with Hangul labels.
+
+Signing in from a Guest state eventually invokes an application-level,
+provider-neutral `MigrateGuestDataToAccount` use case. It copies through
+repository boundaries and is non-destructive, idempotent, and retry-safe.
+Existing cloud data is a merge scenario: local data remains until success, cloud
+state is never blindly replaced, deterministic IDs remain authoritative, and
+duplicate EXP, Daily Quest rewards, or vocabulary-backed ReviewItems are not
+created.
+
+**Why:** A learner can begin without an account while retaining a clear,
+privacy-friendly local persistence boundary. Repository substitution preserves
+the existing clean architecture and avoids teaching every learning feature two
+different behaviors. Safe migration prevents account creation from discarding
+work or overwriting established cloud progress.
+
+**Consequences:** [[DEC-001]] is superseded as the target identity and
+persistence decision. Existing Anonymous Auth, Firestore rules, Firebase
+adapters, and plans that depend on them are legacy implementation records until
+separate implementation work replaces them. Field-level merge formulas are
+defined by [[DEC-030]]. See `docs/AUTH-AND-PERSISTENCE.md`.
+
+---
+
+## DEC-028 — Shared learner-state checkpoints and Daily Quest completion
+
+**Date:** 2026-09-27
+**Status:** Accepted
+
+**Decision:** VocabularyProgress is one accumulated record per learner and
+VocabularyEntry across Learning Path, Daily Quest, Topic, Keyboard Position,
+Review, and future practice modes. It records encounter/practice timestamps and
+raw exercise/keystroke counters only; it has no mastery, familiarity, level,
+score, or streak semantics. Topic displays therefore derive `Practiced` or
+`Encountered` counts from these records rather than owning progress.
+
+JamoStat is likewise one accumulated record per learner and expected jamo.
+Correct input increments its accepted counter; rejected input increments the
+counter for the jamo expected at that position, never the incorrectly pressed
+jamo. Keyboard Position remains a filter over these records. JamoStat records
+both first and latest submitted practice timestamps.
+
+Shared learner-state counters and timestamps are aggregated from submitted
+session results, never written per keystroke. DailyQuestProgress retains the
+existing `dailyQuestProgress/{dateKey}` identity and adds `completedAt` in
+addition to `expAwarded`: completion represents quest status, while
+`expAwarded` makes the once-per-dateKey EXP grant idempotent. A Daily Quest
+retry may update shared learner state and review scheduling, but never grants
+that EXP twice or changes Learning Path progression.
+
+**Why:** One record per underlying target avoids fragmenting learning history by
+mode while retaining distinct responsibilities for curriculum progress, review
+scheduling, global statistics, and quest rewards. Separating completion from
+reward makes a failed/retried reward write observable without treating reward
+status as course progression.
+
+**Consequences:** Extends the target schemas in `docs/DOMAIN-MODEL.md` and the
+shared-state rules in `docs/LEARNING-MODES.md`. The `dateKey` timezone policy,
+vocabulary-selection algorithm, and Guest-to-account field-level merge formulas
+remain unresolved. This is documentation only; no persistence, migration, or
+typing-engine implementation changes.
+
+---
+
+## DEC-029 — Session history separated from learner state and lifetime aggregates
+
+**Date:** 2026-09-28
+**Status:** Accepted
+
+**Decision:** `LearningSession` is the single historical record for a submitted
+Learning Path, Daily Quest, Topic, Keyboard Position, Review, or Random
+Practice activity. It records raw session totals, timing, actual EXP gained,
+and a discriminated `LearningSessionContext` for source context. Accuracy and
+WPM are derived from raw counters and duration. It does not persist detailed
+keystrokes, `MistakeEvent` arrays, exercise snapshots, or per-jamo maps.
+
+LearningSession is distinct from current learner state (`LessonProgress`,
+`VocabularyProgress`, `JamoStat`, `ReviewItem`, and `DailyQuestProgress`) and
+from lifetime aggregate `UserStats`. A shared submitted-session aggregation
+updates all applicable records and creates history. Learning Path may also
+update LessonProgress; Daily Quest may update DailyQuestProgress. History never
+decides rewards, spaced-repetition scheduling, or curriculum progression.
+
+`sessionId` is generated when active practice begins. A retry of the same
+logical submission reuses it; an intentional replay starts a new ID. The
+submitted session must therefore have logical exactly-once effects across its
+LearningSession record and aggregate learner-state updates. The concrete
+idempotency/atomicity mechanism is deferred to implementation.
+
+Guest and authenticated learners share these semantics. Guest sessions persist
+in IndexedDB under the existing 90-day inactivity retention policy;
+authenticated sessions persist at `users/{userId}/learningSessions/{sessionId}`.
+Migration preserves their IDs and must not create duplicate history records.
+
+**Why:** Session records answer what happened during an activity without
+overloading current state or forcing lifetime totals to be recomputed from an
+unbounded history. A single model prevents mode-specific history silos while
+stable IDs make retries and Guest-to-account migration safe.
+
+**Consequences:** History and future Summary can query LearningSession records;
+they do not introduce persisted period aggregates, a detailed analytics schema,
+or a History UI. Only submitted/completed sessions are stored in MVP; abandoned
+session recovery is deferred. See `docs/SESSION-AND-HISTORY.md`.
+
+---
+
+## DEC-030 — Guest-to-account migration merge policy
+
+**Date:** 2026-09-28
+**Status:** Accepted
+
+**Decision:** A Guest-to-account migration unions state by its deterministic
+identity and is idempotent. `LessonProgress` keeps the furthest state
+(`completed` > `unlocked` > `missing`). EXP and `UserStats` raw counters are
+not added as two snapshots; only `LearningSession`s not yet aggregated in the
+Cloud destination contribute their effects. Best accuracy and WPM use their
+maximum values.
+
+`ReviewItem`s union by their deterministic identity and retain the earlier
+`nextReviewAt`, so migration never delays an already-due review. Daily quests
+union by `dateKey`: `completed` and `expAwarded` are true if either source says
+true. Settings use the newest trustworthy `updatedAt`, otherwise Cloud wins.
+Cloud `displayName` wins unless it is absent, in which case the Guest name is
+used. LearningSession records union by their original `sessionId` and are never
+recreated during a migration or retry.
+
+**Why:** These rules preserve the learner's most advanced curriculum state,
+avoid duplicate rewards and lifetime totals, prevent review regressions, and
+avoid overwriting established account preferences without reliable recency
+information.
+
+**Consequences:** `MigrateGuestDataToAccount` tracks destination session
+receipts before applying EXP or raw counters. The implemented protocol writes
+one terminal Cloud marker per `(guestId, uid)` only after all receipt
+transactions complete; Guest data remains local for later cleanup.
+
+---
+
+## DEC-031 — Preserve pre-session learner values as a compatibility baseline
+
+**Date:** 2026-09-28
+**Status:** Accepted
+
+**Decision:** Existing `UserProfile.exp` and `UserProfile.stats` values are an
+immutable `legacyBaseline`; they are not retroactively interpreted as raw
+LearningSession counters. New Lesson/Review submissions update a separate raw
+`sessionAggregate`. The profile read model combines both for display.
+
+During Guest-to-account migration, a Cloud baseline wins
+unconditionally when both sources have one. Session history continues to union
+by `sessionId` under [[DEC-030]].
+
+**Why:** Historical aggregate values do not contain sufficient session data to
+reconstruct exact raw counters or determine whether Guest and Cloud activity
+overlaps. Treating them as raw would silently alter learner totals.
+
+**Consequences:** Compatibility mapping is required in local/Firebase profile
+adapters and profile summaries. The Guest-to-account migration preserves this
+layer rather than attempting to reconstruct historical sessions. The legacy
+baseline remains until a separate, safe migration retires it. Legacy average
+accuracy/WPM are not combined with new raw values; the profile shows
+session-tracked metrics separately.

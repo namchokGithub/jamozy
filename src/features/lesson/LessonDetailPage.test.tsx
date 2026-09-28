@@ -1,6 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import LessonDetailPage from './LessonDetailPage'
 import type { Lesson } from '../../domain/models/lesson'
 import type { UserSettings } from '../../domain/models/user-profile'
@@ -45,7 +45,13 @@ function makeSettings(overrides: Partial<UserSettings> = {}): UserSettings {
 
 function renderPage(lesson: Lesson, settings: UserSettings = makeSettings()) {
   const router = createMemoryRouter(
-    [{ path: '/', Component: LessonDetailPage, loader: async () => ({ lesson, settings }) }],
+    [
+      {
+        path: '/',
+        Component: LessonDetailPage,
+        loader: async () => ({ lesson, settings, courseId: 'c1' }),
+      },
+    ],
     { initialEntries: ['/'] },
   )
   return render(<RouterProvider router={router} />)
@@ -148,7 +154,11 @@ describe('LessonDetailPage', () => {
         {
           path: '/',
           Component: LessonDetailPage,
-          loader: async () => ({ lesson: makeLesson(), settings: makeSettings() }),
+          loader: async () => ({
+            lesson: makeLesson(),
+            settings: makeSettings(),
+            courseId: 'c1',
+          }),
           action: async () => fakeOutcome,
         },
       ],
@@ -170,6 +180,7 @@ describe('LessonDetailPage', () => {
           loader: async () => ({
             lesson: makeLesson(),
             settings: makeSettings({ showKeyboard: false }),
+            courseId: 'c1',
           }),
           action: async () => fakeOutcome,
         },
@@ -190,7 +201,11 @@ describe('LessonDetailPage', () => {
         {
           path: '/',
           Component: LessonDetailPage,
-          loader: async () => ({ lesson: makeLesson(), settings: makeSettings() }),
+          loader: async () => ({
+            lesson: makeLesson(),
+            settings: makeSettings(),
+            courseId: 'c1',
+          }),
           action: async () => fakeOutcome,
         },
       ],
@@ -206,5 +221,129 @@ describe('LessonDetailPage', () => {
     expect(await screen.findByText('Lesson complete!')).toBeInTheDocument()
     expect(screen.getByText(/\+100 EXP/)).toBeInTheDocument()
     expect(screen.getByText('Next lesson unlocked.')).toBeInTheDocument()
+  })
+
+  it('restarts the current lesson from the completion block', async () => {
+    const action = vi.fn(async () => fakeOutcome)
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/',
+          Component: LessonDetailPage,
+          loader: async () => ({
+            lesson: makeLesson(),
+            settings: makeSettings(),
+            courseId: 'c1',
+          }),
+          action,
+        },
+      ],
+      { initialEntries: ['/'] },
+    )
+    render(<RouterProvider router={router} />)
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
+    await screen.findByText('가')
+    fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
+    fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
+    await screen.findByText('Lesson complete!')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
+    expect(await screen.findByText('가')).toBeInTheDocument()
+
+    fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
+    fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
+    await waitFor(() => expect(action).toHaveBeenCalledTimes(2))
+  })
+
+  it('opens the review queue from the completion block', async () => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/',
+          Component: LessonDetailPage,
+          loader: async () => ({
+            lesson: makeLesson(),
+            settings: makeSettings(),
+            courseId: 'c1',
+          }),
+          action: async () => fakeOutcome,
+        },
+        { path: '/review', Component: () => <h1>Review queue</h1> },
+      ],
+      { initialEntries: ['/'] },
+    )
+    render(<RouterProvider router={router} />)
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
+    await screen.findByText('가')
+    fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
+    fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
+    await screen.findByText('Lesson complete!')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Review mistakes' }))
+
+    expect(await screen.findByRole('heading', { name: 'Review queue' })).toBeInTheDocument()
+  })
+
+  it('continues to the newly unlocked lesson from the completion block', async () => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/lessons/:lessonId',
+          Component: LessonDetailPage,
+          loader: async ({ params }) => ({
+            lesson:
+              params.lessonId === 'l2'
+                ? makeLesson({ id: 'l2', title: 'Lesson two' })
+                : makeLesson(),
+            settings: makeSettings(),
+            courseId: 'c1',
+          }),
+          action: async () => fakeOutcome,
+        },
+      ],
+      { initialEntries: ['/lessons/l1'] },
+    )
+    render(<RouterProvider router={router} />)
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
+    await screen.findByText('가')
+    fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
+    fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
+    fireEvent.click(await screen.findByRole('button', { name: 'Next Lesson' }))
+
+    expect(await screen.findByRole('heading', { name: 'Lesson two' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Start Lesson' })).toBeInTheDocument()
+  })
+
+  it('returns to the course map when no next lesson was unlocked', async () => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/',
+          Component: LessonDetailPage,
+          loader: async () => ({
+            lesson: makeLesson(),
+            settings: makeSettings(),
+            courseId: 'c1',
+          }),
+          action: async () => ({ ...fakeOutcome, unlockedNextLessonId: null }),
+        },
+        { path: '/courses/c1', Component: () => <h1>Greetings course</h1> },
+      ],
+      { initialEntries: ['/'] },
+    )
+    render(<RouterProvider router={router} />)
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
+    await screen.findByText('가')
+    fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
+    fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
+    fireEvent.click(await screen.findByRole('button', { name: 'Course Map' }))
+
+    expect(
+      await screen.findByRole('heading', { name: 'Greetings course' }),
+    ).toBeInTheDocument()
   })
 })

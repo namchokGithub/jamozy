@@ -184,6 +184,7 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Recorded `docs/DECISIONS.md` DEC-021 (display-only rounding convention for running-average stats). Ticked README's MVP checklist for "EXP and Level progression"; updated `docs/PROGRESS.md` to match.
 - `pnpm exec vitest run`/`tsc -b`/`pnpm lint` all pass — 189 tests (up from 187 after Task 5, up from 173 before this round).
 - Nothing committed via `git commit` by the user this round — all commits so far were made directly by the assistant during plan execution (per `superpowers:executing-plans`' per-task commit steps, needed for the plan's ledger/review tooling); the user has not yet been asked whether to squash them before their own review.
+
 ### 2026-09-27 — Keyboard settings and Review preview context
 
 - Implemented all remaining keyboard consumers: `showKeyboard`, `showEnglishKeys`, and `keyboardOpacity` now control `VirtualKeyboard` in both lesson and review typing sessions. New profiles default to 0.7 opacity; existing persisted settings are left intact.
@@ -203,6 +204,14 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Recorded [[DEC-022]] and updated `docs/DOMAIN-MODEL.md`: reusable `VocabularyEntry` records can link multiple lesson exercises; vocabulary review history deduplicates by `vocabularyId`, while non-vocabulary review remains lesson/exercise-scoped.
 - Removed the conflicting target-model concept of `ReviewItem.resolved`; all review items remain in the Leitner schedule, including box 5.
 - Replaced ambiguous/derived `UserStats` fields with raw aggregate counters: `exercisesAttempted`, accepted/rejected keystrokes, and typing duration. Accuracy and WPM are now explicitly derived; retries count as practice activity but not as newly completed lessons.
+- No application, domain TypeScript, Firestore, or migration code changed in this documentation pass.
+
+### 2026-09-27 — Learning Modes architecture (documentation only)
+
+- Added `docs/LEARNING-MODES.md` and recorded [[DEC-026]], separating Learning Path from Daily Quest and Practice Modes while reusing shared content and learner state.
+- Defined the contiguous completion frontier for soft-locked, out-of-order Learning Path completion; Practice Modes, Daily Quest, and Review do not write LessonProgress or unlock curriculum.
+- Added target documentation for Topic membership, VocabularyProgress, expected-jamo JamoStats, and DailyQuestProgress with stable daily content and idempotent EXP.
+- Documented conservative MVP EXP: Learning Path keeps its existing rule, Daily Quest awards once per quest, and Topic/Position/Random/Review award no EXP.
 - No application, domain TypeScript, Firestore, or migration code changed in this documentation pass.
 
 ### 2026-09-27 — Identity and content-boundary conventions (documentation only)
@@ -227,3 +236,142 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Corrected stale references in `DOMAIN-MODEL.md`, `PROGRESS.md`, and DEC-021's historical storage semantics.
 - Removed the two remaining target-model references to a persisted three-state Progress status and constrained when the vocabulary `senseKey: 'default'` is valid.
 - No application, domain TypeScript, Firestore, or migration code changed in this documentation pass.
+
+### 2026-09-27 — Auth and persistence target architecture (documentation only)
+
+- Added `docs/AUTH-AND-PERSISTENCE.md` as the source of truth for Guest
+  lifecycle, IndexedDB persistence, authenticated Firebase persistence,
+  UserSession, migration boundaries, and unresolved merge policy.
+- Recorded [[DEC-027]], superseding Firebase Anonymous Auth as the target
+  model. Existing Anonymous Auth and Firestore-only implementation records are
+  explicitly legacy context until separate implementation work replaces them.
+- Updated the target UserProfile with `displayName`; removed the obsolete
+  `showEnglishKeys` setting because physical English labels are always shown.
+- Added planned work for Guest sessions, IndexedDB adapters, account auth, and
+  safe migration. No source code, Firebase configuration, Firestore rules, or
+  data migration changed in this documentation pass.
+
+### 2026-09-27 — Shared learner-state semantics (documentation only)
+
+- Recorded [[DEC-028]], confirming that VocabularyProgress and JamoStat are
+  global per underlying learning target across every learning mode and aggregate
+  only submitted session results.
+- Added `JamoStat.firstPracticedAt` and clarified its first/latest timestamps
+  are based on submitted sessions, not individual persisted keystrokes.
+- Added `DailyQuestProgress.completedAt`, separate from `expAwarded`, while
+  preserving the `dailyQuestProgress/{dateKey}` path and once-per-day EXP rule.
+- Expanded planned work for shared result aggregation, derived Topic/Position
+  displays, Daily Quest persistence, and idempotent rewards. No source code,
+  Firebase configuration, Firestore rules, adapters, or migrations changed.
+
+### 2026-09-28 — Session and History architecture (documentation only)
+
+- Added `docs/SESSION-AND-HISTORY.md` and recorded [[DEC-029]], separating
+  submitted activity history from current learner state and lifetime UserStats.
+- Defined one discriminated LearningSession context across Learning Path and all
+  practice modes; raw counters and timing derive accuracy/WPM without detailed
+  event persistence.
+- Defined start-time session IDs, reuse on the same logical-submit retry, new
+  IDs for real replays, and logical exactly-once effects across history and
+  shared learner-state aggregation. The persistence mechanism remains deferred.
+- Added planned domain, repository, local/Firebase persistence, history query,
+  and future presentation work. No source code, Firebase configuration,
+  Firestore rules, adapters, or migrations changed.
+
+### 2026-09-28 — Guest-to-account migration merge policy
+
+- Recorded [[DEC-030]] and updated `docs/AUTH-AND-PERSISTENCE.md` with the
+  accepted field-level merge rules: progress precedence, session-based EXP/raw
+  counter aggregation, deterministic ReviewItem union with earlier scheduling,
+  Daily Quest union, settings/display-name precedence, best-result maxima, and
+  session-ID union.
+- Marked the migration conflict-policy decision done in `docs/PROGRESS.md`.
+  The concrete exactly-once persistence mechanism remains implementation work.
+
+### 2026-09-28 — Guest-local persistence foundation
+
+- Replaced route-time Firebase Anonymous Auth with a generated local Guest
+  session, native IndexedDB adapters for current learner state, and
+  session-aware repository composition. Firebase remains the content reader.
+- Added the editable `Guest#NNNN` name control on the Course List and updated
+  checked-in Firestore rules for unauthenticated content reads only. Rules were
+  deployed by the user.
+- Added local-adapter, session-composition, and Course List loader regression
+  tests. User ran `pnpm test`: 50 test files and 212 tests passed.
+
+### 2026-09-28 — Authenticated session without Guest migration
+
+- Added Email/password and Google popup authentication behind a Firebase Auth
+  adapter, with a session manager that selects Firebase learner repositories
+  while authenticated and restores the existing Guest session after sign-out.
+- Added the Course List sign-in modal and revalidation on auth-state changes.
+  A first cloud profile uses a Google display name when available, otherwise
+  `Learner`; no Guest data is copied, deleted, or otherwise migrated.
+- User verified `pnpm test` (51 files, 214 tests) and `pnpm build` pass. Vite
+  warned that a minified chunk exceeds 500 kB; this is a non-blocking
+  performance follow-up.
+
+### 2026-09-28 — Agent documentation routing
+
+- Updated `AGENTS.md` and `CLAUDE.md` to remove stale pre-scaffold and
+  Anonymous-Auth-as-target guidance, and to route each task to its authoritative
+  architecture, model, persistence, learning-mode, session-history, decision,
+  requirement, or credit document.
+
+### 2026-09-28 — Lesson and Review session foundation
+
+- Added `LearningSession`, raw session aggregates, immutable legacy-baseline
+  compatibility fields, and profile presentation that keeps legacy averages
+  separate from session-tracked accuracy/WPM.
+- Added a session-ID receipt/checkpoint boundary for Guest IndexedDB and
+  authenticated Firestore. Each new Lesson/Review submission writes its history,
+  aggregate, progress, and review effects once; same-ID retries return the
+  stored outcome, while real replays receive a new ID.
+- Wired the ID and raw metrics from the typing store through route actions and
+  application use cases. Firebase profile mapping preserves the compatibility
+  layer on later profile writes.
+- User verified focused tests, full `pnpm test`, `pnpm build`, and `pnpm lint`.
+
+### 2026-09-28 — Automatic Guest-to-account migration
+
+- Added provider-neutral `MigrateGuestDataToAccount` orchestration over narrow
+  local-snapshot and Firebase-account migration repositories. The auth action
+  captures the pre-auth Guest identity, starts migration after successful
+  Email/password or Google authentication, and keeps authentication successful
+  if migration must retry.
+- Added deterministic Profile, Progress, and ReviewItem merge functions for
+  [[DEC-030]]/[[DEC-031]]. Existing Cloud display names and compatibility
+  baselines win; session receipts gate aggregate, progress, and review effects
+  so retries cannot duplicate a submitted session.
+- Added IndexedDB `migrationCheckpoints`, terminal Cloud markers at
+  `users/{uid}/migrations/{guestId}`, and owner-only Firestore rules for
+  LearningSession history, session receipts, and markers. Guest records are
+  retained; cleanup, future-mode records, and history UI remain deferred.
+- Preserved the `legacyBaseline` / `sessionAggregate` compatibility layer. A
+  Guest migration does not attempt to reconstruct or retire historical totals.
+- User reported focused/full tests, `pnpm build`, and `pnpm lint` pass. Rules
+  are checked in but require user deployment.
+
+### 2026-09-28 — Firestore content writes locked
+
+- Closed [[DEC-015]] before launch: browser clients can read learning content
+  but cannot write `courses`, `units`, or `lessons`, including when signed in.
+- Documented that the old client-SDK seed script is not a production content
+  administration path; future authoring requires an Admin SDK, Cloud Function,
+  or controlled Firebase Console procedure.
+
+### 2026-09-28 — Lesson completion navigation
+
+- Added the first Lesson Result flow control: the existing lesson-completion
+  block now sends learners to an unlocked next lesson, or back to its Course
+  Map when the completed lesson is the final available lesson.
+- The lesson loader resolves the lesson's containing `courseId` through an
+  application-layer unit read; no persisted learner state or completion use
+  case changed.
+- Added router-level UI regression tests for both destinations and a loader
+  regression test for the Course Map fallback data.
+- Added `Retry` to the completion block. It returns to a freshly mounted
+  typing session for the same lesson; the existing store therefore creates a
+  new generation and submission ID for the retry attempt.
+- Added `Review mistakes`, which routes to the existing `/review` queue without
+  changing its Leitner scheduling or persistence behavior.

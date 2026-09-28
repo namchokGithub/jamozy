@@ -2,13 +2,26 @@ import { createBrowserRouter } from 'react-router'
 import {
   courseRepo,
   lessonRepo,
-  progressRepo,
-  userProfileRepo,
-  reviewRepo,
+  progressRepo as firebaseProgressRepo,
+  userProfileRepo as firebaseUserProfileRepo,
+  reviewRepo as firebaseReviewRepo,
 } from '../infrastructure/firebase/repositories'
-import { signInAnonymouslyIfNeeded } from '../infrastructure/firebase/firebase'
+import { GuestSessionRepository } from '../infrastructure/local/guest-session-repository'
+import {
+  LocalProgressRepository,
+  LocalReviewRepository,
+  LocalUserProfileRepository,
+} from '../infrastructure/local/local-repositories'
+import { LocalSessionSubmissionRepository } from '../infrastructure/local/local-session-submission-repository'
+import { FirebaseSessionSubmissionRepository } from '../infrastructure/firebase/repositories/firebase-session-submission-repository'
+import { LocalGuestMigrationRepository } from '../infrastructure/local/local-guest-migration-repository'
+import { FirebaseAccountMigrationRepository } from '../infrastructure/firebase/repositories/firebase-account-migration-repository'
+import { createLearnerRepositories } from './learner-repositories'
+import { FirebaseAuthRepository } from '../infrastructure/firebase/firebase-auth-repository'
+import { SessionManager } from '../application/session-manager'
 import CourseListPage from '../features/course/CourseListPage'
 import { createCourseListLoader } from '../features/course/CourseListPage.loader'
+import { createCourseListAction } from '../features/course/CourseListPage.action'
 import CourseMapPage from '../features/course/CourseMapPage'
 import { createCourseMapLoader } from '../features/course/CourseMapPage.loader'
 import LessonDetailPage from '../features/lesson/LessonDetailPage'
@@ -24,7 +37,51 @@ import ProfilePage from '../features/profile/ProfilePage'
 import { createProfileLoader } from '../features/profile/ProfilePage.loader'
 import RouteError from './RouteError'
 import NotFoundPage from './NotFoundPage'
+import { migrateGuestDataToAccount } from '../application/migrate-guest-data-to-account'
 
+const localUserProfileRepo = new LocalUserProfileRepository()
+const guestSessions = new GuestSessionRepository(
+  undefined,
+  crypto,
+  localUserProfileRepo,
+)
+const firebaseAuthRepo = new FirebaseAuthRepository()
+const sessionManager = new SessionManager(firebaseAuthRepo, guestSessions)
+const guestMigrationRepo = new LocalGuestMigrationRepository()
+const accountMigrationRepo = new FirebaseAccountMigrationRepository()
+const migrateGuestData = async (
+  guestId: string,
+  accountId: string,
+): Promise<void> => {
+  await migrateGuestDataToAccount(
+    guestMigrationRepo,
+    accountMigrationRepo,
+    guestId,
+    accountId,
+  )
+}
+const learners = createLearnerRepositories({
+  sessions: sessionManager,
+  guest: {
+    progressRepo: new LocalProgressRepository(),
+    reviewRepo: new LocalReviewRepository(),
+    userProfileRepo: localUserProfileRepo,
+    sessionSubmissionRepo: new LocalSessionSubmissionRepository(),
+  },
+  authenticated: {
+    progressRepo: firebaseProgressRepo,
+    reviewRepo: firebaseReviewRepo,
+    userProfileRepo: firebaseUserProfileRepo,
+    sessionSubmissionRepo: new FirebaseSessionSubmissionRepository(),
+  },
+})
+const {
+  progressRepo,
+  reviewRepo,
+  userProfileRepo,
+  sessionSubmissionRepo,
+  getActiveUser,
+} = learners
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -32,7 +89,16 @@ export const router = createBrowserRouter([
     loader: createCourseListLoader({
       courseRepo,
       reviewRepo,
-      ensureUser: signInAnonymouslyIfNeeded,
+      userProfileRepo,
+      ensureUser: getActiveUser,
+      getSession: () => sessionManager.getActiveSession(),
+    }),
+    action: createCourseListAction({
+      userProfileRepo,
+      ensureUser: getActiveUser,
+      auth: firebaseAuthRepo,
+      getActiveSession: () => sessionManager.getActiveSession(),
+      migrateGuestData,
     }),
     ErrorBoundary: RouteError,
   },
@@ -43,7 +109,7 @@ export const router = createBrowserRouter([
       courseRepo,
       lessonRepo,
       progressRepo,
-      ensureUser: signInAnonymouslyIfNeeded,
+      ensureUser: getActiveUser,
     }),
     ErrorBoundary: RouteError,
   },
@@ -51,9 +117,10 @@ export const router = createBrowserRouter([
     path: '/lessons/:lessonId',
     Component: LessonDetailPage,
     loader: createLessonDetailLoader({
+      courseRepo,
       lessonRepo,
       userProfileRepo,
-      ensureUser: signInAnonymouslyIfNeeded,
+      ensureUser: getActiveUser,
     }),
     action: createCompleteLessonSessionAction({
       courseRepo,
@@ -61,7 +128,8 @@ export const router = createBrowserRouter([
       progressRepo,
       userProfileRepo,
       reviewRepo,
-      ensureUser: signInAnonymouslyIfNeeded,
+      sessionSubmissionRepo,
+      ensureUser: getActiveUser,
     }),
     ErrorBoundary: RouteError,
   },
@@ -72,11 +140,12 @@ export const router = createBrowserRouter([
       reviewRepo,
       lessonRepo,
       userProfileRepo,
-      ensureUser: signInAnonymouslyIfNeeded,
+      ensureUser: getActiveUser,
     }),
     action: createSubmitReviewSessionAction({
       reviewRepo,
-      ensureUser: signInAnonymouslyIfNeeded,
+      sessionSubmissionRepo,
+      ensureUser: getActiveUser,
     }),
     ErrorBoundary: RouteError,
   },
@@ -85,11 +154,11 @@ export const router = createBrowserRouter([
     Component: SettingsPage,
     loader: createSettingsLoader({
       userProfileRepo,
-      ensureUser: signInAnonymouslyIfNeeded,
+      ensureUser: getActiveUser,
     }),
     action: createUpdateSettingsAction({
       userProfileRepo,
-      ensureUser: signInAnonymouslyIfNeeded,
+      ensureUser: getActiveUser,
     }),
     ErrorBoundary: RouteError,
   },
@@ -98,7 +167,7 @@ export const router = createBrowserRouter([
     Component: ProfilePage,
     loader: createProfileLoader({
       userProfileRepo,
-      ensureUser: signInAnonymouslyIfNeeded,
+      ensureUser: getActiveUser,
     }),
     ErrorBoundary: RouteError,
   },
@@ -107,3 +176,18 @@ export const router = createBrowserRouter([
     Component: NotFoundPage,
   },
 ])
+
+sessionManager.onChange(() => {
+  const user = firebaseAuthRepo.getCurrentUser()
+  if (!user) {
+    router.revalidate()
+    return
+  }
+  void guestSessions
+    .getStoredGuestSession()
+    .then((guest) =>
+      guest ? migrateGuestData(guest.guestId, user.uid) : undefined,
+    )
+    .catch(() => undefined)
+    .finally(() => router.revalidate())
+})

@@ -2,7 +2,7 @@
 
 Field-level target schema for the entities referenced in `README.md`'s Firestore Data Model section. Fills the gap between collection paths (README) and actual `domain/models/*.ts` code. Update this file whenever a model's shape changes — it is the source of truth for field names/types, not the code comments. Where the current implementation differs, this document records the intended model and the implementation must be brought into line in a separate change.
 
-Conventions: document-backed domain entities (`Course`, `Unit`, `Lesson`, `VocabularyEntry`, `UserProfile`, and `ReviewItem`) expose `id`, which is exactly the Firestore document ID. It is never stored again as a document field; Firestore mappers derive it from the document snapshot and use it to address writes. `LessonExercise.id` is different: it is an embedded identifier stored inside a Lesson document, not a Firestore document ID. `Progress` has no independent `id`; its stored `lessonId` is both the document ID and the Lesson foreign key. All relationships use string IDs, never Firestore `DocumentReference` values. Timestamps are Firestore `Timestamp`, mapped to `Date` in the domain layer via `infrastructure/firebase/mappers`.
+Conventions: document-backed cloud entities (`Course`, `Unit`, `Lesson`, `VocabularyEntry`, `Topic`, `UserProfile`, `ReviewItem`, and `LearningSession`) expose `id`, which is exactly the Firestore document ID. It is never stored again as a cloud document field; Firestore mappers derive it from the document snapshot and use it to address writes. The same domain entities may be persisted locally for a Guest using their stable IDs. `LessonExercise.id` is different: it is an embedded identifier stored inside a Lesson document, not a Firestore document ID. Per-user state records use their target key as the document ID and stored field: `Progress.lessonId`, `VocabularyProgress.vocabularyId`, `JamoStat.jamoId`, and `DailyQuestProgress.dateKey`. All relationships use string IDs, never Firestore `DocumentReference` values. Persistence adapters map their timestamp format to `Date` in the domain layer. See `docs/AUTH-AND-PERSISTENCE.md` for persistence selection.
 
 ---
 
@@ -98,6 +98,7 @@ Vocabulary is a reusable learning target, not a replacement for every `LessonExe
 | meaningEn    | string\| null                 | English meaning                            |
 | frequencyRank | number\| null                | positive integer rank from the imported source; not globally unique |
 | difficulty   | `'easy' \| 'medium' \| 'hard'` | default content difficulty               |
+| topicIds     | string[]                      | IDs of Topic metadata that groups this shared vocabulary |
 | sourceId     | string                        | key into `docs/CREDITS.md`'s source registry |
 | sourceUrl    | string\| null                 | source or per-entry reference URL          |
 | createdAt    | Date                          |                                            |
@@ -108,6 +109,27 @@ Vocabulary is a reusable learning target, not a replacement for every `LessonExe
 **Identity and deduplication ([[DEC-025]]):** entries are unique by `(normalizedKorean, partOfSpeech, senseKey)`, where `normalizedKorean` is NFC-normalized and trimmed. A spelling may therefore have multiple entries when its part of speech or sense differs. `id` is a deterministic, collision-safe encoding of that identity, not raw Korean text. `senseKey` is required so the uniqueness rule still holds when part of speech is unavailable. Use `'default'` only when a spelling/POS pair has one imported sense; multiple senses under the same spelling/POS must use distinct, stable sense keys.
 
 Relationships: a `VocabularyEntry` may be referenced by many `LessonExercise`s. A word reused across lessons must reference the same `VocabularyEntry` so its review and learning history are combined. Vocabulary entries need at least one of `meaningTh` or `meaningEn`; `sourceId` is required, while a source may omit a per-entry `sourceUrl`.
+
+`topicIds` is membership metadata, not copied Topic content. Grammar filters should derive from `partOfSpeech` where possible. See `docs/LEARNING-MODES.md`.
+
+---
+
+## Topic
+
+**Path:** `topics/{topicId}`
+**Planned file:** `domain/models/topic.ts`
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| id | string | Firestore document ID |
+| title | string | e.g. `Food` |
+| order | number | display order among Topics |
+
+A Topic is metadata only. Its vocabulary membership is held by
+`VocabularyEntry.topicIds`; it never owns duplicate VocabularyEntry documents.
+Topic counts are derived from member VocabularyEntries and the learner's global
+VocabularyProgress. Label this state `Practiced` or `Encountered`, never
+`Learned`, until a mastery rule exists.
 
 ---
 
@@ -130,11 +152,119 @@ Relationships: a `VocabularyEntry` may be referenced by many `LessonExercise`s. 
 
 Not persisted here: in-progress keystroke/session state. Per `AGENTS.md`, that stays in Zustand client state and is only written here at checkpoint (lesson complete / session end).
 
-**Unlock rule ([[DEC-009]], [[DEC-025]]):** a missing Progress document represents a locked lesson. When a Progress document is created, its initial status is `'unlocked'`; it becomes `'completed'` when the learner completes the lesson. Completing a lesson creates or preserves the next lesson's unlocked Progress document. This transition is written by the `complete-lesson` application use case, not computed on read.
+**Unlock rule ([[DEC-009]], [[DEC-025]], [[DEC-026]]):** a missing Progress document represents a locked lesson. The lock is soft: a learner may practice a future Learning Path lesson after a warning. When a Progress document is created, its initial status is `'unlocked'`; a completed Learning Path lesson persists `'completed'`, even when done early. Practice Modes, Daily Quest, and Review never write LessonProgress. This transition is written by the Learning Path completion use case, not computed on read.
 
-**Creation strategy and global ordering ([[DEC-023]], [[DEC-025]]):** `Progress` is created lazily; a missing document means the lesson is locked. When a user profile is first persisted, the first lesson in the global sequence receives a new document with `status: 'unlocked'`. Completing a lesson creates the next lesson's `unlocked` document only if it does not already exist. No documents are created for still-locked lessons.
+**Creation strategy and global ordering ([[DEC-023]], [[DEC-025]], [[DEC-026]]):** `Progress` is created lazily; a missing document means the lesson is locked. When a user profile is first persisted, the first lesson in the global sequence receives a new document with `status: 'unlocked'`. The recommended lesson is the first lesson in global ordering that is not completed: the contiguous completion frontier. When a Learning Path lesson completes, scan forward through already-completed lessons and create or preserve `unlocked` Progress only for the first remaining lesson. Missing or merely unlocked lessons stop the frontier. No documents are created for still-locked lessons.
 
 The global sequence is the lexicographic order of `(Course.order, Unit.order, Lesson.order)`: courses sort by `Course.order`; units by `Unit.order` within their course; lessons by `Lesson.order` within their unit. The next lesson may therefore cross a Unit and then a Course boundary. Document IDs never determine progression order.
+
+---
+
+## VocabularyProgress (per-user)
+
+**Path:** `users/{userId}/vocabularyProgress/{vocabularyId}`
+**Planned file:** `domain/models/vocabulary-progress.ts`
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| vocabularyId | string | document ID and `VocabularyEntry.id` |
+| firstEncounteredAt | Date | first completed exercise using this vocabulary |
+| lastPracticedAt | Date | latest completed exercise using this vocabulary |
+| exercisesAttempted | number | completed exercises across all experiences |
+| acceptedKeystrokes | number | accepted input for this vocabulary |
+| rejectedKeystrokes | number | rejected input for this vocabulary |
+
+This is a learner's accumulated history for shared vocabulary, not a review
+queue. Accuracy is derived from the raw counters. No mastery or familiarity
+field exists in MVP.
+
+---
+
+## JamoStat (per-user)
+
+**Path:** `users/{userId}/jamoStats/{jamoId}`
+**Planned file:** `domain/models/jamo-stat.ts`
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| jamoId | string | document ID; expected Korean jamo |
+| acceptedKeystrokes | number | incremented for correct input of the expected jamo |
+| rejectedKeystrokes | number | incremented for rejected input while this jamo was expected |
+| firstPracticedAt | Date | first submitted session containing this expected jamo |
+| lastPracticedAt | Date | latest submitted session containing this expected jamo |
+
+Accuracy is derived from the raw counters. Keyboard Position is a view/filter
+over shared jamo and keyboard metadata; it has no separate progress entity.
+All counters and timestamps are aggregated from a submitted session result,
+never persisted per keystroke.
+
+**Jamo and keyboard metadata:** the existing Korean typing domain is the
+canonical content source for jamo, physical key, Shift requirement, and keyboard
+row. This metadata is shared by all experiences and does not require a new
+Firestore collection in MVP.
+
+---
+
+## DailyQuestProgress (per-user)
+
+**Path:** `users/{userId}/dailyQuestProgress/{dateKey}`
+**Planned file:** `domain/models/daily-quest-progress.ts`
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| dateKey | string | document ID identifying the quest day; timezone policy is undecided |
+| vocabularyIds | string[] | stable set of exactly 10 `VocabularyEntry.id` values for that quest |
+| completedAt | Date\| null | set once when the learner first completes that date's quest; independent from reward persistence |
+| expAwarded | boolean | true once the quest's one allowed EXP reward has been granted |
+
+Reloading a dateKey reuses its vocabulary set. This entity records Daily Quest
+identity, completion, and idempotent rewards only; it never completes or
+unlocks a Lesson. `completedAt` may be non-null only once that quest is
+completed; retries may still update shared learner state but cannot grant EXP
+again after `expAwarded` is true.
+
+---
+
+## LearningSession (per-user history)
+
+**Authenticated path:** `users/{userId}/learningSessions/{sessionId}`
+**Implemented file:** `src/domain/models/learning-session.ts` (currently
+supports Learning Path and Review; other contexts below remain target-model
+work).
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| id | string | document ID, generated when the active session starts; retained when its logical submit retries |
+| context | `LearningSessionContext` | discriminated source/mode context below |
+| startedAt | Date | active session start time |
+| completedAt | Date | submitted completion time |
+| durationSeconds | number | non-negative active-session duration |
+| exercisesAttempted | number | submitted exercises in this activity |
+| acceptedKeystrokes | number | raw accepted input in this activity |
+| rejectedKeystrokes | number | raw rejected input in this activity |
+| expGained | number | EXP actually awarded by this submitted activity; `0` when none is awarded |
+
+`LearningSessionContext` is a discriminated union, persisted as an embedded
+object:
+
+```ts
+type LearningSessionContext =
+  | { mode: 'learning-path'; lessonId: string }
+  | { mode: 'daily-quest'; dateKey: string }
+  | { mode: 'topic'; topicId: string }
+  | { mode: 'keyboard-position'; positionId: string }
+  | { mode: 'review' }
+  | { mode: 'random' };
+```
+
+Accuracy and WPM are derived from the raw counters and duration using the same
+zero guards and five-keystrokes-per-word convention as `UserStats`. This is a
+historical activity record, not a source of truth for current learner state,
+rewards, or curriculum progression. A retry after a failed logical submission
+uses the same `id`; a real replay starts a new session and receives a new ID.
+No raw keystrokes, `MistakeEvent` arrays, exercise snapshots, or per-jamo maps
+are persisted in MVP. Guest records use the equivalent IndexedDB adapter and
+retain the same ID for future account migration. See `docs/SESSION-AND-HISTORY.md`.
 
 ---
 
@@ -162,20 +292,24 @@ The global sequence is the lexicographic order of `(Course.order, Unit.order, Le
 
 **Reason priority ([[DEC-024]]):** when one exercise qualifies for review for multiple reasons in a submitted session, choose exactly one: `mistake` > `low-accuracy` > `slow`. `reason` records the highest-priority reason that first created the ReviewItem and is not overwritten on later triggers. Trigger thresholds for `low-accuracy` and `slow` are application policy, not persisted schema.
 
+All experiences may create or update the shared ReviewItem when their rules
+qualify an item. No experience owns a separate review queue.
+
 **Cross-checked against `docs/requirement.md`:** that doc says MVP doesn't need "full" spaced repetition, just a flat problem-word list. Kept Leitner-box scheduling ([[DEC-008]]) — reaffirmed 2026-09-23. Also added `reason` ([[DEC-012]]) since requirement.md wants review entries triggered by mistakes, slow typing, or low accuracy, not just mistakes.
 
 ---
 
 ## UserProfile
 
-**Path:** `users/{userId}` (the parent doc of `lessonProgress`/`reviewItems` subcollections)
+**Authenticated path:** `users/{userId}` (the parent doc of `lessonProgress`/`reviewItems` subcollections)
 **File:** `domain/models/user-profile.ts`
 
 Not in README's original domain file list, but required to home EXP/Level and Settings ([[DEC-006]], [[DEC-007]]).
 
 | Field     | Type           | Notes                        |
 | --------- | -------------- | ----------------------------- |
-| id        | string         | Firebase Anonymous Auth UID  |
+| id        | string         | Firebase Auth UID for an authenticated user; locally generated `guestId` for a Guest |
+| displayName | string       | required player-facing name; never auth identity |
 | exp       | number         | total accumulated EXP, only stored value — `level` is never persisted |
 | settings  | `UserSettings` | see below                    |
 | stats     | `UserStats`    | see below ([[DEC-011]])      |
@@ -186,21 +320,25 @@ Not in README's original domain file list, but required to home EXP/Level and Se
 
 **Cross-checked against `docs/requirement.md`:** that doc's own example ("Level 7, 430/600 EXP") implies an increasing per-level curve (~`level × 100` to reach the next level), not this flat formula, and separately lists "Level" as something to save (implying a stored field). Both reaffirmed against the flat, derived-only formula — 2026-09-23. Revisit the curve shape later if game-design balance needs it; the derived approach means no migration either way.
 
-`UserSettings` (embedded on the user doc, [[DEC-007]]):
+For authenticated users the profile is stored in Firestore; for Guests it is
+stored in IndexedDB with the same domain shape. Authentication/session details
+are separate from `UserProfile`; do not store `email`, provider details, or
+`isGuest` here. See `docs/AUTH-AND-PERSISTENCE.md`.
+
+`UserSettings` (embedded in the profile, [[DEC-007]]):
 
 | Field               | Type                     | Notes                                         |
 | ------------------- | ------------------------ | ---------------------------------------------- |
 | soundEnabled        | boolean                  |                                                |
 | showKeyboard         | boolean                  | show/hide the virtual keyboard widget         |
-| showEnglishKeys      | boolean                  | show English-key hints, e.g. `ㅎ → g`          |
 | keyboardOpacity      | number                   | 0–1                                           |
 | romanizationEnabled  | boolean                  |                                                |
 | meaningLanguage      | `'th' \| 'en' \| 'both'` |                                                |
 | theme                | `'light' \| 'dark'`      |                                                |
 
-Replaces the earlier single `keyboardLayoutHint` field with the full requirement.md settings list ([[DEC-013]]) — `showKeyboard` and `showEnglishKeys` are two distinct settings, not one. "Reset Progress" (requirement.md #13) is an action, not a setting — it's a future `application/` use case, not a `UserSettings` field.
+Replaces the earlier single `keyboardLayoutHint` field with the current settings list. English physical-key labels are always shown alongside Hangul labels, so `showEnglishKeys` is not a user setting ([[DEC-027]]). "Reset Progress" (requirement.md #13) is an action, not a setting — it's a future `application/` use case, not a `UserSettings` field.
 
-`UserStats` (embedded on the user doc, [[DEC-011]]):
+`UserStats` (embedded on `UserProfile`, [[DEC-011]]):
 
 | Field                  | Type   | Notes                                    |
 | ---------------------- | ------ | ------------------------------------------ |
@@ -222,7 +360,16 @@ Return `0` for either value when its denominator is zero. WPM uses the existing 
 
 `currentLevel` (requirement.md #9) is intentionally not stored here — it's `levelFromExp(exp)`, computed on read (see [[DEC-006]]).
 
-`updatedAt` is an audit timestamp, not an activity timestamp: it changes when settings, EXP, or stats are persisted, but not for reads or anonymous sign-in alone. A future `lastActiveAt` must be a separate field if product analytics needs it.
+`updatedAt` is an audit timestamp, not an activity timestamp: it changes when settings, EXP, or stats are persisted, but not for reads or session activation alone. Guest retention uses the separate local `GuestSession.lastActiveAt` field in `docs/AUTH-AND-PERSISTENCE.md`.
+
+**Session-foundation compatibility ([[DEC-031]]):** pre-LearningSession
+`exp`/`stats` values are retained as an immutable `legacyBaseline`, not
+converted into raw counters. New submitted sessions contribute only to
+`sessionAggregate`; profile summaries combine the two. This layer remains until
+an explicit data migration can safely retire the legacy presentation fields.
+Guest-to-account migration preserves this compatibility layer: a Cloud baseline
+wins when both profiles have one, and newly submitted session effects remain
+receipt-gated.
 
 ---
 
@@ -231,17 +378,23 @@ Return `0` for either value when its denominator is zero. WPM uses the existing 
 Previously open, now decided — see `docs/DECISIONS.md` for full rationale:
 
 1. **EXP/Level** ([[DEC-006]]) — `level` derived from `exp` via `level = 1 + floor(exp / 100)`, never stored. Reaffirmed against `docs/requirement.md`.
-2. **Settings location** ([[DEC-007]]) — field on the `users/{userId}` doc, not a separate subcollection.
+2. **Settings location** ([[DEC-007]], [[DEC-027]]) — embedded in `UserProfile`, whether that profile is stored in Guest IndexedDB or authenticated Firestore; never a separate settings collection.
 3. **Review scheduling and identity** ([[DEC-008]], [[DEC-022]]) — Leitner-style spaced repetition, `box` + `nextReviewAt`, no `resolved` state; vocabulary-backed items are deduplicated by `vocabularyId`, other items by lesson/exercise identity.
 4. **Unlock rule** ([[DEC-009]], [[DEC-025]]) — next lesson unlocks when the previous lesson's Progress becomes `'completed'`; a missing document represents locked, while persisted states are `'unlocked'/'completed'`.
 5. **Vocabulary reuse** ([[DEC-022]]) — reusable words live in `VocabularyEntry`; a `LessonExercise` may link one via `vocabularyId` while remaining self-contained.
 6. **`UserStats`** ([[DEC-011]], [[DEC-022]]) — embedded aggregate counters; accuracy and WPM are derived from raw counters, and `exercisesAttempted` replaces the ambiguous `wordsPracticed`.
 7. **`ReviewItem.reason`** ([[DEC-012]]) — mistake/slow/low-accuracy trigger, per `docs/requirement.md`.
-8. **`UserSettings` expansion** ([[DEC-013]]) — full 7-field settings list, per `docs/requirement.md`.
+8. **`UserSettings` expansion** ([[DEC-013]], [[DEC-027]]) — profile settings; English physical-key labels are always shown, so no `showEnglishKeys` field remains.
 9. **Progress creation, ordering, and profile auditing** ([[DEC-023]]) — missing Progress means locked; unlocks are lazy along the global course/unit/lesson ordering; `UserProfile.updatedAt` tracks persisted mutations.
 10. **Identity, exercise count, review reason, and level curve** ([[DEC-024]]) — Firestore/document and domain ID semantics are explicit; lessons cap at 20 exercises; review reasons use a deterministic priority; EXP-to-level balance remains deferred.
 11. **Vocabulary import and Progress-state refinement** ([[DEC-025]]) — vocabulary identity includes spelling, part of speech, and sense; translations are nullable according to content type; Progress has only persisted unlocked/completed states.
+12. **Learning Modes** ([[DEC-026]]) — Learning Path progression, Daily Quest, and Practice Modes are distinct experiences over shared content and learner state.
+13. **Authentication and persistence** ([[DEC-027]], [[DEC-030]], [[DEC-031]]) — Guest and authenticated sessions use the same learner model with IndexedDB or Firestore persistence; automatic migration merges the currently persisted entities with receipt-gated session effects and preserves the legacy-baseline compatibility layer.
+14. **Shared learner-state checkpoint semantics** ([[DEC-028]]) — VocabularyProgress and JamoStat aggregate submitted results across modes; DailyQuestProgress distinguishes completion from its idempotent EXP reward.
+15. **Session history** ([[DEC-029]]) — LearningSession records submitted activity once per logical session, independently of current learner state and lifetime aggregates.
 
-No open questions remain in this document. Add new ones here as they come up, and resolve the same way.
+Guest-to-account field-level rules are decided in [[DEC-030]] and implemented
+for the entities currently persisted on this branch. Future-mode records remain
+out of scope until their models and adapters exist.
 
 **Note on `docs/requirement.md`:** that file is the original product spec and is left as-is (not edited to match resolutions above) — this file and `docs/DECISIONS.md` are the authoritative, up-to-date sources when they disagree with it.

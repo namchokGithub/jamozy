@@ -3,7 +3,7 @@ import { db } from '../firebase'
 import type { ReviewRepository } from '../../../domain/repositories/review-repository'
 import type { ReviewItem } from '../../../domain/models/review-item'
 
-function toReviewItem(id: string, data: Record<string, unknown>): ReviewItem {
+export function toReviewItem(id: string, data: Record<string, unknown>): ReviewItem {
   return {
     id,
     sourceLessonId: data.sourceLessonId as string,
@@ -18,7 +18,7 @@ function toReviewItem(id: string, data: Record<string, unknown>): ReviewItem {
   }
 }
 
-function toReviewItemDoc(item: ReviewItem) {
+export function toReviewItemDoc(item: ReviewItem) {
   return {
     sourceLessonId: item.sourceLessonId,
     sourceExerciseId: item.sourceExerciseId,
