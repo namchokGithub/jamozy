@@ -9,16 +9,24 @@ export default function ReviewPage() {
   const { previews, settings } = useLoaderData() as ReviewLoaderData
   const items = previews.map((preview) => preview.item)
   const [started, setStarted] = useState(false)
-  const [outcome, setOutcome] = useState<SubmitReviewSessionOutcome | null>(null)
+  const [outcome, setOutcome] = useState<SubmitReviewSessionOutcome | null>(
+    null,
+  )
 
   if (outcome) {
     return (
       <main className="mx-auto max-w-2xl p-6">
-        <h1 className="text-2xl font-medium text-slate-900">Review complete!</h1>
+        <h1 className="text-2xl font-medium text-slate-900">
+          Review complete!
+        </h1>
         <p className="mt-2 text-slate-700">
-          {outcome.correctCount} correct, {outcome.needsPracticeCount} need more practice
+          {outcome.correctCount} correct, {outcome.needsPracticeCount} need more
+          practice
         </p>
-        <Link to="/" className="mt-4 inline-block text-sm text-slate-600 underline">
+        <Link
+          to="/"
+          className="mt-4 inline-block text-sm text-slate-600 underline"
+        >
           Back to Course List
         </Link>
       </main>
@@ -29,7 +37,11 @@ export default function ReviewPage() {
     return (
       <main className="mx-auto max-w-2xl p-6">
         <h1 className="text-2xl font-medium text-slate-900">Review</h1>
-        <ReviewTypingSession items={items} onComplete={setOutcome} keyboardSettings={settings} />
+        <ReviewTypingSession
+          items={items}
+          onComplete={setOutcome}
+          keyboardSettings={settings}
+        />
       </main>
     )
   }
@@ -39,19 +51,31 @@ export default function ReviewPage() {
       <h1 className="text-2xl font-medium text-slate-900">Review</h1>
 
       {items.length === 0 ? (
-        <p className="mt-6 text-sm text-slate-500">Nothing due right now.</p>
+        <p className="mt-6 text-sm text-slate-500">
+          Mistyped words are added to your Review queue and become available
+          when due.
+        </p>
       ) : (
         <>
           <ul className="mt-6 space-y-2">
             {previews.map(({ item, exercise }) => {
-              const meaning = exercise && formatExerciseMeaning(exercise, settings.meaningLanguage)
+              const meaning =
+                exercise &&
+                formatExerciseMeaning(exercise, settings.meaningLanguage)
               return (
-                <li key={item.id} className="rounded-lg border border-slate-200 p-3 text-slate-900">
+                <li
+                  key={item.id}
+                  className="rounded-lg border border-slate-200 p-3 text-slate-900"
+                >
                   <div>{item.targetText}</div>
                   {settings.romanizationEnabled && exercise?.romanization && (
-                    <div className="text-sm text-slate-500">{exercise.romanization}</div>
+                    <div className="text-sm text-slate-500">
+                      {exercise.romanization}
+                    </div>
                   )}
-                  {meaning && <div className="mt-1 text-sm text-slate-700">{meaning}</div>}
+                  {meaning && (
+                    <div className="mt-1 text-sm text-slate-700">{meaning}</div>
+                  )}
                 </li>
               )
             })}

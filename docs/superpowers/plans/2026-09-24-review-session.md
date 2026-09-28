@@ -33,10 +33,12 @@
 ### Task 1: `get-review-items.ts` — add an optional, unbounded-by-default `limit`
 
 **Files:**
+
 - Modify: `src/application/get-review-items.ts`
 - Modify: `src/application/get-review-items.test.ts`
 
 **Interfaces:**
+
 - Produces: `getDueReviewItems(reviewRepo, userId, now?, limit?)` — `limit` defaults to `Infinity`. Consumed by Task 3 (`ReviewPage.loader.ts`, passes `limit: 20`) and Task 7 (`CourseListPage.loader.ts`, passes no `limit`).
 
 - [ ] **Step 1: Write the failing tests**
@@ -44,26 +46,28 @@
 Add these two tests to the existing `describe('getDueReviewItems', ...)` block in `src/application/get-review-items.test.ts` (its existing 3 tests and `makeItem` helper stay unchanged):
 
 ```ts
-  it('returns every due item when no limit is given (unbounded)', async () => {
-    const repo = new FakeReviewRepository()
-    for (let i = 0; i < 25; i++) {
-      await repo.addReviewItem('u1', makeItem(`due-${i}`, { nextReviewAt: now }))
-    }
-    const items = await getDueReviewItems(repo, 'u1', now)
-    expect(items).toHaveLength(25)
-  })
+it('returns every due item when no limit is given (unbounded)', async () => {
+  const repo = new FakeReviewRepository()
+  for (let i = 0; i < 25; i++) {
+    await repo.addReviewItem('u1', makeItem(`due-${i}`, { nextReviewAt: now }))
+  }
+  const items = await getDueReviewItems(repo, 'u1', now)
+  expect(items).toHaveLength(25)
+})
 
-  it('caps the returned items to an explicit limit, without dropping the rest from the repository', async () => {
-    const repo = new FakeReviewRepository()
-    for (let i = 0; i < 5; i++) {
-      await repo.addReviewItem('u1', makeItem(`due-${i}`, { nextReviewAt: now }))
-    }
-    const items = await getDueReviewItems(repo, 'u1', now, 3)
-    expect(items).toHaveLength(3)
+it('caps the returned items to an explicit limit, without dropping the rest from the repository', async () => {
+  const repo = new FakeReviewRepository()
+  for (let i = 0; i < 5; i++) {
+    await repo.addReviewItem('u1', makeItem(`due-${i}`, { nextReviewAt: now }))
+  }
+  const items = await getDueReviewItems(repo, 'u1', now, 3)
+  expect(items).toHaveLength(3)
 
-    const allStillThere = await repo.getReviewItems('u1')
-    expect(allStillThere.filter((i) => !i.resolved && i.nextReviewAt <= now)).toHaveLength(5)
-  })
+  const allStillThere = await repo.getReviewItems('u1')
+  expect(
+    allStillThere.filter((i) => !i.resolved && i.nextReviewAt <= now),
+  ).toHaveLength(5)
+})
 ```
 
 - [ ] **Step 2: Run tests to verify they fail**
@@ -86,7 +90,9 @@ export async function getDueReviewItems(
   limit: number = Infinity,
 ): Promise<ReviewItem[]> {
   const items = await reviewRepo.getReviewItems(userId)
-  return items.filter((item) => !item.resolved && item.nextReviewAt <= now).slice(0, limit)
+  return items
+    .filter((item) => !item.resolved && item.nextReviewAt <= now)
+    .slice(0, limit)
 }
 ```
 
@@ -112,10 +118,12 @@ git commit -m "feat(review): add an optional, unbounded-by-default limit to getD
 ### Task 2: `submit-review-session.ts` — the new orchestrating use case
 
 **Files:**
+
 - Create: `src/application/submit-review-session.ts`
 - Test: `src/application/submit-review-session.test.ts`
 
 **Interfaces:**
+
 - Consumes: `submitReviewResult` (`src/application/submit-review-result.ts`, already exists — signature `submitReviewResult(reviewRepo, userId, item: ReviewItem, wasCorrect: boolean, now?): Promise<ReviewItem>`), `ReviewRepository.getReviewItem(userId, itemId): Promise<ReviewItem | null>` (already exists).
 - Produces: `SubmitReviewSessionResult { itemId: string; wasCorrect: boolean }`, `SubmitReviewSessionOutcome { correctCount: number; needsPracticeCount: number }`, `submitReviewSession(reviewRepo, userId, results, now?): Promise<SubmitReviewSessionOutcome>`. Consumed by Task 4 (`ReviewPage.action.ts`).
 
@@ -170,7 +178,12 @@ describe('submitReviewSession', () => {
     const repo = new FakeReviewRepository()
     await repo.addReviewItem('u1', makeItem('a', { box: 4 }))
 
-    const outcome = await submitReviewSession(repo, 'u1', [{ itemId: 'a', wasCorrect: true }], now)
+    const outcome = await submitReviewSession(
+      repo,
+      'u1',
+      [{ itemId: 'a', wasCorrect: true }],
+      now,
+    )
 
     expect(outcome).toEqual({ correctCount: 1, needsPracticeCount: 0 })
     expect((await repo.getReviewItem('u1', 'a'))?.resolved).toBe(true)
@@ -197,7 +210,12 @@ describe('submitReviewSession', () => {
     const repo = new FakeReviewRepository()
     await repo.addReviewItem('otherUser', makeItem('a'))
 
-    const outcome = await submitReviewSession(repo, 'u1', [{ itemId: 'a', wasCorrect: true }], now)
+    const outcome = await submitReviewSession(
+      repo,
+      'u1',
+      [{ itemId: 'a', wasCorrect: true }],
+      now,
+    )
 
     expect(outcome).toEqual({ correctCount: 0, needsPracticeCount: 0 })
     expect((await repo.getReviewItem('otherUser', 'a'))?.box).toBe(1) // untouched
@@ -273,10 +291,12 @@ git commit -m "feat(review): add submit-review-session orchestrating use case"
 ### Task 3: `ReviewPage.loader.ts`
 
 **Files:**
+
 - Create: `src/features/review/ReviewPage.loader.ts`
 - Test: `src/features/review/ReviewPage.loader.test.ts`
 
 **Interfaces:**
+
 - Consumes: `getDueReviewItems` (Task 1).
 - Produces: `ReviewLoaderData { items: ReviewItem[] }`, `createReviewLoader(deps: { reviewRepo: ReviewRepository; ensureUser: () => Promise<{ uid: string }> })`. Consumed by Task 6 (`ReviewPage.tsx`) and Task 8 (`router.ts`).
 
@@ -343,7 +363,12 @@ export function createReviewLoader(deps: {
 }) {
   return async (): Promise<ReviewLoaderData> => {
     const user = await deps.ensureUser()
-    const items = await getDueReviewItems(deps.reviewRepo, user.uid, new Date(), 20)
+    const items = await getDueReviewItems(
+      deps.reviewRepo,
+      user.uid,
+      new Date(),
+      20,
+    )
     return { items }
   }
 }
@@ -371,10 +396,12 @@ git commit -m "feat(review): add the /review route loader"
 ### Task 4: `ReviewPage.action.ts`
 
 **Files:**
+
 - Create: `src/features/review/ReviewPage.action.ts`
 - Test: `src/features/review/ReviewPage.action.test.ts`
 
 **Interfaces:**
+
 - Consumes: `submitReviewSession`, `SubmitReviewSessionOutcome` (Task 2).
 - Produces: `createSubmitReviewSessionAction(deps: { reviewRepo: ReviewRepository; ensureUser: () => Promise<{ uid: string }> })` returning a React Router `ActionFunction`. Consumed by Task 8 (`router.ts`); its payload shape (`{ results: [{ itemId, wasCorrect }] }`) is what Task 5 (`ReviewTypingSession.tsx`) must submit.
 
@@ -465,7 +492,9 @@ export function createSubmitReviewSessionAction(deps: {
   reviewRepo: ReviewRepository
   ensureUser: () => Promise<{ uid: string }>
 }) {
-  return async ({ request }: ActionFunctionArgs): Promise<SubmitReviewSessionOutcome> => {
+  return async ({
+    request,
+  }: ActionFunctionArgs): Promise<SubmitReviewSessionOutcome> => {
     const body = reviewSessionResultSchema.parse(await request.json())
     const user = await deps.ensureUser()
     return submitReviewSession(deps.reviewRepo, user.uid, body.results)
@@ -495,10 +524,12 @@ git commit -m "feat(review): add the /review route action"
 ### Task 5: `ReviewTypingSession.tsx`
 
 **Files:**
+
 - Create: `src/features/review/ReviewTypingSession.tsx`
 - Test: `src/features/review/ReviewTypingSession.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `useLessonSessionStore` (`src/features/typing/lesson-session-store.ts`, already exists — `{ session, start(exercises): number, pressKey(code, shiftKey), generation: number }`), `getCharacterStates`/`getComposedText` (`src/domain/korean/typing-session.ts`), `getLessonProgress` (`src/domain/korean/lesson-session.ts`), `KEY_TO_JAMO` (`src/domain/korean/keymap.ts`), `VirtualKeyboard` (`src/features/typing/VirtualKeyboard.tsx`), `ReviewItem` (`src/domain/models/review-item.ts`), `SubmitReviewSessionOutcome` (Task 2).
 - Produces: `ReviewTypingSession` default export, props `{ items: ReviewItem[]; onComplete: (outcome: SubmitReviewSessionOutcome) => void }`. Consumed by Task 6 (`ReviewPage.tsx`).
 
@@ -530,18 +561,25 @@ function makeItem(id: string, overrides: Partial<ReviewItem> = {}): ReviewItem {
   }
 }
 
-const fakeOutcome: SubmitReviewSessionOutcome = { correctCount: 1, needsPracticeCount: 0 }
+const fakeOutcome: SubmitReviewSessionOutcome = {
+  correctCount: 1,
+  needsPracticeCount: 0,
+}
 
 function renderSession(
   onComplete: (outcome: SubmitReviewSessionOutcome) => void,
   items: ReviewItem[] = [makeItem('a')],
-  action: (args: { request: Request }) => Promise<SubmitReviewSessionOutcome> = async () => fakeOutcome,
+  action: (args: {
+    request: Request
+  }) => Promise<SubmitReviewSessionOutcome> = async () => fakeOutcome,
 ) {
   const router = createMemoryRouter(
     [
       {
         path: '/',
-        Component: () => <ReviewTypingSession items={items} onComplete={onComplete} />,
+        Component: () => (
+          <ReviewTypingSession items={items} onComplete={onComplete} />
+        ),
         action,
       },
     ],
@@ -584,7 +622,9 @@ describe('ReviewTypingSession', () => {
   it('submits wasCorrect:false for an item typed with at least one mistake, even once finished', async () => {
     const onComplete = vi.fn()
     const action = vi.fn(async ({ request }: { request: Request }) => {
-      const body = (await request.json()) as { results: Array<{ itemId: string; wasCorrect: boolean }> }
+      const body = (await request.json()) as {
+        results: Array<{ itemId: string; wasCorrect: boolean }>
+      }
       return {
         correctCount: body.results.filter((r) => r.wasCorrect).length,
         needsPracticeCount: body.results.filter((r) => !r.wasCorrect).length,
@@ -598,7 +638,10 @@ describe('ReviewTypingSession', () => {
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
 
     await waitFor(() => expect(onComplete).toHaveBeenCalledOnce())
-    expect(onComplete).toHaveBeenCalledWith({ correctCount: 0, needsPracticeCount: 1 })
+    expect(onComplete).toHaveBeenCalledWith({
+      correctCount: 0,
+      needsPracticeCount: 1,
+    })
   })
 
   it('stops handling keydowns after unmount', async () => {
@@ -647,7 +690,10 @@ Expected: FAIL — `src/features/review/ReviewTypingSession.tsx` does not exist 
 import { useEffect, useRef } from 'react'
 import { useFetcher } from 'react-router'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
-import { getCharacterStates, getComposedText } from '../../domain/korean/typing-session'
+import {
+  getCharacterStates,
+  getComposedText,
+} from '../../domain/korean/typing-session'
 import { getLessonProgress } from '../../domain/korean/lesson-session'
 import { KEY_TO_JAMO } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
@@ -659,7 +705,10 @@ interface ReviewTypingSessionProps {
   onComplete: (outcome: SubmitReviewSessionOutcome) => void
 }
 
-export default function ReviewTypingSession({ items, onComplete }: ReviewTypingSessionProps) {
+export default function ReviewTypingSession({
+  items,
+  onComplete,
+}: ReviewTypingSessionProps) {
   const { session, start, pressKey, generation } = useLessonSessionStore()
   const fetcher = useFetcher<SubmitReviewSessionOutcome>()
   const hasStarted = useRef(false)
@@ -674,7 +723,9 @@ export default function ReviewTypingSession({ items, onComplete }: ReviewTypingS
   useEffect(() => {
     if (hasStarted.current) return
     hasStarted.current = true
-    myGenerationRef.current = start(items.map((item) => ({ id: item.id, targetText: item.targetText })))
+    myGenerationRef.current = start(
+      items.map((item) => ({ id: item.id, targetText: item.targetText })),
+    )
   }, [items, start])
 
   useEffect(() => {
@@ -700,7 +751,10 @@ export default function ReviewTypingSession({ items, onComplete }: ReviewTypingS
         itemId: result.exerciseId,
         wasCorrect: result.mistakes.length === 0,
       }))
-      fetcher.submit({ results }, { method: 'post', encType: 'application/json' })
+      fetcher.submit(
+        { results },
+        { method: 'post', encType: 'application/json' },
+      )
     }
   }, [session, generation, fetcher])
 
@@ -718,7 +772,8 @@ export default function ReviewTypingSession({ items, onComplete }: ReviewTypingS
   const characters = Array.from(session.currentSession.targetText)
   const characterStates = getCharacterStates(session.currentSession)
   const composed = getComposedText(session.currentSession)
-  const nextKey = session.currentSession.expectedKeys[session.currentSession.keyIndex]
+  const nextKey =
+    session.currentSession.expectedKeys[session.currentSession.keyIndex]
 
   return (
     <div>
@@ -771,10 +826,12 @@ git commit -m "feat(review): add the interactive ReviewTypingSession component"
 ### Task 6: `ReviewPage.tsx`
 
 **Files:**
+
 - Create: `src/features/review/ReviewPage.tsx`
 - Test: `src/features/review/ReviewPage.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `ReviewLoaderData` (Task 3), `ReviewTypingSession` (Task 5), `SubmitReviewSessionOutcome` (Task 2).
 - Produces: `ReviewPage` default export. Consumed by Task 8 (`router.ts`).
 
@@ -805,7 +862,10 @@ function makeItem(id: string, overrides: Partial<ReviewItem> = {}): ReviewItem {
   }
 }
 
-const fakeOutcome: SubmitReviewSessionOutcome = { correctCount: 1, needsPracticeCount: 0 }
+const fakeOutcome: SubmitReviewSessionOutcome = {
+  correctCount: 1,
+  needsPracticeCount: 0,
+}
 
 describe('ReviewPage', () => {
   beforeEach(() => {
@@ -814,12 +874,22 @@ describe('ReviewPage', () => {
 
   it('shows an empty state when nothing is due', async () => {
     const router = createMemoryRouter(
-      [{ path: '/', Component: ReviewPage, loader: async () => ({ items: [] }) }],
+      [
+        {
+          path: '/',
+          Component: ReviewPage,
+          loader: async () => ({ items: [] }),
+        },
+      ],
       { initialEntries: ['/'] },
     )
     render(<RouterProvider router={router} />)
 
-    expect(await screen.findByText('Nothing due right now.')).toBeInTheDocument()
+    expect(
+      await screen.findByText(
+        'Mistyped words are added to your Review queue and become available when due.',
+      ),
+    ).toBeInTheDocument()
   })
 
   it('shows a preview list and Start Review button, then switches to the typing session on click', async () => {
@@ -862,7 +932,9 @@ describe('ReviewPage', () => {
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
 
     expect(await screen.findByText('Review complete!')).toBeInTheDocument()
-    expect(screen.getByText('1 correct, 0 need more practice')).toBeInTheDocument()
+    expect(
+      screen.getByText('1 correct, 0 need more practice'),
+    ).toBeInTheDocument()
   })
 })
 ```
@@ -884,16 +956,24 @@ import type { SubmitReviewSessionOutcome } from '../../application/submit-review
 export default function ReviewPage() {
   const { items } = useLoaderData() as ReviewLoaderData
   const [started, setStarted] = useState(false)
-  const [outcome, setOutcome] = useState<SubmitReviewSessionOutcome | null>(null)
+  const [outcome, setOutcome] = useState<SubmitReviewSessionOutcome | null>(
+    null,
+  )
 
   if (outcome) {
     return (
       <main className="mx-auto max-w-2xl p-6">
-        <h1 className="text-2xl font-medium text-slate-900">Review complete!</h1>
+        <h1 className="text-2xl font-medium text-slate-900">
+          Review complete!
+        </h1>
         <p className="mt-2 text-slate-700">
-          {outcome.correctCount} correct, {outcome.needsPracticeCount} need more practice
+          {outcome.correctCount} correct, {outcome.needsPracticeCount} need more
+          practice
         </p>
-        <Link to="/" className="mt-4 inline-block text-sm text-slate-600 underline">
+        <Link
+          to="/"
+          className="mt-4 inline-block text-sm text-slate-600 underline"
+        >
           Back to Course List
         </Link>
       </main>
@@ -914,12 +994,18 @@ export default function ReviewPage() {
       <h1 className="text-2xl font-medium text-slate-900">Review</h1>
 
       {items.length === 0 ? (
-        <p className="mt-6 text-sm text-slate-500">Nothing due right now.</p>
+        <p className="mt-6 text-sm text-slate-500">
+          Mistyped words are added to your Review queue and become available
+          when due.
+        </p>
       ) : (
         <>
           <ul className="mt-6 space-y-2">
             {items.map((item) => (
-              <li key={item.id} className="rounded-lg border border-slate-200 p-3 text-slate-900">
+              <li
+                key={item.id}
+                className="rounded-lg border border-slate-200 p-3 text-slate-900"
+              >
                 {item.targetText}
               </li>
             ))}
@@ -960,12 +1046,14 @@ git commit -m "feat(review): add ReviewPage (empty state, preview, session, summ
 ### Task 7: `CourseListPage` due-review-count badge
 
 **Files:**
+
 - Modify: `src/features/course/CourseListPage.loader.ts`
 - Modify: `src/features/course/CourseListPage.loader.test.ts`
 - Modify: `src/features/course/CourseListPage.tsx`
 - Modify: `src/features/course/CourseListPage.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `getDueReviewItems` (Task 1, called with **no** `limit` argument — the unbounded true count).
 - Produces: `CourseListLoaderData` gains `dueReviewCount: number`. Consumed by Task 8 (`router.ts`, which must now inject `reviewRepo` into this loader too) and this task's own `CourseListPage.tsx` render.
 
@@ -1071,7 +1159,8 @@ export function createCourseListLoader(deps: {
   return async (): Promise<CourseListLoaderData> => {
     const user = await deps.ensureUser()
     const courses = await getCourses(deps.courseRepo)
-    const dueReviewCount = (await getDueReviewItems(deps.reviewRepo, user.uid)).length
+    const dueReviewCount = (await getDueReviewItems(deps.reviewRepo, user.uid))
+      .length
     return { courses, dueReviewCount }
   }
 }
@@ -1111,7 +1200,10 @@ describe('CourseListPage', () => {
         {
           path: '/',
           Component: CourseListPage,
-          loader: async () => ({ courses: [makeCourse('c1')], dueReviewCount: 0 }),
+          loader: async () => ({
+            courses: [makeCourse('c1')],
+            dueReviewCount: 0,
+          }),
         },
       ],
       { initialEntries: ['/'] },
@@ -1154,7 +1246,9 @@ describe('CourseListPage', () => {
     )
     render(<RouterProvider router={router} />)
 
-    const link = await screen.findByRole('link', { name: /3 words due for review/i })
+    const link = await screen.findByRole('link', {
+      name: /3 words due for review/i,
+    })
     expect(link).toHaveAttribute('href', '/review')
   })
 
@@ -1172,7 +1266,9 @@ describe('CourseListPage', () => {
     render(<RouterProvider router={router} />)
 
     await screen.findByText('No courses yet.')
-    expect(screen.queryByRole('link', { name: /words due for review/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: /words due for review/i }),
+    ).not.toBeInTheDocument()
   })
 })
 ```
@@ -1198,7 +1294,10 @@ export default function CourseListPage() {
       <h1 className="text-2xl font-medium text-slate-900">Jamozy</h1>
 
       {dueReviewCount > 0 && (
-        <Link to="/review" className="mt-2 block text-sm text-amber-700 underline">
+        <Link
+          to="/review"
+          className="mt-2 block text-sm text-amber-700 underline"
+        >
           {dueReviewCount} words due for review
         </Link>
       )}
@@ -1214,7 +1313,9 @@ export default function CourseListPage() {
                 className="block rounded-lg border border-slate-200 p-4 hover:bg-slate-50"
               >
                 <div className="font-medium text-slate-900">{course.title}</div>
-                <div className="text-sm text-slate-600">{course.description}</div>
+                <div className="text-sm text-slate-600">
+                  {course.description}
+                </div>
               </Link>
             </li>
           ))}
@@ -1247,9 +1348,11 @@ git commit -m "feat(course): show a due-review-count link on the course list pag
 ### Task 8: Wire it all together — `router.ts`, manual verification
 
 **Files:**
+
 - Modify: `src/app/router.ts`
 
 **Interfaces:**
+
 - Consumes: everything from Tasks 1–7.
 - Produces: nothing — this is the integration point.
 
@@ -1354,7 +1457,7 @@ Expected: no errors; `dist/` builds successfully.
 Run: `pnpm dev`, then in a browser (or via the `claude-in-chrome` tool):
 
 1. Visit `/` — since no `ReviewItem`s exist yet for this test user, confirm **no** "N words due for review" link appears (the honest, currently-true state).
-2. Visit `/review` directly — confirm the empty state ("Nothing due right now.") renders, no crash.
+2. Visit `/review` directly — confirm the empty state ("Mistyped words are added to your Review queue and become available when due.") renders, no crash.
 3. Go complete a lesson with at least one deliberate wrong keystroke (e.g. `greetings-1`, per the previous round's manual-verification steps) — this creates a real `ReviewItem` in Firestore via the already-shipped `create-review-items.ts` path.
 4. Revisit `/` and `/review` — confirm they **still** correctly show no due items (a freshly-created `ReviewItem`'s `nextReviewAt` is 1 day out per the Leitner box-1 interval — it is genuinely not due yet). This is the correct, honest behavior, not a bug: it proves the due-filtering logic is reading real data faithfully, not just wired to something that happens to always show up.
 5. **Optional, only if you want to see the full "Start Review → type → summary" happy path against live data today** (not something to do yourself as part of this task — mention it to the user and let them decide): the user could open the Firebase console, find that `ReviewItem` document under `users/{uid}/reviewItems/`, and manually edit `nextReviewAt` to a past date, then reload `/review`. Do not do this automatically — CLAUDE.md's Firebase Caution section requires confirming before writing migration/backfill scripts, and hand-editing a document field to fabricate test data crosses the same line. The Vitest suite already exercises this exact "Start Review → type it → submit → box updates" flow end-to-end against fakes (Tasks 2–6), so live-data coverage here is a nice-to-have, not required to ship.
