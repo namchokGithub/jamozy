@@ -370,3 +370,6 @@ Chronological log of completed units of work. One entry per meaningful change (n
   case changed.
 - Added router-level UI regression tests for both destinations and a loader
   regression test for the Course Map fallback data.
+- Added `Retry` to the completion block. It returns to a freshly mounted
+  typing session for the same lesson; the existing store therefore creates a
+  new generation and submission ID for the retry attempt.

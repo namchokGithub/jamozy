@@ -42,6 +42,16 @@ function LessonDetailContent({
         )}
         <button
           type="button"
+          onClick={() => {
+            setOutcome(null)
+            setStarted(true)
+          }}
+          className="mt-6 rounded-lg border border-slate-300 px-4 py-2 text-slate-900"
+        >
+          Retry
+        </button>
+        <button
+          type="button"
           onClick={() =>
             navigate(
               outcome.unlockedNextLessonId
@@ -49,7 +59,7 @@ function LessonDetailContent({
                 : `/courses/${courseId}`,
             )
           }
-          className="mt-6 rounded-lg bg-slate-900 px-4 py-2 text-white"
+          className="ml-3 rounded-lg bg-slate-900 px-4 py-2 text-white"
         >
           {outcome.unlockedNextLessonId ? 'Next Lesson' : 'Course Map'}
         </button>

@@ -1,6 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import LessonDetailPage from './LessonDetailPage'
 import type { Lesson } from '../../domain/models/lesson'
 import type { UserSettings } from '../../domain/models/user-profile'
@@ -221,6 +221,39 @@ describe('LessonDetailPage', () => {
     expect(await screen.findByText('Lesson complete!')).toBeInTheDocument()
     expect(screen.getByText(/\+100 EXP/)).toBeInTheDocument()
     expect(screen.getByText('Next lesson unlocked.')).toBeInTheDocument()
+  })
+
+  it('restarts the current lesson from the completion block', async () => {
+    const action = vi.fn(async () => fakeOutcome)
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/',
+          Component: LessonDetailPage,
+          loader: async () => ({
+            lesson: makeLesson(),
+            settings: makeSettings(),
+            courseId: 'c1',
+          }),
+          action,
+        },
+      ],
+      { initialEntries: ['/'] },
+    )
+    render(<RouterProvider router={router} />)
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
+    await screen.findByText('가')
+    fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
+    fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
+    await screen.findByText('Lesson complete!')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
+    expect(await screen.findByText('가')).toBeInTheDocument()
+
+    fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
+    fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
+    await waitFor(() => expect(action).toHaveBeenCalledTimes(2))
   })
 
   it('continues to the newly unlocked lesson from the completion block', async () => {
