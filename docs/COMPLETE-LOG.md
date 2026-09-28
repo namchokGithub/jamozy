@@ -287,6 +287,17 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Marked the migration conflict-policy decision done in `docs/PROGRESS.md`.
   The concrete exactly-once persistence mechanism remains implementation work.
 
+### 2026-09-28 — Guest-local persistence foundation (verification pending)
+
+- Replaced route-time Firebase Anonymous Auth with a generated local Guest
+  session, native IndexedDB adapters for current learner state, and
+  session-aware repository composition. Firebase remains the content reader.
+- Added the editable `Guest#NNNN` name control on the Course List and updated
+  checked-in Firestore rules for unauthenticated content reads only. Rules were
+  deployed by the user.
+- Added local-adapter, session-composition, and Course List loader regression
+  tests. Full test verification remains pending user-run results.
+
 ### 2026-09-28 — Agent documentation routing
 
 - Updated `AGENTS.md` and `CLAUDE.md` to remove stale pre-scaffold and

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createCourseListLoader } from './CourseListPage.loader'
-import { FakeCourseRepository, FakeReviewRepository } from '../../test/fakes'
+import { FakeCourseRepository, FakeReviewRepository, FakeUserProfileRepository } from '../../test/fakes'
 import type { Course } from '../../domain/models/course'
 import type { ReviewItem } from '../../domain/models/review-item'
 
@@ -62,5 +62,12 @@ describe('createCourseListLoader', () => {
     const data = await loader()
 
     expect(data.dueReviewCount).toBe(25)
+  })
+
+  it('returns the persisted Guest display name', async () => {
+    const profiles = new FakeUserProfileRepository()
+    await profiles.saveUserProfile('user1', { id: 'user1', displayName: 'Guest#1245', exp: 0, settings: { soundEnabled: true, showKeyboard: true, showEnglishKeys: true, keyboardOpacity: 0.7, romanizationEnabled: true, meaningLanguage: 'both', theme: 'light' }, stats: { lessonsCompleted: 0, wordsPracticed: 0, averageAccuracy: 0, bestAccuracy: 0, averageSpeedWpm: 0, totalTypingTimeSeconds: 0 }, createdAt: new Date(), updatedAt: new Date() })
+    const loader = createCourseListLoader({ courseRepo: new FakeCourseRepository(), reviewRepo: new FakeReviewRepository(), userProfileRepo: profiles, ensureUser: async () => ({ uid: 'user1' }) })
+    expect((await loader()).displayName).toBe('Guest#1245')
   })
 })

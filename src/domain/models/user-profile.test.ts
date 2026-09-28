@@ -20,6 +20,7 @@ describe('defaultUserProfile', () => {
 
     expect(profile).toEqual({
       id: 'user1',
+      displayName: 'Guest',
       exp: 0,
       settings: {
         soundEnabled: true,
@@ -39,6 +40,7 @@ describe('defaultUserProfile', () => {
         totalTypingTimeSeconds: 0,
       },
       createdAt: now,
+      updatedAt: now,
     })
   })
 })

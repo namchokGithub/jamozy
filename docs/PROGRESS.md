@@ -51,8 +51,8 @@ Last updated: 2026-09-28 (Learning Modes, auth/persistence, and session-history 
 
 | Item | Status | Notes |
 | --- | --- | --- |
-| Guest session and profile | Not started | Stable local guest ID, required display name, and 90-day inactivity retention. |
-| IndexedDB learner-state repositories | Not started | Local adapters for Guest learner state; no `localStorage` primary database. |
+| Guest session and profile | In progress | Guest UUID and generated `Guest#NNNN` display name, editable from the Course List header, now persist locally. Retention cleanup remains deferred; awaiting full test verification. |
+| IndexedDB learner-state repositories | In progress | Local profile, lesson-progress, and review-item adapters now exist; no `localStorage` learner database. Awaiting full test verification. |
 | Email/password authentication | Not started | Authenticated session method; no UI implementation in this documentation pass. |
 | Google Sign-In | Not started | Authenticated session method; provider does not affect learner-data rules. |
 | Guest-to-account migration | Not started | Application-level, retry-safe, non-destructive, provider-neutral orchestration. |
