@@ -78,7 +78,7 @@ function LessonDetailContent({
           onClick={() => navigate('/review')}
           className="ml-3 rounded-lg border border-slate-300 px-4 py-2 text-slate-900"
         >
-          Review mistakes
+          Go to Review
         </button>
         <button
           type="button"

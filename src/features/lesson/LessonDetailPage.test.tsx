@@ -358,7 +358,7 @@ describe('LessonDetailPage', () => {
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
     await screen.findByText('Lesson complete!')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Review mistakes' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Go to Review' }))
 
     expect(await screen.findByRole('heading', { name: 'Review queue' })).toBeInTheDocument()
   })

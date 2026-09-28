@@ -373,8 +373,8 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Added `Retry` to the completion block. It returns to a freshly mounted
   typing session for the same lesson; the existing store therefore creates a
   new generation and submission ID for the retry attempt.
-- Added `Review mistakes`, which routes to the existing `/review` queue without
-  changing its Leitner scheduling or persistence behavior.
+- Added `Go to Review`, which routes to the existing due-only `/review` queue
+  without changing its Leitner scheduling or persistence behavior.
 - Added the inline lesson Result summary from the transient `LessonResult`:
   accuracy, WPM, duration, all rejected keystrokes, and unique mistyped words.
   The action response and persisted learner state remain unchanged.

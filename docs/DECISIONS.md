@@ -635,3 +635,23 @@ layer rather than attempting to reconstruct historical sessions. The legacy
 baseline remains until a separate, safe migration retires it. Legacy average
 accuracy/WPM are not combined with new raw values; the profile shows
 session-tracked metrics separately.
+
+---
+
+## DEC-032 — Lesson Result review action opens the due Review queue
+
+**Date:** 2026-09-28
+**Status:** Accepted
+
+**Decision:** The Lesson Result action is labelled `Go to Review` and navigates
+to `/review`, the existing Leitner-scheduled Review queue. A word mistyped in
+the completed lesson is not guaranteed to appear there immediately; it appears
+only when its `nextReviewAt` is due. MVP does not introduce an immediate-mistake
+practice flow.
+
+**Why:** The Review queue has one established scheduling contract. A separate
+immediate-practice flow would create a second, ambiguous review experience and
+needs its own exercise-selection and scheduling rules.
+
+**Consequences:** The Lesson Result button is navigation only. `ReviewItem`
+creation and its Leitner schedule remain unchanged.
