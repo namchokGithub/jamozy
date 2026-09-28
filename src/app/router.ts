@@ -1,14 +1,11 @@
 import { createBrowserRouter } from 'react-router'
-import {
-  courseRepo,
-  lessonRepo,
-  progressRepo,
-  userProfileRepo,
-  reviewRepo,
-} from '../infrastructure/firebase/repositories'
-import { signInAnonymouslyIfNeeded } from '../infrastructure/firebase/firebase'
+import { courseRepo, lessonRepo, progressRepo as firebaseProgressRepo, userProfileRepo as firebaseUserProfileRepo, reviewRepo as firebaseReviewRepo } from '../infrastructure/firebase/repositories'
+import { GuestSessionRepository } from '../infrastructure/local/guest-session-repository'
+import { LocalProgressRepository, LocalReviewRepository, LocalUserProfileRepository } from '../infrastructure/local/local-repositories'
+import { createLearnerRepositories } from './learner-repositories'
 import CourseListPage from '../features/course/CourseListPage'
 import { createCourseListLoader } from '../features/course/CourseListPage.loader'
+import { createCourseListAction } from '../features/course/CourseListPage.action'
 import CourseMapPage from '../features/course/CourseMapPage'
 import { createCourseMapLoader } from '../features/course/CourseMapPage.loader'
 import LessonDetailPage from '../features/lesson/LessonDetailPage'
@@ -25,6 +22,13 @@ import { createProfileLoader } from '../features/profile/ProfilePage.loader'
 import RouteError from './RouteError'
 import NotFoundPage from './NotFoundPage'
 
+const localUserProfileRepo = new LocalUserProfileRepository()
+const learners = createLearnerRepositories({
+  sessions: new GuestSessionRepository(undefined, crypto, localUserProfileRepo),
+  guest: { progressRepo: new LocalProgressRepository(), reviewRepo: new LocalReviewRepository(), userProfileRepo: localUserProfileRepo },
+  authenticated: { progressRepo: firebaseProgressRepo, reviewRepo: firebaseReviewRepo, userProfileRepo: firebaseUserProfileRepo },
+})
+const { progressRepo, reviewRepo, userProfileRepo, getActiveUser } = learners
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -32,8 +36,10 @@ export const router = createBrowserRouter([
     loader: createCourseListLoader({
       courseRepo,
       reviewRepo,
-      ensureUser: signInAnonymouslyIfNeeded,
+      userProfileRepo,
+      ensureUser: getActiveUser,
     }),
+    action: createCourseListAction({ userProfileRepo, ensureUser: getActiveUser }),
     ErrorBoundary: RouteError,
   },
   {
@@ -43,7 +49,7 @@ export const router = createBrowserRouter([
       courseRepo,
       lessonRepo,
       progressRepo,
-      ensureUser: signInAnonymouslyIfNeeded,
+      ensureUser: getActiveUser,
     }),
     ErrorBoundary: RouteError,
   },
@@ -53,7 +59,7 @@ export const router = createBrowserRouter([
     loader: createLessonDetailLoader({
       lessonRepo,
       userProfileRepo,
-      ensureUser: signInAnonymouslyIfNeeded,
+      ensureUser: getActiveUser,
     }),
     action: createCompleteLessonSessionAction({
       courseRepo,
@@ -61,7 +67,7 @@ export const router = createBrowserRouter([
       progressRepo,
       userProfileRepo,
       reviewRepo,
-      ensureUser: signInAnonymouslyIfNeeded,
+      ensureUser: getActiveUser,
     }),
     ErrorBoundary: RouteError,
   },
@@ -72,11 +78,11 @@ export const router = createBrowserRouter([
       reviewRepo,
       lessonRepo,
       userProfileRepo,
-      ensureUser: signInAnonymouslyIfNeeded,
+      ensureUser: getActiveUser,
     }),
     action: createSubmitReviewSessionAction({
       reviewRepo,
-      ensureUser: signInAnonymouslyIfNeeded,
+      ensureUser: getActiveUser,
     }),
     ErrorBoundary: RouteError,
   },
@@ -85,11 +91,11 @@ export const router = createBrowserRouter([
     Component: SettingsPage,
     loader: createSettingsLoader({
       userProfileRepo,
-      ensureUser: signInAnonymouslyIfNeeded,
+      ensureUser: getActiveUser,
     }),
     action: createUpdateSettingsAction({
       userProfileRepo,
-      ensureUser: signInAnonymouslyIfNeeded,
+      ensureUser: getActiveUser,
     }),
     ErrorBoundary: RouteError,
   },
@@ -98,7 +104,7 @@ export const router = createBrowserRouter([
     Component: ProfilePage,
     loader: createProfileLoader({
       userProfileRepo,
-      ensureUser: signInAnonymouslyIfNeeded,
+      ensureUser: getActiveUser,
     }),
     ErrorBoundary: RouteError,
   },

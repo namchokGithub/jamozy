@@ -2,8 +2,6 @@ import { initializeApp } from 'firebase/app'
 import {
   connectAuthEmulator,
   getAuth,
-  signInAnonymously,
-  type User,
 } from 'firebase/auth'
 import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore'
 
@@ -25,11 +23,4 @@ if (import.meta.env.VITE_FIREBASE_USE_EMULATOR === '1') {
     disableWarnings: true,
   })
   connectFirestoreEmulator(db, '127.0.0.1', 8080)
-}
-
-export function signInAnonymouslyIfNeeded(): Promise<User> {
-  if (auth.currentUser) {
-    return Promise.resolve(auth.currentUser)
-  }
-  return signInAnonymously(auth).then((credential) => credential.user)
 }

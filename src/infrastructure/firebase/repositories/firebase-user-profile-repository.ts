@@ -6,19 +6,25 @@ import type { UserProfile } from '../../../domain/models/user-profile'
 function toUserProfile(id: string, data: Record<string, unknown>): UserProfile {
   return {
     id,
+    displayName: typeof data.displayName === 'string' ? data.displayName : 'Guest',
     exp: data.exp as number,
     settings: data.settings as UserProfile['settings'],
     stats: data.stats as UserProfile['stats'],
     createdAt: (data.createdAt as { toDate(): Date }).toDate(),
+    updatedAt: data.updatedAt
+      ? (data.updatedAt as { toDate(): Date }).toDate()
+      : (data.createdAt as { toDate(): Date }).toDate(),
   }
 }
 
 function toUserProfileDoc(profile: UserProfile) {
   return {
+    displayName: profile.displayName ?? 'Guest',
     exp: profile.exp,
     settings: profile.settings,
     stats: profile.stats,
     createdAt: profile.createdAt,
+    updatedAt: profile.updatedAt ?? profile.createdAt,
   }
 }
 

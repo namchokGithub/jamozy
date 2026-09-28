@@ -8,18 +8,15 @@ service cloud.firestore {
     // DEC-015: revisit before shipping, this currently lets any player rewrite
     // course content via the client SDK.
     match /courses/{courseId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null;
+      allow read: if true;
     }
 
     match /units/{unitId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null;
+      allow read: if true;
     }
 
     match /lessons/{lessonId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null;
+      allow read: if true;
     }
 
     // Per-user data. Only the owning user may read or write their own doc
