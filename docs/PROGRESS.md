@@ -56,7 +56,7 @@ Last updated: 2026-09-28 (Learning Modes, auth/persistence, and session-history 
 | Email/password authentication | Not started | Authenticated session method; no UI implementation in this documentation pass. |
 | Google Sign-In | Not started | Authenticated session method; provider does not affect learner-data rules. |
 | Guest-to-account migration | Not started | Application-level, retry-safe, non-destructive, provider-neutral orchestration. |
-| Migration conflict/idempotency policy | Blocked | Needs a future product decision for exact field-level merge formulas. |
+| Migration conflict/idempotency policy | Done | Field-level rules accepted in [[DEC-030]]. A separate exactly-once persistence mechanism is still required during implementation. |
 
 ## Later (post-MVP)
 

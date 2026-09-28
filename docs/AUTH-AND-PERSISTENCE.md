@@ -118,23 +118,27 @@ implementation must preserve the deterministic identities already defined for
 Progress, VocabularyProgress, JamoStats, DailyQuestProgress, ReviewItems, and
 LearningSessions.
 
-### Minimum merge principles
+### Merge policy
 
-- Preserve completed Learning Path work from either persistence target.
-- Combine statistics from raw counters rather than stored averages.
-- Never award EXP twice because data was migrated.
-- Never create duplicate Daily Quest rewards.
-- Never create duplicate vocabulary-backed ReviewItems.
-- Preserve a Guest LearningSession ID when it is migrated.
-- Retain local Guest data until the migration has succeeded.
+The destination is the union of Guest and Cloud state under each record's
+deterministic identity. A migration must be idempotent: repeating it produces
+the same destination state and never duplicates a reward, aggregate, or
+history record.
 
-## Unresolved migration policy
+| Data | Merge rule |
+| --- | --- |
+| `LessonProgress` | Keep the furthest state: `completed` > `unlocked` > `missing`. |
+| EXP | Do not add Guest and Cloud totals directly. Aggregate only submitted sessions whose `sessionId` has not already contributed to the destination. |
+| `UserStats` raw counters | Like EXP, aggregate only from sessions not already aggregated in the destination; derive averages from the resulting raw counters. |
+| `ReviewItem` | Union by deterministic identity. Keep the state that makes review due sooner (the earlier `nextReviewAt`); preserve one item only. |
+| `DailyQuestProgress` | Union by `dateKey`; `completed` and `expAwarded` are each true when either side is true. |
+| Settings | Use the most recently updated values when trustworthy `updatedAt` values exist; otherwise prefer Cloud settings. |
+| `displayName` | Prefer Cloud; use the Guest name only when the account has no name. |
+| `bestAccuracy` / `bestWpm` | Keep the maximum value. |
+| `LearningSession` | Union by the original `sessionId`; do not recreate a record during migration or retry. |
 
-Exact field-level merge formulas are deliberately not decided. Implementation
-must request a separate product decision before choosing how to combine or
-prefer conflicting values for EXP, lesson/stat counters, ReviewItem scheduling,
-DailyQuestProgress, settings, or best-result fields. It must not silently pick
-sum, max, latest, or overwrite behavior.
+Local Guest data remains until migration succeeds; it must never be deleted
+before a successful, durable Cloud write.
 
 ## Implementation status
 

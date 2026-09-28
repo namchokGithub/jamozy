@@ -480,10 +480,8 @@ work or overwriting established cloud progress.
 **Consequences:** [[DEC-001]] is superseded as the target identity and
 persistence decision. Existing Anonymous Auth, Firestore rules, Firebase
 adapters, and plans that depend on them are legacy implementation records until
-separate implementation work replaces them. Exact field-level merge formulas
-for EXP, counters, scheduling, settings, and best results remain intentionally
-unresolved; implementation must obtain a follow-up migration-policy decision.
-See `docs/AUTH-AND-PERSISTENCE.md`.
+separate implementation work replaces them. Field-level merge formulas are
+defined by [[DEC-030]]. See `docs/AUTH-AND-PERSISTENCE.md`.
 
 ---
 
@@ -566,3 +564,35 @@ stable IDs make retries and Guest-to-account migration safe.
 they do not introduce persisted period aggregates, a detailed analytics schema,
 or a History UI. Only submitted/completed sessions are stored in MVP; abandoned
 session recovery is deferred. See `docs/SESSION-AND-HISTORY.md`.
+
+---
+
+## DEC-030 — Guest-to-account migration merge policy
+
+**Date:** 2026-09-28
+**Status:** Accepted
+
+**Decision:** A Guest-to-account migration unions state by its deterministic
+identity and is idempotent. `LessonProgress` keeps the furthest state
+(`completed` > `unlocked` > `missing`). EXP and `UserStats` raw counters are
+not added as two snapshots; only `LearningSession`s not yet aggregated in the
+Cloud destination contribute their effects. Best accuracy and WPM use their
+maximum values.
+
+`ReviewItem`s union by their deterministic identity and retain the earlier
+`nextReviewAt`, so migration never delays an already-due review. Daily quests
+union by `dateKey`: `completed` and `expAwarded` are true if either source says
+true. Settings use the newest trustworthy `updatedAt`, otherwise Cloud wins.
+Cloud `displayName` wins unless it is absent, in which case the Guest name is
+used. LearningSession records union by their original `sessionId` and are never
+recreated during a migration or retry.
+
+**Why:** These rules preserve the learner's most advanced curriculum state,
+avoid duplicate rewards and lifetime totals, prevent review regressions, and
+avoid overwriting established account preferences without reliable recency
+information.
+
+**Consequences:** `MigrateGuestDataToAccount` must track whether a session's
+effects have already been aggregated before applying EXP or raw counters. This
+resolves the merge-policy blocker in `docs/PROGRESS.md`; the separate
+exactly-once persistence mechanism remains an implementation decision.

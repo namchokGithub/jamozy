@@ -276,3 +276,13 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Added planned domain, repository, local/Firebase persistence, history query,
   and future presentation work. No source code, Firebase configuration,
   Firestore rules, adapters, or migrations changed.
+
+### 2026-09-28 — Guest-to-account migration merge policy
+
+- Recorded [[DEC-030]] and updated `docs/AUTH-AND-PERSISTENCE.md` with the
+  accepted field-level merge rules: progress precedence, session-based EXP/raw
+  counter aggregation, deterministic ReviewItem union with earlier scheduling,
+  Daily Quest union, settings/display-name precedence, best-result maxima, and
+  session-ID union.
+- Marked the migration conflict-policy decision done in `docs/PROGRESS.md`.
+  The concrete exactly-once persistence mechanism remains implementation work.
