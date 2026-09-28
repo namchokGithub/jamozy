@@ -1,7 +1,17 @@
 import { createBrowserRouter } from 'react-router'
-import { courseRepo, lessonRepo, progressRepo as firebaseProgressRepo, userProfileRepo as firebaseUserProfileRepo, reviewRepo as firebaseReviewRepo } from '../infrastructure/firebase/repositories'
+import {
+  courseRepo,
+  lessonRepo,
+  progressRepo as firebaseProgressRepo,
+  userProfileRepo as firebaseUserProfileRepo,
+  reviewRepo as firebaseReviewRepo,
+} from '../infrastructure/firebase/repositories'
 import { GuestSessionRepository } from '../infrastructure/local/guest-session-repository'
-import { LocalProgressRepository, LocalReviewRepository, LocalUserProfileRepository } from '../infrastructure/local/local-repositories'
+import {
+  LocalProgressRepository,
+  LocalReviewRepository,
+  LocalUserProfileRepository,
+} from '../infrastructure/local/local-repositories'
 import { LocalSessionSubmissionRepository } from '../infrastructure/local/local-session-submission-repository'
 import { FirebaseSessionSubmissionRepository } from '../infrastructure/firebase/repositories/firebase-session-submission-repository'
 import { LocalGuestMigrationRepository } from '../infrastructure/local/local-guest-migration-repository'
@@ -30,20 +40,48 @@ import NotFoundPage from './NotFoundPage'
 import { migrateGuestDataToAccount } from '../application/migrate-guest-data-to-account'
 
 const localUserProfileRepo = new LocalUserProfileRepository()
-const guestSessions = new GuestSessionRepository(undefined, crypto, localUserProfileRepo)
+const guestSessions = new GuestSessionRepository(
+  undefined,
+  crypto,
+  localUserProfileRepo,
+)
 const firebaseAuthRepo = new FirebaseAuthRepository()
 const sessionManager = new SessionManager(firebaseAuthRepo, guestSessions)
 const guestMigrationRepo = new LocalGuestMigrationRepository()
 const accountMigrationRepo = new FirebaseAccountMigrationRepository()
-const migrateGuestData = async (guestId: string, accountId: string): Promise<void> => {
-  await migrateGuestDataToAccount(guestMigrationRepo, accountMigrationRepo, guestId, accountId)
+const migrateGuestData = async (
+  guestId: string,
+  accountId: string,
+): Promise<void> => {
+  await migrateGuestDataToAccount(
+    guestMigrationRepo,
+    accountMigrationRepo,
+    guestId,
+    accountId,
+  )
 }
 const learners = createLearnerRepositories({
   sessions: sessionManager,
-  guest: { progressRepo: new LocalProgressRepository(), reviewRepo: new LocalReviewRepository(), userProfileRepo: localUserProfileRepo, sessionSubmissionRepo: new LocalSessionSubmissionRepository() },
-  authenticated: { progressRepo: firebaseProgressRepo, reviewRepo: firebaseReviewRepo, userProfileRepo: firebaseUserProfileRepo, sessionSubmissionRepo: new FirebaseSessionSubmissionRepository() },
+  guest: {
+    progressRepo: new LocalProgressRepository(),
+    reviewRepo: new LocalReviewRepository(),
+    userProfileRepo: localUserProfileRepo,
+    sessionSubmissionRepo: new LocalSessionSubmissionRepository(),
+  },
+  authenticated: {
+    progressRepo: firebaseProgressRepo,
+    reviewRepo: firebaseReviewRepo,
+    userProfileRepo: firebaseUserProfileRepo,
+    sessionSubmissionRepo: new FirebaseSessionSubmissionRepository(),
+  },
 })
-const { progressRepo, reviewRepo, userProfileRepo, sessionSubmissionRepo, getActiveUser } = learners
+const {
+  progressRepo,
+  reviewRepo,
+  userProfileRepo,
+  sessionSubmissionRepo,
+  getActiveUser,
+} = learners
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -55,7 +93,13 @@ export const router = createBrowserRouter([
       ensureUser: getActiveUser,
       getSession: () => sessionManager.getActiveSession(),
     }),
-    action: createCourseListAction({ userProfileRepo, ensureUser: getActiveUser, auth: firebaseAuthRepo, getActiveSession: () => sessionManager.getActiveSession(), migrateGuestData }),
+    action: createCourseListAction({
+      userProfileRepo,
+      ensureUser: getActiveUser,
+      auth: firebaseAuthRepo,
+      getActiveSession: () => sessionManager.getActiveSession(),
+      migrateGuestData,
+    }),
     ErrorBoundary: RouteError,
   },
   {
@@ -73,6 +117,7 @@ export const router = createBrowserRouter([
     path: '/lessons/:lessonId',
     Component: LessonDetailPage,
     loader: createLessonDetailLoader({
+      courseRepo,
       lessonRepo,
       userProfileRepo,
       ensureUser: getActiveUser,
@@ -138,8 +183,11 @@ sessionManager.onChange(() => {
     router.revalidate()
     return
   }
-  void guestSessions.getStoredGuestSession()
-    .then((guest) => guest ? migrateGuestData(guest.guestId, user.uid) : undefined)
+  void guestSessions
+    .getStoredGuestSession()
+    .then((guest) =>
+      guest ? migrateGuestData(guest.guestId, user.uid) : undefined,
+    )
     .catch(() => undefined)
     .finally(() => router.revalidate())
 })

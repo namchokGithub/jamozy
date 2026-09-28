@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createLessonDetailLoader } from './LessonDetailPage.loader'
-import { FakeLessonRepository, FakeUserProfileRepository } from '../../test/fakes'
+import {
+  FakeCourseRepository,
+  FakeLessonRepository,
+  FakeUserProfileRepository,
+} from '../../test/fakes'
 import { NotFoundError } from '../../domain/errors'
 import { defaultUserProfile } from '../../domain/models/user-profile'
 import type { Lesson } from '../../domain/models/lesson'
@@ -22,6 +26,20 @@ describe('createLessonDetailLoader', () => {
   it('signs in before reading the lesson, and returns it alongside the default settings for a new user', async () => {
     const ensureUser = vi.fn().mockResolvedValue({ uid: 'user1' })
     const loader = createLessonDetailLoader({
+      courseRepo: new FakeCourseRepository(
+        [],
+        [
+          {
+            id: 'u1',
+            courseId: 'c1',
+            title: 'Unit one',
+            description: '',
+            order: 1,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
+      ),
       lessonRepo: new FakeLessonRepository([makeLesson('l1')]),
       userProfileRepo: new FakeUserProfileRepository(),
       ensureUser,
@@ -40,9 +58,27 @@ describe('createLessonDetailLoader', () => {
     const profile = defaultUserProfile('user1', new Date('2025-01-01'))
     await userProfileRepo.saveUserProfile('user1', {
       ...profile,
-      settings: { ...profile.settings, meaningLanguage: 'th', romanizationEnabled: false },
+      settings: {
+        ...profile.settings,
+        meaningLanguage: 'th',
+        romanizationEnabled: false,
+      },
     })
     const loader = createLessonDetailLoader({
+      courseRepo: new FakeCourseRepository(
+        [],
+        [
+          {
+            id: 'u1',
+            courseId: 'c1',
+            title: 'Unit one',
+            description: '',
+            order: 1,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
+      ),
       lessonRepo: new FakeLessonRepository([makeLesson('l1')]),
       userProfileRepo,
       ensureUser: vi.fn().mockResolvedValue({ uid: 'user1' }),
@@ -54,9 +90,36 @@ describe('createLessonDetailLoader', () => {
     expect(data.settings.romanizationEnabled).toBe(false)
   })
 
+  it('returns the containing course ID for the completion fallback', async () => {
+    const loader = createLessonDetailLoader({
+      lessonRepo: new FakeLessonRepository([makeLesson('l1')]),
+      courseRepo: new FakeCourseRepository(
+        [],
+        [
+          {
+            id: 'u1',
+            courseId: 'c1',
+            title: 'Unit one',
+            description: '',
+            order: 1,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ],
+      ),
+      userProfileRepo: new FakeUserProfileRepository(),
+      ensureUser: vi.fn().mockResolvedValue({ uid: 'user1' }),
+    })
+
+    const data = await loader({ params: { lessonId: 'l1' } } as never)
+
+    expect(data.courseId).toBe('c1')
+  })
+
   it('throws NotFoundError when the lesson does not exist', async () => {
     const ensureUser = vi.fn().mockResolvedValue({ uid: 'user1' })
     const loader = createLessonDetailLoader({
+      courseRepo: new FakeCourseRepository(),
       lessonRepo: new FakeLessonRepository(),
       userProfileRepo: new FakeUserProfileRepository(),
       ensureUser,
@@ -70,6 +133,7 @@ describe('createLessonDetailLoader', () => {
   it('throws when lessonId is missing from params', async () => {
     const ensureUser = vi.fn().mockResolvedValue({ uid: 'user1' })
     const loader = createLessonDetailLoader({
+      courseRepo: new FakeCourseRepository(),
       lessonRepo: new FakeLessonRepository(),
       userProfileRepo: new FakeUserProfileRepository(),
       ensureUser,

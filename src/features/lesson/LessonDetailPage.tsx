@@ -1,25 +1,58 @@
 import { useState } from 'react'
-import { useLoaderData } from 'react-router'
+import { useLoaderData, useNavigate } from 'react-router'
 import type { LessonDetailLoaderData } from './LessonDetailPage.loader'
 import LessonTypingSession from './LessonTypingSession'
 import { formatExerciseMeaning } from './format-exercise-meaning'
 import type { CompleteLessonOutcome } from '../../application/complete-lesson'
 
 export default function LessonDetailPage() {
-  const { lesson, settings } = useLoaderData() as LessonDetailLoaderData
+  const { lesson, settings, courseId } =
+    useLoaderData() as LessonDetailLoaderData
+
+  return (
+    <LessonDetailContent
+      key={lesson.id}
+      lesson={lesson}
+      settings={settings}
+      courseId={courseId}
+    />
+  )
+}
+
+function LessonDetailContent({
+  lesson,
+  settings,
+  courseId,
+}: LessonDetailLoaderData) {
+  const navigate = useNavigate()
   const [started, setStarted] = useState(false)
   const [outcome, setOutcome] = useState<CompleteLessonOutcome | null>(null)
 
   if (outcome) {
     return (
       <main className="mx-auto max-w-2xl p-6">
-        <h1 className="text-2xl font-medium text-slate-900">Lesson complete!</h1>
+        <h1 className="text-2xl font-medium text-slate-900">
+          Lesson complete!
+        </h1>
         <p className="mt-2 text-slate-700">
           +{outcome.expGained} EXP — now level {outcome.level}
         </p>
         {outcome.unlockedNextLessonId && (
           <p className="mt-1 text-sm text-slate-600">Next lesson unlocked.</p>
         )}
+        <button
+          type="button"
+          onClick={() =>
+            navigate(
+              outcome.unlockedNextLessonId
+                ? `/lessons/${outcome.unlockedNextLessonId}`
+                : `/courses/${courseId}`,
+            )
+          }
+          className="mt-6 rounded-lg bg-slate-900 px-4 py-2 text-white"
+        >
+          {outcome.unlockedNextLessonId ? 'Next Lesson' : 'Course Map'}
+        </button>
       </main>
     )
   }
@@ -28,7 +61,11 @@ export default function LessonDetailPage() {
     return (
       <main className="mx-auto max-w-2xl p-6">
         <h1 className="text-2xl font-medium text-slate-900">{lesson.title}</h1>
-        <LessonTypingSession lesson={lesson} onComplete={setOutcome} keyboardSettings={settings} />
+        <LessonTypingSession
+          lesson={lesson}
+          onComplete={setOutcome}
+          keyboardSettings={settings}
+        />
       </main>
     )
   }
@@ -44,14 +81,26 @@ export default function LessonDetailPage() {
         <>
           <ul className="mt-6 space-y-4">
             {lesson.exercises.map((exercise) => {
-              const meaning = formatExerciseMeaning(exercise, settings.meaningLanguage)
+              const meaning = formatExerciseMeaning(
+                exercise,
+                settings.meaningLanguage,
+              )
               return (
-                <li key={exercise.id} className="rounded-lg border border-slate-200 p-4">
-                  <div className="text-xl text-slate-900">{exercise.targetText}</div>
+                <li
+                  key={exercise.id}
+                  className="rounded-lg border border-slate-200 p-4"
+                >
+                  <div className="text-xl text-slate-900">
+                    {exercise.targetText}
+                  </div>
                   {settings.romanizationEnabled && exercise.romanization && (
-                    <div className="text-sm text-slate-500">{exercise.romanization}</div>
+                    <div className="text-sm text-slate-500">
+                      {exercise.romanization}
+                    </div>
                   )}
-                  {meaning && <div className="mt-2 text-sm text-slate-700">{meaning}</div>}
+                  {meaning && (
+                    <div className="mt-2 text-sm text-slate-700">{meaning}</div>
+                  )}
                 </li>
               )
             })}

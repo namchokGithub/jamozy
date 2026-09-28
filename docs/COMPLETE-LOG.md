@@ -184,6 +184,7 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Recorded `docs/DECISIONS.md` DEC-021 (display-only rounding convention for running-average stats). Ticked README's MVP checklist for "EXP and Level progression"; updated `docs/PROGRESS.md` to match.
 - `pnpm exec vitest run`/`tsc -b`/`pnpm lint` all pass — 189 tests (up from 187 after Task 5, up from 173 before this round).
 - Nothing committed via `git commit` by the user this round — all commits so far were made directly by the assistant during plan execution (per `superpowers:executing-plans`' per-task commit steps, needed for the plan's ledger/review tooling); the user has not yet been asked whether to squash them before their own review.
+
 ### 2026-09-27 — Keyboard settings and Review preview context
 
 - Implemented all remaining keyboard consumers: `showKeyboard`, `showEnglishKeys`, and `keyboardOpacity` now control `VirtualKeyboard` in both lesson and review typing sessions. New profiles default to 0.7 opacity; existing persisted settings are left intact.
@@ -358,3 +359,14 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Documented that the old client-SDK seed script is not a production content
   administration path; future authoring requires an Admin SDK, Cloud Function,
   or controlled Firebase Console procedure.
+
+### 2026-09-28 — Lesson completion navigation
+
+- Added the first Lesson Result flow control: the existing lesson-completion
+  block now sends learners to an unlocked next lesson, or back to its Course
+  Map when the completed lesson is the final available lesson.
+- The lesson loader resolves the lesson's containing `courseId` through an
+  application-layer unit read; no persisted learner state or completion use
+  case changed.
+- Added router-level UI regression tests for both destinations and a loader
+  regression test for the Course Map fallback data.
