@@ -57,6 +57,7 @@ export default function CourseListPage() {
               </button>
             ))}
             {!isAuthenticated && !editingName && <button type="button" onClick={() => setShowAuth(true)} className="rounded-full border px-3 py-2 text-sm">Sign in</button>}
+            {isAuthenticated && <span className="rounded-full border px-3 py-2 text-sm">{name}</span>}
             {isAuthenticated && <button type="button" onClick={() => fetcher.submit({ intent: 'sign-out' }, { method: 'post', encType: 'application/json' })} className="rounded-full border px-3 py-2 text-sm">Sign out</button>}
             <Link
               to="/profile"
