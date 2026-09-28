@@ -225,11 +225,14 @@ authenticated player, can write those collections. Owner-only rules remain for
 `users/{userId}/**`.
 
 **Consequences:** the client-SDK `pnpm seed` script is no longer a valid way to
-change production content. Future content administration must use an Admin SDK,
-Cloud Function, or Firebase Console procedure with appropriate operational
-access; that authoring path is intentionally out of MVP scope.
+change production content. The planned post-MVP authoring path is an Admin BO
+whose browser writes are gated by an `admin` Firebase Auth custom claim and
+Firestore Rules; a controlled Admin SDK operator script provisions claims. No
+Cloud Function is planned. Until that BO exists, Firebase Console procedures
+remain an operational fallback.
 
-**Deploy:** rules aren't live until run — `firebase login` (interactive, user runs this) then `firebase deploy --only firestore:rules`.
+**Deploy:** the restrictive rules are deployed. Any future rules change still
+requires an explicit Firebase Console deployment procedure.
 
 **Legacy implementation note:** the original permissive rule is historical and
 does not define the Guest/Authenticated architecture in [[DEC-027]].
