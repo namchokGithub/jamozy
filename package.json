@@ -10,10 +10,13 @@
     "test": "vitest",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "seed": "tsx scripts/seed-firestore.ts"
+    "seed": "tsx scripts/seed-firestore.ts",
+    "admin:grant": "tsx scripts/set-admin-claim.ts",
+    "content:migrate-status": "tsx scripts/migrate-content-status.ts"
   },
   "dependencies": {
     "firebase": "^12.19.0",
+    "firebase-admin": "^13.6.0",
     "lucide-react": "^1.47.0",
     "motion": "^13.4.0",
     "react": "^19.3.0",

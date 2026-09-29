@@ -372,8 +372,10 @@ implementation status and the post-MVP roadmap.
 
 ### Next / Post-MVP
 
-- Admin BO content management (admin-only UI, Firebase Auth custom claims, and
-  Firestore Rules; no Cloud Function planned)
+- Admin BO operations: deploy the status indexes, run the documented content
+  migration, deploy Rules, and grant the owner custom claim before using the
+  shipped `/admin` content-management UI. See the
+  [implementation plan](docs/superpowers/plans/2026-09-29-admin-content-management.md).
 - Decide whether sound feedback ships or is deferred, then implement the
   selected behavior
 - Dark-mode CSS
@@ -382,6 +384,24 @@ implementation status and the post-MVP roadmap.
 - Learning Modes: VocabularyProgress, JamoStats, Practice, and Daily Quest
 - Account linking between authentication providers
 - Achievements, daily streaks, pronunciation audio, and additional curriculum
+
+### Admin BO operator checklist
+
+The application includes a single-owner `/admin` authoring interface. It is
+not enabled by navigation alone: Firestore Rules require an Auth token with
+`admin: true`. Before rollout, deploy `firestore.indexes.json`, then run the
+status migration with a local service-account credential:
+
+```bash
+pnpm content:migrate-status -- --dry-run
+pnpm content:migrate-status -- --write --after-dry-run
+pnpm admin:grant -- <firebase-auth-uid>
+```
+
+Deploy the restrictive Rules only after the migration count is verified. The
+owner must sign out and back in after the claim is granted. The scripts use
+`GOOGLE_APPLICATION_CREDENTIALS` from `.env.local`; do not place a service
+credential in `VITE_*` variables or commit it.
 
 ## Development Principles
 

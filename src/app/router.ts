@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router'
+import { createBrowserRouter, Outlet } from 'react-router'
 import {
   courseRepo,
   lessonRepo,
@@ -18,6 +18,8 @@ import { LocalGuestMigrationRepository } from '../infrastructure/local/local-gue
 import { FirebaseAccountMigrationRepository } from '../infrastructure/firebase/repositories/firebase-account-migration-repository'
 import { createLearnerRepositories } from './learner-repositories'
 import { FirebaseAuthRepository } from '../infrastructure/firebase/firebase-auth-repository'
+import { FirebaseAdminAuthRepository } from '../infrastructure/firebase/firebase-admin-auth-repository'
+import { FirebaseAdminContentRepository } from '../infrastructure/firebase/repositories/firebase-admin-content-repository'
 import { SessionManager } from '../application/session-manager'
 import CourseListPage from '../features/course/CourseListPage'
 import { createCourseListLoader } from '../features/course/CourseListPage.loader'
@@ -38,6 +40,19 @@ import { createProfileLoader } from '../features/profile/ProfilePage.loader'
 import RouteError from './RouteError'
 import NotFoundPage from './NotFoundPage'
 import { migrateGuestDataToAccount } from '../application/migrate-guest-data-to-account'
+import {
+  createAdminGuardLoader,
+  requireAdmin,
+} from '../features/admin/AdminGuard.loader'
+import AdminDashboardPage from '../features/admin/AdminDashboardPage'
+import { createAdminDashboardLoader } from '../features/admin/AdminDashboardPage.loader'
+import CourseEditorPage from '../features/admin/CourseEditorPage'
+import { createCourseEditorLoader } from '../features/admin/CourseEditorPage.loader'
+import UnitEditorPage from '../features/admin/UnitEditorPage'
+import { createUnitEditorLoader } from '../features/admin/UnitEditorPage.loader'
+import LessonEditorPage from '../features/admin/LessonEditorPage'
+import { createLessonEditorLoader } from '../features/admin/LessonEditorPage.loader'
+import { createAdminAction } from '../features/admin/admin-action'
 
 const localUserProfileRepo = new LocalUserProfileRepository()
 const guestSessions = new GuestSessionRepository(
@@ -46,6 +61,8 @@ const guestSessions = new GuestSessionRepository(
   localUserProfileRepo,
 )
 const firebaseAuthRepo = new FirebaseAuthRepository()
+const adminAuthRepo = new FirebaseAdminAuthRepository()
+const adminContentRepo = new FirebaseAdminContentRepository()
 const sessionManager = new SessionManager(firebaseAuthRepo, guestSessions)
 const guestMigrationRepo = new LocalGuestMigrationRepository()
 const accountMigrationRepo = new FirebaseAccountMigrationRepository()
@@ -83,6 +100,62 @@ const {
   getActiveUser,
 } = learners
 export const router = createBrowserRouter([
+  {
+    path: '/admin',
+    Component: Outlet,
+    loader: createAdminGuardLoader(adminAuthRepo),
+    ErrorBoundary: RouteError,
+    children: [
+      {
+        index: true,
+        Component: AdminDashboardPage,
+        loader: requireAdmin(
+          adminAuthRepo,
+          createAdminDashboardLoader(adminContentRepo),
+        ),
+        action: requireAdmin(
+          adminAuthRepo,
+          createAdminAction(adminContentRepo),
+        ),
+      },
+      {
+        path: 'courses/:courseId',
+        Component: CourseEditorPage,
+        loader: requireAdmin(
+          adminAuthRepo,
+          createCourseEditorLoader(adminContentRepo),
+        ),
+        action: requireAdmin(
+          adminAuthRepo,
+          createAdminAction(adminContentRepo),
+        ),
+      },
+      {
+        path: 'units/:unitId',
+        Component: UnitEditorPage,
+        loader: requireAdmin(
+          adminAuthRepo,
+          createUnitEditorLoader(adminContentRepo),
+        ),
+        action: requireAdmin(
+          adminAuthRepo,
+          createAdminAction(adminContentRepo),
+        ),
+      },
+      {
+        path: 'lessons/:lessonId',
+        Component: LessonEditorPage,
+        loader: requireAdmin(
+          adminAuthRepo,
+          createLessonEditorLoader(adminContentRepo),
+        ),
+        action: requireAdmin(
+          adminAuthRepo,
+          createAdminAction(adminContentRepo),
+        ),
+      },
+    ],
+  },
   {
     path: '/',
     Component: CourseListPage,
@@ -161,8 +234,11 @@ export const router = createBrowserRouter([
       ensureUser: getActiveUser,
     }),
     shouldRevalidate: ({ actionResult, defaultShouldRevalidate }) =>
-      !(actionResult && typeof actionResult === 'object' && 'error' in actionResult) &&
-      defaultShouldRevalidate,
+      !(
+        actionResult &&
+        typeof actionResult === 'object' &&
+        'error' in actionResult
+      ) && defaultShouldRevalidate,
     ErrorBoundary: RouteError,
   },
   {

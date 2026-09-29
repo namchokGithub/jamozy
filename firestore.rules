@@ -2,19 +2,38 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Learning content is public read-only. There is no client write rule, so
-    // course content must be administered outside this browser application.
-    // See DEC-015 for the retired MVP client-write exception.
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    function isPublishedCourse(courseId) {
+      return get(/databases/$(database)/documents/courses/$(courseId)).data.status == 'published';
+    }
+
+    function isPublishedUnit(unitId) {
+      return get(/databases/$(database)/documents/units/$(unitId)).data.status == 'published';
+    }
+
     match /courses/{courseId} {
-      allow read: if true;
+      allow read: if isAdmin() || resource.data.status == 'published';
+      allow create, update, delete: if isAdmin();
     }
 
     match /units/{unitId} {
-      allow read: if true;
+      allow read: if isAdmin() || (
+        resource.data.status == 'published' &&
+        isPublishedCourse(resource.data.courseId)
+      );
+      allow create, update, delete: if isAdmin();
     }
 
     match /lessons/{lessonId} {
-      allow read: if true;
+      allow read: if isAdmin() || (
+        resource.data.status == 'published' &&
+        isPublishedUnit(resource.data.unitId) &&
+        isPublishedCourse(get(/databases/$(database)/documents/units/$(resource.data.unitId)).data.courseId)
+      );
+      allow create, update, delete: if isAdmin();
     }
 
     // Per-user data. Only the owning user may read or write their own doc

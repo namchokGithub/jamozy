@@ -684,3 +684,26 @@ predictable reward without competing with progression through new content.
 **Consequences:** This supersedes DEC-014's no-repeat-EXP rule for the active
 `completeLessonSession` path. There is no daily cap in MVP; any future balance
 limit needs its own persisted policy and decision.
+
+---
+
+## DEC-034 — Admin content is claim-authorized and status-gated
+
+**Date:** 2026-09-29
+**Status:** Accepted
+
+**Decision:** The single-owner `/admin` BO uses Firebase Auth's `admin: true`
+custom claim for its UX guard and Firestore Rules authorization. Course, Unit,
+and Lesson each persist `draft`, `published`, or `archived`; learner reads
+require the item and every ancestor to be published. Archive records the prior
+Draft/Published state in `archivedFromStatus`, without altering descendant
+statuses or learner-owned data.
+
+**Why:** Content authoring needs safe preparation and reversible removal, while
+learner progress, ReviewItems, and LearningSessions rely on stable IDs.
+
+**Consequences:** A local Admin SDK migration must mark legacy statusless
+content Published before restrictive Rules deploy. The owner receives the claim
+only through the local Admin SDK script and must refresh their sign-in token.
+Exercises remain embedded and stable: authors may add, edit, and reorder them,
+but retire them by archiving their Lesson instead of hard deletion.

@@ -17,6 +17,8 @@ Conventions: document-backed cloud entities (`Course`, `Unit`, `Lesson`, `Vocabu
 | title       | string | e.g. "Hangul Basics"               |
 | description | string | short summary shown on course list |
 | order       | number | canonical display/unlock order among courses; unique globally |
+| status      | `'draft' \| 'published' \| 'archived'` | learner visibility state ([[DEC-034]]) |
+| archivedFromStatus | `'draft' \| 'published'` \| absent | recorded on Archive and used by Restore |
 | createdAt   | Date   |                                    |
 | updatedAt   | Date   |                                    |
 
@@ -36,6 +38,8 @@ Relationships: a `Unit` belongs to a `Course` via `Unit.courseId`. No nested sub
 | title       | string | e.g. "Basic Vowels"                    |
 | description | string |                                        |
 | order       | number | canonical display/unlock order within the course; unique within `courseId` |
+| status      | `'draft' \| 'published' \| 'archived'` | learner visibility also requires published Course ([[DEC-034]]) |
+| archivedFromStatus | `'draft' \| 'published'` \| absent | recorded on Archive and used by Restore |
 | createdAt   | Date   |                                        |
 | updatedAt   | Date   |                                        |
 
@@ -55,6 +59,8 @@ Relationships: a `Lesson` belongs to a `Unit` via `Lesson.unitId`.
 | title     | string                                                          |                                            |
 | type      | `'character' \| 'syllable' \| 'word' \| 'phrase' \| 'sentence'` | matches README's progressive learning flow |
 | order     | number                                                          | canonical display/unlock order within the unit; unique within `unitId` |
+| status    | `'draft' \| 'published' \| 'archived'`                         | learner visibility also requires published Unit and Course ([[DEC-034]]) |
+| archivedFromStatus | `'draft' \| 'published'` \| absent | recorded on Archive and used by Restore |
 | exercises | `LessonExercise[]`                                              | ordered typing prompts for this lesson     |
 | createdAt | Date                                                            |                                            |
 | updatedAt | Date                                                            |                                            |
@@ -71,6 +77,14 @@ Relationships: a `Lesson` belongs to a `Unit` via `Lesson.unitId`.
 | meaningEn    | string\| null                 | English meaning ([[DEC-025]])                      |
 | difficulty   | `'easy' \| 'medium' \| 'hard'` | used by Practice Mode filtering ([[DEC-010]])      |
 | hint         | string\| null                 | optional extra hint (not meaning — see `meaningTh`/`meaningEn`) |
+
+Content authoring creates Course, Unit, and Lesson records as Draft. A Lesson
+can publish only with a published Course and Unit plus at least one valid
+Exercise. Exercises retain stable embedded IDs; they can be edited and
+reordered but not individually deleted or archived in v1. Archive a containing
+Lesson instead. The Firestore status migration is a one-time operational step
+for legacy statusless documents; statusless content is never learner-visible
+after the restrictive Rules are deployed.
 
 When `vocabularyId` is present, `targetText`, romanization, meanings, and difficulty are a denormalized lesson snapshot of that vocabulary entry. Content authoring must keep them aligned. This keeps a lesson self-contained at runtime while allowing a word to be reused and tracked across lessons.
 

@@ -402,3 +402,29 @@ Chronological log of completed units of work. One entry per meaningful change (n
 
 - Changed an intentional replay of an already completed Learning Path lesson from 0 EXP to a flat 15 EXP. First completions retain their accuracy-based reward; replays do not change Progress, unlock another lesson, or create first-completion review effects ([[DEC-033]]).
 - Added regression coverage for the replay outcome. Verification: 253 Vitest tests, lint, and production build passed.
+
+### 2026-09-29 — Admin BO design and implementation plan
+
+- Recorded the approved single-owner Admin BO design: Google custom-claim authorization, `/admin` routes, Course/Unit/Lesson Draft/Publish/Archive lifecycle, text Exercise authoring, no hard deletion, and published-only learner visibility.
+- Added the implementation plan covering content-state migration, Rules Emulator coverage, repository/use-case boundaries, admin UI, and operator rollout. No Admin BO code has been implemented yet.
+
+### 2026-09-29 — Native Admin BO content management
+
+- Implemented the protected `/admin` Course → Unit → Lesson authoring flow in
+  the existing React app. It supports Draft/Publish/Archive/Restore, saves
+  text-only Exercise arrays, preserves embedded exercise IDs while reordering,
+  and transactionally swaps adjacent Unit/Lesson orders.
+- Added the separate admin repository/application path and a Firebase custom
+  claim adapter. Learner repositories now query only published content and
+  reject unpublished direct lookups; Firestore Rules are the authoritative
+  guard for owner-only content writes and published ancestor visibility.
+- Added `firebase-admin` scripts: `pnpm content:migrate-status -- --dry-run`
+  reports legacy statusless content; `--write --after-dry-run` applies only
+  `status: 'published'` to Course/Unit/Lesson documents. `pnpm admin:grant -- <uid>`
+  assigns the owner claim with a local service credential. Neither script was
+  run against Firebase during implementation.
+- Recorded [[DEC-034]] and updated README/PROGRESS/DOMAIN-MODEL with the
+  required production order: indexes → migration → Rules → owner claim → app.
+- Local verification passed: 264 Vitest tests, lint, production build, and
+  `git diff --check`. Firestore Rules Emulator coverage and the real Firebase
+  rollout remain explicitly pending; no Firebase state was changed.
