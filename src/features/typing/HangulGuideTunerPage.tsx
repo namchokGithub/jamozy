@@ -6,15 +6,17 @@ import { PageSurface } from '../../components/ui/PageSurface'
 import { buildExpectedKeys } from '../../domain/korean/target-sequence'
 import {
   renderGuideInspection,
-  SYLLABLE_GUIDES,
   waitForHangulFont,
   type GuideDiagnostics,
   type GuideInspectionMode,
+} from './DecomposedHangulTarget'
+import {
+  SYLLABLE_GUIDES,
   type GuideMode,
   type GuideOperation,
   type GuideShape,
   type SyllableGuide,
-} from './DecomposedHangulTarget'
+} from './hangul-segmentation-guides'
 
 const TUNABLE_SYLLABLES = ['녕', '하', '죄'] as const
 const INSPECTION_VIEWS: Array<{ mode: GuideInspectionMode; label: string }> = [

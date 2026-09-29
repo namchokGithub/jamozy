@@ -474,3 +474,12 @@ Chronological log of completed units of work. One entry per meaningful change (n
   pixels for each target syllable.
 - Verified with `pnpm build`, `pnpm lint`, and browser visual QA. No automated
   tests were added per the requested UI-only testing policy.
+
+### 2026-09-30 — Hangul segmentation guide data module
+
+- Moved the guide schema, reusable seed layouts, and `SYLLABLE_GUIDES` map from
+  `DecomposedHangulTarget.tsx` into
+  `src/features/typing/hangul-segmentation-guides.ts`.
+- The learner renderer and development tuner import the same data map. The
+  tuned `녕`, `하`, and `죄` values were copied unchanged; no guide behavior was
+  changed.
