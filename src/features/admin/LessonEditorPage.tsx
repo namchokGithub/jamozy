@@ -49,6 +49,7 @@ export default function LessonEditorPage() {
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(
     null,
   )
+  const [hasPendingExerciseOrder, setHasPendingExerciseOrder] = useState(false)
   const submit = (intent: string) =>
     fetcher.submit(
       {
@@ -80,6 +81,7 @@ export default function LessonEditorPage() {
       const target = index + direction
       if (!next[target]) return items
       ;[next[index], next[target]] = [next[target], next[index]]
+      setHasPendingExerciseOrder(true)
       return next
     })
   const cancelExercise = (exerciseId: string) => {
@@ -99,10 +101,16 @@ export default function LessonEditorPage() {
     <PageSurface contentClassName="max-w-3xl">
       <AdminTopBar
         breadcrumb={[
-          t('breadcrumb.admin'),
-          course?.title ?? t('kind.course'),
-          unit?.title ?? t('kind.unit'),
-          lesson.title,
+          { label: t('breadcrumb.admin'), to: '/admin' },
+          {
+            label: course?.title ?? t('kind.course'),
+            to: unit ? `/admin/courses/${unit.courseId}` : undefined,
+          },
+          {
+            label: unit?.title ?? t('kind.unit'),
+            to: unit ? `/admin/units/${unit.id}` : undefined,
+          },
+          { label: lesson.title },
         ]}
       />
       <header className="mt-4 flex flex-wrap justify-between gap-3">
@@ -189,6 +197,23 @@ export default function LessonEditorPage() {
             {t('action.addExercise')}
           </Button>
         </div>
+        {hasPendingExerciseOrder && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button onClick={() => submit('save')}>
+              {t('action.saveChanges')}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setExercises(lesson.exercises)
+                setEditingExerciseId(null)
+                setHasPendingExerciseOrder(false)
+              }}
+            >
+              {t('action.cancel')}
+            </Button>
+          </div>
+        )}
         <div className="mt-4 space-y-4">
           {exercises.map((exercise, index) => (
             <Card key={exercise.id} className="grid gap-3">
@@ -196,37 +221,34 @@ export default function LessonEditorPage() {
                 <p className="text-sm font-bold">
                   {t('lesson.exerciseNumber', { number: index + 1 })}
                 </p>
-                {editingExerciseId === exercise.id ? (
-                  <div className="flex gap-1">
-                    <Button
-                      aria-label={t('lesson.exerciseMoveUp', {
-                        number: index + 1,
-                      })}
-                      variant="ghost"
-                      disabled={index === 0}
-                      onClick={() => move(index, -1)}
-                    >
-                      {t('action.moveUp')}
-                    </Button>
-                    <Button
-                      aria-label={t('lesson.exerciseMoveDown', {
-                        number: index + 1,
-                      })}
-                      variant="ghost"
-                      disabled={index === exercises.length - 1}
-                      onClick={() => move(index, 1)}
-                    >
-                      {t('action.moveDown')}
-                    </Button>
-                  </div>
-                ) : (
+                <div className="flex flex-wrap justify-end gap-1">
+                  <Button
+                    aria-label={t('lesson.exerciseMoveUp', {
+                      number: index + 1,
+                    })}
+                    variant="ghost"
+                    disabled={index === 0}
+                    onClick={() => move(index, -1)}
+                  >
+                    {t('action.moveUp')}
+                  </Button>
+                  <Button
+                    aria-label={t('lesson.exerciseMoveDown', {
+                      number: index + 1,
+                    })}
+                    variant="ghost"
+                    disabled={index === exercises.length - 1}
+                    onClick={() => move(index, 1)}
+                  >
+                    {t('action.moveDown')}
+                  </Button>
                   <Button
                     variant="secondary"
                     onClick={() => setEditingExerciseId(exercise.id)}
                   >
                     {t('action.editExercise')}
                   </Button>
-                )}
+                </div>
               </div>
               {editingExerciseId === exercise.id ? (
                 <>

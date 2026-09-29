@@ -20,7 +20,12 @@ export default function CourseEditorPage() {
     fetcher.submit(data, { method: 'post' })
   return (
     <PageSurface contentClassName="max-w-3xl">
-      <AdminTopBar breadcrumb={[t('breadcrumb.admin'), course.title]} />
+      <AdminTopBar
+        breadcrumb={[
+          { label: t('breadcrumb.admin'), to: '/admin' },
+          { label: course.title },
+        ]}
+      />
       <header className="mt-4 flex flex-wrap justify-between gap-3">
         <div>
           <p className="text-sm font-semibold uppercase text-[#a85d4e]">

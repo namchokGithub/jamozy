@@ -27,9 +27,12 @@ export default function UnitEditorPage() {
     <PageSurface contentClassName="max-w-3xl">
       <AdminTopBar
         breadcrumb={[
-          t('breadcrumb.admin'),
-          course?.title ?? t('kind.course'),
-          unit.title,
+          { label: t('breadcrumb.admin'), to: '/admin' },
+          {
+            label: course?.title ?? t('kind.course'),
+            to: `/admin/courses/${unit.courseId}`,
+          },
+          { label: unit.title },
         ]}
       />
       <header className="mt-4 flex flex-wrap justify-between gap-3">
