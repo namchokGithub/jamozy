@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
 import type { OnePageLearningPath } from '../../application/get-one-page-learning-path'
 import { KEY_TO_JAMO } from '../../domain/korean/keymap'
-import { getCharacterStates } from '../../domain/korean/typing-session'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
+import DecomposedHangulTarget from '../typing/DecomposedHangulTarget'
 import FingerPlacementGuide from './FingerPlacementGuide'
 
 interface OnePageLearningPlayerProps {
@@ -84,10 +84,6 @@ export default function OnePageLearningPlayer({
   if (learningPath.courses.length === 0) return null
   const currentIndex = session?.currentIndex ?? 0
   const active = learningPath.queue[currentIndex]
-  const characters = session
-    ? Array.from(session.currentSession.targetText)
-    : []
-  const states = session ? getCharacterStates(session.currentSession) : []
   const nextKey =
     session?.currentSession.expectedKeys[session.currentSession.keyIndex]
   const acceptedKeystrokes = session
@@ -167,28 +163,16 @@ export default function OnePageLearningPlayer({
             </span>
           </div>
           <div className="mt-3 rounded-3xl border border-[#eadfd4] bg-white p-6 text-center">
-            <div className="flex justify-center gap-1 text-4xl font-bold tracking-wide sm:text-5xl">
-              {characters.map((character, index) => (
-                <span
-                  key={`${character}-${index}`}
-                  className={
-                    states[index] === 'correct'
-                      ? 'text-[#58733f]'
-                      : states[index] === 'current'
-                        ? 'text-[#a85d4e] underline'
-                        : 'text-[#c7c3bc]'
-                  }
-                >
-                  {character}
-                </span>
-              ))}
-            </div>
+            <DecomposedHangulTarget
+              session={session.currentSession}
+              className="text-4xl font-bold tracking-wide sm:text-5xl"
+            />
             <p className="mt-4 text-sm text-[#667085]">
-              {active.exercise.meaningTh}
+              {active.exercise.meaningTh} : {active.exercise.meaningEn}
             </p>
-            <p className="mt-1 text-sm text-[#667085]">
+            {/* <p className="mt-1 text-sm text-[#667085]">
               {active.exercise.meaningEn}
-            </p>
+            </p> */}
             {active.exercise.romanization && (
               <p className="mt-2 text-sm italic text-[#7863a8]">
                 {active.exercise.romanization}
@@ -197,7 +181,7 @@ export default function OnePageLearningPlayer({
             {/* <p className="mt-4 text-xs text-[#98a2b3]">Typed: {getComposedText(session.currentSession)}</p> */}
           </div>
           <VirtualKeyboard nextKey={nextKey} showEnglishKeys opacity={1} />
-          <FingerPlacementGuide />
+          <FingerPlacementGuide nextKey={nextKey} />
           {fetcher.state !== 'idle' && (
             <p className="mt-3 text-center text-sm text-[#667085]">
               Saving progress…

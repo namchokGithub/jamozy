@@ -90,9 +90,6 @@ export default function VirtualKeyboard({
         <div className="flex gap-1.5">{ROW_1.map(renderKey)}</div>
         <div className="flex gap-1.5">{ROW_2.map(renderKey)}</div>
         <div className="flex gap-1.5">{ROW_3.map(renderKey)}</div>
-        <div className="flex justify-center pt-1.5">
-          <div className="h-8 w-2/5 rounded-xl border border-[#cfe0fb] bg-white/75" aria-label="Space" />
-        </div>
       </div>
     </div>
   )

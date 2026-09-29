@@ -2,16 +2,13 @@ import { useEffect, useRef } from 'react'
 import { useFetcher } from 'react-router'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
 import {
-  getCharacterStates,
-  // getComposedText,
-} from '../../domain/korean/typing-session'
-import {
   getLessonProgress,
   getLessonResult,
   type LessonResult,
 } from '../../domain/korean/lesson-session'
 import { KEY_TO_JAMO } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
+import DecomposedHangulTarget from '../typing/DecomposedHangulTarget'
 import type { Lesson } from '../../domain/models/lesson'
 import type { CompleteLessonOutcome } from '../../application/complete-lesson'
 import type { UserSettings } from '../../domain/models/user-profile'
@@ -120,8 +117,6 @@ export default function LessonTypingSession({
   }
 
   const progress = getLessonProgress(session)
-  const characters = Array.from(session.currentSession.targetText)
-  const characterStates = getCharacterStates(session.currentSession)
   // const composed = getComposedText(session.currentSession)
   const nextKey =
     session.currentSession.expectedKeys[session.currentSession.keyIndex]
@@ -132,22 +127,10 @@ export default function LessonTypingSession({
         {progress.current} / {progress.total}
       </p>
 
-      <div className="mt-4 flex gap-1 text-3xl">
-        {characters.map((char, index) => (
-          <span
-            key={index}
-            className={
-              characterStates[index] === 'correct'
-                ? 'text-[#58733f]'
-                : characterStates[index] === 'current'
-                  ? 'text-[#a85d4e] underline'
-                  : 'text-[#c7c3bc]'
-            }
-          >
-            {char}
-          </span>
-        ))}
-      </div>
+      <DecomposedHangulTarget
+        session={session.currentSession}
+        className="mt-4 text-3xl"
+      />
       {/* <p className="mt-2 text-sm text-[#667085]">Typed: {composed}</p> */}
       {keyboardSettings.showKeyboard && (
         <VirtualKeyboard
