@@ -18,7 +18,9 @@ export class FirebaseProgressRepository implements ProgressRepository {
     const snapshot = await getDocs(
       collection(db, 'users', userId, 'lessonProgress'),
     )
-    return snapshot.docs.map((d) => toProgress(d.id, d.data()))
+    return snapshot.docs
+      .map((d) => toProgress(d.id, d.data()))
+      .filter((progress): progress is Progress => progress !== null)
   }
 
   async saveProgress(userId: string, progress: Progress): Promise<void> {

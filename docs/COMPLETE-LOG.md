@@ -449,3 +449,12 @@ Chronological log of completed units of work. One entry per meaningful change (n
   or update Course/Unit/Lesson content.
 - Mutation-verified the learner-write denial: temporarily weakening the Course
   write Rule made the focused suite fail, then the original Rule passed again.
+
+### 2026-09-29 — One-page Learning Path implementation (verification pending)
+
+- Added Home one-page player flow with course-local queues, completed-exercise
+  checkpoint plumbing in IndexedDB, and a presented finger-placement guide.
+- Refactored Learning Path progress writes toward missing/unlocked/completed
+  target semantics and global Course → Unit → Lesson frontier ordering.
+- Per user direction, no test, build, or lint command was run in this round;
+  verification and content seeding remain user-owned.

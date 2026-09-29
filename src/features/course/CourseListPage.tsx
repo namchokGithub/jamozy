@@ -14,6 +14,7 @@ import mascot from '../../assets/jamozy-mascot.png'
 import { AuthModal } from '../auth/AuthModal'
 import { Button } from '../../components/ui/Button'
 import { useSnackbar } from '../../components/ui/SnackbarProvider'
+import OnePageLearningPlayer from '../home/OnePageLearningPlayer'
 
 type CourseListActionData = {
   displayName?: string
@@ -22,7 +23,7 @@ type CourseListActionData = {
 }
 
 export default function CourseListPage() {
-  const { courses, dueReviewCount, displayName, isAuthenticated } =
+  const { courses, dueReviewCount, displayName, isAuthenticated, onePageLearningPath } =
     useLoaderData() as CourseListLoaderData
   const fetcher = useFetcher<CourseListActionData>()
   const { showError, showSuccess } = useSnackbar()
@@ -147,6 +148,13 @@ export default function CourseListPage() {
             </Link>
           </nav>
         </header>
+
+        {onePageLearningPath && (
+          <OnePageLearningPlayer
+            key={onePageLearningPath.selectedCourseId}
+            learningPath={onePageLearningPath}
+          />
+        )}
 
         <section className="relative mt-8 overflow-hidden rounded-4xl border border-[#f0dfd1] bg-[#fffdf9] px-6 py-8 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:px-10 sm:py-11">
           <div

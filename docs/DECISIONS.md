@@ -707,3 +707,31 @@ content Published before restrictive Rules deploy. The owner receives the claim
 only through the local Admin SDK script and must refresh their sign-in token.
 Exercises remain embedded and stable: authors may add, edit, and reorder them,
 but retire them by archiving their Lesson instead of hard deletion.
+
+---
+
+## DEC-035 — Home one-page player uses browser-local exercise checkpoints
+
+**Date:** 2026-09-29
+**Status:** Accepted
+
+**Decision:** Home is the primary Learning Path player. It offers the first
+three incomplete courses, but a ten-exercise queue is always confined to one
+selected course. Hero and explicit Course/ Lesson navigation remain available.
+
+Completed exercise boundaries and partial raw lesson totals persist in an
+IndexedDB record keyed by `(userId, courseId)`. This record stores a stable
+submission ID per incomplete lesson, but never individual keystrokes. It is
+browser-local for Guests and authenticated users alike; it is not a Firebase
+record, migration entity, Progress record, or LearningSession history entry.
+
+**Why:** Learners can refresh and continue the next prompt without writing
+per keystroke or treating abandoned work as submitted activity. Keeping it
+local meets the one-device-resume scope without expanding account migration.
+
+**Consequences:** Completing a lesson’s final exercise submits exactly one
+normal LearningSession through the existing receipt boundary, then removes
+that lesson’s checkpoint. A failed completion retains its local submission ID
+for retry. The player uses missing Progress as locked and only writes
+`unlocked`/`completed`; legacy persisted `locked` entries are read as absent
+without destructive cleanup.

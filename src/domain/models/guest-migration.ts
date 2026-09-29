@@ -50,7 +50,7 @@ export function mergeProfile(cloud: UserProfile | null, guest: UserProfile | nul
   }
 }
 
-const progressRank: Record<Progress['status'], number> = { locked: 0, unlocked: 1, completed: 2 }
+const progressRank: Record<Progress['status'], number> = { unlocked: 1, completed: 2 }
 
 export function mergeProgress(cloud: Progress | null, guest: Progress): Progress {
   if (!cloud) return guest

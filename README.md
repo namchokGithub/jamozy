@@ -3,8 +3,8 @@
   <img
     src="public/templates/jamozy-64x64.ico"
     alt="Jamozy Logo"
-    width="48"
-    height="48"
+    width="64"
+    height="64"
     align="center"
   />
 </h1>
@@ -24,8 +24,10 @@ and sentences while improving typing accuracy and speed.
 ## Core Features
 
 - Progressive Unit → Lesson learning structure
+- One-page Home learning player with up to 10 exercises per selected course
 - Korean typing exercises
 - Virtual Korean keyboard guide
+- Finger-placement reference for Korean keyboard practice
 - Correct / incorrect typing feedback
 - Accuracy and typing speed tracking
 - Lesson results
@@ -39,6 +41,23 @@ and sentences while improving typing accuracy and speed.
 ## Learning Flow
 
 Learn → Type → Review → Improve → Unlock
+
+### Home One-page Learning Path
+
+Home is the fast path into practice. It presents up to the first three courses
+that are not finished; the learner chooses one course, then types a queue of
+up to ten exercises in `Unit → Lesson → Exercise` order. A queue never fills
+its remaining slots from another course.
+
+The active exercise shows Korean, Thai/English meanings, romanization, live
+WPM/accuracy, the virtual keyboard, and a finger-placement guide. Completing
+an exercise saves a browser-local IndexedDB checkpoint, so a refresh resumes
+at the next exercise. The checkpoint is local even for signed-in users and is
+not cloud-synced or migrated. Only the final exercise of a lesson creates the
+normal submitted lesson result, progress, EXP, and review effects.
+
+The Hero and the standard learning-path cards remain below the player. Learners
+can still open a Course and choose a specific Lesson through the existing flow.
 
 ## Learning Modes
 
@@ -330,7 +349,7 @@ users/{userId}/dailyQuestProgress/{dateKey}
 
 > Learning content and user progress are stored separately.
 
-Progress documents are created lazily: a missing `lessonProgress` document means a lesson is locked. Learning order is `Course.order → Unit.order → Lesson.order`; document IDs do not determine which lesson unlocks next. Guest learner state has the same domain shape but is stored in IndexedDB, not in Firestore.
+Progress documents are created lazily: a missing `lessonProgress` document means a lesson is locked. Persisted states are `unlocked` and `completed`. Learning order is `Course.order → Unit.order → Lesson.order`; document IDs do not determine which lesson unlocks next. Guest learner state has the same domain shape but is stored in IndexedDB, not in Firestore.
 
 For document-backed domain entities, the domain `id` is the Firestore document ID and is not duplicated in document data. Embedded exercise IDs and Progress's `lessonId` follow the exceptions documented in `docs/DOMAIN-MODEL.md`.
 
@@ -356,6 +375,7 @@ Current work focuses on:
 
 - vocabulary import with source/license attribution and deduplication rules;
 - simplified lesson-progress persistence (`missing` = locked);
+- one-page Learning Path resume checkpoints in local IndexedDB;
 - raw typing-stat counters with derived accuracy and WPM;
 - updated `ReviewItem` identity and Leitner lifecycle.
 - Learning Modes shared-state architecture, including contiguous Learning Path

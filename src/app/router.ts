@@ -15,6 +15,7 @@ import {
 import { LocalSessionSubmissionRepository } from '../infrastructure/local/local-session-submission-repository'
 import { FirebaseSessionSubmissionRepository } from '../infrastructure/firebase/repositories/firebase-session-submission-repository'
 import { LocalGuestMigrationRepository } from '../infrastructure/local/local-guest-migration-repository'
+import { LocalOnePageLearningCheckpointRepository } from '../infrastructure/local/local-one-page-learning-checkpoint-repository'
 import { FirebaseAccountMigrationRepository } from '../infrastructure/firebase/repositories/firebase-account-migration-repository'
 import { createLearnerRepositories } from './learner-repositories'
 import { FirebaseAuthRepository } from '../infrastructure/firebase/firebase-auth-repository'
@@ -68,6 +69,7 @@ const adminContentRepo = new FirebaseAdminContentRepository()
 const sessionManager = new SessionManager(firebaseAuthRepo, guestSessions)
 const guestMigrationRepo = new LocalGuestMigrationRepository()
 const accountMigrationRepo = new FirebaseAccountMigrationRepository()
+const onePageCheckpointRepo = new LocalOnePageLearningCheckpointRepository()
 const migrateGuestData = async (
   guestId: string,
   accountId: string,
@@ -165,6 +167,9 @@ export const router = createBrowserRouter([
       courseRepo,
       reviewRepo,
       userProfileRepo,
+      lessonRepo,
+      progressRepo,
+      checkpointRepo: onePageCheckpointRepo,
       ensureUser: getActiveUser,
       getSession: () => sessionManager.getActiveSession(),
     }),
@@ -174,6 +179,14 @@ export const router = createBrowserRouter([
       auth: firebaseAuthRepo,
       getActiveSession: () => sessionManager.getActiveSession(),
       migrateGuestData,
+      onePage: {
+        courseRepo,
+        lessonRepo,
+        progressRepo,
+        reviewRepo,
+        sessionSubmissionRepo,
+        checkpointRepo: onePageCheckpointRepo,
+      },
     }),
     ErrorBoundary: RouteError,
   },
