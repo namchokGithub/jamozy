@@ -5,10 +5,11 @@ import { Button } from './Button'
 interface ModalProps extends PropsWithChildren {
   open: boolean
   title: string
+  closeLabel?: string
   onClose: () => void
 }
 
-export function Modal({ children, open, title, onClose }: ModalProps) {
+export function Modal({ children, open, title, closeLabel = 'Close', onClose }: ModalProps) {
   const titleId = useId()
   const dialogRef = useRef<HTMLElement>(null)
   const previousFocus = useRef<HTMLElement | null>(null)
@@ -44,7 +45,7 @@ export function Modal({ children, open, title, onClose }: ModalProps) {
             {title}
           </h2>
           <Button
-            aria-label="Close"
+            aria-label={closeLabel}
             className="h-9 w-9 shrink-0 px-0 py-0"
             variant="ghost"
             onClick={onClose}

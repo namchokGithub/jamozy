@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet } from 'react-router'
+import { createBrowserRouter } from 'react-router'
 import {
   courseRepo,
   lessonRepo,
@@ -44,6 +44,8 @@ import {
   createAdminGuardLoader,
   requireAdmin,
 } from '../features/admin/AdminGuard.loader'
+import AdminLayout from '../features/admin/AdminLayout'
+import AdminRouteError from '../features/admin/AdminRouteError'
 import AdminDashboardPage from '../features/admin/AdminDashboardPage'
 import { createAdminDashboardLoader } from '../features/admin/AdminDashboardPage.loader'
 import CourseEditorPage from '../features/admin/CourseEditorPage'
@@ -102,9 +104,9 @@ const {
 export const router = createBrowserRouter([
   {
     path: '/admin',
-    Component: Outlet,
+    Component: AdminLayout,
     loader: createAdminGuardLoader(adminAuthRepo),
-    ErrorBoundary: RouteError,
+    ErrorBoundary: AdminRouteError,
     children: [
       {
         index: true,

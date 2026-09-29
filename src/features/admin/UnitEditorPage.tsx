@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Link, useFetcher, useLoaderData } from 'react-router'
-import { ArrowDown, ArrowUp, Pencil, Plus } from 'lucide-react'
 import type { Course } from '../../domain/models/course'
 import type { Lesson } from '../../domain/models/lesson'
 import type { Unit } from '../../domain/models/unit'
@@ -9,7 +8,8 @@ import { Card } from '../../components/ui/Card'
 import { PageSurface } from '../../components/ui/PageSurface'
 import { AdminStatusActions } from './AdminStatusActions'
 import { useAdminFeedback } from './useAdminFeedback'
-import { AdminBreadcrumb } from './AdminBreadcrumb'
+import { AdminTopBar } from './AdminTopBar'
+import { statusKey, useAdminTranslation } from './i18n/admin-i18n'
 
 export default function UnitEditorPage() {
   const { unit, course, lessons } = useLoaderData() as {
@@ -17,6 +17,7 @@ export default function UnitEditorPage() {
     course: Course | null
     lessons: Lesson[]
   }
+  const { t } = useAdminTranslation()
   const fetcher = useFetcher()
   useAdminFeedback(fetcher)
   const [editingDetails, setEditingDetails] = useState(false)
@@ -24,15 +25,19 @@ export default function UnitEditorPage() {
     fetcher.submit(data, { method: 'post' })
   return (
     <PageSurface contentClassName="max-w-3xl">
-      <AdminBreadcrumb
-        items={['Admin', course?.title ?? 'Course', unit.title]}
+      <AdminTopBar
+        breadcrumb={[
+          t('breadcrumb.admin'),
+          course?.title ?? t('kind.course'),
+          unit.title,
+        ]}
       />
       <header className="mt-4 flex flex-wrap justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-[#a85d4e]">
-            UNIT · {unit.status ?? 'draft'}
+          <p className="text-sm font-semibold uppercase text-[#a85d4e]">
+            {t('kind.unit')} · {t(statusKey(unit.status))}
           </p>
-          <h1 className="mt-1 text-3xl font-bold">Unit details</h1>
+          <h1 className="mt-1 text-3xl font-bold">{t('unit.title')}</h1>
         </div>
         <AdminStatusActions id={unit.id} kind="unit" status={unit.status} />
       </header>
@@ -43,7 +48,7 @@ export default function UnitEditorPage() {
           <input type="hidden" name="id" value={unit.id} />
           <Card className="grid gap-4">
             <label className="grid gap-1 text-sm font-semibold">
-              Title
+              {t('field.title')}
               <input
                 name="title"
                 defaultValue={unit.title}
@@ -51,7 +56,7 @@ export default function UnitEditorPage() {
               />
             </label>
             <label className="grid gap-1 text-sm font-semibold">
-              Description
+              {t('field.description')}
               <textarea
                 name="description"
                 defaultValue={unit.description}
@@ -59,12 +64,12 @@ export default function UnitEditorPage() {
               />
             </label>
             <div className="flex flex-wrap gap-2">
-              <Button type="submit">Save Unit</Button>
+              <Button type="submit">{t('action.saveUnit')}</Button>
               <Button
                 variant="secondary"
                 onClick={() => setEditingDetails(false)}
               >
-                Cancel
+                {t('action.cancel')}
               </Button>
             </div>
           </Card>
@@ -78,20 +83,18 @@ export default function UnitEditorPage() {
             </p>
           </div>
           <Button variant="secondary" onClick={() => setEditingDetails(true)}>
-            <Pencil size={16} aria-hidden="true" /> Edit details
+            {t('action.editDetails')}
           </Button>
         </Card>
       )}
       <section className="mt-8">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold">Lessons</h2>
-            <p className="text-sm text-[#667085]">
-              Publish each Lesson independently after its parents.
-            </p>
+            <h2 className="text-xl font-bold">{t('unit.lessonsHeading')}</h2>
+            <p className="text-sm text-[#667085]">{t('unit.lessonsHint')}</p>
           </div>
           <Button onClick={() => submit({ intent: 'create-lesson' })}>
-            <Plus size={16} aria-hidden="true" /> Create Lesson
+            {t('action.createLesson')}
           </Button>
         </div>
         <div className="mt-4 space-y-3">
@@ -102,23 +105,23 @@ export default function UnitEditorPage() {
             >
               <div>
                 <p className="text-xs font-bold uppercase text-[#a85d4e]">
-                  {lesson.status ?? 'draft'}
+                  {t(statusKey(lesson.status))}
                 </p>
                 <h3 className="font-bold">{lesson.title}</h3>
               </div>
               <div className="flex items-center gap-1">
                 <Button
-                  aria-label={`Move ${lesson.title} up`}
+                  aria-label={t('action.moveItemUp', { name: lesson.title })}
                   variant="ghost"
                   disabled={index === 0}
                   onClick={() =>
                     submit({ intent: 'move-up', kind: 'lesson', id: lesson.id })
                   }
                 >
-                  <ArrowUp size={16} />
+                  {t('action.moveUp')}
                 </Button>
                 <Button
-                  aria-label={`Move ${lesson.title} down`}
+                  aria-label={t('action.moveItemDown', { name: lesson.title })}
                   variant="ghost"
                   disabled={index === lessons.length - 1}
                   onClick={() =>
@@ -129,13 +132,13 @@ export default function UnitEditorPage() {
                     })
                   }
                 >
-                  <ArrowDown size={16} />
+                  {t('action.moveDown')}
                 </Button>
                 <Link
                   className="rounded-full px-3 py-2 text-sm font-semibold text-[#8d4c43] hover:bg-white"
                   to={`/admin/lessons/${lesson.id}`}
                 >
-                  Edit
+                  {t('action.edit')}
                 </Link>
                 <AdminStatusActions
                   id={lesson.id}

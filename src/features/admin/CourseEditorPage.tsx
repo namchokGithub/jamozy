@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Link, useFetcher, useLoaderData } from 'react-router'
-import { ArrowDown, ArrowUp, Pencil, Plus } from 'lucide-react'
 import type { Course } from '../../domain/models/course'
 import type { Unit } from '../../domain/models/unit'
 import { Button } from '../../components/ui/Button'
@@ -8,10 +7,12 @@ import { Card } from '../../components/ui/Card'
 import { PageSurface } from '../../components/ui/PageSurface'
 import { AdminStatusActions } from './AdminStatusActions'
 import { useAdminFeedback } from './useAdminFeedback'
-import { AdminBreadcrumb } from './AdminBreadcrumb'
+import { AdminTopBar } from './AdminTopBar'
+import { statusKey, useAdminTranslation } from './i18n/admin-i18n'
 
 export default function CourseEditorPage() {
   const { course, units } = useLoaderData() as { course: Course; units: Unit[] }
+  const { t } = useAdminTranslation()
   const fetcher = useFetcher()
   useAdminFeedback(fetcher)
   const [editingDetails, setEditingDetails] = useState(false)
@@ -19,13 +20,13 @@ export default function CourseEditorPage() {
     fetcher.submit(data, { method: 'post' })
   return (
     <PageSurface contentClassName="max-w-3xl">
-      <AdminBreadcrumb items={['Admin', course.title]} />
+      <AdminTopBar breadcrumb={[t('breadcrumb.admin'), course.title]} />
       <header className="mt-4 flex flex-wrap justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-[#a85d4e]">
-            COURSE · {course.status ?? 'draft'}
+          <p className="text-sm font-semibold uppercase text-[#a85d4e]">
+            {t('kind.course')} · {t(statusKey(course.status))}
           </p>
-          <h1 className="mt-1 text-3xl font-bold">Course details</h1>
+          <h1 className="mt-1 text-3xl font-bold">{t('course.title')}</h1>
         </div>
         <AdminStatusActions
           id={course.id}
@@ -40,7 +41,7 @@ export default function CourseEditorPage() {
           <input type="hidden" name="id" value={course.id} />
           <Card className="grid gap-4">
             <label className="grid gap-1 text-sm font-semibold">
-              Title
+              {t('field.title')}
               <input
                 name="title"
                 defaultValue={course.title}
@@ -48,7 +49,7 @@ export default function CourseEditorPage() {
               />
             </label>
             <label className="grid gap-1 text-sm font-semibold">
-              Description
+              {t('field.description')}
               <textarea
                 name="description"
                 defaultValue={course.description}
@@ -56,12 +57,12 @@ export default function CourseEditorPage() {
               />
             </label>
             <div className="flex flex-wrap gap-2">
-              <Button type="submit">Save Course</Button>
+              <Button type="submit">{t('action.saveCourse')}</Button>
               <Button
                 variant="secondary"
                 onClick={() => setEditingDetails(false)}
               >
-                Cancel
+                {t('action.cancel')}
               </Button>
             </div>
           </Card>
@@ -75,20 +76,18 @@ export default function CourseEditorPage() {
             </p>
           </div>
           <Button variant="secondary" onClick={() => setEditingDetails(true)}>
-            <Pencil size={16} aria-hidden="true" /> Edit details
+            {t('action.editDetails')}
           </Button>
         </Card>
       )}
       <section className="mt-8">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold">Units</h2>
-            <p className="text-sm text-[#667085]">
-              Order controls affect learner order when content is published.
-            </p>
+            <h2 className="text-xl font-bold">{t('course.unitsHeading')}</h2>
+            <p className="text-sm text-[#667085]">{t('course.unitsHint')}</p>
           </div>
           <Button onClick={() => submit({ intent: 'create-unit' })}>
-            <Plus size={16} aria-hidden="true" /> Create Unit
+            {t('action.createUnit')}
           </Button>
         </div>
         <div className="mt-4 space-y-3">
@@ -99,36 +98,36 @@ export default function CourseEditorPage() {
             >
               <div>
                 <p className="text-xs font-bold uppercase text-[#a85d4e]">
-                  {unit.status ?? 'draft'}
+                  {t(statusKey(unit.status))}
                 </p>
                 <h3 className="font-bold">{unit.title}</h3>
               </div>
               <div className="flex items-center gap-1">
                 <Button
-                  aria-label={`Move ${unit.title} up`}
+                  aria-label={t('action.moveItemUp', { name: unit.title })}
                   variant="ghost"
                   disabled={index === 0}
                   onClick={() =>
                     submit({ intent: 'move-up', kind: 'unit', id: unit.id })
                   }
                 >
-                  <ArrowUp size={16} />
+                  {t('action.moveUp')}
                 </Button>
                 <Button
-                  aria-label={`Move ${unit.title} down`}
+                  aria-label={t('action.moveItemDown', { name: unit.title })}
                   variant="ghost"
                   disabled={index === units.length - 1}
                   onClick={() =>
                     submit({ intent: 'move-down', kind: 'unit', id: unit.id })
                   }
                 >
-                  <ArrowDown size={16} />
+                  {t('action.moveDown')}
                 </Button>
                 <Link
                   className="rounded-full px-3 py-2 text-sm font-semibold text-[#8d4c43] hover:bg-white"
                   to={`/admin/units/${unit.id}`}
                 >
-                  Edit
+                  {t('action.edit')}
                 </Link>
                 <AdminStatusActions
                   id={unit.id}

@@ -1,9 +1,11 @@
 import { ChevronRight } from 'lucide-react'
+import { useAdminTranslation } from './i18n/admin-i18n'
 
 export function AdminBreadcrumb({ items }: { items: string[] }) {
+  const { t } = useAdminTranslation()
   return (
     <nav
-      aria-label="Content location"
+      aria-label={t('breadcrumb.label')}
       className="flex flex-wrap items-center gap-1.5 text-sm"
     >
       {items.map((item, index) => (

@@ -5,6 +5,9 @@ import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
 import { useSnackbar } from '../../components/ui/SnackbarProvider'
 import type { AdminActionData } from './admin-action'
+import { formatAdminError, useAdminTranslation } from './i18n/admin-i18n'
+
+type StatusIntent = 'publish' | 'archive' | 'restore'
 
 export function AdminStatusActions({
   id,
@@ -17,22 +20,24 @@ export function AdminStatusActions({
 }) {
   const fetcher = useFetcher<AdminActionData>()
   const { showError, showSuccess } = useSnackbar()
-  const [pendingIntent, setPendingIntent] = useState<
-    'publish' | 'archive' | 'restore' | null
-  >(null)
+  const { t } = useAdminTranslation()
+  const [pendingIntent, setPendingIntent] = useState<StatusIntent | null>(null)
   const waiting = useRef(false)
   useEffect(() => {
     if (waiting.current && fetcher.state === 'idle' && fetcher.data) {
       waiting.current = false
-      if (fetcher.data.error) showError(fetcher.data.error)
-      else showSuccess(fetcher.data.message ?? 'Content updated.')
+      if (fetcher.data.error)
+        showError(
+          formatAdminError(t, fetcher.data.error, fetcher.data.errorDetail),
+        )
+      else showSuccess(t(fetcher.data.message ?? 'feedback.contentUpdated'))
     }
-  }, [fetcher.data, fetcher.state, showError, showSuccess])
+  }, [fetcher.data, fetcher.state, showError, showSuccess, t])
   const submit = (intent: string) => {
     waiting.current = true
     fetcher.submit({ intent, id, kind }, { method: 'post' })
   }
-  const actions: Array<'publish' | 'archive' | 'restore'> =
+  const actions: StatusIntent[] =
     status === 'archived'
       ? ['restore']
       : status === 'published'
@@ -47,22 +52,27 @@ export function AdminStatusActions({
           variant={action === 'archive' ? 'secondary' : 'primary'}
           onClick={() => setPendingIntent(action)}
         >
-          {action[0].toUpperCase() + action.slice(1)}
+          {t(`action.${action}`)}
         </Button>
       ))}
       <Modal
         open={pendingIntent !== null}
-        title={`${pendingIntent?.[0].toUpperCase()}${pendingIntent?.slice(1)} ${kind}?`}
+        title={
+          pendingIntent
+            ? t(`confirm.${pendingIntent}.title`, { kind: t(`kind.${kind}`) })
+            : ''
+        }
+        closeLabel={t('action.close')}
         onClose={() => setPendingIntent(null)}
       >
         <p className="mt-3 text-sm leading-6 text-[#667085]">
           {pendingIntent === 'archive'
-            ? 'This hides the content from learners without changing learner history.'
-            : 'This change will update content visibility for learners.'}
+            ? t('confirm.archive.body')
+            : t('confirm.visibility.body')}
         </p>
         <div className="mt-5 flex justify-end gap-2">
           <Button variant="secondary" onClick={() => setPendingIntent(null)}>
-            Cancel
+            {t('action.cancel')}
           </Button>
           <Button
             onClick={() => {
@@ -70,8 +80,7 @@ export function AdminStatusActions({
               setPendingIntent(null)
             }}
           >
-            {pendingIntent?.[0].toUpperCase()}
-            {pendingIntent?.slice(1)}
+            {pendingIntent ? t(`action.${pendingIntent}`) : ''}
           </Button>
         </div>
       </Modal>
