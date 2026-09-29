@@ -63,6 +63,53 @@ describe('getProfileSummary', () => {
     expect(summary.stats.averageAccuracy).toBe(91.5)
   })
 
+  it('derives all profile metrics from session raw counters when the legacy baseline is empty', async () => {
+    const userProfileRepo = new FakeUserProfileRepository()
+    await userProfileRepo.saveUserProfile('user1', {
+      ...defaultUserProfile('user1', new Date('2025-01-01')),
+      sessionAggregate: {
+        exp: 270,
+        exercisesAttempted: 12,
+        acceptedKeystrokes: 34,
+        rejectedKeystrokes: 6,
+        totalTypingTimeSeconds: 180,
+        bestAccuracy: 100,
+      },
+    })
+
+    const summary = await getProfileSummary(userProfileRepo, 'user1')
+
+    expect(summary.stats).toEqual({
+      lessonsCompleted: 0,
+      wordsPracticed: 12,
+      averageAccuracy: 85,
+      bestAccuracy: 100,
+      averageSpeedWpm: 2.2666666666666666,
+      totalTypingTimeSeconds: 180,
+    })
+  })
+
+  it('keeps legacy averages when the baseline has EXP but zero-valued stats', async () => {
+    const userProfileRepo = new FakeUserProfileRepository()
+    await userProfileRepo.saveUserProfile('user1', {
+      ...defaultUserProfile('user1', new Date('2025-01-01')),
+      exp: 250,
+      sessionAggregate: {
+        exp: 120,
+        exercisesAttempted: 4,
+        acceptedKeystrokes: 30,
+        rejectedKeystrokes: 2,
+        totalTypingTimeSeconds: 90,
+        bestAccuracy: 93.75,
+      },
+    })
+
+    const summary = await getProfileSummary(userProfileRepo, 'user1')
+
+    expect(summary.stats.averageAccuracy).toBe(0)
+    expect(summary.stats.averageSpeedWpm).toBe(0)
+  })
+
   it('derives level 1 at exp 99 and level 2 at exp 100 (the 100-EXP-per-level boundary)', async () => {
     const userProfileRepo = new FakeUserProfileRepository()
     await userProfileRepo.saveUserProfile('below', {

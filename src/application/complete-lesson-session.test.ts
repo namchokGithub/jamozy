@@ -114,4 +114,39 @@ describe('completeLessonSession', () => {
     expect(retry.expGained).toBe(170)
     expect(deps.sessionSubmissionRepo.submissions).toHaveLength(1)
   })
+
+  it('awards 15 EXP for an intentional replay of a completed lesson', async () => {
+    const deps = {
+      courseRepo: new FakeCourseRepository([], [makeUnit('u1')]),
+      lessonRepo: new FakeLessonRepository([makeLesson('l1', 'u1')]),
+      progressRepo: new FakeProgressRepository(),
+      userProfileRepo: new FakeUserProfileRepository(),
+      reviewRepo: new FakeReviewRepository(),
+      sessionSubmissionRepo: new FakeSessionSubmissionRepository(),
+    }
+    await deps.progressRepo.saveProgress('user1', {
+      lessonId: 'l1',
+      status: 'completed',
+      bestAccuracy: 100,
+      bestSpeedWpm: 20,
+      attempts: 1,
+      lastAttemptAt: new Date('2026-01-01'),
+      completedAt: new Date('2026-01-01'),
+    })
+
+    const outcome = await completeLessonSession(deps, 'user1', 'l1', {
+      accuracy: 100,
+      speedWpm: 20,
+      durationSeconds: 30,
+      startedAtMs: new Date('2026-01-02').getTime(),
+      exercisesAttempted: 1,
+      acceptedKeystrokes: 2,
+      rejectedKeystrokes: 0,
+      mistakes: [],
+    }, 'replay-1', new Date('2026-01-02'))
+
+    expect(outcome.expGained).toBe(15)
+    expect(outcome.progress.status).toBe('completed')
+    expect(outcome.unlockedNextLessonId).toBeNull()
+  })
 })

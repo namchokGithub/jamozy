@@ -42,6 +42,7 @@ async function seed() {
       title: course.title,
       description: course.description,
       order: course.order,
+      status: 'published',
       createdAt: now,
       updatedAt: now,
     })
@@ -54,6 +55,7 @@ async function seed() {
       title: unit.title,
       description: unit.description,
       order: unit.order,
+      status: 'published',
       createdAt: now,
       updatedAt: now,
     })
@@ -67,6 +69,7 @@ async function seed() {
       type: lesson.type,
       order: lesson.order,
       exercises: lesson.exercises,
+      status: 'published',
       createdAt: now,
       updatedAt: now,
     })

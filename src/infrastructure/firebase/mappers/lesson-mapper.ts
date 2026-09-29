@@ -1,5 +1,9 @@
 import type { DocumentData } from 'firebase/firestore'
 import type { Lesson, LessonExercise } from '../../../domain/models/lesson'
+import type {
+  ContentStatus,
+  RestorableContentStatus,
+} from '../../../domain/models/content-status'
 
 export function toLesson(id: string, data: DocumentData): Lesson {
   return {
@@ -11,5 +15,12 @@ export function toLesson(id: string, data: DocumentData): Lesson {
     exercises: (data.exercises as LessonExercise[]) ?? [],
     createdAt: data.createdAt.toDate(),
     updatedAt: data.updatedAt.toDate(),
+    status: (data.status as ContentStatus | undefined) ?? 'draft',
+    ...(data.archivedFromStatus
+      ? {
+          archivedFromStatus:
+            data.archivedFromStatus as RestorableContentStatus,
+        }
+      : {}),
   }
 }

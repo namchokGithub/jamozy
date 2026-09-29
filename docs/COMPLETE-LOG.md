@@ -378,3 +378,74 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Added the inline lesson Result summary from the transient `LessonResult`:
   accuracy, WPM, duration, all rejected keystrokes, and unique mistyped words.
   The action response and persisted learner state remain unchanged.
+### 2026-09-29 — Light-theme UI consistency
+
+- Unified Course Map, Lesson, Review, Profile, Settings, Auth modal, virtual keyboard, route-error, and not-found screens with Home's warm cream/pastel/rounded presentation language. Added presentation-only primitives under `src/components/ui/`: `PageSurface`, `Card`, `Button`, accessible `Modal`, native-select `Dropdown`, and `SnackbarProvider`.
+- Added non-blocking, dismissible snackbar feedback exclusively for Settings saves and authentication/sign-out outcomes. A failed Settings save now returns a structured UI error and skips loader revalidation so the learner remains on the editable form; parsing, repository calls, and Firebase persistence semantics are unchanged.
+- Used existing Jamozy assets from `public/templates` for recovery states. Dark mode and animation remain out of scope.
+- Fresh review found and the implementation fixed: Settings failed-save revalidation, stale auth notifications, modal Escape/focus behavior, active typing-surface theme coverage, description-list semantics, and result-region accessibility.
+- Verification: 248 Vitest tests passed; `pnpm lint` and `pnpm build` passed. Browser visual QA covered Home and Settings.
+
+### 2026-09-29 — Extracted Lesson Result component
+
+- Moved the completed-lesson presentation from `LessonDetailPage.tsx` into `LessonResult.tsx`. `LessonDetailPage` remains the state-flow coordinator and continues to own route navigation, loader/action wiring, and retry setup.
+- `LessonResult` receives the transient `LessonCompletion` plus callbacks for Retry, Review, and Continue; it preserves all result metrics, unique review-word handling, and the existing Next Lesson/Course Map decision.
+- Added focused component coverage for the result summary and CTA delegation. Verification: 249 Vitest tests and `pnpm lint` passed.
+
+### 2026-09-29 — Profile statistics compatibility
+
+- Changed Profile's Lessons completed source of truth to persisted `LessonProgress.status === 'completed'`, matching Course Map and remaining stable when curriculum adds Units or Lessons. It no longer uses EXP or a session aggregate proxy.
+- Updated the Profile read model to combine session exercise/best/time counters with the compatibility baseline and derive accuracy/WPM directly from raw session counters when that baseline is empty. Non-zero legacy averages remain unchanged because their source denominators are unavailable.
+- Added regression coverage for raw-session profile metrics and completed-lesson Progress counting. Verification: 252 Vitest tests, lint, and production build passed.
+
+### 2026-09-29 — Learning Path replay reward
+
+- Changed an intentional replay of an already completed Learning Path lesson from 0 EXP to a flat 15 EXP. First completions retain their accuracy-based reward; replays do not change Progress, unlock another lesson, or create first-completion review effects ([[DEC-033]]).
+- Added regression coverage for the replay outcome. Verification: 253 Vitest tests, lint, and production build passed.
+
+### 2026-09-29 — Admin BO design and implementation plan
+
+- Recorded the approved single-owner Admin BO design: Google custom-claim authorization, `/admin` routes, Course/Unit/Lesson Draft/Publish/Archive lifecycle, text Exercise authoring, no hard deletion, and published-only learner visibility.
+- Added the implementation plan covering content-state migration, Rules Emulator coverage, repository/use-case boundaries, admin UI, and operator rollout. No Admin BO code has been implemented yet.
+
+### 2026-09-29 — Native Admin BO content management
+
+- Implemented the protected `/admin` Course → Unit → Lesson authoring flow in
+  the existing React app. It supports Draft/Publish/Archive/Restore, saves
+  text-only Exercise arrays, preserves embedded exercise IDs while reordering,
+  and transactionally swaps adjacent Unit/Lesson orders.
+- Added the separate admin repository/application path and a Firebase custom
+  claim adapter. Learner repositories now query only published content and
+  reject unpublished direct lookups; Firestore Rules are the authoritative
+  guard for owner-only content writes and published ancestor visibility.
+- Added `firebase-admin` scripts: `pnpm content:migrate-status -- --dry-run`
+  reports legacy statusless content; `--write --after-dry-run` applies only
+  `status: 'published'` to Course/Unit/Lesson documents. `pnpm admin:grant -- <uid>`
+  assigns the owner claim with a local service credential. Neither script was
+  run against Firebase during implementation.
+- Recorded [[DEC-034]] and updated README/PROGRESS/DOMAIN-MODEL with the
+  required production order: indexes → migration → Rules → owner claim → app.
+- Local verification passed: 264 Vitest tests, lint, production build, and
+  `git diff --check`. Firestore Rules Emulator coverage and the real Firebase
+  rollout remain explicitly pending; no Firebase state was changed.
+
+### 2026-09-29 — Admin BO production rollout
+
+- Deployed the Admin BO Firestore indexes and restrictive Rules.
+- Ran the status migration against Firebase: it found and updated 5 legacy
+  statusless content documents to `published`.
+- Granted the owner `admin: true` custom claim and verified it by successfully
+  editing content through `/admin`.
+- Firestore Rules Emulator coverage remains follow-up hardening; the deployed
+  rollout did not change any learner/user collections.
+
+### 2026-09-29 — Admin BO Firestore Rules Emulator coverage
+
+- Added `pnpm test:rules`, which starts a local Firestore Emulator and runs
+  the Rules integration suite without contacting the Firebase project.
+- Added coverage that permits only published content with published ancestors
+  to anonymous learners, rejects Course/Unit/Lesson writes by authenticated
+  learners, and permits an `admin: true` user to read draft content and create
+  or update Course/Unit/Lesson content.
+- Mutation-verified the learner-write denial: temporarily weakening the Course
+  write Rule made the focused suite fail, then the original Rule passed again.

@@ -1,6 +1,9 @@
-export type LessonType = 'character' | 'syllable' | 'word' | 'phrase' | 'sentence'
+export type LessonType =
+  'character' | 'syllable' | 'word' | 'phrase' | 'sentence'
 
 export type ExerciseDifficulty = 'easy' | 'medium' | 'hard'
+
+import type { ContentStatusFields } from './content-status'
 
 export interface LessonExercise {
   id: string
@@ -12,7 +15,7 @@ export interface LessonExercise {
   hint: string | null
 }
 
-export interface Lesson {
+export interface Lesson extends ContentStatusFields {
   id: string
   unitId: string
   title: string

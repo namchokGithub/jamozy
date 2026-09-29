@@ -1,3 +1,4 @@
+import type { LearningSession } from './learning-session'
 import type { UserStats } from './user-profile'
 
 export interface LegacyBaseline { exp: number; stats: UserStats }
@@ -12,9 +13,7 @@ export interface SessionAggregate {
 
 export const emptySessionAggregate = (): SessionAggregate => ({ exp: 0, exercisesAttempted: 0, acceptedKeystrokes: 0, rejectedKeystrokes: 0, totalTypingTimeSeconds: 0, bestAccuracy: 0 })
 
-export function aggregateFromSession(session: {
-  expGained: number; exercisesAttempted: number; acceptedKeystrokes: number; rejectedKeystrokes: number; durationSeconds: number
-}): SessionAggregate {
+export function aggregateFromSession(session: Pick<LearningSession, 'expGained' | 'exercisesAttempted' | 'acceptedKeystrokes' | 'rejectedKeystrokes' | 'durationSeconds'>): SessionAggregate {
   const total = session.acceptedKeystrokes + session.rejectedKeystrokes
   return { exp: session.expGained, exercisesAttempted: session.exercisesAttempted, acceptedKeystrokes: session.acceptedKeystrokes, rejectedKeystrokes: session.rejectedKeystrokes, totalTypingTimeSeconds: session.durationSeconds, bestAccuracy: total === 0 ? 0 : (session.acceptedKeystrokes / total) * 100 }
 }

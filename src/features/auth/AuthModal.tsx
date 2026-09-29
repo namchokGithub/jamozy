@@ -1,14 +1,47 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useFetcher } from 'react-router'
+import { Button } from '../../components/ui/Button'
+import { Modal } from '../../components/ui/Modal'
+import { useSnackbar } from '../../components/ui/SnackbarProvider'
+
+interface AuthResult {
+  authenticated?: boolean
+  error?: string
+}
 
 export function AuthModal({ onClose }: { onClose: () => void }) {
-  const fetcher = useFetcher<{ error?: string }>()
+  const fetcher = useFetcher<AuthResult>()
+  const { showError, showSuccess } = useSnackbar()
   const [createAccount, setCreateAccount] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const pendingIntent = useRef<string | null>(null)
+  const handledResult = useRef<AuthResult | null>(null)
+
   useEffect(() => {
-    if (fetcher.data && !fetcher.data.error) onClose()
-  }, [fetcher.data, onClose])
-  const submit = (intent: string) => fetcher.submit({ intent, email, password }, { method: 'post', encType: 'application/json' })
-  return <div role="dialog" aria-modal="true" aria-label="Sign in" className="fixed inset-0 z-50 grid place-items-center bg-slate-900/30 p-4"><div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"><button type="button" onClick={onClose} className="float-right">×</button><h2 className="text-xl font-bold">{createAccount ? 'Create account' : 'Sign in'}</h2><label className="mt-4 block text-sm">Email<input value={email} onChange={(e) => setEmail(e.target.value)} type="email" className="mt-1 w-full rounded border p-2" /></label><label className="mt-3 block text-sm">Password<input value={password} onChange={(e) => setPassword(e.target.value)} type="password" className="mt-1 w-full rounded border p-2" /></label>{fetcher.data?.error && <p role="alert" className="mt-2 text-sm text-red-600">{fetcher.data.error}</p>}<button type="button" onClick={() => submit(createAccount ? 'sign-up' : 'sign-in')} className="mt-4 w-full rounded bg-slate-900 p-2 text-white">{createAccount ? 'Create account' : 'Sign in'}</button><button type="button" onClick={() => submit('google')} className="mt-3 w-full rounded border p-2">Continue with Google</button><button type="button" onClick={() => setCreateAccount(!createAccount)} className="mt-3 text-sm underline">{createAccount ? 'Already have an account?' : 'Create account'}</button></div></div>
+    if (!fetcher.data || fetcher.data === handledResult.current) return
+    handledResult.current = fetcher.data
+    if (fetcher.data.error) showError(fetcher.data.error)
+    if (fetcher.data.authenticated) {
+      showSuccess(pendingIntent.current === 'sign-up' ? 'Account created successfully' : 'Signed in successfully')
+      onClose()
+    }
+  }, [fetcher.data, onClose, showError, showSuccess])
+
+  const submit = (intent: string) => {
+    pendingIntent.current = intent
+    handledResult.current = null
+    fetcher.submit({ intent, email, password }, { method: 'post', encType: 'application/json' })
+  }
+
+  return <Modal open title={createAccount ? 'Create account' : 'Sign in'} onClose={onClose}>
+    <div className="mt-5 space-y-3">
+      <label className="grid gap-1.5 text-sm font-semibold text-[#39465b]">Email<input value={email} onChange={(event) => setEmail(event.target.value)} type="email" className="rounded-2xl border border-[#eadfd4] bg-white px-3 py-2.5 font-normal outline-none focus:border-[#d8b3a9] focus:ring-2 focus:ring-[#f2c5bb]" /></label>
+      <label className="grid gap-1.5 text-sm font-semibold text-[#39465b]">Password<input value={password} onChange={(event) => setPassword(event.target.value)} type="password" className="rounded-2xl border border-[#eadfd4] bg-white px-3 py-2.5 font-normal outline-none focus:border-[#d8b3a9] focus:ring-2 focus:ring-[#f2c5bb]" /></label>
+      {fetcher.data?.error && <p className="text-sm font-medium text-[#a85d4e]">{fetcher.data.error}</p>}
+      <Button className="mt-2 w-full" onClick={() => submit(createAccount ? 'sign-up' : 'sign-in')} disabled={fetcher.state !== 'idle'}>{createAccount ? 'Create account' : 'Sign in'}</Button>
+      <Button className="w-full" variant="secondary" onClick={() => submit('google')} disabled={fetcher.state !== 'idle'}>Continue with Google</Button>
+      <Button className="w-full" variant="ghost" onClick={() => setCreateAccount((current) => !current)}>{createAccount ? 'Already have an account?' : 'Create account'}</Button>
+    </div>
+  </Modal>
 }

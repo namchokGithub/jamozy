@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useFetcher, useLoaderData } from 'react-router'
 import {
   ArrowUpRight,
@@ -12,15 +12,33 @@ import {
 import type { CourseListLoaderData } from './CourseListPage.loader'
 import mascot from '../../assets/jamozy-mascot.png'
 import { AuthModal } from '../auth/AuthModal'
+import { Button } from '../../components/ui/Button'
+import { useSnackbar } from '../../components/ui/SnackbarProvider'
+
+type CourseListActionData = {
+  displayName?: string
+  authenticated?: boolean
+  error?: string
+}
 
 export default function CourseListPage() {
   const { courses, dueReviewCount, displayName, isAuthenticated } =
     useLoaderData() as CourseListLoaderData
-  const fetcher = useFetcher<{ displayName: string }>()
+  const fetcher = useFetcher<CourseListActionData>()
+  const { showError, showSuccess } = useSnackbar()
   const name = fetcher.data?.displayName ?? displayName
   const [editingName, setEditingName] = useState(false)
   const [draftName, setDraftName] = useState(name)
   const [showAuth, setShowAuth] = useState(false)
+  const signOutPending = useRef(false)
+
+  useEffect(() => {
+    if (signOutPending.current && fetcher.state === 'idle' && fetcher.data) {
+      signOutPending.current = false
+      if (fetcher.data.error) showError(fetcher.data.error)
+      else showSuccess('Signed out successfully')
+    }
+  }, [fetcher.data, fetcher.state, showError, showSuccess])
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#fffaf1] px-4 py-5 text-[#253247] sm:px-6 sm:py-8">
@@ -38,9 +56,11 @@ export default function CourseListPage() {
             to="/"
             className="flex items-center gap-2.5 rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#bc6c5d]"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#f2c5bb] text-[#8d4c43] shadow-sm">
-              <Flower2 aria-hidden="true" size={21} strokeWidth={2.4} />
-            </span>
+            <img
+              src="/templates/jamozy-hanguk-180x180.png"
+              alt=""
+              className="h-15 w-15 object-contain"
+            />
             <span className="text-xl font-bold tracking-tight">Jamozy</span>
           </Link>
 
@@ -83,13 +103,13 @@ export default function CourseListPage() {
                 </button>
               ))}
             {!isAuthenticated && !editingName && (
-              <button
+              <Button
                 type="button"
                 onClick={() => setShowAuth(true)}
-                className="rounded-full border px-3 py-2 text-sm"
+                variant="secondary"
               >
                 Sign in
-              </button>
+              </Button>
             )}
             {isAuthenticated && (
               <span className="rounded-full border px-3 py-2 text-sm">
@@ -97,18 +117,19 @@ export default function CourseListPage() {
               </span>
             )}
             {isAuthenticated && (
-              <button
+              <Button
                 type="button"
-                onClick={() =>
+                onClick={() => {
+                  signOutPending.current = true
                   fetcher.submit(
                     { intent: 'sign-out' },
                     { method: 'post', encType: 'application/json' },
                   )
-                }
-                className="rounded-full border px-3 py-2 text-sm"
+                }}
+                variant="secondary"
               >
                 Sign out
-              </button>
+              </Button>
             )}
             <Link
               to="/profile"

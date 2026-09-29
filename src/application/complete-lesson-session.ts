@@ -75,7 +75,7 @@ export async function completeLessonSession(
       progress.push({ lessonId: unlockedNextLessonId, status: 'unlocked', bestAccuracy: next?.bestAccuracy ?? 0, bestSpeedWpm: next?.bestSpeedWpm ?? 0, attempts: next?.attempts ?? 0, lastAttemptAt: next?.lastAttemptAt ?? null, completedAt: null })
     }
   }
-  const expGained = wasAlreadyCompleted ? 0 : expForAccuracy(result.accuracy)
+  const expGained = wasAlreadyCompleted ? 15 : expForAccuracy(result.accuracy)
   const profile = (await deps.userProfileRepo.getUserProfile(userId)) ?? defaultUserProfile(userId, now)
   const submission = await deps.sessionSubmissionRepo.submit(userId, {
     id: submissionId,
