@@ -21,7 +21,9 @@ function makeSettings(overrides: Partial<UserSettings> = {}): UserSettings {
 
 function renderPage(
   settings: UserSettings = makeSettings(),
-  action: (args: { request: Request }) => Promise<SettingsActionData> = async () => settings,
+  action: (args: {
+    request: Request
+  }) => Promise<SettingsActionData> = async () => settings,
 ) {
   const router = createMemoryRouter(
     [
@@ -46,17 +48,20 @@ describe('SettingsPage', () => {
     renderPage(makeSettings({ theme: 'dark', meaningLanguage: 'th' }))
 
     expect(await screen.findByLabelText('Sound')).toBeChecked()
-    expect(screen.getByLabelText('Theme')).toHaveValue('dark')
-    expect(screen.getByLabelText('Meaning language')).toHaveValue('th')
+    expect(
+      screen.getByRole('button', { name: 'Theme: Dark' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Meaning language: Thai' }),
+    ).toBeInTheDocument()
   })
 
   it('links back to the course list', async () => {
     renderPage()
 
-    expect(await screen.findByRole('link', { name: 'Back to Course List' })).toHaveAttribute(
-      'href',
-      '/',
-    )
+    expect(
+      await screen.findByRole('link', { name: 'Back to Course List' }),
+    ).toHaveAttribute('href', '/')
   })
 
   it('disables Save while submitting and announces success once it succeeds', async () => {
@@ -77,7 +82,9 @@ describe('SettingsPage', () => {
     resolveAction!(makeSettings())
 
     await waitFor(() => expect(saveButton).not.toBeDisabled())
-    expect(await screen.findByRole('status')).toHaveTextContent('Settings saved')
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Settings saved',
+    )
   })
 
   it('shows Saved once the post-action loader revalidation finishes, not just the action', async () => {
@@ -88,7 +95,8 @@ describe('SettingsPage', () => {
     // promises independently forces "loading" to be its own observed render, the
     // same way a real (slower) Firestore round trip does.
     let resolveAction: (settings: UserSettings) => void
-    let resolveRevalidation: ((data: { settings: UserSettings }) => void) | undefined
+    let resolveRevalidation:
+      ((data: { settings: UserSettings }) => void) | undefined
     let loaderCallCount = 0
     const router = createMemoryRouter(
       [
@@ -129,9 +137,13 @@ describe('SettingsPage', () => {
 
     await waitFor(() => expect(loaderCallCount).toBe(2))
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
-    resolveRevalidation!({ settings: { ...makeSettings(), soundEnabled: false } })
+    resolveRevalidation!({
+      settings: { ...makeSettings(), soundEnabled: false },
+    })
 
-    expect(await screen.findByRole('status')).toHaveTextContent('Settings saved')
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Settings saved',
+    )
   })
 
   it('announces success even when the loaded settings and the saved-back settings have different key orders', async () => {
@@ -165,17 +177,23 @@ describe('SettingsPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
 
-    expect(await screen.findByRole('status')).toHaveTextContent('Settings saved')
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Settings saved',
+    )
   })
 
   it('keeps settings editable after a failed save and announces the failure', async () => {
-    renderPage(makeSettings(), async () => ({ error: 'Could not save settings' }))
+    renderPage(makeSettings(), async () => ({
+      error: 'Could not save settings',
+    }))
     await screen.findByLabelText('Sound')
 
     fireEvent.click(screen.getByLabelText('Sound'))
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Could not save settings')
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Could not save settings',
+    )
     expect(screen.getByLabelText('Sound')).not.toBeChecked()
   })
 
@@ -184,7 +202,9 @@ describe('SettingsPage', () => {
     await screen.findByLabelText('Sound')
 
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
-    expect(await screen.findByRole('status')).toHaveTextContent('Settings saved')
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Settings saved',
+    )
 
     expect(screen.getByLabelText('Sound')).toBeEnabled()
   })

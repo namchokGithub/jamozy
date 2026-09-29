@@ -66,7 +66,8 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 
 - Don't add features, refactors, or abstractions beyond what's asked. This project favors small, focused, calm implementations (see README "Development Principles").
 - When adding a new domain concept, add the model to `domain/models`, the interface to `domain/repositories`, the required persistence adapter(s), and an `application/` use case — don't skip layers. Target learner-state behavior must work through either Guest-local or authenticated-Firebase adapters.
-- Run `pnpm test` before considering a change complete once a test setup exists.
+- **Testing policy:** Do not create or update automated tests for UI-only work (visual styling, layout, presentation components, or page appearance); the user performs that verification manually. Add automated tests for domain, application, repository, persistence, security-rule, migration, and other non-visual logic. Only change a UI test when the user explicitly asks for it or a UI change also changes non-visual behavior.
+- Run `pnpm test` before considering a logic/persistence/security change complete once a test setup exists. For UI-only changes, run the relevant static checks/build and hand off manual verification to the user.
 - Record non-obvious architectural choices in `docs/DECISIONS.md`, not as scattered code comments. Update the authoritative topic document when a decision changes its model or policy.
 - Track detailed implementation status in `docs/PROGRESS.md`. `README.md`
   carries the high-level MVP/post-MVP overview; keep its summary and roadmap

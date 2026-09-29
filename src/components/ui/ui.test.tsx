@@ -30,10 +30,12 @@ describe('shared UI primitives', () => {
       </Modal>,
     )
 
-    expect(screen.queryByRole('dialog', { name: 'Sign in' })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('dialog', { name: 'Sign in' }),
+    ).not.toBeInTheDocument()
   })
 
-  it('labels a dropdown and reports the selected option', () => {
+  it('opens a themed dropdown list and reports the selected option', () => {
     const onChange = vi.fn()
 
     render(
@@ -49,12 +51,16 @@ describe('shared UI primitives', () => {
       />,
     )
 
-    const select = screen.getByLabelText('Meaning language')
-    expect(select).toHaveValue('both')
+    const trigger = screen.getByRole('button', {
+      name: 'Meaning language: Both',
+    })
+    expect(trigger).toHaveTextContent('Both')
 
-    fireEvent.change(select, { target: { value: 'th' } })
+    fireEvent.click(trigger)
+    fireEvent.click(screen.getByRole('option', { name: 'Thai' }))
 
     expect(onChange).toHaveBeenCalledWith('th')
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
   })
 
   it('keeps disabled button semantics', () => {
