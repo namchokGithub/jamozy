@@ -664,3 +664,23 @@ needs its own exercise-selection and scheduling rules.
 
 **Consequences:** The Lesson Result button is navigation only. `ReviewItem`
 creation and its Leitner schedule remain unchanged.
+
+---
+
+## DEC-033 — Intentional Learning Path replays grant 15 EXP
+
+**Date:** 2026-09-29
+**Status:** Accepted
+
+**Decision:** The first completed Learning Path attempt keeps its normal
+accuracy-based EXP reward. An intentional replay of a lesson whose
+`LessonProgress` is already `completed` creates a new submitted session and
+grants a flat 15 EXP. It does not change the lesson's completion state, unlock
+the next lesson, or create first-completion review effects.
+
+**Why:** Replays are legitimate typing practice and should receive a small,
+predictable reward without competing with progression through new content.
+
+**Consequences:** This supersedes DEC-014's no-repeat-EXP rule for the active
+`completeLessonSession` path. There is no daily cap in MVP; any future balance
+limit needs its own persisted policy and decision.

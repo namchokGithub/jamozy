@@ -397,3 +397,8 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Changed Profile's Lessons completed source of truth to persisted `LessonProgress.status === 'completed'`, matching Course Map and remaining stable when curriculum adds Units or Lessons. It no longer uses EXP or a session aggregate proxy.
 - Updated the Profile read model to combine session exercise/best/time counters with the compatibility baseline and derive accuracy/WPM directly from raw session counters when that baseline is empty. Non-zero legacy averages remain unchanged because their source denominators are unavailable.
 - Added regression coverage for raw-session profile metrics and completed-lesson Progress counting. Verification: 252 Vitest tests, lint, and production build passed.
+
+### 2026-09-29 — Learning Path replay reward
+
+- Changed an intentional replay of an already completed Learning Path lesson from 0 EXP to a flat 15 EXP. First completions retain their accuracy-based reward; replays do not change Progress, unlock another lesson, or create first-completion review effects ([[DEC-033]]).
+- Added regression coverage for the replay outcome. Verification: 253 Vitest tests, lint, and production build passed.
