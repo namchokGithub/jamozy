@@ -385,3 +385,9 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Used existing Jamozy assets from `public/templates` for recovery states. Dark mode and animation remain out of scope.
 - Fresh review found and the implementation fixed: Settings failed-save revalidation, stale auth notifications, modal Escape/focus behavior, active typing-surface theme coverage, description-list semantics, and result-region accessibility.
 - Verification: 248 Vitest tests passed; `pnpm lint` and `pnpm build` passed. Browser visual QA covered Home and Settings.
+
+### 2026-09-29 — Extracted Lesson Result component
+
+- Moved the completed-lesson presentation from `LessonDetailPage.tsx` into `LessonResult.tsx`. `LessonDetailPage` remains the state-flow coordinator and continues to own route navigation, loader/action wiring, and retry setup.
+- `LessonResult` receives the transient `LessonCompletion` plus callbacks for Retry, Review, and Continue; it preserves all result metrics, unique review-word handling, and the existing Next Lesson/Course Map decision.
+- Added focused component coverage for the result summary and CTA delegation. Verification: 249 Vitest tests and `pnpm lint` passed.
