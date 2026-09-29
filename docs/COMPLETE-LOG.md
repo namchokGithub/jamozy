@@ -392,8 +392,8 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - `LessonResult` receives the transient `LessonCompletion` plus callbacks for Retry, Review, and Continue; it preserves all result metrics, unique review-word handling, and the existing Next Lesson/Course Map decision.
 - Added focused component coverage for the result summary and CTA delegation. Verification: 249 Vitest tests and `pnpm lint` passed.
 
-### 2026-09-29 — Profile raw-session statistics
+### 2026-09-29 — Profile statistics compatibility
 
-- Added `sessionAggregate.lessonsCompleted` for first-time, EXP-awarding Learning Path checkpoints and aggregate-safe fallback for existing documents that do not have the field.
-- Updated the Profile read model to combine session completion/exercise/best/time counters with the compatibility baseline and derive accuracy/WPM directly from raw session counters when that baseline is empty. Non-zero legacy averages remain unchanged because their source denominators are unavailable.
-- Added regression coverage for raw-session profile metrics and completed-lesson aggregate counting. Verification: 254 Vitest tests, lint, and production build passed.
+- Changed Profile's Lessons completed source of truth to persisted `LessonProgress.status === 'completed'`, matching Course Map and remaining stable when curriculum adds Units or Lessons. It no longer uses EXP or a session aggregate proxy.
+- Updated the Profile read model to combine session exercise/best/time counters with the compatibility baseline and derive accuracy/WPM directly from raw session counters when that baseline is empty. Non-zero legacy averages remain unchanged because their source denominators are unavailable.
+- Added regression coverage for raw-session profile metrics and completed-lesson Progress counting. Verification: 252 Vitest tests, lint, and production build passed.

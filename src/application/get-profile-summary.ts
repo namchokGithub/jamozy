@@ -30,7 +30,6 @@ export async function getProfileSummary(
     level: levelFromExp(resolved.exp + sessionAggregate.exp),
     stats: {
       ...resolved.stats,
-      lessonsCompleted: resolved.stats.lessonsCompleted + (sessionAggregate.lessonsCompleted ?? 0),
       wordsPracticed: resolved.stats.wordsPracticed + sessionAggregate.exercisesAttempted,
       averageAccuracy: hasLegacyBaseline || sessionAttempts === 0 ? resolved.stats.averageAccuracy : sessionAccuracy,
       bestAccuracy: Math.max(resolved.stats.bestAccuracy, sessionAggregate.bestAccuracy),

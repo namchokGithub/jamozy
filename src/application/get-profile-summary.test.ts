@@ -69,7 +69,6 @@ describe('getProfileSummary', () => {
       ...defaultUserProfile('user1', new Date('2025-01-01')),
       sessionAggregate: {
         exp: 270,
-        lessonsCompleted: 1,
         exercisesAttempted: 12,
         acceptedKeystrokes: 34,
         rejectedKeystrokes: 6,
@@ -81,7 +80,7 @@ describe('getProfileSummary', () => {
     const summary = await getProfileSummary(userProfileRepo, 'user1')
 
     expect(summary.stats).toEqual({
-      lessonsCompleted: 1,
+      lessonsCompleted: 0,
       wordsPracticed: 12,
       averageAccuracy: 85,
       bestAccuracy: 100,
@@ -97,7 +96,6 @@ describe('getProfileSummary', () => {
       exp: 250,
       sessionAggregate: {
         exp: 120,
-        lessonsCompleted: 1,
         exercisesAttempted: 4,
         acceptedKeystrokes: 30,
         rejectedKeystrokes: 2,

@@ -170,6 +170,7 @@ export const router = createBrowserRouter([
     Component: ProfilePage,
     loader: createProfileLoader({
       userProfileRepo,
+      progressRepo,
       ensureUser: getActiveUser,
     }),
     ErrorBoundary: RouteError,

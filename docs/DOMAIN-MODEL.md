@@ -367,11 +367,12 @@ Return `0` for either value when its denominator is zero. WPM uses the existing 
 converted into raw counters. New submitted sessions contribute only to
 `sessionAggregate`; profile summaries combine the two. This layer remains until
 an explicit data migration can safely retire the legacy presentation fields.
-`sessionAggregate.lessonsCompleted` counts first-time, EXP-awarding Learning
-Path completions. When the legacy baseline is all zero, the profile derives
-accuracy and WPM from aggregate accepted/rejected keystrokes and typing time;
-when it is not, it keeps the legacy averages because their raw denominators are
-unavailable.
+Profile's `Lessons completed` is derived from persisted `LessonProgress`
+records with `status: 'completed'`, not from `UserStats` or
+`sessionAggregate`; this remains correct when curriculum adds more Units or
+Lessons. When the legacy baseline is all zero, the profile derives accuracy and
+WPM from aggregate accepted/rejected keystrokes and typing time; when it is not,
+it keeps the legacy averages because their raw denominators are unavailable.
 Guest-to-account migration preserves this compatibility layer: a Cloud baseline
 wins when both profiles have one, and newly submitted session effects remain
 receipt-gated.

@@ -637,11 +637,13 @@ adapters and profile summaries. The Guest-to-account migration preserves this
 layer rather than attempting to reconstruct historical sessions. The legacy
 baseline remains until a separate, safe migration retires it. Legacy average
 accuracy/WPM are not combined with new raw values; the profile shows
-session-tracked metrics separately. For a zero-valued legacy baseline, the
-Profile read model derives accuracy and WPM from `sessionAggregate`'s raw
-counters and adds its first-time Learning Path completion counter to the
-displayed lesson total. A non-zero baseline continues to display its stored
-averages because their denominators cannot be reconstructed safely.
+session-tracked metrics separately. Profile derives its `Lessons completed`
+display from `LessonProgress.status === 'completed'`, which is the current
+learner-state source of truth rather than an aggregate or EXP proxy. For a
+zero-valued legacy baseline, the Profile read model derives accuracy and WPM
+from `sessionAggregate`'s raw counters. A non-zero baseline continues to
+display its stored averages because their denominators cannot be reconstructed
+safely.
 
 ---
 
