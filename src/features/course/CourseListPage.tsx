@@ -57,9 +57,9 @@ export default function CourseListPage() {
             className="flex items-center gap-2.5 rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#bc6c5d]"
           >
             <img
-              src="/templates/jamozy-180×180.png"
+              src="/templates/jamozy-hanguk-180x180.png"
               alt=""
-              className="h-10 w-10 object-contain"
+              className="h-15 w-15 object-contain"
             />
             <span className="text-xl font-bold tracking-tight">Jamozy</span>
           </Link>
