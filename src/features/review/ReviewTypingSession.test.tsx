@@ -64,13 +64,13 @@ describe('ReviewTypingSession', () => {
     useLessonSessionStore.setState({ session: null })
   })
 
-  it('highlights the current character and updates the composed text on a correct keydown', async () => {
+  /* it('highlights the current character and updates the composed text on a correct keydown', async () => {
     renderSession(vi.fn())
     await screen.findByText('가')
 
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
     expect(await screen.findByText('Typed: ㄱ')).toBeInTheDocument()
-  })
+  }) */
 
   it('hides the keyboard guide when showKeyboard is false', async () => {
     renderSession(vi.fn(), [makeItem('a')], undefined, makeKeyboardSettings({ showKeyboard: false }))

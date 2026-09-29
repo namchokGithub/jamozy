@@ -1,7 +1,10 @@
 import { useEffect, useRef } from 'react'
 import { useFetcher } from 'react-router'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
-import { getCharacterStates, getComposedText } from '../../domain/korean/typing-session'
+import {
+  getCharacterStates,
+  // getComposedText,
+} from '../../domain/korean/typing-session'
 import { getLessonProgress, getLessonResult } from '../../domain/korean/lesson-session'
 import { KEY_TO_JAMO } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
@@ -94,7 +97,7 @@ export default function ReviewTypingSession({
   const progress = getLessonProgress(session)
   const characters = Array.from(session.currentSession.targetText)
   const characterStates = getCharacterStates(session.currentSession)
-  const composed = getComposedText(session.currentSession)
+  // const composed = getComposedText(session.currentSession)
   const nextKey = session.currentSession.expectedKeys[session.currentSession.keyIndex]
 
   return (
@@ -119,7 +122,7 @@ export default function ReviewTypingSession({
           </span>
         ))}
       </div>
-      <p className="mt-2 text-sm text-[#667085]">Typed: {composed}</p>
+      {/* <p className="mt-2 text-sm text-[#667085]">Typed: {composed}</p> */}
       {keyboardSettings.showKeyboard && (
         <VirtualKeyboard
           nextKey={nextKey}
