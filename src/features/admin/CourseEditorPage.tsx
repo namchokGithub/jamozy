@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { Link, useFetcher, useLoaderData } from 'react-router'
-import { ArrowDown, ArrowUp, Plus } from 'lucide-react'
+import { ArrowDown, ArrowUp, Pencil, Plus } from 'lucide-react'
 import type { Course } from '../../domain/models/course'
 import type { Unit } from '../../domain/models/unit'
 import { Button } from '../../components/ui/Button'
@@ -7,27 +8,24 @@ import { Card } from '../../components/ui/Card'
 import { PageSurface } from '../../components/ui/PageSurface'
 import { AdminStatusActions } from './AdminStatusActions'
 import { useAdminFeedback } from './useAdminFeedback'
+import { AdminBreadcrumb } from './AdminBreadcrumb'
 
 export default function CourseEditorPage() {
   const { course, units } = useLoaderData() as { course: Course; units: Unit[] }
   const fetcher = useFetcher()
   useAdminFeedback(fetcher)
+  const [editingDetails, setEditingDetails] = useState(false)
   const submit = (data: Record<string, string>) =>
     fetcher.submit(data, { method: 'post' })
   return (
     <PageSurface contentClassName="max-w-3xl">
-      <Link
-        to="/admin"
-        className="text-sm font-semibold text-[#667085] hover:text-[#8d4c43]"
-      >
-        ← All Courses
-      </Link>
+      <AdminBreadcrumb items={['Admin', course.title]} />
       <header className="mt-4 flex flex-wrap justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-[#a85d4e]">
             COURSE · {course.status ?? 'draft'}
           </p>
-          <h1 className="mt-1 text-3xl font-bold">Edit Course</h1>
+          <h1 className="mt-1 text-3xl font-bold">Course details</h1>
         </div>
         <AdminStatusActions
           id={course.id}
@@ -35,30 +33,52 @@ export default function CourseEditorPage() {
           status={course.status}
         />
       </header>
-      <fetcher.Form method="post" className="mt-6">
-        <input type="hidden" name="intent" value="save" />
-        <input type="hidden" name="kind" value="course" />
-        <input type="hidden" name="id" value={course.id} />
-        <Card className="grid gap-4">
-          <label className="grid gap-1 text-sm font-semibold">
-            Title
-            <input
-              name="title"
-              defaultValue={course.title}
-              className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
-            />
-          </label>
-          <label className="grid gap-1 text-sm font-semibold">
-            Description
-            <textarea
-              name="description"
-              defaultValue={course.description}
-              className="min-h-24 rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
-            />
-          </label>
-          <Button type="submit">Save Course</Button>
+      {editingDetails ? (
+        <fetcher.Form method="post" className="mt-6">
+          <input type="hidden" name="intent" value="save" />
+          <input type="hidden" name="kind" value="course" />
+          <input type="hidden" name="id" value={course.id} />
+          <Card className="grid gap-4">
+            <label className="grid gap-1 text-sm font-semibold">
+              Title
+              <input
+                name="title"
+                defaultValue={course.title}
+                className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
+              />
+            </label>
+            <label className="grid gap-1 text-sm font-semibold">
+              Description
+              <textarea
+                name="description"
+                defaultValue={course.description}
+                className="min-h-24 rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
+              />
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit">Save Course</Button>
+              <Button
+                variant="secondary"
+                onClick={() => setEditingDetails(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </Card>
+        </fetcher.Form>
+      ) : (
+        <Card className="mt-6 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-bold">{course.title}</h2>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-[#667085]">
+              {course.description}
+            </p>
+          </div>
+          <Button variant="secondary" onClick={() => setEditingDetails(true)}>
+            <Pencil size={16} aria-hidden="true" /> Edit details
+          </Button>
         </Card>
-      </fetcher.Form>
+      )}
       <section className="mt-8">
         <div className="flex items-center justify-between">
           <div>

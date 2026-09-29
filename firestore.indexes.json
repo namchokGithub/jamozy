@@ -13,7 +13,23 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "courseId", "order": "ASCENDING" },
+        { "fieldPath": "order", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "units",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "courseId", "order": "ASCENDING" },
         { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "order", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "unitId", "order": "ASCENDING" },
         { "fieldPath": "order", "order": "ASCENDING" }
       ]
     },
