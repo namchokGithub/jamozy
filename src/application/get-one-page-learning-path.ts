@@ -73,14 +73,18 @@ export async function getOnePageLearningPath(
     ordered
       .filter(({ lesson }) => !isCompleted(progress, lesson.id))
       .map(({ course }) => course.id),
-  )].slice(0, 3)
-  const courses = incompleteCourseIds.map((courseId) => {
+  )]
+  const replayCourseIds = [...new Set(ordered.map(({ course }) => course.id))]
+  const selectableCourseIds = (incompleteCourseIds.length > 0
+    ? incompleteCourseIds
+    : replayCourseIds).slice(0, 3)
+  const courses = selectableCourseIds.map((courseId) => {
     const course = ordered.find((entry) => entry.course.id === courseId)!.course
     return { id: course.id, title: course.title, description: course.description }
   })
-  const courseId = selectedCourseId && incompleteCourseIds.includes(selectedCourseId)
+  const courseId = selectedCourseId && selectableCourseIds.includes(selectedCourseId)
     ? selectedCourseId
-    : incompleteCourseIds[0] ?? null
+    : selectableCourseIds[0] ?? null
   if (!courseId) return { courses, selectedCourseId: null, queue: [], checkpoint: null, pendingLessonId: null }
 
   const courseEntries = ordered.filter(({ course }) => course.id === courseId)
@@ -89,15 +93,16 @@ export async function getOnePageLearningPath(
   if (checkpoint && JSON.stringify(checkpoint) !== JSON.stringify(storedCheckpoint)) {
     await deps.checkpointRepo.saveCheckpoint({ ...checkpoint, updatedAt: new Date() })
   }
+  const isReplayCourse = !incompleteCourseIds.includes(courseId)
   const queue = courseEntries
-    .filter(({ lesson }) => !isCompleted(progress, lesson.id))
+    .filter(({ lesson }) => isReplayCourse || !isCompleted(progress, lesson.id))
     .flatMap((entry) => entry.lesson.exercises
       .filter((exercise) => !checkpoint?.completedExerciseIdsByLesson[entry.lesson.id]?.includes(exercise.id))
       .map((exercise) => ({ ...entry, exercise })))
     .slice(0, 10)
   const pendingLessonId = checkpoint
     ? courseEntries.find(({ lesson }) =>
-      !isCompleted(progress, lesson.id) &&
+      (isReplayCourse || !isCompleted(progress, lesson.id)) &&
       lesson.exercises.length > 0 &&
       lesson.exercises.every((exercise) => checkpoint.completedExerciseIdsByLesson[lesson.id]?.includes(exercise.id)),
     )?.lesson.id ?? null

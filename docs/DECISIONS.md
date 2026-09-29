@@ -734,4 +734,6 @@ normal LearningSession through the existing receipt boundary, then removes
 that lesson’s checkpoint. A failed completion retains its local submission ID
 for retry. The player uses missing Progress as locked and only writes
 `unlocked`/`completed`; legacy persisted `locked` entries are read as absent
-without destructive cleanup.
+without destructive cleanup. When no incomplete course remains, Home falls
+back to its first three courses and replays their exercises; the existing
+15-EXP replay policy ([[DEC-033]]) applies.

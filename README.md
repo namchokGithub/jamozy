@@ -58,6 +58,8 @@ normal submitted lesson result, progress, EXP, and review effects.
 
 The Hero and the standard learning-path cards remain below the player. Learners
 can still open a Course and choose a specific Lesson through the existing flow.
+When every available course is complete, Home falls back to replaying the first
+three courses; completed lessons retain the existing lower replay EXP reward.
 
 ## Learning Modes
 
