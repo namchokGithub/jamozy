@@ -428,3 +428,13 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Local verification passed: 264 Vitest tests, lint, production build, and
   `git diff --check`. Firestore Rules Emulator coverage and the real Firebase
   rollout remain explicitly pending; no Firebase state was changed.
+
+### 2026-09-29 — Admin BO production rollout
+
+- Deployed the Admin BO Firestore indexes and restrictive Rules.
+- Ran the status migration against Firebase: it found and updated 5 legacy
+  statusless content documents to `published`.
+- Granted the owner `admin: true` custom claim and verified it by successfully
+  editing content through `/admin`.
+- Firestore Rules Emulator coverage remains follow-up hardening; the deployed
+  rollout did not change any learner/user collections.

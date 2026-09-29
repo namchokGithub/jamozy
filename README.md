@@ -372,9 +372,8 @@ implementation status and the post-MVP roadmap.
 
 ### Next / Post-MVP
 
-- Admin BO operations: deploy the status indexes, run the documented content
-  migration, deploy Rules, and grant the owner custom claim before using the
-  shipped `/admin` content-management UI. See the
+- Add and execute Firestore Rules Emulator coverage for the deployed `/admin`
+  authorization policy. See the
   [implementation plan](docs/superpowers/plans/2026-09-29-admin-content-management.md).
 - Decide whether sound feedback ships or is deferred, then implement the
   selected behavior
