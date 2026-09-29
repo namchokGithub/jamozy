@@ -2,7 +2,7 @@
 
 Mirrors the MVP checklist in `README.md`. Update both when status changes. Statuses: `Not started`, `In progress`, `Blocked`, `Done`.
 
-Last updated: 2026-09-29 (Admin content-management rollout)
+Last updated: 2026-09-29 (Admin Rules Emulator coverage)
 
 ## MVP
 
@@ -68,7 +68,7 @@ Last updated: 2026-09-29 (Admin content-management rollout)
 | Daily streaks                     | Not started |                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | Pronunciation audio               | Not started |                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | More courses and lesson types     | Not started |                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| Admin BO content management       | Done | `/admin` provides Course → Unit → Lesson authoring with Draft/Publish/Archive/Restore, text Exercise editing/reordering, and guarded sibling moves. Firestore Rules and the client guard require the same `admin: true` custom claim. Status indexes and Rules are deployed; the migration wrote `status: 'published'` to 5 legacy content documents; the owner claim was granted and a real content edit succeeded. No user collections were changed. Firestore Rules Emulator coverage remains follow-up hardening. |
+| Admin BO content management       | Done | `/admin` provides Course → Unit → Lesson authoring with Draft/Publish/Archive/Restore, text Exercise editing/reordering, and guarded sibling moves. Firestore Rules and the client guard require the same `admin: true` custom claim. Status indexes and Rules are deployed; the migration wrote `status: 'published'` to 5 legacy content documents; the owner claim was granted and a real content edit succeeded. `pnpm test:rules` provides Firestore Emulator coverage for anonymous published-only reads, learner write denial, and admin draft read/content writes. No user collections were changed. |
 
 ## Foundational / Setup (not in README checklist, tracked here)
 
@@ -84,7 +84,7 @@ Last updated: 2026-09-29 (Admin content-management rollout)
 
 ## Current Focus
 
-**MVP status:** The core Learning Path, Lesson Result, Review, Guest-local persistence, authenticated Firebase persistence, settings, profile flows, and single-owner Admin BO are complete. The Admin BO production rollout deployed indexes and Rules, migrated 5 legacy content documents, and verified the owner claim with a successful content edit. The remaining tracked work is post-MVP UX, deployment automation, Rules Emulator coverage, and the planned Learning Modes.
+**MVP status:** The core Learning Path, Lesson Result, Review, Guest-local persistence, authenticated Firebase persistence, settings, profile flows, and single-owner Admin BO are complete. The Admin BO production rollout deployed indexes and Rules, migrated 5 legacy content documents, verified the owner claim with a successful content edit, and has Firestore Rules Emulator coverage. The remaining tracked work is post-MVP UX, deployment automation, and the planned Learning Modes.
 
 **Light-theme UI:** All learner-facing routes now share Home's warm cream, pastel, rounded visual language through presentation-only components in `src/components/ui/`. Course Map, Lesson, Review, Profile, Settings, Auth, typing keyboard, and recovery pages are covered. Shared `Modal`, native-select `Dropdown`, and `SnackbarProvider` are UI-only; dark theme and animation remain deliberately deferred.
 
@@ -106,4 +106,4 @@ A fresh whole-branch review (Opus) found no Critical issues. The one Important f
 
 `pnpm test`/`pnpm exec tsc -b`/`pnpm lint` all pass (240 tests).
 
-Next real steps, not blocked on each other: (1) add and execute Firestore Rules Emulator coverage for the deployed Admin BO policy, (2) decide whether to defer the misleading sound control to post-MVP or implement real sound; build real dark-mode CSS as a separate cross-cutting change, (3) a proper Lesson Result screen (currently an inline MVP result).
+Next real steps, not blocked on each other: (1) decide whether to defer the misleading sound control to post-MVP or implement real sound; build real dark-mode CSS as a separate cross-cutting change, (2) a proper Lesson Result screen (currently an inline MVP result).

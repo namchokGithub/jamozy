@@ -402,6 +402,10 @@ owner must sign out and back in after the claim is granted. The scripts use
 `GOOGLE_APPLICATION_CREDENTIALS` from `.env.local`; do not place a service
 credential in `VITE_*` variables or commit it.
 
+Run the Rules authorization suite with `pnpm test:rules`. It starts a local
+Firestore Emulator, never contacts the Firebase project, and requires the
+Firebase CLI and Java to be available on the developer machine.
+
 ## Development Principles
 
 - Keep Firebase access outside React UI components.

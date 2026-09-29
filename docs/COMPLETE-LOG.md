@@ -438,3 +438,14 @@ Chronological log of completed units of work. One entry per meaningful change (n
   editing content through `/admin`.
 - Firestore Rules Emulator coverage remains follow-up hardening; the deployed
   rollout did not change any learner/user collections.
+
+### 2026-09-29 — Admin BO Firestore Rules Emulator coverage
+
+- Added `pnpm test:rules`, which starts a local Firestore Emulator and runs
+  the Rules integration suite without contacting the Firebase project.
+- Added coverage that permits only published content with published ancestors
+  to anonymous learners, rejects Course/Unit/Lesson writes by authenticated
+  learners, and permits an `admin: true` user to read draft content and create
+  or update Course/Unit/Lesson content.
+- Mutation-verified the learner-write denial: temporarily weakening the Course
+  write Rule made the focused suite fail, then the original Rule passed again.
