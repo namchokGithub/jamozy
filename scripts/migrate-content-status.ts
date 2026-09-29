@@ -35,8 +35,18 @@ export async function migrateContentStatus(
   return { scanned, updated, dryRun }
 }
 
-const mode = process.argv[2]
-const confirmedAfterDryRun = process.argv[3] === '--after-dry-run'
+export function parseMigrationArgs(args: string[]): {
+  mode: string | undefined
+  confirmedAfterDryRun: boolean
+} {
+  const forwarded = args.filter((arg) => arg !== '--')
+  return {
+    mode: forwarded[0],
+    confirmedAfterDryRun: forwarded.includes('--after-dry-run'),
+  }
+}
+
+const { mode, confirmedAfterDryRun } = parseMigrationArgs(process.argv.slice(2))
 if (import.meta.url === `file://${process.argv[1]}`) {
   if (
     (mode !== '--dry-run' && mode !== '--write') ||

@@ -18,7 +18,11 @@ export async function setAdminClaim(
   await auth.setCustomUserClaims(uid, { ...user.customClaims, admin: true })
 }
 
-const uid = process.argv[2]
+export function parseAdminClaimArgs(args: string[]): string | undefined {
+  return args.find((arg) => arg !== '--')
+}
+
+const uid = parseAdminClaimArgs(process.argv.slice(2))
 if (import.meta.url === `file://${process.argv[1]}`) {
   setAdminClaim(uid ?? '')
     .then(() =>

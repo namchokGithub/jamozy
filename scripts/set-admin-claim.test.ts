@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
-import { setAdminClaim } from './set-admin-claim'
+import { parseAdminClaimArgs, setAdminClaim } from './set-admin-claim'
 
 describe('setAdminClaim', () => {
+  it('accepts a UID forwarded by pnpm after its separator', () => {
+    expect(parseAdminClaimArgs(['--', 'owner-uid'])).toBe('owner-uid')
+  })
+
   it('sets the admin claim for the supplied Auth UID', async () => {
     const setCustomUserClaims = vi.fn().mockResolvedValue(undefined)
     await setAdminClaim('owner-uid', {
