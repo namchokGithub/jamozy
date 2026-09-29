@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router'
+import '@fontsource/noto-sans-kr/700.css'
 import './index.css'
 import { router } from './app/router'
 import { SnackbarProvider } from './components/ui/SnackbarProvider'

@@ -458,3 +458,19 @@ Chronological log of completed units of work. One entry per meaningful change (n
   target semantics and global Course → Unit → Lesson frontier ordering.
 - Per user direction, no test, build, or lint command was run in this round;
   verification and content seeding remain user-owned.
+
+### 2026-09-30 — Hangul guide inspection setup
+
+- Bundled Noto Sans KR at weight 700 and wait for each syllable's Korean glyph
+  before canvas rendering, making the glyph geometry independent of installed
+  system fonts.
+- Added the development-only `/dev/hangul-guides` tuner for `녕`, `하`, and
+  `죄`. It reuses the production guide operations and pixel assignment path,
+  shows original/colored/ownership and exception overlays, reports pixel
+  coverage, supports add/subtract rectangle and ellipse operations, and exports
+  the edited normalized guide JSON without changing production guide data.
+- Tuned those three seed guides to complete single-owner partitions. Browser
+  inspection reports 0 unassigned, overlapping, and nearest-center-fallback
+  pixels for each target syllable.
+- Verified with `pnpm build`, `pnpm lint`, and browser visual QA. No automated
+  tests were added per the requested UI-only testing policy.

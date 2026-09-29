@@ -56,6 +56,7 @@ import { createUnitEditorLoader } from '../features/admin/UnitEditorPage.loader'
 import LessonEditorPage from '../features/admin/LessonEditorPage'
 import { createLessonEditorLoader } from '../features/admin/LessonEditorPage.loader'
 import { createAdminAction } from '../features/admin/admin-action'
+import HangulGuideTunerPage from '../features/typing/HangulGuideTunerPage'
 
 const localUserProfileRepo = new LocalUserProfileRepository()
 const guestSessions = new GuestSessionRepository(
@@ -103,6 +104,9 @@ const {
   sessionSubmissionRepo,
   getActiveUser,
 } = learners
+const developmentRoutes = import.meta.env.DEV
+  ? [{ path: '/dev/hangul-guides', Component: HangulGuideTunerPage }]
+  : []
 export const router = createBrowserRouter([
   {
     path: '/admin',
@@ -266,6 +270,7 @@ export const router = createBrowserRouter([
     }),
     ErrorBoundary: RouteError,
   },
+  ...developmentRoutes,
   {
     path: '*',
     Component: NotFoundPage,
