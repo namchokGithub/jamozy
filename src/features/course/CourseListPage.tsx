@@ -15,7 +15,11 @@ import { AuthModal } from '../auth/AuthModal'
 import { Button } from '../../components/ui/Button'
 import { useSnackbar } from '../../components/ui/SnackbarProvider'
 
-type CourseListActionData = { displayName?: string; authenticated?: boolean; error?: string }
+type CourseListActionData = {
+  displayName?: string
+  authenticated?: boolean
+  error?: string
+}
 
 export default function CourseListPage() {
   const { courses, dueReviewCount, displayName, isAuthenticated } =
@@ -52,9 +56,11 @@ export default function CourseListPage() {
             to="/"
             className="flex items-center gap-2.5 rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#bc6c5d]"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#f2c5bb] text-[#8d4c43] shadow-sm">
-              <Flower2 aria-hidden="true" size={21} strokeWidth={2.4} />
-            </span>
+            <img
+              src="/templates/jamozy-180×180.png"
+              alt=""
+              className="h-10 w-10 object-contain"
+            />
             <span className="text-xl font-bold tracking-tight">Jamozy</span>
           </Link>
 
