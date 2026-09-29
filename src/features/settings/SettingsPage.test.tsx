@@ -3,6 +3,8 @@ import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 import SettingsPage from './SettingsPage'
 import type { UserSettings } from '../../domain/models/user-profile'
+import type { SettingsActionData } from './SettingsPage.action'
+import { SnackbarProvider } from '../../components/ui/SnackbarProvider'
 
 function makeSettings(overrides: Partial<UserSettings> = {}): UserSettings {
   return {
@@ -19,7 +21,7 @@ function makeSettings(overrides: Partial<UserSettings> = {}): UserSettings {
 
 function renderPage(
   settings: UserSettings = makeSettings(),
-  action: (args: { request: Request }) => Promise<UserSettings> = async () => settings,
+  action: (args: { request: Request }) => Promise<SettingsActionData> = async () => settings,
 ) {
   const router = createMemoryRouter(
     [
@@ -32,7 +34,11 @@ function renderPage(
     ],
     { initialEntries: ['/'] },
   )
-  return render(<RouterProvider router={router} />)
+  return render(
+    <SnackbarProvider>
+      <RouterProvider router={router} />
+    </SnackbarProvider>,
+  )
 }
 
 describe('SettingsPage', () => {
@@ -53,7 +59,7 @@ describe('SettingsPage', () => {
     )
   })
 
-  it('disables Save while submitting and shows Saved once it succeeds', async () => {
+  it('disables Save while submitting and announces success once it succeeds', async () => {
     let resolveAction: (settings: UserSettings) => void
     const action = vi.fn(
       () =>
@@ -71,7 +77,7 @@ describe('SettingsPage', () => {
     resolveAction!(makeSettings())
 
     await waitFor(() => expect(saveButton).not.toBeDisabled())
-    expect(await screen.findByText('Saved')).toBeInTheDocument()
+    expect(await screen.findByRole('status')).toHaveTextContent('Settings saved')
   })
 
   it('shows Saved once the post-action loader revalidation finishes, not just the action', async () => {
@@ -106,7 +112,11 @@ describe('SettingsPage', () => {
       ],
       { initialEntries: ['/'] },
     )
-    render(<RouterProvider router={router} />)
+    render(
+      <SnackbarProvider>
+        <RouterProvider router={router} />
+      </SnackbarProvider>,
+    )
     await screen.findByLabelText('Sound')
 
     // Edit a field first — without this, `settings` still equals the untouched
@@ -118,13 +128,13 @@ describe('SettingsPage', () => {
     resolveAction!({ ...makeSettings(), soundEnabled: false })
 
     await waitFor(() => expect(loaderCallCount).toBe(2))
-    expect(screen.queryByText('Saved')).not.toBeInTheDocument()
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
     resolveRevalidation!({ settings: { ...makeSettings(), soundEnabled: false } })
 
-    expect(await screen.findByText('Saved')).toBeInTheDocument()
+    expect(await screen.findByRole('status')).toHaveTextContent('Settings saved')
   })
 
-  it('shows Saved even when the loaded settings and the saved-back settings have different key orders', async () => {
+  it('announces success even when the loaded settings and the saved-back settings have different key orders', async () => {
     // The loader's settings come from Firestore (whatever field order the
     // repository mapper produces); the action's returned settings come from
     // userSettingsSchema.parse(), which always emits keys in the schema's
@@ -155,18 +165,27 @@ describe('SettingsPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
 
-    expect(await screen.findByText('Saved')).toBeInTheDocument()
+    expect(await screen.findByRole('status')).toHaveTextContent('Settings saved')
   })
 
-  it('clears the Saved indicator as soon as a field is edited again', async () => {
+  it('keeps settings editable after a failed save and announces the failure', async () => {
+    renderPage(makeSettings(), async () => ({ error: 'Could not save settings' }))
+    await screen.findByLabelText('Sound')
+
+    fireEvent.click(screen.getByLabelText('Sound'))
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Could not save settings')
+    expect(screen.getByLabelText('Sound')).not.toBeChecked()
+  })
+
+  it('keeps settings editable after a successful save', async () => {
     renderPage(makeSettings())
     await screen.findByLabelText('Sound')
 
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
-    expect(await screen.findByText('Saved')).toBeInTheDocument()
+    expect(await screen.findByRole('status')).toHaveTextContent('Settings saved')
 
-    fireEvent.click(screen.getByLabelText('Sound'))
-
-    expect(screen.queryByText('Saved')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Sound')).toBeEnabled()
   })
 })

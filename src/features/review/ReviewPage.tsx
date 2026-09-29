@@ -4,6 +4,8 @@ import type { ReviewLoaderData } from './ReviewPage.loader'
 import ReviewTypingSession from './ReviewTypingSession'
 import type { SubmitReviewSessionOutcome } from '../../application/submit-review-session'
 import { formatExerciseMeaning } from '../lesson/format-exercise-meaning'
+import { Button } from '../../components/ui/Button'
+import { PageSurface } from '../../components/ui/PageSurface'
 
 export default function ReviewPage() {
   const { previews, settings } = useLoaderData() as ReviewLoaderData
@@ -15,7 +17,7 @@ export default function ReviewPage() {
 
   if (outcome) {
     return (
-      <main className="mx-auto max-w-2xl p-6">
+      <PageSurface contentClassName="max-w-2xl">
         <h1 className="text-2xl font-medium text-slate-900">
           Review complete!
         </h1>
@@ -29,25 +31,25 @@ export default function ReviewPage() {
         >
           Back to Course List
         </Link>
-      </main>
+      </PageSurface>
     )
   }
 
   if (started) {
     return (
-      <main className="mx-auto max-w-2xl p-6">
+      <PageSurface contentClassName="max-w-2xl">
         <h1 className="text-2xl font-medium text-slate-900">Review</h1>
         <ReviewTypingSession
           items={items}
           onComplete={setOutcome}
           keyboardSettings={settings}
         />
-      </main>
+      </PageSurface>
     )
   }
 
   return (
-    <main className="mx-auto max-w-2xl p-6">
+    <PageSurface contentClassName="max-w-2xl">
       <h1 className="text-2xl font-medium text-slate-900">Review</h1>
 
       {items.length === 0 ? (
@@ -65,7 +67,7 @@ export default function ReviewPage() {
               return (
                 <li
                   key={item.id}
-                  className="rounded-lg border border-slate-200 p-3 text-slate-900"
+                  className="rounded-3xl border border-[#eadfd4] bg-white/85 p-4 text-[#253247] shadow-sm"
                 >
                   <div>{item.targetText}</div>
                   {settings.romanizationEnabled && exercise?.romanization && (
@@ -80,15 +82,15 @@ export default function ReviewPage() {
               )
             })}
           </ul>
-          <button
+          <Button
             type="button"
             onClick={() => setStarted(true)}
-            className="mt-6 rounded-lg bg-slate-900 px-4 py-2 text-white"
+            className="mt-6"
           >
             Start Review
-          </button>
+          </Button>
         </>
       )}
-    </main>
+    </PageSurface>
   )
 }

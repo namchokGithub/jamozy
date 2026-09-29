@@ -5,12 +5,12 @@ import VirtualKeyboard from './VirtualKeyboard'
 describe('VirtualKeyboard', () => {
   it('highlights the key matching nextKey.code', () => {
     render(<VirtualKeyboard nextKey={{ code: 'KeyR', shift: false }} showEnglishKeys opacity={1} />)
-    expect(screen.getByText('ㄱ').closest('div')).toHaveClass('bg-amber-100')
+    expect(screen.getByText('ㄱ').closest('div')).toHaveClass('bg-[#fff0d8]')
   })
 
   it('highlights Shift when nextKey.shift is true', () => {
     render(<VirtualKeyboard nextKey={{ code: 'KeyQ', shift: true }} showEnglishKeys opacity={1} />)
-    expect(screen.getByText('Shift')).toHaveClass('bg-amber-100')
+    expect(screen.getByText('Shift')).toHaveClass('bg-[#fff0d8]')
   })
 
   it('highlights nothing when nextKey is undefined', () => {

@@ -109,8 +109,8 @@ export default function LessonTypingSession({
   const nextKey = session.currentSession.expectedKeys[session.currentSession.keyIndex]
 
   return (
-    <div>
-      <p className="text-sm text-slate-500">
+    <div className="mt-5 rounded-3xl border border-[#eadfd4] bg-[#fffdf9] p-5 shadow-sm">
+      <p className="text-sm font-semibold text-[#a85d4e]">
         {progress.current} / {progress.total}
       </p>
 
@@ -120,17 +120,17 @@ export default function LessonTypingSession({
             key={index}
             className={
               characterStates[index] === 'correct'
-                ? 'text-emerald-600'
+                ? 'text-[#58733f]'
                 : characterStates[index] === 'current'
-                  ? 'text-slate-900 underline'
-                  : 'text-slate-300'
+                  ? 'text-[#a85d4e] underline'
+                  : 'text-[#c7c3bc]'
             }
           >
             {char}
           </span>
         ))}
       </div>
-      <p className="mt-2 text-sm text-slate-500">Typed: {composed}</p>
+      <p className="mt-2 text-sm text-[#667085]">Typed: {composed}</p>
       {keyboardSettings.showKeyboard && (
         <VirtualKeyboard
           nextKey={nextKey}

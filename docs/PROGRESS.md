@@ -2,7 +2,7 @@
 
 Mirrors the MVP checklist in `README.md`. Update both when status changes. Statuses: `Not started`, `In progress`, `Blocked`, `Done`.
 
-Last updated: 2026-09-28 (MVP documentation reconciled)
+Last updated: 2026-09-29 (Light-theme UI consistency pass)
 
 ## MVP
 
@@ -18,7 +18,7 @@ Last updated: 2026-09-28 (MVP documentation reconciled)
 | EXP and Level progression                          | Done   | EXP awarded in`complete-lesson` per `docs/requirement.md` #8 (100 base / +20 acc>90 / +50 perfect); `levelFromExp` derives level. Surfaced in the post-lesson inline block ("+X EXP — now level Y") and now persistently via `/profile` (`ProfilePage.tsx`, `application/get-profile-summary.ts`) — level, an EXP progress bar, and all 6 `UserStats` fields. Live-verified (zero-state and real-data rendering)                                                                            |
 | Guest local persistence and authenticated accounts | Done   | Guest IndexedDB plus Email/password and Google Sign-In select the active persistence adapter. Successful authentication automatically starts safe, non-destructive Guest-to-account migration ([[DEC-027]], [[DEC-030]], [[DEC-031]]).                                                                                                                                                                                                                                                      |
 | Authenticated Firestore learner persistence        | Done   | Authenticated sessions use Firebase learner repositories. Lesson/Review session history, exactly-once checkpoint effects, and Guest migration are verified.                                                                                                                                                                                                                                                                                                                                 |
-| Settings                                           | Done   | `/settings` (`SettingsPage.tsx`) reads/writes `UserProfile.settings` via `get-settings.ts`/`update-settings.ts` (read-modify-write, never touches `exp`/`stats`/`createdAt`). All five learner-facing display preferences now have consumers: meaning/romanization in Lesson and Review previews; keyboard visibility, English labels, and opacity in both typing sessions. New profiles default to 0.7 keyboard opacity. Sound and theme remain persist-only.                              |
+| Settings                                           | Done   | `/settings` (`SettingsPage.tsx`) reads/writes `UserProfile.settings` via `get-settings.ts`/`update-settings.ts` (read-modify-write, never touches `exp`/`stats`/`createdAt`). All five learner-facing display preferences now have consumers: meaning/romanization in Lesson and Review previews; keyboard visibility, English labels, and opacity in both typing sessions. Save outcomes use accessible snackbars; a structured failed save preserves the form rather than revalidating into RouteError. New profiles default to 0.7 keyboard opacity. Sound and theme remain persist-only.                              |
 
 ## Planned Learning Modes
 
@@ -85,6 +85,8 @@ Last updated: 2026-09-28 (MVP documentation reconciled)
 ## Current Focus
 
 **MVP status:** The core Learning Path, Lesson Result, Review, Guest-local persistence, authenticated Firebase persistence, settings, and profile flows are complete. Firebase Console configuration is complete. The remaining tracked work is post-MVP UX, content administration, deployment automation, and the planned Learning Modes.
+
+**Light-theme UI:** All learner-facing routes now share Home's warm cream, pastel, rounded visual language through presentation-only components in `src/components/ui/`. Course Map, Lesson, Review, Profile, Settings, Auth, typing keyboard, and recovery pages are covered. Shared `Modal`, native-select `Dropdown`, and `SnackbarProvider` are UI-only; dark theme and animation remain deliberately deferred.
 
 **Deferred architecture:** [[DEC-022]]–[[DEC-029]] define future vocabulary, shared learner-state checkpoints, Learning Modes, and richer session-history consumers. `VocabularyProgress`, `JamoStats`, Topic/Position practice, Daily Quest, and History UI are not missing MVP scaffolding; they remain explicitly deferred.
 

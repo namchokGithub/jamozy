@@ -5,6 +5,9 @@ import LessonTypingSession, {
   type LessonCompletion,
 } from './LessonTypingSession'
 import { formatExerciseMeaning } from './format-exercise-meaning'
+import { Button } from '../../components/ui/Button'
+import { Card } from '../../components/ui/Card'
+import { PageSurface } from '../../components/ui/PageSurface'
 
 export default function LessonDetailPage() {
   const { lesson, settings, courseId } =
@@ -33,14 +36,14 @@ function LessonDetailContent({
     const { outcome, result } = completion
     const mistypedWords = [...new Set(result.mistakes.map((mistake) => mistake.targetText))]
     return (
-      <main className="mx-auto max-w-2xl p-6">
+      <PageSurface contentClassName="max-w-2xl">
         <h1 className="text-2xl font-medium text-slate-900">
           Lesson complete!
         </h1>
         <p className="mt-2 text-slate-700">
           +{outcome.expGained} EXP — now level {outcome.level}
         </p>
-        <section aria-label="Lesson results" className="mt-4 rounded-lg border border-slate-200 p-4">
+        <Card aria-label="Lesson results" className="mt-4" role="region">
           <ul className="space-y-1 text-sm text-slate-700">
             <li>Accuracy {Math.round(result.accuracy)}%</li>
             <li>Typing speed {Math.round(result.speedWpm)} WPM</li>
@@ -59,28 +62,30 @@ function LessonDetailContent({
               </ul>
             </>
           )}
-        </section>
+        </Card>
         {outcome.unlockedNextLessonId && (
           <p className="mt-1 text-sm text-slate-600">Next lesson unlocked.</p>
         )}
-        <button
+        <Button
           type="button"
           onClick={() => {
             setCompletion(null)
             setStarted(true)
           }}
-          className="mt-6 rounded-lg border border-slate-300 px-4 py-2 text-slate-900"
+          className="mt-6"
+          variant="secondary"
         >
           Retry
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={() => navigate('/review')}
-          className="ml-3 rounded-lg border border-slate-300 px-4 py-2 text-slate-900"
+          className="ml-3"
+          variant="secondary"
         >
           Go to Review
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={() =>
             navigate(
@@ -89,29 +94,29 @@ function LessonDetailContent({
                 : `/courses/${courseId}`,
             )
           }
-          className="ml-3 rounded-lg bg-slate-900 px-4 py-2 text-white"
+          className="ml-3"
         >
           {outcome.unlockedNextLessonId ? 'Next Lesson' : 'Course Map'}
-        </button>
-      </main>
+        </Button>
+      </PageSurface>
     )
   }
 
   if (started) {
     return (
-      <main className="mx-auto max-w-2xl p-6">
+      <PageSurface contentClassName="max-w-2xl">
         <h1 className="text-2xl font-medium text-slate-900">{lesson.title}</h1>
         <LessonTypingSession
           lesson={lesson}
           onComplete={setCompletion}
           keyboardSettings={settings}
         />
-      </main>
+      </PageSurface>
     )
   }
 
   return (
-    <main className="mx-auto max-w-2xl p-6">
+    <PageSurface contentClassName="max-w-2xl">
       <h1 className="text-2xl font-medium text-slate-900">{lesson.title}</h1>
       <p className="mt-1 text-sm text-slate-600">{lesson.type}</p>
 
@@ -128,7 +133,7 @@ function LessonDetailContent({
               return (
                 <li
                   key={exercise.id}
-                  className="rounded-lg border border-slate-200 p-4"
+                  className="rounded-3xl border border-[#eadfd4] bg-white/85 p-5 shadow-sm"
                 >
                   <div className="text-xl text-slate-900">
                     {exercise.targetText}
@@ -145,15 +150,15 @@ function LessonDetailContent({
               )
             })}
           </ul>
-          <button
+          <Button
             type="button"
             onClick={() => setStarted(true)}
-            className="mt-6 rounded-lg bg-slate-900 px-4 py-2 text-white"
+            className="mt-6"
           >
             Start Lesson
-          </button>
+          </Button>
         </>
       )}
-    </main>
+    </PageSurface>
   )
 }

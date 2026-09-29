@@ -1,79 +1,13 @@
 import { useState } from 'react'
+import { Check, ChevronDown, LockKeyhole, Sparkles } from 'lucide-react'
 import { Link, useLoaderData } from 'react-router'
 import type { CourseMapLoaderData } from './CourseMapPage.loader'
 import type { CourseMapUnit } from '../../application/get-course'
 import type { LessonProgressStatus } from '../../domain/models/progress'
+import { Card } from '../../components/ui/Card'
+import { PageSurface } from '../../components/ui/PageSurface'
 
-function statusLabel(status: LessonProgressStatus | undefined): string {
-  if (status === 'completed') return 'Completed'
-  if (status === 'unlocked') return 'Unlocked'
-  return 'Locked'
-}
-
-function UnitSection({ mapUnit }: { mapUnit: CourseMapUnit }) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <li className="rounded-lg border border-slate-200">
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        aria-expanded={open}
-        className="flex w-full items-center justify-between p-4 text-left"
-      >
-        <div>
-          <div className="font-medium text-slate-900">{mapUnit.unit.title}</div>
-          <div className="text-sm text-slate-600">{mapUnit.unit.description}</div>
-        </div>
-        <span className="text-sm text-slate-500">
-          {open ? 'Hide lessons' : 'Show lessons'}
-        </span>
-      </button>
-
-      {open && mapUnit.lessons.length === 0 && (
-        <p className="border-t border-slate-100 p-4 text-sm text-slate-500">
-          No lessons yet.
-        </p>
-      )}
-
-      {open && mapUnit.lessons.length > 0 && (
-        <ul className="space-y-2 border-t border-slate-100 p-4">
-          {mapUnit.lessons.map(({ lesson, progress }) => (
-            <li key={lesson.id}>
-              <Link
-                to={`/lessons/${lesson.id}`}
-                className="flex items-center justify-between rounded-md p-2 hover:bg-slate-50"
-              >
-                <span>{lesson.title}</span>
-                <span className="text-xs text-slate-500">
-                  {statusLabel(progress?.status)}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </li>
-  )
-}
-
-export default function CourseMapPage() {
-  const { courseMap } = useLoaderData() as CourseMapLoaderData
-
-  return (
-    <main className="mx-auto max-w-2xl p-6">
-      <h1 className="text-2xl font-medium text-slate-900">{courseMap.course.title}</h1>
-      <p className="mt-1 text-slate-600">{courseMap.course.description}</p>
-
-      {courseMap.units.length === 0 ? (
-        <p className="mt-6 text-sm text-slate-500">No units yet.</p>
-      ) : (
-        <ul className="mt-6 space-y-3">
-          {courseMap.units.map((mapUnit) => (
-            <UnitSection key={mapUnit.unit.id} mapUnit={mapUnit} />
-          ))}
-        </ul>
-      )}
-    </main>
-  )
-}
+function statusLabel(status: LessonProgressStatus | undefined): string { return status === 'completed' ? 'Completed' : status === 'unlocked' ? 'Unlocked' : 'Locked' }
+function StatusPill({ status }: { status: LessonProgressStatus | undefined }) { const label = statusLabel(status); const classes = label === 'Completed' ? 'bg-[#e7f1d8] text-[#58733f]' : label === 'Unlocked' ? 'bg-[#fff0d8] text-[#8b6035]' : 'bg-[#eeeaf5] text-[#7863a8]'; return <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${classes}`}>{label === 'Completed' ? <Check aria-hidden="true" size={13} /> : label === 'Locked' ? <LockKeyhole aria-hidden="true" size={13} /> : <Sparkles aria-hidden="true" size={13} />}{label}</span> }
+function UnitSection({ mapUnit }: { mapUnit: CourseMapUnit }) { const [open, setOpen] = useState(false); return <li><Card className="p-0"><button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} className="flex w-full items-center justify-between gap-4 p-5 text-left"><div><p className="font-bold">{mapUnit.unit.title}</p><p className="mt-1 text-sm text-[#667085]">{mapUnit.unit.description}</p></div><ChevronDown aria-hidden="true" className={`shrink-0 text-[#a85d4e] ${open ? 'rotate-180' : ''}`} size={20} /></button>{open && <div className="border-t border-[#f0dfd1] p-4">{mapUnit.lessons.length === 0 ? <p className="text-sm text-[#667085]">No lessons yet.</p> : <ul className="space-y-2">{mapUnit.lessons.map(({ lesson, progress }) => <li key={lesson.id}><Link to={`/lessons/${lesson.id}`} className="flex items-center justify-between gap-3 rounded-2xl bg-[#fffaf5] px-4 py-3 transition hover:bg-[#fff1e8]"><span className="font-semibold text-[#39465b]">{lesson.title}</span><StatusPill status={progress?.status} /></Link></li>)}</ul>}</div>}</Card></li> }
+export default function CourseMapPage() { const { courseMap } = useLoaderData() as CourseMapLoaderData; return <PageSurface contentClassName="max-w-3xl"><header className="rounded-4xl border border-[#f0dfd1] bg-[#fffdf9] px-6 py-8 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)]"><p className="text-sm font-semibold text-[#a85d4e]">YOUR LEARNING PATH</p><h1 className="mt-2 text-3xl font-bold tracking-tight">{courseMap.course.title}</h1><p className="mt-2 text-[#667085]">{courseMap.course.description}</p></header>{courseMap.units.length === 0 ? <Card className="mt-6 text-center"><p className="font-bold">Your next unit will bloom here.</p><p className="mt-1 text-sm text-[#667085]">No units yet.</p></Card> : <ul className="mt-6 space-y-4">{courseMap.units.map((unit) => <UnitSection key={unit.unit.id} mapUnit={unit} />)}</ul>}</PageSurface> }

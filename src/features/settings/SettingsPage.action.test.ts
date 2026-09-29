@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createUpdateSettingsAction } from './SettingsPage.action'
 import { FakeUserProfileRepository } from '../../test/fakes'
+import type { UserProfileRepository } from '../../domain/repositories/user-profile-repository'
 
 function makeSettingsBody() {
   return {
@@ -59,5 +60,26 @@ describe('createUpdateSettingsAction', () => {
     })
 
     await expect(action({ request } as never)).rejects.toThrow()
+  })
+
+  it('returns a UI error when persistence fails after valid settings are parsed', async () => {
+    const failingRepo: UserProfileRepository = {
+      getUserProfile: async () => null,
+      saveUserProfile: async () => {
+        throw new Error('offline')
+      },
+    }
+    const action = createUpdateSettingsAction({
+      userProfileRepo: failingRepo,
+      ensureUser: vi.fn().mockResolvedValue({ uid: 'user1' }),
+    })
+    const request = new Request('http://localhost/settings', {
+      method: 'POST',
+      body: JSON.stringify(makeSettingsBody()),
+    })
+
+    await expect(action({ request } as never)).resolves.toEqual({
+      error: 'Could not save settings',
+    })
   })
 })

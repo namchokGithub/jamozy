@@ -23,10 +23,10 @@ export default function VirtualKeyboard({
   opacity,
 }: VirtualKeyboardProps) {
   return (
-    <div className="mt-6 select-none" aria-label="Virtual Korean keyboard" style={{ opacity }}>
+    <div className="mt-6 rounded-3xl border border-[#eadfd4] bg-[#fffdf9] p-4 shadow-sm select-none" aria-label="Virtual Korean keyboard" style={{ opacity }}>
       <div
         className={`mb-2 inline-block rounded-md border px-3 py-1 text-sm ${
-          nextKey?.shift ? 'border-amber-400 bg-amber-100' : 'border-slate-200 text-slate-400'
+          nextKey?.shift ? 'border-[#e4bd79] bg-[#fff0d8] text-[#8b6035]' : 'border-[#eadfd4] bg-white/70 text-[#667085]'
         }`}
       >
         Shift
@@ -40,7 +40,7 @@ export default function VirtualKeyboard({
               <div
                 key={code}
                 className={`flex h-12 w-12 flex-col items-center justify-center rounded-md border text-sm ${
-                  isNext ? 'border-amber-400 bg-amber-100' : 'border-slate-200'
+                  isNext ? 'border-[#e4bd79] bg-[#fff0d8] text-[#8b6035]' : 'border-[#eadfd4] bg-white/70 text-[#39465b]'
                 }`}
               >
                 <span className="text-base">{jamo.base}</span>
@@ -52,7 +52,7 @@ export default function VirtualKeyboard({
           })}
         </div>
       ))}
-      <div className="mt-1 h-8 w-full rounded-md border border-slate-200" aria-label="Space" />
+      <div className="mt-1 h-8 w-full rounded-xl border border-[#eadfd4] bg-white/70" aria-label="Space" />
     </div>
   )
 }

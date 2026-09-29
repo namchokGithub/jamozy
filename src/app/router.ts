@@ -160,6 +160,9 @@ export const router = createBrowserRouter([
       userProfileRepo,
       ensureUser: getActiveUser,
     }),
+    shouldRevalidate: ({ actionResult, defaultShouldRevalidate }) =>
+      !(actionResult && typeof actionResult === 'object' && 'error' in actionResult) &&
+      defaultShouldRevalidate,
     ErrorBoundary: RouteError,
   },
   {

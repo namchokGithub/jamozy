@@ -378,3 +378,10 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Added the inline lesson Result summary from the transient `LessonResult`:
   accuracy, WPM, duration, all rejected keystrokes, and unique mistyped words.
   The action response and persisted learner state remain unchanged.
+### 2026-09-29 — Light-theme UI consistency
+
+- Unified Course Map, Lesson, Review, Profile, Settings, Auth modal, virtual keyboard, route-error, and not-found screens with Home's warm cream/pastel/rounded presentation language. Added presentation-only primitives under `src/components/ui/`: `PageSurface`, `Card`, `Button`, accessible `Modal`, native-select `Dropdown`, and `SnackbarProvider`.
+- Added non-blocking, dismissible snackbar feedback exclusively for Settings saves and authentication/sign-out outcomes. A failed Settings save now returns a structured UI error and skips loader revalidation so the learner remains on the editable form; parsing, repository calls, and Firebase persistence semantics are unchanged.
+- Used existing Jamozy assets from `public/templates` for recovery states. Dark mode and animation remain out of scope.
+- Fresh review found and the implementation fixed: Settings failed-save revalidation, stale auth notifications, modal Escape/focus behavior, active typing-surface theme coverage, description-list semantics, and result-region accessibility.
+- Verification: 248 Vitest tests passed; `pnpm lint` and `pnpm build` passed. Browser visual QA covered Home and Settings.
