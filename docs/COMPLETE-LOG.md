@@ -378,6 +378,7 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Added the inline lesson Result summary from the transient `LessonResult`:
   accuracy, WPM, duration, all rejected keystrokes, and unique mistyped words.
   The action response and persisted learner state remain unchanged.
+
 ### 2026-09-29 — Light-theme UI consistency
 
 - Unified Course Map, Lesson, Review, Profile, Settings, Auth modal, virtual keyboard, route-error, and not-found screens with Home's warm cream/pastel/rounded presentation language. Added presentation-only primitives under `src/components/ui/`: `PageSurface`, `Card`, `Button`, accessible `Modal`, native-select `Dropdown`, and `SnackbarProvider`.
@@ -483,3 +484,25 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - The learner renderer and development tuner import the same data map. The
   tuned `녕`, `하`, and `죄` values were copied unchanged; no guide behavior was
   changed.
+
+### 2026-09-30 — Pretendard per-jamo SVG PoC
+
+- Added the development-only `/dev/jamo-svg` inspector. It lazy-loads only in
+  Vite development mode and does not import, change, or reuse the learner
+  canvas renderer or the Hangul guide data.
+- The inspector fetches and parses the locally bundled Pretendard 600 TTF with
+  `opentype.js`, renders the original font glyph alongside its extracted SVG
+  outline, exposes every contour for manual physical-jamo ownership assignment,
+  and previews the future combined-path export shape.
+- Inspected six source glyphs: `가` (2 contours), `하` (4), `녕` (4), `죄` (3),
+  `화` (4), and `값` (4). `가`, `하`, `녕`, `죄`, and `화` group cleanly by
+  physical jamo; `값` contour 3 contains both final `ㅂ` and `ㅅ` geometry and
+  is explicitly marked as requiring a future split rather than exported as a
+  misleading clean grouping.
+- Verified with `pnpm build`, `pnpm lint`, and browser inspection of the
+  normal SVG extraction and the `값` splitting warning. No automated tests were
+  added, per the UI-only PoC testing policy.
+- Normalized the inspection previews to Pretendard's 2,048-unit em square and
+  derived the SVG baseline (`1,752`) from its ascender (`1,950`) and descender
+  (`-494`). The dev-only Original preview can now overlay the extracted outline
+  to inspect the shared scale and position without per-syllable offsets.

@@ -105,7 +105,17 @@ const {
   getActiveUser,
 } = learners
 const developmentRoutes = import.meta.env.DEV
-  ? [{ path: '/dev/hangul-guides', Component: HangulGuideTunerPage }]
+  ? [
+      { path: '/dev/hangul-guides', Component: HangulGuideTunerPage },
+      {
+        path: '/dev/jamo-svg',
+        lazy: async () => {
+          const { default: Component } =
+            await import('../features/dev-jamo-svg/HangulSvgInspectorPage')
+          return { Component }
+        },
+      },
+    ]
   : []
 export const router = createBrowserRouter([
   {
