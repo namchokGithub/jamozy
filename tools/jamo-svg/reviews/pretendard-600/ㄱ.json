@@ -43,7 +43,7 @@
       ],
       "splitRecipes": [],
       "approved": {
-        "at": "2026-09-30T08:28:47.371Z",
+        "at": "2026-09-30T08:36:13.434Z",
         "reviewer": "local-reviewer",
         "validatorVersion": 1,
         "validationHash": "bbb40f3c25b225740b13460fb0222044acbed9852272aeb84058bbc83b347aa8"
@@ -61,7 +61,7 @@
         },
         "sourceGlyphHash": "650e221b164ef2a94f1e2dacd8d5b1380ad56bda15060a9727e0e370f8edbb5f"
       },
-      "status": "reviewing",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -173,7 +173,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-09-30T08:35:58.345Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "feb9d548fb0b132272b860a91c43a384ba4bc9a7ce37cfd105a52cf7b5b2f06a"
+      }
     },
     "굵": {
       "reviewSchemaVersion": 1,
@@ -218,6 +224,143 @@
       ],
       "splitRecipes": [],
       "notes": "Single source contour contains geometry for all four physical jamo steps (ㄱ / ㅜ / ㄹ / ㄱ). Requires path splitting."
+    },
+    "굸": {
+      "reviewSchemaVersion": 1,
+      "syllable": "굸",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 1
+        },
+        "sourceGlyphHash": "825d6b2638f745dd94ec5d00198036458173fc5257d9db8a6006442a30c146e5"
+      },
+      "status": "reviewing",
+      "blockers": [
+        "needs-split",
+        "empty-physical-step",
+        "unassigned-source-geometry",
+        "reconstruction-mismatch"
+      ],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄱ",
+          "geometry": []
+        },
+        {
+          "order": 1,
+          "jamo": "ㅜ",
+          "geometry": []
+        },
+        {
+          "order": 2,
+          "jamo": "ㄹ",
+          "geometry": []
+        },
+        {
+          "order": 3,
+          "jamo": "ㅅ",
+          "geometry": []
+        }
+      ],
+      "splitRecipes": [],
+      "notes": "Single source contour contains geometry for all four physical jamo steps (ㄱ / ㅜ / ㄹ / ㅅ). Requires path splitting."
+    },
+    "귌": {
+      "reviewSchemaVersion": 1,
+      "syllable": "귌",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 1
+        },
+        "sourceGlyphHash": "e11f84ed15e944b250f6c99274e52ff04a45bf633d7084810b58b75ddee43b5d"
+      },
+      "status": "reviewing",
+      "blockers": [
+        "needs-split",
+        "empty-physical-step",
+        "unassigned-source-geometry",
+        "reconstruction-mismatch"
+      ],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄱ",
+          "geometry": []
+        },
+        {
+          "order": 1,
+          "jamo": "ㅜ",
+          "geometry": []
+        },
+        {
+          "order": 2,
+          "jamo": "ㅣ",
+          "geometry": []
+        },
+        {
+          "order": 3,
+          "jamo": "ㄹ",
+          "geometry": []
+        },
+        {
+          "order": 4,
+          "jamo": "ㅅ",
+          "geometry": []
+        }
+      ],
+      "splitRecipes": [],
+      "notes": "Single source contour contains geometry for all four physical jamo steps (ㄱ / ㅜ / ㅣ / ㄹ / ㅅ). Requires path splitting."
+    },
+    "귟": {
+      "reviewSchemaVersion": 1,
+      "syllable": "귟",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 1
+        },
+        "sourceGlyphHash": "ed6118bb5e3c47418546f10b1f4a509ec0a6213d2b3e7cb5337793f8eb18e6a6"
+      },
+      "status": "reviewing",
+      "blockers": [
+        "needs-split",
+        "empty-physical-step",
+        "unassigned-source-geometry",
+        "reconstruction-mismatch"
+      ],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄱ",
+          "geometry": []
+        },
+        {
+          "order": 1,
+          "jamo": "ㅠ",
+          "geometry": []
+        },
+        {
+          "order": 2,
+          "jamo": "ㄱ",
+          "geometry": []
+        },
+        {
+          "order": 3,
+          "jamo": "ㅅ",
+          "geometry": []
+        }
+      ],
+      "splitRecipes": [],
+      "notes": "Single source contour contains geometry for all four physical jamo steps (ㄱ / ㅠ / ㄱ / ㅅ). Requires path splitting."
     }
   }
 }

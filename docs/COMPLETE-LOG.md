@@ -578,3 +578,8 @@ Chronological log of completed units of work. One entry per meaningful change (n
   non-persisting dev-only preview request that recompiles the current draft and
   refreshes automatic blockers. Out-of-order preview responses cannot overwrite
   a newer draft; saving remains the only operation that writes a review shard.
+- Added a compiled physical-step inspection panel to the dev-only Tagger. It
+  renders each ordered export path independently, highlights empty steps, and
+  exposes ownership controls for the existing constrained split pieces so a
+  reviewer can verify paths, combined coloring, and reconstruction before
+  human approval.
