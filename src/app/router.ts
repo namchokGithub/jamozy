@@ -115,6 +115,14 @@ const developmentRoutes = import.meta.env.DEV
           return { Component }
         },
       },
+      {
+        path: '/dev/jamo-svg-tagger',
+        lazy: async () => {
+          const { default: Component } =
+            await import('../features/dev-jamo-svg-tagger/JamoSvgTaggerPage')
+          return { Component }
+        },
+      },
     ]
   : []
 export const router = createBrowserRouter([

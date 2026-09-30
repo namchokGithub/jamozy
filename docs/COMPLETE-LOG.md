@@ -540,3 +540,18 @@ Chronological log of completed units of work. One entry per meaningful change (n
   `evenodd` fill and reconstructs the source glyph with the separate `ㅏ`
   path. Recorded `하` as a verified multi-contour/counter reference in the
   persistent SVG analysis.
+
+### 2026-09-30 — Jamo SVG Tagger v1 design
+
+- Added `docs/research/JAMO_SVG_TAGGER_DESIGN.md`, a design-only specification
+  for the future development Tagger. It defines regenerable extraction cache
+  shards, durable version-controlled review metadata, source-command split
+  recipes, semantic grouping, bounded review queues, validation, and the
+  minimal runtime-data boundary.
+- Revised the review persistence design before implementation: committed
+  ownership/split records are choseong-sharded from v1 behind a layout-agnostic
+  `ReviewStore`, with a versioned manifest, per-shard checksums, safe
+  single-shard writes, and a separately versioned queue document. This avoids a
+  monolithic-review migration as coverage grows.
+- The design intentionally defers implementation, production dataset
+  generation, and any production renderer changes.

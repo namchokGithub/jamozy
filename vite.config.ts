@@ -1,9 +1,10 @@
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { jamoSvgTaggerPlugin } from './tools/jamo-svg/vite-plugin'
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), jamoSvgTaggerPlugin()],
   build: {
     rollupOptions: {
       output: {

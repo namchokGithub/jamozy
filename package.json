@@ -13,7 +13,8 @@
     "format": "prettier --write .",
     "seed": "tsx scripts/seed-firestore.ts",
     "admin:grant": "tsx scripts/set-admin-claim.ts",
-    "content:migrate-status": "tsx scripts/migrate-content-status.ts"
+    "content:migrate-status": "tsx scripts/migrate-content-status.ts",
+    "jamo-svg:seed": "tsx scripts/generate-jamo-svg-tagger-data.ts"
   },
   "dependencies": {
     "@fontsource/noto-sans-kr": "^5.3.0",
