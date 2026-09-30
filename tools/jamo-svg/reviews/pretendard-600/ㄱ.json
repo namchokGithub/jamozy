@@ -2,7 +2,7 @@
   "shardSchemaVersion": 2,
   "choseong": "ㄱ",
   "fontFingerprint": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
-  "physicalStepAlgorithmVersion": 1,
+  "physicalStepAlgorithmVersion": 2,
   "splitRecipeSchemaVersion": 2,
   "reviews": {
     "가": {
@@ -13,7 +13,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 1
+          "physicalStepAlgorithm": 2
         },
         "sourceGlyphHash": "80d6d205781eb499ccbba77a4bc0bc098e0246c7ad09975e9629fb97957d8159"
       },
@@ -57,11 +57,11 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 1
+          "physicalStepAlgorithm": 2
         },
         "sourceGlyphHash": "650e221b164ef2a94f1e2dacd8d5b1380ad56bda15060a9727e0e370f8edbb5f"
       },
-      "status": "approved",
+      "status": "reviewing",
       "blockers": [],
       "steps": [
         {
@@ -151,16 +151,8 @@
               "id": "siot",
               "tokens": [
                 {
-                  "kind": "move-to-anchor",
-                  "anchor": {
-                    "contourId": 2,
-                    "commandIndex": 5,
-                    "point": "end"
-                  }
-                },
-                {
                   "kind": "source-range",
-                  "fromCommand": 6,
+                  "fromCommand": 5,
                   "toCommand": 23
                 },
                 {
@@ -171,13 +163,7 @@
             }
           ]
         }
-      ],
-      "approved": {
-        "at": "2026-09-30T08:35:58.345Z",
-        "reviewer": "local-reviewer",
-        "validatorVersion": 1,
-        "validationHash": "feb9d548fb0b132272b860a91c43a384ba4bc9a7ce37cfd105a52cf7b5b2f06a"
-      }
+      ]
     },
     "굵": {
       "reviewSchemaVersion": 2,
@@ -187,7 +173,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 1
+          "physicalStepAlgorithm": 2
         },
         "sourceGlyphHash": "57655b69c30aa880f029892c60575431b9e6f739cce9759016efcf0c9f2cee49"
       },
@@ -352,7 +338,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 1
+          "physicalStepAlgorithm": 2
         },
         "sourceGlyphHash": "825d6b2638f745dd94ec5d00198036458173fc5257d9db8a6006442a30c146e5"
       },
@@ -517,7 +503,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 1
+          "physicalStepAlgorithm": 2
         },
         "sourceGlyphHash": "e11f84ed15e944b250f6c99274e52ff04a45bf633d7084810b58b75ddee43b5d"
       },
@@ -536,21 +522,16 @@
         },
         {
           "order": 1,
-          "jamo": "ㅜ",
+          "jamo": "ㅟ",
           "geometry": []
         },
         {
           "order": 2,
-          "jamo": "ㅣ",
-          "geometry": []
-        },
-        {
-          "order": 3,
           "jamo": "ㄹ",
           "geometry": []
         },
         {
-          "order": 4,
+          "order": 3,
           "jamo": "ㅅ",
           "geometry": []
         }
@@ -566,11 +547,11 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 1
+          "physicalStepAlgorithm": 2
         },
         "sourceGlyphHash": "ed6118bb5e3c47418546f10b1f4a509ec0a6213d2b3e7cb5337793f8eb18e6a6"
       },
-      "status": "reviewing",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -724,7 +705,13 @@
           ]
         }
       ],
-      "notes": "Source-command partition completed for ㄱ / ㅠ / ㄱ / ㅅ. All four physical typing steps are assigned and the reconstruction matches the Pretendard source. Awaiting final visual review."
+      "notes": "Source-command partition completed for ㄱ / ㅠ / ㄱ / ㅅ. All four physical typing steps are assigned and the reconstruction matches the Pretendard source. Awaiting final visual review.",
+      "approved": {
+        "at": "2026-09-30T17:58:47.507Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "d4bf39262e0c98009e81c9d65a1910cc1d573a3f40dfefc8e030809e13a042a8"
+      }
     }
   }
 }

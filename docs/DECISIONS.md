@@ -737,3 +737,26 @@ for retry. The player uses missing Progress as locked and only writes
 without destructive cleanup. When no incomplete course remains, Home falls
 back to its first three courses and replays their exercises; the existing
 15-EXP replay policy ([[DEC-033]]) applies.
+
+## DEC-036 — Jamo SVG steps follow visual jamo for compound medials
+
+**Date:** 2026-10-01
+**Status:** Accepted
+
+**Decision:** The Jamo SVG Tagger's physical-step algorithm v2 keeps each
+compound medial (`ㅘ ㅙ ㅚ ㅝ ㅞ ㅟ ㅢ`) as one SVG step, following the
+visual letter rather than the two keys used to type it. Compound finals stay
+one step per key (`값` remains `ㄱ / ㅏ / ㅂ / ㅅ`). The typing engine,
+`hangul.ts`, and Lesson/Review keystroke sequences are unchanged.
+
+**Why:** A compound medial reads as one visual vowel, and splitting it into
+typed parts forced glyph-specific splits (for example `귌`) that do not match
+how the letter is seen.
+
+**Consequences:** This supersedes the "one SVG path per physical key" invariant
+for medials only. A future runtime renderer must map the two medial keystrokes
+onto one path. The version bump changes every extraction fingerprint;
+`pnpm jamo-svg:migrate-step-algorithm` keeps reviews whose step sequence is
+unchanged (including approval) and merges compound-medial steps' geometry for
+the rest, returning them to `reviewing` for human re-approval. The measured
+step-count tables in `HANGUL_SVG_ANALYSIS.md` describe algorithm v1.

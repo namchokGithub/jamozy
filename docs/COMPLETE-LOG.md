@@ -630,3 +630,20 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Corrected five remaining PoC review records without approval: completed the
   reviewed source-command partitions for 굵, 굸, and 귟; reassigned 낪's counter
   to ㅂ; and added 닶's reviewed ㅂ/ㅅ partition plus its ㅂ counter ownership.
+
+### 2026-10-01 — Jamo SVG physical-step algorithm v2
+
+- Changed the dev-only Tagger's step algorithm so each compound medial is one
+  visual SVG step; compound finals and the typing engine are unchanged
+  ([[DEC-036]]).
+- Added `pnpm jamo-svg:migrate-step-algorithm`: it regenerates the cache,
+  keeps unchanged reviews and their approval, merges compound-medial step
+  geometry for affected reviews and returns them to `reviewing`, then updates
+  the manifest and queue keys.
+- Added queue status filtering and orange `reviewing` labels to the Tagger.
+
+- Corrected `화`: the v1 review assigned the ㅎ cap to ㅗ and left the ㅗ stem
+  inside ㅎ's ring contour. A source-command split now separates the ring from
+  the ㅗ stem and bar, in both the review record and the seed.
+- Repaired `값`'s `siot` piece to replay command 5 as a source range, since
+  move anchors no longer count as coverage. Both reviews await re-approval.

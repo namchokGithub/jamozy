@@ -2,7 +2,7 @@
   "shardSchemaVersion": 2,
   "choseong": "ㅎ",
   "fontFingerprint": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
-  "physicalStepAlgorithmVersion": 1,
+  "physicalStepAlgorithmVersion": 2,
   "splitRecipeSchemaVersion": 2,
   "reviews": {
     "하": {
@@ -13,7 +13,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 1
+          "physicalStepAlgorithm": 2
         },
         "sourceGlyphHash": "87e4af414d641a6a602641b9e82c16068190f32dad52d1edc132b901264f2dda"
       },
@@ -65,11 +65,11 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 1
+          "physicalStepAlgorithm": 2
         },
         "sourceGlyphHash": "371b869b21cabca92244e748203faafc3355d6f9c145aa6f4132337686e67f93"
       },
-      "status": "approved",
+      "status": "reviewing",
       "blockers": [],
       "steps": [
         {
@@ -78,7 +78,12 @@
           "geometry": [
             {
               "kind": "contour",
-              "contourId": 1
+              "contourId": 2
+            },
+            {
+              "kind": "split-piece",
+              "recipeId": "hieut-o-1",
+              "pieceId": "hieut-ring"
             },
             {
               "kind": "contour",
@@ -88,18 +93,13 @@
         },
         {
           "order": 1,
-          "jamo": "ㅗ",
+          "jamo": "ㅘ",
           "geometry": [
             {
-              "kind": "contour",
-              "contourId": 2
-            }
-          ]
-        },
-        {
-          "order": 2,
-          "jamo": "ㅏ",
-          "geometry": [
+              "kind": "split-piece",
+              "recipeId": "hieut-o-1",
+              "pieceId": "o-stem-bar"
+            },
             {
               "kind": "contour",
               "contourId": 0
@@ -107,13 +107,59 @@
           ]
         }
       ],
-      "splitRecipes": [],
-      "approved": {
-        "at": "2026-09-30T09:01:17.580Z",
-        "reviewer": "local-reviewer",
-        "validatorVersion": 1,
-        "validationHash": "c57b1ffd54790792b0d8a0f613496361bef7fe4ef4f28486aba1adf7b52f58d0"
-      }
+      "splitRecipes": [
+        {
+          "splitRecipeSchemaVersion": 2,
+          "id": "hieut-o-1",
+          "sourceContourId": 1,
+          "sourceContourHash": "c06e1152a2689fbd03b2e090c1e105f8ba6e711db218747ef833b016e3643ea6",
+          "method": "source-command-partition",
+          "rationale": "Contour 1 unions the ㅎ ring with the ㅗ stem and bar; seam where the stem meets the ring.",
+          "visualValidation": {
+            "sourceContourHash": "c06e1152a2689fbd03b2e090c1e105f8ba6e711db218747ef833b016e3643ea6"
+          },
+          "pieces": [
+            {
+              "id": "hieut-ring",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 4,
+                  "toCommand": 18
+                },
+                {
+                  "kind": "close-to-start",
+                  "reason": "interior-closure-seam"
+                }
+              ]
+            },
+            {
+              "id": "o-stem-bar",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 3
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 1,
+                    "commandIndex": 18,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 19,
+                  "toCommand": 27
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   }
 }

@@ -3,37 +3,37 @@
   "reviewRecordSchemaVersion": 2,
   "splitRecipeSchemaVersion": 2,
   "activeFontFingerprint": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
-  "physicalStepAlgorithmVersion": 1,
+  "physicalStepAlgorithmVersion": 2,
   "shards": [
     {
       "choseong": "ㄱ",
       "file": "ㄱ.json",
       "reviewCount": 6,
-      "sha256": "12ea7615cefea11c33cd06f45b517e1cca4fc2716a931e69dac4cb1f648d6304"
+      "sha256": "1f7b0ff723f606556b38e286eead50168c54b8ca672588d021f8164045a804b8"
     },
     {
       "choseong": "ㄴ",
       "file": "ㄴ.json",
       "reviewCount": 2,
-      "sha256": "9eaa4e6b67b478131ce5e7369cfdaca0963671fbb286a40327784fdd0d1b7041"
+      "sha256": "5e568efd1d2fa92b51ddfd215bd4c68e29060a6adb8e5b83d8b66c2d871f1c84"
     },
     {
       "choseong": "ㄷ",
       "file": "ㄷ.json",
       "reviewCount": 1,
-      "sha256": "f3953409827330c02de62e40659810625d7772c93a465d5a59ef4c3d2d17a54c"
+      "sha256": "43e951bad6eca6099008e5bbdacd1718110f1371f0abdbd6dfcdd189d4636254"
     },
     {
       "choseong": "ㅈ",
       "file": "ㅈ.json",
       "reviewCount": 1,
-      "sha256": "f26a22d951265608a1f906657879c895b963d03a7bfc7038687c86340e811de0"
+      "sha256": "33e21515f97cf3bf8ed59ed6e3fda683ae9fa7aaf074cf6bd76dad65ebe70f47"
     },
     {
       "choseong": "ㅎ",
       "file": "ㅎ.json",
       "reviewCount": 2,
-      "sha256": "8f97aef1473f29513b52d2f8aeb02f999cd1d19062650ea159fb5179cf310fca"
+      "sha256": "bd4ce08cf83e26e7a83a0171d2f75a6302400f950cfb57ef09e769ff4706fc8c"
     }
   ]
 }

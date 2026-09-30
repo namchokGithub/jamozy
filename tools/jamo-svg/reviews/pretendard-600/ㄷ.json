@@ -2,7 +2,7 @@
   "shardSchemaVersion": 2,
   "choseong": "ㄷ",
   "fontFingerprint": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
-  "physicalStepAlgorithmVersion": 1,
+  "physicalStepAlgorithmVersion": 2,
   "splitRecipeSchemaVersion": 2,
   "reviews": {
     "닶": {
@@ -13,11 +13,11 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 1
+          "physicalStepAlgorithm": 2
         },
         "sourceGlyphHash": "dccd315678edc6201e5c07635de39d34d6d385b44c8e9e320a3201c57019e19c"
       },
-      "status": "reviewing",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -116,7 +116,13 @@
           ]
         }
       ],
-      "notes": "Corrected the final ㅂ/ㅅ union contour using a source-command partition. The small inner rectangle is now assigned to Step 3 (ㅂ); Step 4 contains only ㅅ geometry. Reconstruction is complete. Awaiting final visual review."
+      "notes": "Corrected the final ㅂ/ㅅ union contour using a source-command partition. The small inner rectangle is now assigned to Step 3 (ㅂ); Step 4 contains only ㅅ geometry. Reconstruction is complete. Awaiting final visual review.",
+      "approved": {
+        "at": "2026-09-30T17:59:37.378Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "01a897d45e90007dbe651b9491fe0776164b7a93dcddeebac47c345971b74f0c"
+      }
     }
   }
 }

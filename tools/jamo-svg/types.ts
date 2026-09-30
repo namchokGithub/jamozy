@@ -1,6 +1,6 @@
 export const EXTRACTION_SCHEMA_VERSION = 1 as const
 export const PATH_NORMALIZATION_VERSION = 1 as const
-export const PHYSICAL_STEP_ALGORITHM_VERSION = 1 as const
+export const PHYSICAL_STEP_ALGORITHM_VERSION = 2 as const
 export const REVIEW_SCHEMA_VERSION = 2 as const
 export const SPLIT_RECIPE_SCHEMA_VERSION = 2 as const
 

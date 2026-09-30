@@ -3,10 +3,10 @@ import { mkdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { loadCacheGlyph, atomicWrite } from './cache'
 import { validateReview } from './compile'
-import type { GlyphReview } from './types'
+import { PHYSICAL_STEP_ALGORITHM_VERSION, type GlyphReview } from './types'
 
-export type ReviewShard = { shardSchemaVersion: 2; choseong: string; fontFingerprint: string; physicalStepAlgorithmVersion: 1; splitRecipeSchemaVersion: 2; reviews: Record<string, GlyphReview> }
-export type ReviewManifest = { manifestSchemaVersion: 2; reviewRecordSchemaVersion: 2; splitRecipeSchemaVersion: 2; activeFontFingerprint: string; physicalStepAlgorithmVersion: 1; shards: Array<{ choseong: string; file: string; reviewCount: number; sha256: string }> }
+export type ReviewShard = { shardSchemaVersion: 2; choseong: string; fontFingerprint: string; physicalStepAlgorithmVersion: typeof PHYSICAL_STEP_ALGORITHM_VERSION; splitRecipeSchemaVersion: 2; reviews: Record<string, GlyphReview> }
+export type ReviewManifest = { manifestSchemaVersion: 2; reviewRecordSchemaVersion: 2; splitRecipeSchemaVersion: 2; activeFontFingerprint: string; physicalStepAlgorithmVersion: typeof PHYSICAL_STEP_ALGORITHM_VERSION; shards: Array<{ choseong: string; file: string; reviewCount: number; sha256: string }> }
 export type QueueEntry = { syllable: string; priority: number; reasons: string[]; queueKey: { medialLayout: string; hasFinal: boolean; compoundMedial: string | null; compoundFinal: string | null; physicalStepCount: number; contourRelation: 'deficit' | 'aligned' | 'surplus' }; nearestApprovedSyllables: string[] }
 export type QueueDocument = { queueSchemaVersion: 1; fontFingerprint: string; entries: QueueEntry[] }
 const stable = (value: unknown) => JSON.stringify(value, null, 2) + '\n'
@@ -34,7 +34,7 @@ export class ReviewStore {
     review.blockers = validation.blockers
     const manifest = await this.manifest(); if (manifest.activeFontFingerprint !== source.extraction.fontSha256 || manifest.physicalStepAlgorithmVersion !== source.extraction.physicalStepAlgorithm) throw new Error('Stale review manifest fingerprint.')
     const choseong = source.hangul.choseong; const file = `${choseong}.json`; const existing = manifest.shards.find((item) => item.choseong === choseong)
-    const shard: ReviewShard = existing ? JSON.parse(await readFile(join(this.reviewsRoot, existing.file), 'utf8')) : { shardSchemaVersion: 2, choseong, fontFingerprint: source.extraction.fontSha256, physicalStepAlgorithmVersion: 1, splitRecipeSchemaVersion: 2, reviews: {} }
+    const shard: ReviewShard = existing ? JSON.parse(await readFile(join(this.reviewsRoot, existing.file), 'utf8')) : { shardSchemaVersion: 2, choseong, fontFingerprint: source.extraction.fontSha256, physicalStepAlgorithmVersion: PHYSICAL_STEP_ALGORITHM_VERSION, splitRecipeSchemaVersion: 2, reviews: {} }
     if (shard.shardSchemaVersion !== 2 || shard.splitRecipeSchemaVersion !== 2) throw new Error(`Unsupported review shard schema in ${existing?.file ?? file}.`)
     const currentRevision = checksum(stable(shard)); if (expectedRevision && expectedRevision !== currentRevision) throw new ConflictError()
     if (review.status === 'approved' && (!review.approved || validation.blockers.length)) throw new Error('Approval requires a valid explicit approval record.')
@@ -49,4 +49,4 @@ export class QueueStore {
   async list(): Promise<QueueEntry[]> { try { const queue = JSON.parse(await readFile(this.file, 'utf8')) as QueueDocument; if (queue.queueSchemaVersion !== 1 || queue.fontFingerprint !== this.fontFingerprint) throw new Error('Stale queue fingerprint.'); return queue.entries } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []; throw error } }
   async save(entries: QueueEntry[]) { await atomicWrite(this.file, stable({ queueSchemaVersion: 1, fontFingerprint: this.fontFingerprint, entries: [...entries].sort((a, b) => a.syllable.localeCompare(b.syllable)) })) }
 }
-export async function initializeReviewManifest(reviewsRoot: string, fontFingerprint: string) { await atomicWrite(join(reviewsRoot, 'manifest.json'), stable({ manifestSchemaVersion: 2, reviewRecordSchemaVersion: 2, splitRecipeSchemaVersion: 2, activeFontFingerprint: fontFingerprint, physicalStepAlgorithmVersion: 1, shards: [] } satisfies ReviewManifest)) }
+export async function initializeReviewManifest(reviewsRoot: string, fontFingerprint: string) { await atomicWrite(join(reviewsRoot, 'manifest.json'), stable({ manifestSchemaVersion: 2, reviewRecordSchemaVersion: 2, splitRecipeSchemaVersion: 2, activeFontFingerprint: fontFingerprint, physicalStepAlgorithmVersion: PHYSICAL_STEP_ALGORITHM_VERSION, shards: [] } satisfies ReviewManifest)) }

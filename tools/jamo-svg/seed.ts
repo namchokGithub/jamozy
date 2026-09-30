@@ -7,7 +7,7 @@ const assignments: Record<string, number[]> = {
   하: [1, 0, 0, 0],
   녕: [0, 1, 2, 2],
   죄: [0, 1, 2],
-  화: [2, 0, 1, 0],
+  화: [1, 0, 0, 0],
   값: [1, 0, 2, 2],
 }
 export const REFERENCE_SYLLABLES = ['가', '하', '녕', '죄', '화', '값'] as const
@@ -74,6 +74,52 @@ export async function seedReview(syllable: string): Promise<GlyphReview> {
       },
     ]
   }
+  if (syllable === '화') {
+    const contour = source.contours[1]
+    const commands = contour.commands
+    const ringStart = commands[3]
+    const ringEnd = commands[18]
+    if (
+      commands.length !== 28 ||
+      ringStart.y !== ringEnd.y ||
+      ringStart.x === undefined ||
+      ringEnd.x === undefined
+    )
+      throw new Error('Unexpected Pretendard 600 화 contour recipe source.')
+    splitRecipes = [
+      {
+        splitRecipeSchemaVersion: 2,
+        id: 'hieut-o-1',
+        sourceContourId: 1,
+        sourceContourHash: contour.commandHash,
+        method: 'source-command-partition',
+        rationale:
+          'Contour 1 unions the ㅎ ring with the ㅗ stem and bar; seam where the stem meets the ring.',
+        visualValidation: { sourceContourHash: contour.commandHash },
+        pieces: [
+          {
+            id: 'hieut-ring',
+            tokens: [
+              { kind: 'source-range', fromCommand: 4, toCommand: 18 },
+              { kind: 'close-to-start', reason: 'interior-closure-seam' },
+            ],
+          },
+          {
+            id: 'o-stem-bar',
+            tokens: [
+              { kind: 'source-range', fromCommand: 0, toCommand: 3 },
+              {
+                kind: 'line-to-anchor',
+                anchor: { contourId: 1, commandIndex: 18, point: 'end' },
+                reason: 'interior-closure-seam',
+              },
+              { kind: 'source-range', fromCommand: 19, toCommand: 27 },
+            ],
+          },
+        ],
+      },
+    ]
+  }
   const steps = source.physicalSteps.map((physical, order) => ({
     order,
     jamo: physical.jamo,
@@ -96,6 +142,14 @@ export async function seedReview(syllable: string): Promise<GlyphReview> {
                 },
               ]
             : []
+      if (syllable === '화' && contour.id === 1)
+        return [
+          {
+            kind: 'split-piece' as const,
+            recipeId: 'hieut-o-1',
+            pieceId: order === 0 ? 'hieut-ring' : 'o-stem-bar',
+          },
+        ]
       return sourceAssignments[contour.id] === order
         ? [{ kind: 'contour' as const, contourId: contour.id }]
         : []

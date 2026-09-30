@@ -145,9 +145,9 @@ export async function extractGlyph(
   )
   const steps: Array<{ jamo: string; slot: JamoSlot }> = [
     { jamo: decomposed.choseong, slot: 'choseong' },
-    ...(
-      COMPOUND_JUNGSEONG_PARTS[decomposed.jungseong] ?? [decomposed.jungseong]
-    ).map((jamo) => ({ jamo, slot: 'jungseong' as const })),
+    // Algorithm v2: a compound medial is one visual step, although it is
+    // typed with two keys. Compound finals remain one step per key.
+    { jamo: decomposed.jungseong, slot: 'jungseong' },
     ...(decomposed.jongseong
       ? (
           COMPOUND_JONGSEONG_PARTS[decomposed.jongseong] ?? [

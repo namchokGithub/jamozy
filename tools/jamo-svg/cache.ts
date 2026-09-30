@@ -2,11 +2,11 @@ import { createHash } from 'node:crypto'
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { extractGlyph } from './extract'
-import type { CachedGlyph } from './types'
+import { PHYSICAL_STEP_ALGORITHM_VERSION, type CachedGlyph } from './types'
 
 export const CACHE_SCHEMA_VERSION = 1 as const
 export type CacheShard = { schemaVersion: 1; choseong: string; glyphs: Record<string, CachedGlyph> }
-export type CacheManifest = { schemaVersion: 1; fontFingerprint: string; extractionSchemaVersion: 1; pathNormalizationVersion: 1; physicalStepAlgorithmVersion: 1; shards: Array<{ choseong: string; file: string; glyphCount: number; sha256: string }> }
+export type CacheManifest = { schemaVersion: 1; fontFingerprint: string; extractionSchemaVersion: 1; pathNormalizationVersion: 1; physicalStepAlgorithmVersion: typeof PHYSICAL_STEP_ALGORITHM_VERSION; shards: Array<{ choseong: string; file: string; glyphCount: number; sha256: string }> }
 const stable = (value: unknown) => JSON.stringify(value, null, 2) + '\n'
 const checksum = (value: string) => createHash('sha256').update(value).digest('hex')
 export async function atomicWrite(file: string, text: string) {
@@ -24,7 +24,7 @@ export async function generateCache(root: string, syllables: string[]) {
     shards.push({ choseong, file, glyphCount: group.length, sha256: checksum(text) })
   }
   const fontFingerprint = glyphs[0]?.extraction.fontSha256 ?? ''
-  const manifest: CacheManifest = { schemaVersion: CACHE_SCHEMA_VERSION, fontFingerprint, extractionSchemaVersion: 1, pathNormalizationVersion: 1, physicalStepAlgorithmVersion: 1, shards }
+  const manifest: CacheManifest = { schemaVersion: CACHE_SCHEMA_VERSION, fontFingerprint, extractionSchemaVersion: 1, pathNormalizationVersion: 1, physicalStepAlgorithmVersion: PHYSICAL_STEP_ALGORITHM_VERSION, shards }
   await atomicWrite(join(root, 'manifest.json'), stable(manifest)); return manifest
 }
 export async function loadCacheGlyph(root: string, syllable: string): Promise<CachedGlyph> {
