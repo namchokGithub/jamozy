@@ -46,7 +46,9 @@ export const DEFAULT_PIECE_ASSIGNMENTS: Record<
   Record<string, number>
 > = {
   가: { 'contour-0': 1, 'contour-1': 0 },
-  하: { 'contour-0': 1, 'contour-1': 1, 'contour-2': 1, 'contour-3': 0 },
+  // Verified manually in the dev inspector: ㅏ owns Contour 1; ㅎ owns
+  // Contours 2–4, including its counter geometry.
+  하: { 'contour-0': 1, 'contour-1': 0, 'contour-2': 0, 'contour-3': 0 },
   녕: { 'contour-0': 0, 'contour-1': 1, 'contour-2': 2, 'contour-3': 2 },
   죄: { 'contour-0': 0, 'contour-1': 1, 'contour-2': 2 },
   화: { 'contour-0': 2, 'contour-1': 0, 'contour-2': 1, 'contour-3': 0 },

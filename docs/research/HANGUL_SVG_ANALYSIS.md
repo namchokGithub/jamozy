@@ -150,9 +150,12 @@ By physical step count, the aligned / deficit / surplus split is:
 
 - **Simple / count-aligned:** `가` is `ㄱ / ㅏ`, with 2 contours and 2 steps.
   This was directly assigned in the PoC.
-- **Intermediate / multi-contour ownership:** `하` is `ㅎ / ㅏ`, with 4
-  contours and 2 steps; the PoC assigns several source contours to `ㅎ`.
-  `녕` (`ㄴ / ㅕ / ㅇ`) has 4 contours and 3 steps, including multiple `ㅇ`
+- **Verified intermediate / multi-contour ownership:** `하` is `ㅎ / ㅏ`, with
+  4 contours and 2 steps. Manual inspection verified Contour 1 → `ㅏ` and
+  Contours 2–4 → `ㅎ`; the latter includes the counter/hole geometry. The
+  exporter combines those three source contours into `ㅎ`'s one path while
+  preserving the transparent counter under `evenodd` fill. `녕`
+  (`ㄴ / ㅕ / ㅇ`) has 4 contours and 3 steps, including multiple `ㅇ`
   contours.
 - **Difficult / compact:** `굵` (`ㄱ / ㅜ / ㄹ / ㄱ`) has 1 contour for 4
   physical steps; `귌` (`ㄱ / ㅜ / ㅣ / ㄹ / ㅅ`) has 2 contours for 5 steps.

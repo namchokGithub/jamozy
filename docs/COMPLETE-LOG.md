@@ -531,3 +531,12 @@ Chronological log of completed units of work. One entry per meaningful change (n
   candidates, and 6,145 contour-surplus candidates. These remain review
   signals, not automatic ownership or splitting decisions; the known `값`
   union is count-aligned.
+
+### 2026-09-30 — Verified `하` multi-contour SVG ownership
+
+- Corrected the development-only Pretendard SVG PoC default ownership to
+  Contour 1 → `ㅏ` and Contours 2–4 → `ㅎ`.
+- Verified the combined `ㅎ` output retains its transparent inner counter under
+  `evenodd` fill and reconstructs the source glyph with the separate `ㅏ`
+  path. Recorded `하` as a verified multi-contour/counter reference in the
+  persistent SVG analysis.
