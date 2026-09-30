@@ -69,7 +69,7 @@
         },
         "sourceGlyphHash": "371b869b21cabca92244e748203faafc3355d6f9c145aa6f4132337686e67f93"
       },
-      "status": "reviewing",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -159,7 +159,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-09-30T18:27:22.462Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "34d12930ff848b18a5c80e3926dfcf74aa96d68f597d2bfaa1c43b5cdba55711"
+      }
     }
   }
 }

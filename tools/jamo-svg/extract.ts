@@ -122,8 +122,24 @@ function medialLayout(jungseong: string): MedialLayoutClass {
     ? 'compound-horizontal-leading'
     : 'compound-vertical-leading'
 }
+// Parsing the font dominates extraction cost, so each process loads it once.
+const loadedFonts = new Map<
+  string,
+  Promise<{ font: import('opentype.js').Font; sha256: string }>
+>()
+function loadFont(fontPath: string) {
+  let loaded = loadedFonts.get(fontPath)
+  if (!loaded) {
+    loaded = readFile(fontPath).then((buffer) => ({
+      font: opentype.parse(toArrayBuffer(buffer)),
+      sha256: hash(buffer),
+    }))
+    loadedFonts.set(fontPath, loaded)
+  }
+  return loaded
+}
 export async function fontFingerprint(fontPath = FONT_PATH) {
-  return hash(await readFile(fontPath))
+  return (await loadFont(fontPath)).sha256
 }
 export async function extractGlyph(
   syllable: string,
@@ -134,8 +150,7 @@ export async function extractGlyph(
     throw new Error(
       `Expected a modern precomposed Hangul syllable, received ${syllable}.`,
     )
-  const buffer = await readFile(fontPath)
-  const font = opentype.parse(toArrayBuffer(buffer))
+  const { font, sha256: fontSha256 } = await loadFont(fontPath)
   const glyph = font.charToGlyph(syllable)
   if (glyph.advanceWidth === undefined)
     throw new Error(`Glyph ${syllable} does not have an advance width.`)
@@ -168,7 +183,7 @@ export async function extractGlyph(
     syllable,
     codePoint: `U+${syllable.codePointAt(0)!.toString(16).toUpperCase()}`,
     extraction: {
-      fontSha256: await fontFingerprint(fontPath),
+      fontSha256,
       extractionSchema: EXTRACTION_SCHEMA_VERSION,
       pathNormalization: PATH_NORMALIZATION_VERSION,
       physicalStepAlgorithm: PHYSICAL_STEP_ALGORITHM_VERSION,

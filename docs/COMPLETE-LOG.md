@@ -647,3 +647,10 @@ Chronological log of completed units of work. One entry per meaningful change (n
   the ㅗ stem and bar, in both the review record and the seed.
 - Repaired `값`'s `siot` piece to replay command 5 as a source range, since
   move anchors no longer count as coverage. Both reviews await re-approval.
+- Added the `귌` split: its union contour is partitioned into ㄱ, the ㅜ part
+  of ㅟ (combined with the separate ㅣ contour), ㄹ, and ㅅ using only source
+  ranges and declared seams. It keeps `needs-split` until reviewer approval.
+- Added a data-driven test that validates every committed approved review
+  against the bundled font, so compiler or extraction changes cannot silently
+  invalidate approvals. The extractor now parses the font once per process
+  (about 50 ms to 2 ms per glyph), which keeps a full-block check practical.

@@ -61,7 +61,7 @@
         },
         "sourceGlyphHash": "650e221b164ef2a94f1e2dacd8d5b1380ad56bda15060a9727e0e370f8edbb5f"
       },
-      "status": "reviewing",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -163,7 +163,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-09-30T18:27:08.810Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "09c2f1ccf7566c6ba2aa323294446bdce2a8c23323bfcfb372a33b357f8cabbe"
+      }
     },
     "굵": {
       "reviewSchemaVersion": 2,
@@ -507,37 +513,174 @@
         },
         "sourceGlyphHash": "e11f84ed15e944b250f6c99274e52ff04a45bf633d7084810b58b75ddee43b5d"
       },
-      "status": "reviewing",
-      "blockers": [
-        "needs-split",
-        "empty-physical-step",
-        "unassigned-source-geometry",
-        "reconstruction-mismatch"
-      ],
+      "status": "approved",
+      "blockers": [],
       "steps": [
         {
           "order": 0,
           "jamo": "ㄱ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "gwi-union-1",
+              "pieceId": "giyeok"
+            }
+          ]
         },
         {
           "order": 1,
           "jamo": "ㅟ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "gwi-union-1",
+              "pieceId": "u-bar-stem"
+            },
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
         },
         {
           "order": 2,
           "jamo": "ㄹ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "gwi-union-1",
+              "pieceId": "rieul"
+            }
+          ]
         },
         {
           "order": 3,
           "jamo": "ㅅ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "gwi-union-1",
+              "pieceId": "siot"
+            }
+          ]
         }
       ],
-      "splitRecipes": [],
-      "notes": "Single source contour contains geometry for five physical typing steps (ㄱ / ㅜ / ㅣ / ㄹ / ㅅ). Requires path splitting.\nแต่จริงๆ มี 4 steps (ㄱ / ㅟ / ㄹ / ㅅ) ต้องแก้ physical-step algorithm ให้ ㅟ เป็นหนึ่ง step"
+      "splitRecipes": [
+        {
+          "splitRecipeSchemaVersion": 2,
+          "id": "gwi-union-1",
+          "sourceContourId": 1,
+          "sourceContourHash": "ea74b0742861506e035db2b6beb6c578e1f11aae85f9672efeee1403479b1493",
+          "method": "source-command-partition",
+          "rationale": "Contour 1 unions ㄱ, the ㅜ part of ㅟ, ㄹ, and ㅅ. Seams follow the ㅜ bar top under ㄱ, the ㅜ stem foot on ㄹ, and the ㄹ/ㅅ contact.",
+          "visualValidation": {
+            "sourceContourHash": "ea74b0742861506e035db2b6beb6c578e1f11aae85f9672efeee1403479b1493"
+          },
+          "pieces": [
+            {
+              "id": "giyeok",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 4,
+                  "toCommand": 11
+                },
+                {
+                  "kind": "close-to-start",
+                  "reason": "interior-closure-seam"
+                }
+              ]
+            },
+            {
+              "id": "u-bar-stem",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 3
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 1,
+                    "commandIndex": 11,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 12,
+                  "toCommand": 18
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 1,
+                    "commandIndex": 56,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 57,
+                  "toCommand": 60
+                }
+              ]
+            },
+            {
+              "id": "rieul",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 19,
+                  "toCommand": 26
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 1,
+                    "commandIndex": 45,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 46,
+                  "toCommand": 56
+                },
+                {
+                  "kind": "close-to-start",
+                  "reason": "interior-closure-seam"
+                }
+              ]
+            },
+            {
+              "id": "siot",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 27,
+                  "toCommand": 45
+                },
+                {
+                  "kind": "close-to-start",
+                  "reason": "interior-closure-seam"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "notes": "Single source contour contains geometry for five physical typing steps (ㄱ / ㅜ / ㅣ / ㄹ / ㅅ). Requires path splitting.\nแต่จริงๆ มี 4 steps (ㄱ / ㅟ / ㄹ / ㅅ) ต้องแก้ physical-step algorithm ให้ ㅟ เป็นหนึ่ง step",
+      "approved": {
+        "at": "2026-09-30T18:29:46.814Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "1cce799e3203621b148042ae1fc9c9b8e0a6d828aa1aabea4b37752bf8c3145b"
+      }
     },
     "귟": {
       "reviewSchemaVersion": 2,

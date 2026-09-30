@@ -703,6 +703,7 @@ export default function JamoSvgTaggerPage() {
     updateDraft(review)
   }
   const reviewStateWarning =
+    state?.review.status !== 'approved' &&
     Boolean(state?.review.notes?.trim()) &&
     !state?.review.blockers.includes('needs-split')
   const hasCompleteCompiledPreview = Boolean(
