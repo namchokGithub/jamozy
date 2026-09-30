@@ -596,3 +596,29 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Added a dev-only command-range inspector for split review: it previews the
   exact source-command replay for a selected piece, supports additional ranges
   and move anchors, and exposes per-command owned/open/duplicate coverage.
+- Changed split-piece editing to a jamo-first visual flow: reviewers choose the
+  target physical jamo before painting source-command geometry; numeric command
+  inputs are now optional technical controls. Range updates normalize reversed
+  bounds and preserve seams and additional source ranges.
+- Added a clearly labelled draft segmentation preview for incomplete split
+  recipes. It renders selected source-command strokes by physical jamo while
+  validation blockers remain; only a blocker-free review shows exportable
+  filled paths.
+- Added live per-jamo pending/assigned ownership in the split contour card and
+  per-range removal controls, so reviewers can correct accidental
+  source-range tokens without recreating an entire piece.
+- Consolidated source-range editing inside each split piece: every range now
+  has its own from/to controls and removal action, while the redundant command
+  highlight and piece-preview panel was removed to keep the workflow compact.
+- Fixed split-range compilation for ranges that begin mid-contour. The compiler
+  now restores each range's original cursor with a synthetic move, while
+  anchors remain non-owning path controls and cannot create false duplicate
+  coverage.
+- Made split seams positional: a line-to-anchor can now be inserted between
+  consecutive source ranges, removed in place, and keeps the next range in the
+  same path instead of forcing a new subpath.
+- Clarified manual seam creation in the split UI: it appears directly between
+  the two relevant ranges, suggests the command immediately before the next
+  range, and keeps existing seams individually removable.
+- Made source-range fields ordinary text inputs that update the draft on each
+  valid numeric change without number-input spinners or disruptive validation.

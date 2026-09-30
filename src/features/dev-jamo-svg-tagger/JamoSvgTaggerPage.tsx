@@ -5,8 +5,8 @@ import { Card } from '../../components/ui/Card'
 import { PageSurface } from '../../components/ui/PageSurface'
 import { retainSourceAfterSave } from './tagger-state'
 import {
-  commandCoverage as sourceCommandCoverage,
-  compileSplitPiecePreview,
+  removeSourceRange,
+  replacePrimarySourceRange,
 } from '../../../tools/jamo-svg/split-workbench'
 import type { CachedContour, RecipeToken } from '../../../tools/jamo-svg/types'
 
@@ -40,22 +40,15 @@ type Glyph = {
   physicalSteps: Array<{ order: number; jamo: string }>
   extraction: unknown
 }
-type PiecePreview = {
-  recipeId: string
-  pieceId: string
-  d: string
-  error?: string
-}
 type State = {
   source: Glyph
   review: Review
   compiled: { paths: Array<{ jamo: string; d: string }> }
   validation: { blockers: string[] }
-  piecePreviews?: PiecePreview[]
   revision?: string
 }
 type SaveResponse = Omit<State, 'source'> & { revision: string }
-type PreviewResponse = Pick<State, 'compiled' | 'validation' | 'piecePreviews'>
+type PreviewResponse = Pick<State, 'compiled' | 'validation'>
 type QueueEntry = {
   syllable: string
   priority: number
@@ -108,178 +101,289 @@ function GlyphPreview({
     </svg>
   )
 }
-function SplitPieceInspector({
-  glyph,
-  contour,
-  recipe,
-  onUpdate,
-}: {
-  glyph: Glyph
-  contour?: Glyph['contours'][number]
-  recipe?: Review['splitRecipes'][number]
-  onUpdate: (pieceId: string, tokens: RecipeToken[]) => void
-}) {
-  const [pieceId, setPieceId] = useState('')
-  const [from, setFrom] = useState(0)
-  const [to, setTo] = useState(0)
-  const [anchor, setAnchor] = useState('')
-  if (!contour || !recipe || recipe.pieces.length === 0) return null
-  const piece =
-    recipe.pieces.find((item) => item.id === pieceId) ?? recipe.pieces[0]
-  const coverage = sourceCommandCoverage(contour, recipe.pieces)
-  let preview = ''
-  let previewError = ''
-  try {
-    preview = compileSplitPiecePreview(contour, piece)
-  } catch (error) {
-    previewError =
-      error instanceof Error ? error.message : 'Invalid source selection.'
+function commandSegmentPath(
+  commands: CachedContour['commands'],
+  commandIndex: number,
+) {
+  let cursor: { x: number; y: number } | undefined
+  let subpathStart: { x: number; y: number } | undefined
+  for (let index = 0; index <= commandIndex; index += 1) {
+    const command = commands[index]
+    if (!command) return undefined
+    if (command.type === 'M') {
+      cursor = { x: command.x!, y: command.y! }
+      subpathStart = cursor
+      if (index === commandIndex)
+        return { d: `M${cursor.x} ${cursor.y}`, point: cursor }
+      continue
+    }
+    if (!cursor) return undefined
+    if (command.type === 'L') {
+      const next = { x: command.x!, y: command.y! }
+      if (index === commandIndex)
+        return { d: `M${cursor.x} ${cursor.y} L${next.x} ${next.y}` }
+      cursor = next
+      continue
+    }
+    if (command.type === 'Q') {
+      const next = { x: command.x!, y: command.y! }
+      if (index === commandIndex)
+        return {
+          d: `M${cursor.x} ${cursor.y} Q${command.x1} ${command.y1} ${next.x} ${next.y}`,
+        }
+      cursor = next
+      continue
+    }
+    if (command.type === 'C') {
+      const next = { x: command.x!, y: command.y! }
+      if (index === commandIndex)
+        return {
+          d: `M${cursor.x} ${cursor.y} C${command.x1} ${command.y1} ${command.x2} ${command.y2} ${next.x} ${next.y}`,
+        }
+      cursor = next
+      continue
+    }
+    if (index === commandIndex && subpathStart)
+      return {
+        d: `M${cursor.x} ${cursor.y} L${subpathStart.x} ${subpathStart.y}`,
+      }
+    cursor = subpathStart
   }
-  const addRange = () =>
-    onUpdate(piece.id, [
-      ...piece.tokens,
-      { kind: 'source-range', fromCommand: from, toCommand: to },
-    ])
-  const addMove = () => {
-    if (anchor === '') return
-    onUpdate(piece.id, [
-      ...piece.tokens,
-      {
-        kind: 'move-to-anchor',
-        anchor: {
-          contourId: contour.id,
-          commandIndex: Number(anchor),
-          point: 'end',
-        },
-      },
-    ])
-    setAnchor('')
+  return undefined
+}
+function SourceRangeInput({
+  value,
+  onChange,
+}: {
+  value: number
+  onChange: (value: number) => void
+}) {
+  const [draft, setDraft] = useState(String(value))
+  const [syncedValue, setSyncedValue] = useState(value)
+  if (value !== syncedValue) {
+    setSyncedValue(value)
+    setDraft(String(value))
   }
   return (
-    <Card className="mt-4">
-      <h2 className="font-bold text-[#39465b]">
-        Command highlight and piece preview
-      </h2>
-      <p className="mt-1 text-sm text-[#667085]">
-        Use this inspector to test an audited range. It never creates geometry
-        beyond source commands and explicit anchors.
+    <input
+      className="mt-1 w-full rounded border p-2 font-normal"
+      type="text"
+      value={draft}
+      onChange={(event) => {
+        const next = event.target.value
+        setDraft(next)
+        const number = Number(next)
+        if (next !== '' && Number.isInteger(number)) onChange(number)
+      }}
+    />
+  )
+}
+function CommandRangePainter({
+  glyph,
+  contour,
+  ranges,
+  targetJamo,
+  onRangeChange,
+}: {
+  glyph: Glyph
+  contour: CachedContour
+  ranges: Array<{ fromCommand: number; toCommand: number }>
+  targetJamo?: string
+  onRangeChange: (fromCommand: number, toCommand: number) => void
+}) {
+  const [dragStart, setDragStart] = useState<number>()
+  const [dragEnd, setDragEnd] = useState<number>()
+  const dragRange = useRef<{ start: number; end: number } | undefined>(
+    undefined,
+  )
+  const selected = (index: number) => {
+    if (dragStart !== undefined && dragEnd !== undefined)
+      return (
+        index >= Math.min(dragStart, dragEnd) &&
+        index <= Math.max(dragStart, dragEnd)
+      )
+    return ranges.some(
+      (range) => index >= range.fromCommand && index <= range.toCommand,
+    )
+  }
+  const finish = () => {
+    if (dragRange.current)
+      onRangeChange(
+        Math.min(dragRange.current.start, dragRange.current.end),
+        Math.max(dragRange.current.start, dragRange.current.end),
+      )
+    dragRange.current = undefined
+    setDragStart(undefined)
+    setDragEnd(undefined)
+  }
+  return (
+    <div className="mt-3 rounded border border-[#d8e3f2] bg-[#f9fbff] p-3">
+      <p className="text-xs font-semibold text-[#39465b]">
+        Paint source commands
       </p>
-      <div className="mt-3 grid gap-4 lg:grid-cols-2">
-        <div>
-          <label className="block text-sm font-semibold">
-            Piece
-            <select
-              className="mt-1 w-full rounded border p-2 font-normal"
-              value={piece.id}
-              onChange={(event) => setPieceId(event.target.value)}
-            >
-              {recipe.pieces.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.id}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <label className="text-xs font-semibold">
-              Range from
-              <input
-                className="mt-1 w-full rounded border p-2"
-                type="number"
-                min="0"
-                max={contour.commands.length - 1}
-                value={from}
-                onChange={(event) => setFrom(Number(event.target.value))}
-              />
-            </label>
-            <label className="text-xs font-semibold">
-              Range to
-              <input
-                className="mt-1 w-full rounded border p-2"
-                type="number"
-                min="0"
-                max={contour.commands.length - 1}
-                value={to}
-                onChange={(event) => setTo(Number(event.target.value))}
-              />
-            </label>
-          </div>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <Button variant="secondary" disabled={from > to} onClick={addRange}>
-              Add source range
-            </Button>
-            <select
-              className="rounded border p-2 text-sm"
-              value={anchor}
-              onChange={(event) => setAnchor(event.target.value)}
-            >
-              <option value="">Move to source anchor…</option>
-              {contour.commands.map((command, index) =>
-                command.x !== undefined && command.y !== undefined ? (
-                  <option key={index} value={index}>
-                    command {index} end
-                  </option>
-                ) : null,
-              )}
-            </select>
-            <Button
-              variant="secondary"
-              disabled={anchor === ''}
-              onClick={addMove}
-            >
-              Add move anchor
-            </Button>
-          </div>
-          <p className="mt-2 text-xs text-[#667085]">
-            Selected tokens:{' '}
-            {piece.tokens
-              .map((token) =>
-                token.kind === 'source-range'
-                  ? `${token.fromCommand}–${token.toCommand}`
-                  : token.kind,
-              )
-              .join(', ') || 'none'}
-          </p>
-        </div>
-        <div>
-          <p className="text-sm font-semibold">Compiled piece preview</p>
-          {preview ? (
-            <GlyphPreview glyph={glyph} paths={[{ d: preview }]} />
-          ) : (
-            <p className="mt-3 rounded bg-[#fff9ed] p-3 text-sm text-[#9a6424]">
-              {previewError}
-            </p>
-          )}
-        </div>
-      </div>
-      <details className="mt-3">
-        <summary className="cursor-pointer text-sm font-semibold">
-          Command ownership ledger
-        </summary>
-        <ol className="mt-2 grid max-h-64 grid-cols-2 gap-1 overflow-auto rounded bg-[#f7f7fa] p-2 font-mono text-xs sm:grid-cols-4">
-          {contour.commands.map((command, index) => (
-            <li
-              className={
-                coverage[index] === 1
-                  ? 'text-[#357768]'
-                  : coverage[index] === 0
-                    ? 'text-[#9a6424]'
-                    : 'text-[#9d3b32]'
-              }
+      <p className="mt-1 text-xs text-[#667085]">
+        {targetJamo
+          ? `Drag across the outline to paint geometry for ${targetJamo}. The colored selection still saves only source-command indexes.`
+          : 'Choose the target jamo first, then drag across its outline.'}
+      </p>
+      <svg
+        className="mt-2 h-36 w-full touch-none"
+        viewBox={`0 0 ${glyph.advanceWidth} 2048`}
+        role="img"
+        aria-label="Paint a source-command range"
+        onPointerUp={finish}
+        onPointerMove={(event) => {
+          const attribute = (event.target as Element).getAttribute(
+            'data-command-index',
+          )
+          if (attribute === null) return
+          const commandIndex = Number(attribute)
+          if (
+            event.buttons === 1 &&
+            dragRange.current &&
+            Number.isInteger(commandIndex)
+          ) {
+            dragRange.current.end = commandIndex
+            setDragEnd(commandIndex)
+          }
+        }}
+        onPointerLeave={(event) => {
+          if (event.buttons === 0) finish()
+        }}
+      >
+        <path d={contour.d} fill="none" stroke="#c4cfdf" strokeWidth="18" />
+        {contour.commands.map((_, index) => {
+          const segment = commandSegmentPath(contour.commands, index)
+          if (!segment) return null
+          const color = selected(index) ? '#e66c58' : '#4c8f8b'
+          return segment.point ? (
+            <circle
               key={index}
-            >
-              {index}:{' '}
-              {coverage[index] === 1
-                ? 'owned'
-                : coverage[index] === 0
-                  ? 'open'
-                  : 'duplicate'}{' '}
-              · {command.type}
-            </li>
-          ))}
-        </ol>
-      </details>
-    </Card>
+              cx={segment.point.x}
+              cy={segment.point.y}
+              r="22"
+              fill={color}
+              className={targetJamo ? 'cursor-crosshair' : 'cursor-not-allowed'}
+              onPointerDown={() => {
+                if (!targetJamo) return
+                dragRange.current = { start: index, end: index }
+                setDragStart(index)
+                setDragEnd(index)
+              }}
+              data-command-index={index}
+            />
+          ) : (
+            <path
+              key={index}
+              d={segment.d}
+              fill="none"
+              stroke={color}
+              strokeWidth="28"
+              strokeLinecap="round"
+              className={targetJamo ? 'cursor-crosshair' : 'cursor-not-allowed'}
+              onPointerDown={() => {
+                if (!targetJamo) return
+                dragRange.current = { start: index, end: index }
+                setDragStart(index)
+                setDragEnd(index)
+              }}
+              data-command-index={index}
+            />
+          )
+        })}
+      </svg>
+      <p className="text-xs text-[#667085]">
+        {dragStart !== undefined && dragEnd !== undefined
+          ? `Painting commands ${Math.min(dragStart, dragEnd)}–${Math.max(dragStart, dragEnd)}.`
+          : ranges.length > 0
+            ? `Source ranges: ${ranges.map((range) => `${range.fromCommand}–${range.toCommand}`).join(', ')}.`
+            : 'Click a segment, or drag from the first segment to the last.'}
+      </p>
+    </div>
+  )
+}
+function DraftSegmentationPreview({
+  glyph,
+  review,
+}: {
+  glyph: Glyph
+  review: Review
+}) {
+  return (
+    <svg
+      className="h-48 w-full"
+      viewBox={`0 0 ${glyph.advanceWidth} 2048`}
+      role="img"
+      aria-label={`${glyph.syllable} draft jamo segmentation`}
+    >
+      <path
+        d={glyph.sourcePath}
+        fill="none"
+        stroke="#d5dce8"
+        strokeWidth="14"
+      />
+      {review.steps.flatMap((step) =>
+        step.geometry.flatMap((geometry) => {
+          const color = colors[step.order % colors.length]
+          if (geometry.kind === 'contour') {
+            const contour = glyph.contours.find(
+              (item) => item.id === geometry.contourId,
+            )
+            return contour
+              ? [
+                  <path
+                    key={`contour-${step.order}-${contour.id}`}
+                    d={contour.d}
+                    fill={color}
+                    fillRule="evenodd"
+                  />,
+                ]
+              : []
+          }
+          const recipe = review.splitRecipes.find(
+            (item) => item.id === geometry.recipeId,
+          )
+          const contour = glyph.contours.find(
+            (item) => item.id === recipe?.sourceContourId,
+          )
+          const piece = recipe?.pieces.find(
+            (item) => item.id === geometry.pieceId,
+          )
+          if (!contour || !piece) return []
+          return contour.commands.flatMap((_, commandIndex) => {
+            const selected = piece.tokens.some(
+              (token) =>
+                token.kind === 'source-range' &&
+                commandIndex >= token.fromCommand &&
+                commandIndex <= token.toCommand,
+            )
+            if (!selected) return []
+            const segment = commandSegmentPath(contour.commands, commandIndex)
+            if (!segment) return []
+            return segment.point
+              ? [
+                  <circle
+                    key={`piece-${step.order}-${piece.id}-${commandIndex}`}
+                    cx={segment.point.x}
+                    cy={segment.point.y}
+                    r="20"
+                    fill={color}
+                  />,
+                ]
+              : [
+                  <path
+                    key={`piece-${step.order}-${piece.id}-${commandIndex}`}
+                    d={segment.d}
+                    fill="none"
+                    stroke={color}
+                    strokeWidth="24"
+                    strokeLinecap="round"
+                  />,
+                ]
+          })
+        }),
+      )}
+    </svg>
   )
 }
 export default function JamoSvgTaggerPage() {
@@ -545,11 +649,9 @@ export default function JamoSvgTaggerPage() {
               count +
               piece.tokens.filter(
                 (token) =>
-                  (token.kind === 'source-range' &&
-                    index >= token.fromCommand &&
-                    index <= token.toCommand) ||
-                  (token.kind === 'move-to-anchor' &&
-                    token.anchor.commandIndex === index),
+                  token.kind === 'source-range' &&
+                  index >= token.fromCommand &&
+                  index <= token.toCommand,
               ).length,
             0,
           ),
@@ -602,6 +704,12 @@ export default function JamoSvgTaggerPage() {
   const reviewStateWarning =
     Boolean(state?.review.notes?.trim()) &&
     !state?.review.blockers.includes('needs-split')
+  const hasCompleteCompiledPreview = Boolean(
+    state &&
+    state.source.physicalSteps.every((step) =>
+      Boolean(state.compiled.paths[step.order]?.d),
+    ),
+  )
   return (
     <PageSurface contentClassName="max-w-7xl">
       <header className="flex items-end justify-between gap-4">
@@ -715,14 +823,28 @@ export default function JamoSvgTaggerPage() {
               <Card>
                 <h2 className="font-bold text-[#39465b]">Per-jamo result</h2>
                 <p className="mt-1 text-xs text-[#667085]">
-                  Combined compiled/exportable geometry, colored by physical
-                  step.
+                  {hasCompleteCompiledPreview
+                    ? 'Combined compiled/exportable geometry, colored by physical step.'
+                    : 'Draft segmentation from selected source commands, colored by physical step.'}
                 </p>
-                <GlyphPreview
-                  glyph={state.source}
-                  colored
-                  paths={state.compiled.paths}
-                />
+                {hasCompleteCompiledPreview ? (
+                  <GlyphPreview
+                    glyph={state.source}
+                    colored
+                    paths={state.compiled.paths}
+                  />
+                ) : (
+                  <DraftSegmentationPreview
+                    glyph={state.source}
+                    review={state.review}
+                  />
+                )}
+                {!hasCompleteCompiledPreview && (
+                  <p className="text-xs font-semibold text-[#9a6424]">
+                    Draft only — resolve coverage, seams, and all blockers to
+                    inspect exportable filled paths.
+                  </p>
+                )}
               </Card>
               <Card>
                 <div className="flex justify-between">
@@ -808,50 +930,41 @@ export default function JamoSvgTaggerPage() {
                     {state.review.splitRecipes.some(
                       (recipe) => recipe.sourceContourId === contour.id,
                     ) ? (
-                      <div className="mt-2 space-y-2">
-                        {state.review.splitRecipes
-                          .filter(
-                            (recipe) => recipe.sourceContourId === contour.id,
-                          )
-                          .flatMap((recipe) =>
-                            recipe.pieces.map((piece) => (
-                              <label
-                                className="block text-xs font-semibold text-[#39465b]"
-                                key={`${recipe.id}/${piece.id}`}
-                              >
-                                {piece.id}
-                                <select
-                                  className="mt-1 w-full rounded border p-2 font-normal"
-                                  value={
-                                    state.review.steps.find((step) =>
-                                      step.geometry.some(
-                                        (geometry) =>
-                                          geometry.kind === 'split-piece' &&
-                                          geometry.recipeId === recipe.id &&
-                                          geometry.pieceId === piece.id,
-                                      ),
-                                    )?.order ?? ''
-                                  }
-                                  onChange={(event) =>
-                                    assignSplitPiece(
-                                      recipe.id,
-                                      piece.id,
-                                      event.target.value === ''
-                                        ? null
-                                        : Number(event.target.value),
-                                    )
-                                  }
-                                >
-                                  <option value="">Unassigned</option>
-                                  {state.source.physicalSteps.map((step) => (
-                                    <option key={step.order} value={step.order}>
-                                      {step.order + 1}. {step.jamo}
-                                    </option>
-                                  ))}
-                                </select>
-                              </label>
-                            )),
-                          )}
+                      <div className="mt-2 rounded border border-dashed border-[#d8e3f2] p-2">
+                        <p className="text-xs font-semibold text-[#39465b]">
+                          Live split ownership
+                        </p>
+                        <ul className="mt-1 space-y-1 text-xs text-[#667085]">
+                          {state.review.steps.map((step) => {
+                            const pieces = state.review.splitRecipes
+                              .filter(
+                                (recipe) =>
+                                  recipe.sourceContourId === contour.id,
+                              )
+                              .flatMap((recipe) =>
+                                recipe.pieces
+                                  .filter((piece) =>
+                                    step.geometry.some(
+                                      (geometry) =>
+                                        geometry.kind === 'split-piece' &&
+                                        geometry.recipeId === recipe.id &&
+                                        geometry.pieceId === piece.id,
+                                    ),
+                                  )
+                                  .map((piece) => piece.id),
+                              )
+                            return (
+                              <li key={step.order}>
+                                {step.order + 1}. {step.jamo}:{' '}
+                                {pieces.length ? pieces.join(', ') : 'pending'}
+                              </li>
+                            )
+                          })}
+                        </ul>
+                        <p className="mt-2 text-xs text-[#667085]">
+                          Assign or change a piece&apos;s jamo in Split
+                          Workbench below; this preview updates before Save.
+                        </p>
                       </div>
                     ) : (
                       <select
@@ -972,7 +1085,7 @@ export default function JamoSvgTaggerPage() {
                         duplicate
                       </p>
                       {activeRecipe.pieces.map((piece) => {
-                        const range = piece.tokens.find(
+                        const ranges = piece.tokens.filter(
                           (
                             token,
                           ): token is Extract<
@@ -980,9 +1093,60 @@ export default function JamoSvgTaggerPage() {
                             { kind: 'source-range' }
                           > => token.kind === 'source-range',
                         )
-                        const seams = piece.tokens.filter(
-                          (token) => token.kind !== 'source-range',
+                        const owner = state.review.steps.find((step) =>
+                          step.geometry.some(
+                            (geometry) =>
+                              geometry.kind === 'split-piece' &&
+                              geometry.recipeId === activeRecipe.id &&
+                              geometry.pieceId === piece.id,
+                          ),
                         )
+                        const updateSourceRange = (
+                          tokenIndex: number,
+                          fromCommand: number,
+                          toCommand: number,
+                        ) =>
+                          updatePiece(
+                            activeRecipe.id,
+                            piece.id,
+                            piece.tokens.map((token, index) =>
+                              index === tokenIndex &&
+                              token.kind === 'source-range'
+                                ? {
+                                    kind: 'source-range',
+                                    fromCommand: Math.min(
+                                      fromCommand,
+                                      toCommand,
+                                    ),
+                                    toCommand: Math.max(fromCommand, toCommand),
+                                  }
+                                : token,
+                            ),
+                          )
+                        const updatePrimaryRange = (
+                          fromCommand: number,
+                          toCommand: number,
+                        ) => {
+                          const rangeIndex = piece.tokens.findIndex(
+                            (token) => token.kind === 'source-range',
+                          )
+                          if (rangeIndex < 0)
+                            updatePiece(
+                              activeRecipe.id,
+                              piece.id,
+                              replacePrimarySourceRange(
+                                piece.tokens,
+                                fromCommand,
+                                toCommand,
+                              ),
+                            )
+                          else
+                            updateSourceRange(
+                              rangeIndex,
+                              fromCommand,
+                              toCommand,
+                            )
+                        }
                         return (
                           <article
                             className="rounded border border-[#d8e3f2] p-3"
@@ -999,84 +1163,211 @@ export default function JamoSvgTaggerPage() {
                                 Delete piece
                               </Button>
                             </div>
-                            <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                              <label className="text-xs font-semibold">
-                                From command
-                                <input
-                                  className="mt-1 w-full rounded border p-2 font-normal"
-                                  type="number"
-                                  min="0"
-                                  max={activeContour.commands.length - 1}
-                                  value={range?.fromCommand ?? ''}
-                                  onChange={(event) =>
-                                    updatePiece(activeRecipe.id, piece.id, [
-                                      {
-                                        kind: 'source-range',
-                                        fromCommand: Number(event.target.value),
-                                        toCommand:
-                                          range?.toCommand ??
-                                          Number(event.target.value),
-                                      },
-                                      ...seams,
-                                    ])
-                                  }
-                                />
-                              </label>
-                              <label className="text-xs font-semibold">
-                                To command
-                                <input
-                                  className="mt-1 w-full rounded border p-2 font-normal"
-                                  type="number"
-                                  min="0"
-                                  max={activeContour.commands.length - 1}
-                                  value={range?.toCommand ?? ''}
-                                  onChange={(event) =>
-                                    updatePiece(activeRecipe.id, piece.id, [
-                                      {
-                                        kind: 'source-range',
-                                        fromCommand:
-                                          range?.fromCommand ??
-                                          Number(event.target.value),
-                                        toCommand: Number(event.target.value),
-                                      },
-                                      ...seams,
-                                    ])
-                                  }
-                                />
-                              </label>
-                              <label className="text-xs font-semibold">
-                                Physical step
-                                <select
-                                  className="mt-1 w-full rounded border p-2 font-normal"
-                                  value={
-                                    state.review.steps.find((step) =>
-                                      step.geometry.some(
-                                        (geometry) =>
-                                          geometry.kind === 'split-piece' &&
-                                          geometry.recipeId ===
-                                            activeRecipe.id &&
-                                          geometry.pieceId === piece.id,
-                                      ),
-                                    )?.order ?? ''
-                                  }
-                                  onChange={(event) =>
-                                    assignSplitPiece(
-                                      activeRecipe.id,
-                                      piece.id,
-                                      event.target.value === ''
-                                        ? null
-                                        : Number(event.target.value),
+                            <label className="mt-2 block text-xs font-semibold">
+                              This geometry belongs to
+                              <select
+                                className="mt-1 w-full rounded border p-2 font-normal"
+                                value={owner?.order ?? ''}
+                                onChange={(event) =>
+                                  assignSplitPiece(
+                                    activeRecipe.id,
+                                    piece.id,
+                                    event.target.value === ''
+                                      ? null
+                                      : Number(event.target.value),
+                                  )
+                                }
+                              >
+                                <option value="">Choose a jamo to paint</option>
+                                {state.source.physicalSteps.map((step) => (
+                                  <option key={step.order} value={step.order}>
+                                    {step.order + 1}. {step.jamo}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                            <CommandRangePainter
+                              glyph={state.source}
+                              contour={activeContour}
+                              ranges={ranges}
+                              targetJamo={owner?.jamo}
+                              onRangeChange={updatePrimaryRange}
+                            />
+                            <div className="mt-2">
+                              <p className="text-xs font-semibold text-[#39465b]">
+                                Source ranges
+                              </p>
+                              <div className="mt-1 space-y-2">
+                                {piece.tokens.map((token, tokenIndex) => {
+                                  if (token.kind !== 'source-range') return null
+                                  const nextToken = piece.tokens[tokenIndex + 1]
+                                  const seamAfterRange =
+                                    nextToken?.kind === 'line-to-anchor'
+                                      ? nextToken
+                                      : undefined
+                                  const nextRange = piece.tokens
+                                    .slice(tokenIndex + 1)
+                                    .find(
+                                      (candidate) =>
+                                        candidate.kind === 'source-range',
                                     )
+                                  const suggestedAnchor =
+                                    nextRange && nextRange.fromCommand > 0
+                                      ? nextRange.fromCommand - 1
+                                      : undefined
+                                  return (
+                                    <div
+                                      key={`${piece.id}-${tokenIndex}`}
+                                      className="rounded border border-[#d8e3f2] p-2"
+                                    >
+                                      <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                                        <label className="text-xs font-semibold">
+                                          Range from
+                                          <SourceRangeInput
+                                            value={token.fromCommand}
+                                            onChange={(value) =>
+                                              updateSourceRange(
+                                                tokenIndex,
+                                                value,
+                                                token.toCommand,
+                                              )
+                                            }
+                                          />
+                                        </label>
+                                        <label className="text-xs font-semibold">
+                                          Range to
+                                          <SourceRangeInput
+                                            value={token.toCommand}
+                                            onChange={(value) =>
+                                              updateSourceRange(
+                                                tokenIndex,
+                                                token.fromCommand,
+                                                value,
+                                              )
+                                            }
+                                          />
+                                        </label>
+                                        <Button
+                                          variant="secondary"
+                                          onClick={() =>
+                                            updatePiece(
+                                              activeRecipe.id,
+                                              piece.id,
+                                              removeSourceRange(
+                                                piece.tokens,
+                                                tokenIndex,
+                                              ),
+                                            )
+                                          }
+                                        >
+                                          Remove
+                                        </Button>
+                                      </div>
+                                      {seamAfterRange ? (
+                                        <div className="mt-2 flex items-center justify-between gap-2 rounded bg-[#fff8ed] p-2 text-xs">
+                                          <span>
+                                            Seam before next range → command{' '}
+                                            {seamAfterRange.anchor.commandIndex}{' '}
+                                            end
+                                          </span>
+                                          <Button
+                                            variant="secondary"
+                                            onClick={() =>
+                                              updatePiece(
+                                                activeRecipe.id,
+                                                piece.id,
+                                                piece.tokens.filter(
+                                                  (_, index) =>
+                                                    index !== tokenIndex + 1,
+                                                ),
+                                              )
+                                            }
+                                          >
+                                            Remove seam
+                                          </Button>
+                                        </div>
+                                      ) : nextRange ? (
+                                        <label className="mt-2 block text-xs font-semibold text-[#39465b]">
+                                          Line seam to next range
+                                          <span className="ml-1 font-normal text-[#667085]">
+                                            (usually command{' '}
+                                            {suggestedAnchor ?? 0} end)
+                                          </span>
+                                          <select
+                                            className="mt-1 w-full rounded border p-2 font-normal"
+                                            defaultValue=""
+                                            onChange={(event) => {
+                                              if (event.target.value === '')
+                                                return
+                                              const tokens = [...piece.tokens]
+                                              tokens.splice(tokenIndex + 1, 0, {
+                                                kind: 'line-to-anchor',
+                                                anchor: {
+                                                  contourId: activeContour.id,
+                                                  commandIndex: Number(
+                                                    event.target.value,
+                                                  ),
+                                                  point: 'end',
+                                                },
+                                                reason: 'interior-closure-seam',
+                                              })
+                                              updatePiece(
+                                                activeRecipe.id,
+                                                piece.id,
+                                                tokens,
+                                              )
+                                            }}
+                                          >
+                                            <option value="">
+                                              Choose anchor…
+                                            </option>
+                                            {suggestedAnchor !== undefined && (
+                                              <option value={suggestedAnchor}>
+                                                Suggested: command{' '}
+                                                {suggestedAnchor} end
+                                              </option>
+                                            )}
+                                            {activeContour.commands.map(
+                                              (_, commandIndex) =>
+                                                commandIndex ===
+                                                suggestedAnchor ? null : (
+                                                  <option
+                                                    key={commandIndex}
+                                                    value={commandIndex}
+                                                  >
+                                                    command {commandIndex} end
+                                                  </option>
+                                                ),
+                                            )}
+                                          </select>
+                                        </label>
+                                      ) : null}
+                                    </div>
+                                  )
+                                })}
+                                {!piece.tokens.some(
+                                  (token) => token.kind === 'source-range',
+                                ) && (
+                                  <p className="text-xs text-[#667085]">
+                                    No source ranges painted yet.
+                                  </p>
+                                )}
+                                <Button
+                                  variant="secondary"
+                                  onClick={() =>
+                                    updatePiece(activeRecipe.id, piece.id, [
+                                      ...piece.tokens,
+                                      {
+                                        kind: 'source-range',
+                                        fromCommand: 0,
+                                        toCommand: 0,
+                                      },
+                                    ])
                                   }
                                 >
-                                  <option value="">Unassigned</option>
-                                  {state.source.physicalSteps.map((step) => (
-                                    <option key={step.order} value={step.order}>
-                                      {step.order + 1}. {step.jamo}
-                                    </option>
-                                  ))}
-                                </select>
-                              </label>
+                                  Add source range
+                                </Button>
+                              </div>
                             </div>
                             <div className="mt-2 flex flex-wrap gap-2">
                               <Button
@@ -1093,43 +1384,6 @@ export default function JamoSvgTaggerPage() {
                               >
                                 Add close-to-start seam
                               </Button>
-                              <label className="text-xs font-semibold">
-                                Add line seam to anchor
-                                <select
-                                  className="ml-2 rounded border p-2 font-normal"
-                                  defaultValue=""
-                                  onChange={(event) => {
-                                    if (event.target.value === '') return
-                                    updatePiece(activeRecipe.id, piece.id, [
-                                      ...piece.tokens,
-                                      {
-                                        kind: 'line-to-anchor',
-                                        anchor: {
-                                          contourId: activeContour.id,
-                                          commandIndex: Number(
-                                            event.target.value,
-                                          ),
-                                          point: 'end',
-                                        },
-                                        reason: 'interior-closure-seam',
-                                      },
-                                    ])
-                                    event.currentTarget.value = ''
-                                  }}
-                                >
-                                  <option value="">Choose anchor</option>
-                                  {activeContour.commands.map(
-                                    (_, commandIndex) => (
-                                      <option
-                                        key={commandIndex}
-                                        value={commandIndex}
-                                      >
-                                        command {commandIndex} end
-                                      </option>
-                                    ),
-                                  )}
-                                </select>
-                              </label>
                             </div>
                             <p className="mt-2 text-xs text-[#667085]">
                               Tokens:{' '}
@@ -1205,14 +1459,6 @@ export default function JamoSvgTaggerPage() {
                 </Button>
               </div>
             </Card>
-            <SplitPieceInspector
-              glyph={state.source}
-              contour={activeContour}
-              recipe={activeRecipe}
-              onUpdate={(pieceId, tokens) =>
-                activeRecipe && updatePiece(activeRecipe.id, pieceId, tokens)
-              }
-            />
           </main>
         )}
       </section>

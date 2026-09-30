@@ -237,34 +237,151 @@
       },
       "status": "reviewing",
       "blockers": [
-        "needs-split",
-        "empty-physical-step",
-        "unassigned-source-geometry",
-        "reconstruction-mismatch"
+        "needs-split"
       ],
       "steps": [
         {
           "order": 0,
           "jamo": "ㄱ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
+            }
+          ]
         },
         {
           "order": 1,
           "jamo": "ㅜ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
+            }
+          ]
         },
         {
           "order": 2,
           "jamo": "ㄹ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-3"
+            }
+          ]
         },
         {
           "order": 3,
           "jamo": "ㅅ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-4"
+            }
+          ]
         }
       ],
-      "splitRecipes": [],
+      "splitRecipes": [
+        {
+          "id": "split-0-1",
+          "sourceContourId": 0,
+          "sourceContourHash": "7cc6da581e2405efddeee603b507ee34910e91b0a8c289fc97f62420e138ad88",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "7cc6da581e2405efddeee603b507ee34910e91b0a8c289fc97f62420e138ad88"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 3
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 50,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 51,
+                  "toCommand": 56
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 47,
+                  "toCommand": 50
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 3,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 4,
+                  "toCommand": 9
+                }
+              ]
+            },
+            {
+              "id": "piece-3",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 36,
+                  "toCommand": 46
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 9,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 10,
+                  "toCommand": 16
+                }
+              ]
+            },
+            {
+              "id": "piece-4",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 17,
+                  "toCommand": 35
+                }
+              ]
+            }
+          ]
+        }
+      ],
       "notes": "Single source contour contains geometry for all four physical jamo steps (ㄱ / ㅜ / ㄹ / ㅅ). Requires path splitting."
     },
     "귌": {
