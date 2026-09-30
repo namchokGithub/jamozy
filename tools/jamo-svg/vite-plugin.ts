@@ -5,6 +5,7 @@ import type { Plugin } from 'vite'
 import { loadCacheGlyph } from './cache'
 import { compileReview, validateReview } from './compile'
 import { QueueStore, ReviewStore } from './review-store'
+import { createUnreviewedDraft } from './review-draft'
 import type { GlyphReview } from './types'
 
 const ROOT = process.cwd()
@@ -27,8 +28,9 @@ export function jamoSvgTaggerPlugin(): Plugin {
           if (request.method === 'GET' && url.pathname === '/queue') return json(response, 200, { entries: await queue.list(), manifest: await reviews.getManifest() })
           const syllable = url.searchParams.get('syllable')
           if (request.method === 'GET' && url.pathname === '/glyph' && syllable) {
-            const source = await loadCacheGlyph(cacheRoot, syllable); const { review, revision } = await reviews.getWithRevision(syllable)
-            return json(response, 200, { source, review, revision, compiled: review ? compileReview(source, review) : null, validation: review ? validateReview(source, review) : null })
+            const source = await loadCacheGlyph(cacheRoot, syllable); const { review: savedReview, revision } = await reviews.getWithRevision(syllable)
+            const review = savedReview ?? createUnreviewedDraft(source)
+            return json(response, 200, { source, review, revision, compiled: compileReview(source, review), validation: validateReview(source, review) })
           }
           if (request.method === 'POST' && (url.pathname === '/save' || url.pathname === '/approve')) {
             const chunks: Buffer[] = []; for await (const chunk of request) chunks.push(Buffer.from(chunk)); const body = JSON.parse(Buffer.concat(chunks).toString('utf8')) as { review: GlyphReview; expectedRevision?: string; reviewer?: string }
