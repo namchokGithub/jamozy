@@ -16,6 +16,15 @@ export class ReviewStore {
   constructor(private readonly reviewsRoot: string, private readonly cacheRoot: string) {}
   private async manifest(): Promise<ReviewManifest> { return JSON.parse(await readFile(join(this.reviewsRoot, 'manifest.json'), 'utf8')) as ReviewManifest }
   async get(syllable: string) { const source = await loadCacheGlyph(this.cacheRoot, syllable); const manifest = await this.manifest(); const item = manifest.shards.find((shard) => shard.choseong === source.hangul.choseong); if (!item) return undefined; const shard = JSON.parse(await readFile(join(this.reviewsRoot, item.file), 'utf8')) as ReviewShard; return shard.reviews[syllable] }
+  async getWithRevision(syllable: string) {
+    const source = await loadCacheGlyph(this.cacheRoot, syllable)
+    const manifest = await this.manifest()
+    const item = manifest.shards.find((shard) => shard.choseong === source.hangul.choseong)
+    if (!item) return { review: undefined, revision: undefined }
+    const text = await readFile(join(this.reviewsRoot, item.file), 'utf8')
+    if (checksum(text) !== item.sha256) throw new Error(`Review shard checksum mismatch for ${item.file}.`)
+    return { review: (JSON.parse(text) as ReviewShard).reviews[syllable], revision: checksum(stable(JSON.parse(text))) }
+  }
   async getManifest() { return this.manifest() }
   async save(review: GlyphReview, expectedRevision?: string) {
     const source = await loadCacheGlyph(this.cacheRoot, review.syllable); const validation = validateReview(source, review); if (validation.blockers.length) throw new Error(`Review validation failed: ${validation.blockers.join(', ')}`)

@@ -16,6 +16,7 @@ describe('sharded review store', () => {
     await generateCache(cache, ['가', '하']); const reviewsRoot = join(root, 'reviews'); await initializeReviewManifest(reviewsRoot, source.extraction.fontSha256)
     const store = new ReviewStore(reviewsRoot, cache); const saved = await store.save(await seedReview('가'))
     expect((await store.getManifest()).shards).toEqual([expect.objectContaining({ choseong: 'ㄱ', file: 'ㄱ.json', reviewCount: 1 })])
+    expect(await store.getWithRevision('가')).toEqual(expect.objectContaining({ review: expect.objectContaining({ syllable: '가' }), revision: saved.revision }))
     await expect(store.save(await seedReview('가'), 'stale-revision')).rejects.toBeInstanceOf(ConflictError)
     expect(saved.revision).toHaveLength(64)
   })
