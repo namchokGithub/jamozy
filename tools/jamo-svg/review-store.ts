@@ -5,8 +5,8 @@ import { loadCacheGlyph, atomicWrite } from './cache'
 import { validateReview } from './compile'
 import type { GlyphReview } from './types'
 
-export type ReviewShard = { shardSchemaVersion: 1; choseong: string; fontFingerprint: string; physicalStepAlgorithmVersion: 1; splitRecipeSchemaVersion: 1; reviews: Record<string, GlyphReview> }
-export type ReviewManifest = { manifestSchemaVersion: 1; reviewRecordSchemaVersion: 1; splitRecipeSchemaVersion: 1; activeFontFingerprint: string; physicalStepAlgorithmVersion: 1; shards: Array<{ choseong: string; file: string; reviewCount: number; sha256: string }> }
+export type ReviewShard = { shardSchemaVersion: 2; choseong: string; fontFingerprint: string; physicalStepAlgorithmVersion: 1; splitRecipeSchemaVersion: 2; reviews: Record<string, GlyphReview> }
+export type ReviewManifest = { manifestSchemaVersion: 2; reviewRecordSchemaVersion: 2; splitRecipeSchemaVersion: 2; activeFontFingerprint: string; physicalStepAlgorithmVersion: 1; shards: Array<{ choseong: string; file: string; reviewCount: number; sha256: string }> }
 export type QueueEntry = { syllable: string; priority: number; reasons: string[]; queueKey: { medialLayout: string; hasFinal: boolean; compoundMedial: string | null; compoundFinal: string | null; physicalStepCount: number; contourRelation: 'deficit' | 'aligned' | 'surplus' }; nearestApprovedSyllables: string[] }
 export type QueueDocument = { queueSchemaVersion: 1; fontFingerprint: string; entries: QueueEntry[] }
 const stable = (value: unknown) => JSON.stringify(value, null, 2) + '\n'
@@ -14,8 +14,8 @@ const checksum = (text: string) => createHash('sha256').update(text).digest('hex
 export class ConflictError extends Error { constructor() { super('Review shard changed; reload before saving.'); } }
 export class ReviewStore {
   constructor(private readonly reviewsRoot: string, private readonly cacheRoot: string) {}
-  private async manifest(): Promise<ReviewManifest> { return JSON.parse(await readFile(join(this.reviewsRoot, 'manifest.json'), 'utf8')) as ReviewManifest }
-  async get(syllable: string) { const source = await loadCacheGlyph(this.cacheRoot, syllable); const manifest = await this.manifest(); const item = manifest.shards.find((shard) => shard.choseong === source.hangul.choseong); if (!item) return undefined; const shard = JSON.parse(await readFile(join(this.reviewsRoot, item.file), 'utf8')) as ReviewShard; return shard.reviews[syllable] }
+  private async manifest(): Promise<ReviewManifest> { const manifest = JSON.parse(await readFile(join(this.reviewsRoot, 'manifest.json'), 'utf8')) as ReviewManifest; if (manifest.manifestSchemaVersion !== 2 || manifest.reviewRecordSchemaVersion !== 2 || manifest.splitRecipeSchemaVersion !== 2) throw new Error('Unsupported review schema; run the explicit migration.'); return manifest }
+  async get(syllable: string) { const source = await loadCacheGlyph(this.cacheRoot, syllable); const manifest = await this.manifest(); const item = manifest.shards.find((shard) => shard.choseong === source.hangul.choseong); if (!item) return undefined; const shard = JSON.parse(await readFile(join(this.reviewsRoot, item.file), 'utf8')) as ReviewShard; if (shard.shardSchemaVersion !== 2 || shard.splitRecipeSchemaVersion !== 2) throw new Error(`Unsupported review shard schema in ${item.file}.`); return shard.reviews[syllable] }
   async getWithRevision(syllable: string) {
     const source = await loadCacheGlyph(this.cacheRoot, syllable)
     const manifest = await this.manifest()
@@ -23,7 +23,7 @@ export class ReviewStore {
     if (!item) return { review: undefined, revision: undefined }
     const text = await readFile(join(this.reviewsRoot, item.file), 'utf8')
     if (checksum(text) !== item.sha256) throw new Error(`Review shard checksum mismatch for ${item.file}.`)
-    return { review: (JSON.parse(text) as ReviewShard).reviews[syllable], revision: checksum(stable(JSON.parse(text))) }
+    const shard = JSON.parse(text) as ReviewShard; if (shard.shardSchemaVersion !== 2 || shard.splitRecipeSchemaVersion !== 2) throw new Error(`Unsupported review shard schema in ${item.file}.`); return { review: shard.reviews[syllable], revision: checksum(stable(shard)) }
   }
   async getManifest() { return this.manifest() }
   async save(review: GlyphReview, expectedRevision?: string) {
@@ -34,7 +34,8 @@ export class ReviewStore {
     review.blockers = validation.blockers
     const manifest = await this.manifest(); if (manifest.activeFontFingerprint !== source.extraction.fontSha256 || manifest.physicalStepAlgorithmVersion !== source.extraction.physicalStepAlgorithm) throw new Error('Stale review manifest fingerprint.')
     const choseong = source.hangul.choseong; const file = `${choseong}.json`; const existing = manifest.shards.find((item) => item.choseong === choseong)
-    const shard: ReviewShard = existing ? JSON.parse(await readFile(join(this.reviewsRoot, existing.file), 'utf8')) : { shardSchemaVersion: 1, choseong, fontFingerprint: source.extraction.fontSha256, physicalStepAlgorithmVersion: 1, splitRecipeSchemaVersion: 1, reviews: {} }
+    const shard: ReviewShard = existing ? JSON.parse(await readFile(join(this.reviewsRoot, existing.file), 'utf8')) : { shardSchemaVersion: 2, choseong, fontFingerprint: source.extraction.fontSha256, physicalStepAlgorithmVersion: 1, splitRecipeSchemaVersion: 2, reviews: {} }
+    if (shard.shardSchemaVersion !== 2 || shard.splitRecipeSchemaVersion !== 2) throw new Error(`Unsupported review shard schema in ${existing?.file ?? file}.`)
     const currentRevision = checksum(stable(shard)); if (expectedRevision && expectedRevision !== currentRevision) throw new ConflictError()
     if (review.status === 'approved' && (!review.approved || validation.blockers.length)) throw new Error('Approval requires a valid explicit approval record.')
     shard.reviews[review.syllable] = review; const shardText = stable({ ...shard, reviews: Object.fromEntries(Object.entries(shard.reviews).sort(([a], [b]) => a.localeCompare(b))) })
@@ -48,4 +49,4 @@ export class QueueStore {
   async list(): Promise<QueueEntry[]> { try { const queue = JSON.parse(await readFile(this.file, 'utf8')) as QueueDocument; if (queue.queueSchemaVersion !== 1 || queue.fontFingerprint !== this.fontFingerprint) throw new Error('Stale queue fingerprint.'); return queue.entries } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []; throw error } }
   async save(entries: QueueEntry[]) { await atomicWrite(this.file, stable({ queueSchemaVersion: 1, fontFingerprint: this.fontFingerprint, entries: [...entries].sort((a, b) => a.syllable.localeCompare(b.syllable)) })) }
 }
-export async function initializeReviewManifest(reviewsRoot: string, fontFingerprint: string) { await atomicWrite(join(reviewsRoot, 'manifest.json'), stable({ manifestSchemaVersion: 1, reviewRecordSchemaVersion: 1, splitRecipeSchemaVersion: 1, activeFontFingerprint: fontFingerprint, physicalStepAlgorithmVersion: 1, shards: [] } satisfies ReviewManifest)) }
+export async function initializeReviewManifest(reviewsRoot: string, fontFingerprint: string) { await atomicWrite(join(reviewsRoot, 'manifest.json'), stable({ manifestSchemaVersion: 2, reviewRecordSchemaVersion: 2, splitRecipeSchemaVersion: 2, activeFontFingerprint: fontFingerprint, physicalStepAlgorithmVersion: 1, shards: [] } satisfies ReviewManifest)) }

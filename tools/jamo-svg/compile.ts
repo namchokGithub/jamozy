@@ -4,45 +4,18 @@ import {
   type CachedGlyph,
   type CompiledGlyph,
   type GlyphReview,
-  type OutlineCommand,
   type ReviewBlocker,
   type SplitRecipe,
 } from './types'
+import { compileSplitPiecePreview } from './split-workbench'
 
 export * from './types'
 
-function commandToSvg(command: OutlineCommand): string {
-  if (command.type === 'Z') return 'Z'
-  if (command.type === 'M' || command.type === 'L') return `${command.type}${command.x} ${command.y}`
-  if (command.type === 'Q') return `Q${command.x1} ${command.y1} ${command.x} ${command.y}`
-  return `C${command.x1} ${command.y1} ${command.x2} ${command.y2} ${command.x} ${command.y}`
-}
-
-function compileRecipePiece(source: CachedGlyph, recipe: SplitRecipe, pieceId: string): string {
+export function compileRecipePiece(source: CachedGlyph, recipe: SplitRecipe, pieceId: string): string {
   const contour = source.contours.find(({ id }) => id === recipe.sourceContourId)
   const piece = recipe.pieces.find(({ id }) => id === pieceId)
   if (!contour || !piece) throw new Error('Unknown split recipe piece.')
-  const result: OutlineCommand[] = []
-  let start: { x: number; y: number } | undefined
-  for (const token of piece.tokens) {
-    if (token.kind === 'source-range') {
-      result.push(...contour.commands.slice(token.fromCommand, token.toCommand + 1))
-      if (!start) {
-        const move = result.find(({ type }) => type === 'M')
-        if (move?.x !== undefined && move.y !== undefined) start = { x: move.x, y: move.y }
-      }
-      continue
-    }
-    if (token.kind === 'close-to-start') { result.push({ type: 'Z' }); continue }
-    const command = contour.commands[token.anchor.commandIndex]
-    const x = token.anchor.point === 'control1' ? command?.x1 : token.anchor.point === 'control2' ? command?.x2 : command?.x
-    const y = token.anchor.point === 'control1' ? command?.y1 : token.anchor.point === 'control2' ? command?.y2 : command?.y
-    if (x === undefined || y === undefined) throw new Error('Invalid recipe anchor.')
-    result.push({ type: token.kind === 'move-to-anchor' ? 'M' : 'L', x, y })
-    if (!start && token.kind === 'move-to-anchor') start = { x, y }
-  }
-  if (!start) throw new Error('Split piece has no source geometry.')
-  return result.map(commandToSvg).join(' ')
+  return compileSplitPiecePreview(contour, piece)
 }
 
 export function compileReview(source: CachedGlyph, review: GlyphReview): CompiledGlyph {
@@ -69,20 +42,35 @@ function recipeIsValid(source: CachedGlyph, recipe: SplitRecipe): boolean {
   const contour = source.contours.find(({ id }) => id === recipe.sourceContourId)
   if (!contour || recipe.splitRecipeSchemaVersion !== SPLIT_RECIPE_SCHEMA_VERSION || contour.commandHash !== recipe.sourceContourHash) return false
   const ids = new Set<string>()
-  const covered = new Set<number>()
+  // A source range or an explicit move anchor consumes source geometry. A
+  // line-to anchor is only a declared synthetic closure seam, so it must not
+  // make a command look owned by a piece.
+  const coverage = new Map<number, number>()
+  const consume = (index: number) => coverage.set(index, (coverage.get(index) ?? 0) + 1)
+  const anchorIsUsable = (index: number, point: 'start' | 'end' | 'control1' | 'control2') => {
+    const command = contour.commands[index]
+    if (!command) return false
+    if (point === 'control1') return command.x1 !== undefined && command.y1 !== undefined
+    if (point === 'control2') return command.x2 !== undefined && command.y2 !== undefined
+    return command.x !== undefined && command.y !== undefined
+  }
   const valid = recipe.pieces.every((piece) => {
-    if (ids.has(piece.id) || piece.ownerStep < 0 || piece.ownerStep >= source.physicalSteps.length) return false
+    if (ids.has(piece.id)) return false
     ids.add(piece.id)
     return piece.tokens.every((token) => {
       if (token.kind === 'source-range') {
         if (token.fromCommand < 0 || token.toCommand < token.fromCommand || token.toCommand >= contour.commands.length) return false
-        for (let index = token.fromCommand; index <= token.toCommand; index += 1) covered.add(index)
+        for (let index = token.fromCommand; index <= token.toCommand; index += 1) consume(index)
       }
-      if (token.kind === 'move-to-anchor') covered.add(token.anchor.commandIndex)
+      if (token.kind === 'move-to-anchor') {
+        if (token.anchor.contourId !== contour.id || !anchorIsUsable(token.anchor.commandIndex, token.anchor.point)) return false
+        consume(token.anchor.commandIndex)
+      }
+      if (token.kind === 'line-to-anchor' && (token.anchor.contourId !== contour.id || !anchorIsUsable(token.anchor.commandIndex, token.anchor.point))) return false
       return true
     })
   })
-  return valid && contour.commands.every((_, index) => covered.has(index))
+  return valid && contour.commands.every((_, index) => coverage.get(index) === 1)
 }
 
 export function validateReview(source: CachedGlyph, review: GlyphReview): { blockers: ReviewBlocker[] } {

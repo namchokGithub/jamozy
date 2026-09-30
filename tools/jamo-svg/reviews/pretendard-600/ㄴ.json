@@ -1,12 +1,12 @@
 {
-  "shardSchemaVersion": 1,
+  "shardSchemaVersion": 2,
   "choseong": "ㄴ",
   "fontFingerprint": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
   "physicalStepAlgorithmVersion": 1,
-  "splitRecipeSchemaVersion": 1,
+  "splitRecipeSchemaVersion": 2,
   "reviews": {
     "낪": {
-      "reviewSchemaVersion": 1,
+      "reviewSchemaVersion": 2,
       "syllable": "낪",
       "source": {
         "extraction": {
@@ -26,7 +26,7 @@
           "geometry": [
             {
               "kind": "contour",
-              "contourId": 0
+              "contourId": 3
             }
           ]
         },
@@ -36,7 +36,7 @@
           "geometry": [
             {
               "kind": "contour",
-              "contourId": 1
+              "contourId": 2
             }
           ]
         },
@@ -46,7 +46,7 @@
           "geometry": [
             {
               "kind": "contour",
-              "contourId": 2
+              "contourId": 0
             }
           ]
         },
@@ -56,7 +56,7 @@
           "geometry": [
             {
               "kind": "contour",
-              "contourId": 3
+              "contourId": 1
             }
           ]
         }
@@ -65,7 +65,7 @@
       "notes": "Contour 1 contains combined ㅂ + ㅅ geometry and requires splitting.\nContour 2 appears to be the counter/hole geometry for ㅂ.\nContour 3 belongs to ㅏ.\nContour 4 belongs to ㄴ."
     },
     "녕": {
-      "reviewSchemaVersion": 1,
+      "reviewSchemaVersion": 2,
       "syllable": "녕",
       "source": {
         "extraction": {

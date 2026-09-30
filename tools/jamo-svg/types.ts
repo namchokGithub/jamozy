@@ -1,8 +1,8 @@
 export const EXTRACTION_SCHEMA_VERSION = 1 as const
 export const PATH_NORMALIZATION_VERSION = 1 as const
 export const PHYSICAL_STEP_ALGORITHM_VERSION = 1 as const
-export const REVIEW_SCHEMA_VERSION = 1 as const
-export const SPLIT_RECIPE_SCHEMA_VERSION = 1 as const
+export const REVIEW_SCHEMA_VERSION = 2 as const
+export const SPLIT_RECIPE_SCHEMA_VERSION = 2 as const
 
 export type Bounds = { x1: number; y1: number; x2: number; y2: number }
 export type OutlineCommand = {
@@ -94,7 +94,7 @@ export type RecipeToken =
   | { kind: 'move-to-anchor'; anchor: SourceAnchor }
   | { kind: 'line-to-anchor'; anchor: SourceAnchor; reason: 'interior-closure-seam' }
   | { kind: 'close-to-start'; reason: 'interior-closure-seam' }
-export type SplitPiece = { id: string; ownerStep: number; tokens: RecipeToken[] }
+export type SplitPiece = { id: string; tokens: RecipeToken[] }
 export type SplitRecipe = {
   splitRecipeSchemaVersion: typeof SPLIT_RECIPE_SCHEMA_VERSION
   id: string

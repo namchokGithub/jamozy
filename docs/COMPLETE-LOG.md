@@ -588,3 +588,11 @@ Chronological log of completed units of work. One entry per meaningful change (n
   removes V1 duplicate split-piece ownership in favor of reviewed-step refs,
   defines a deterministic migration, and records the current note/blocker
   inconsistency without mutating reviewed records.
+- Migrated the bounded Pretendard review store to schema V2 and added the
+  development-only source-command Split Workbench. Ownership now derives only
+  from reviewed-step geometry; reviewers can inspect cached command indexes,
+  create/delete source-range pieces, add explicit closure seams, assign pieces
+  to steps, and validate live without introducing replacement SVG geometry.
+- Added a dev-only command-range inspector for split review: it previews the
+  exact source-command replay for a selected piece, supports additional ranges
+  and move anchors, and exposes per-command owned/open/duplicate coverage.

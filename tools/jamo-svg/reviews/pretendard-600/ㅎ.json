@@ -1,12 +1,12 @@
 {
-  "shardSchemaVersion": 1,
+  "shardSchemaVersion": 2,
   "choseong": "ㅎ",
   "fontFingerprint": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
   "physicalStepAlgorithmVersion": 1,
-  "splitRecipeSchemaVersion": 1,
+  "splitRecipeSchemaVersion": 2,
   "reviews": {
     "하": {
-      "reviewSchemaVersion": 1,
+      "reviewSchemaVersion": 2,
       "syllable": "하",
       "source": {
         "extraction": {
@@ -58,7 +58,7 @@
       }
     },
     "화": {
-      "reviewSchemaVersion": 1,
+      "reviewSchemaVersion": 2,
       "syllable": "화",
       "source": {
         "extraction": {

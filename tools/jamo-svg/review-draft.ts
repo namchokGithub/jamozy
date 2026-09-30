@@ -3,7 +3,7 @@ import type { CachedGlyph, GlyphReview } from './types'
 /** A UI-only draft; ReviewStore receives it only after the reviewer saves. */
 export function createUnreviewedDraft(source: CachedGlyph): GlyphReview {
   return {
-    reviewSchemaVersion: 1,
+    reviewSchemaVersion: 2,
     syllable: source.syllable,
     source: {
       extraction: source.extraction,

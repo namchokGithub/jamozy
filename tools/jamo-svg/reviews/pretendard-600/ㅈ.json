@@ -1,12 +1,12 @@
 {
-  "shardSchemaVersion": 1,
+  "shardSchemaVersion": 2,
   "choseong": "ㅈ",
   "fontFingerprint": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
   "physicalStepAlgorithmVersion": 1,
-  "splitRecipeSchemaVersion": 1,
+  "splitRecipeSchemaVersion": 2,
   "reviews": {
     "죄": {
-      "reviewSchemaVersion": 1,
+      "reviewSchemaVersion": 2,
       "syllable": "죄",
       "source": {
         "extraction": {

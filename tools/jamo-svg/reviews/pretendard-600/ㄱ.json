@@ -1,12 +1,12 @@
 {
-  "shardSchemaVersion": 1,
+  "shardSchemaVersion": 2,
   "choseong": "ㄱ",
   "fontFingerprint": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
   "physicalStepAlgorithmVersion": 1,
-  "splitRecipeSchemaVersion": 1,
+  "splitRecipeSchemaVersion": 2,
   "reviews": {
     "가": {
-      "reviewSchemaVersion": 1,
+      "reviewSchemaVersion": 2,
       "syllable": "가",
       "source": {
         "extraction": {
@@ -50,7 +50,7 @@
       }
     },
     "값": {
-      "reviewSchemaVersion": 1,
+      "reviewSchemaVersion": 2,
       "syllable": "값",
       "source": {
         "extraction": {
@@ -113,7 +113,7 @@
       ],
       "splitRecipes": [
         {
-          "splitRecipeSchemaVersion": 1,
+          "splitRecipeSchemaVersion": 2,
           "id": "values-bieup-siot-v1",
           "sourceContourId": 2,
           "sourceContourHash": "eded72fb8bb44c7f1e0a4e7ef7f7a9d1b6875f660351543bd2621bcb8c3df488",
@@ -125,7 +125,6 @@
           "pieces": [
             {
               "id": "bieup",
-              "ownerStep": 2,
               "tokens": [
                 {
                   "kind": "source-range",
@@ -150,7 +149,6 @@
             },
             {
               "id": "siot",
-              "ownerStep": 3,
               "tokens": [
                 {
                   "kind": "move-to-anchor",
@@ -182,7 +180,7 @@
       }
     },
     "굵": {
-      "reviewSchemaVersion": 1,
+      "reviewSchemaVersion": 2,
       "syllable": "굵",
       "source": {
         "extraction": {
@@ -226,7 +224,7 @@
       "notes": "Single source contour contains geometry for all four physical jamo steps (ㄱ / ㅜ / ㄹ / ㄱ). Requires path splitting."
     },
     "굸": {
-      "reviewSchemaVersion": 1,
+      "reviewSchemaVersion": 2,
       "syllable": "굸",
       "source": {
         "extraction": {
@@ -270,7 +268,7 @@
       "notes": "Single source contour contains geometry for all four physical jamo steps (ㄱ / ㅜ / ㄹ / ㅅ). Requires path splitting."
     },
     "귌": {
-      "reviewSchemaVersion": 1,
+      "reviewSchemaVersion": 2,
       "syllable": "귌",
       "source": {
         "extraction": {
@@ -319,7 +317,7 @@
       "notes": "Single source contour contains geometry for all four physical jamo steps (ㄱ / ㅜ / ㅣ / ㄹ / ㅅ). Requires path splitting."
     },
     "귟": {
-      "reviewSchemaVersion": 1,
+      "reviewSchemaVersion": 2,
       "syllable": "귟",
       "source": {
         "extraction": {

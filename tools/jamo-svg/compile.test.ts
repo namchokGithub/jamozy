@@ -34,7 +34,7 @@ const source: CachedGlyph = {
 }
 
 const review: GlyphReview = {
-  reviewSchemaVersion: 1,
+  reviewSchemaVersion: 2,
   syllable: '하',
   source: { extraction: source.extraction, sourceGlyphHash: source.sourceGlyphHash },
   status: 'reviewing',
@@ -74,5 +74,30 @@ describe('review compiler', () => {
         ],
       }).blockers,
     ).toContain('duplicate-ownership')
+  })
+
+  test('blocks a split recipe that assigns one source command to multiple pieces', () => {
+    const splitSource = {
+      ...source,
+      syllable: '가',
+      sourcePath: 'M0 0 L2 0 Z',
+      contours: [{ id: 0, d: 'M0 0 L2 0 Z', commands: [{ type: 'M' as const, x: 0, y: 0 }, { type: 'L' as const, x: 2, y: 0 }, { type: 'Z' as const }], commandHash: 'split', bounds: { x1: 0, y1: 0, x2: 2, y2: 0 }, commandTypes: 'MLZ' }],
+      physicalSteps: [{ order: 0, jamo: 'ㄱ', slot: 'choseong' as const }, { order: 1, jamo: 'ㅏ', slot: 'jungseong' as const }],
+    }
+    const splitReview: GlyphReview = {
+      ...review,
+      syllable: '가',
+      source: { extraction: splitSource.extraction, sourceGlyphHash: splitSource.sourceGlyphHash },
+      steps: [
+        { order: 0, jamo: 'ㄱ', geometry: [{ kind: 'split-piece', recipeId: 'mixed', pieceId: 'one' }] },
+        { order: 1, jamo: 'ㅏ', geometry: [{ kind: 'split-piece', recipeId: 'mixed', pieceId: 'two' }] },
+      ],
+      splitRecipes: [{ splitRecipeSchemaVersion: 2, id: 'mixed', sourceContourId: 0, sourceContourHash: 'split', method: 'source-command-partition', rationale: 'test', visualValidation: { sourceContourHash: 'split' }, pieces: [
+        { id: 'one', tokens: [{ kind: 'source-range', fromCommand: 0, toCommand: 1 }] },
+        { id: 'two', tokens: [{ kind: 'move-to-anchor', anchor: { contourId: 0, commandIndex: 1, point: 'end' } }, { kind: 'source-range', fromCommand: 1, toCommand: 2 }] },
+      ] }],
+    }
+
+    expect(validateReview(splitSource, splitReview).blockers).toContain('invalid-split-recipe')
   })
 })
