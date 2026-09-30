@@ -6,6 +6,15 @@ export interface GlyphContour {
   d: string
   /** Jamo steps physically present in this contour, based on manual inspection. */
   spansJamoSteps?: number[]
+  splitPieceIds?: string[]
+}
+
+export interface GlyphPiece {
+  id: string
+  d: string
+  sourceContourId: number
+  /** This piece was made by closing a shared interior seam in its source contour. */
+  wasSplitFromSourceContour?: boolean
 }
 
 export interface PretendardGlyph {
@@ -18,6 +27,7 @@ export interface PretendardGlyph {
   boundingBox: { x1: number; y1: number; x2: number; y2: number }
   d: string
   contours: GlyphContour[]
+  pieces: GlyphPiece[]
 }
 
 export const TARGET_SYLLABLES = {
@@ -31,15 +41,22 @@ export const TARGET_SYLLABLES = {
 
 export type TargetSyllable = keyof typeof TARGET_SYLLABLES
 
-export const DEFAULT_CONTOUR_ASSIGNMENTS: Record<TargetSyllable, number[]> = {
-  가: [1, 0],
-  하: [1, 1, 1, 0],
-  녕: [0, 1, 2, 2],
-  죄: [0, 1, 2],
-  화: [2, 0, 1, 0],
-  // Contour 2 contains both physical ㅂ and ㅅ geometry. It is deliberately
-  // assigned to ㅂ so the inspection UI exposes the conflict.
-  값: [1, 0, 2, 2],
+export const DEFAULT_PIECE_ASSIGNMENTS: Record<
+  TargetSyllable,
+  Record<string, number>
+> = {
+  가: { 'contour-0': 1, 'contour-1': 0 },
+  하: { 'contour-0': 1, 'contour-1': 1, 'contour-2': 1, 'contour-3': 0 },
+  녕: { 'contour-0': 0, 'contour-1': 1, 'contour-2': 2, 'contour-3': 2 },
+  죄: { 'contour-0': 0, 'contour-1': 1, 'contour-2': 2 },
+  화: { 'contour-0': 2, 'contour-1': 0, 'contour-2': 1, 'contour-3': 0 },
+  값: {
+    'contour-0': 1,
+    'contour-1': 0,
+    'contour-2-bieup': 2,
+    'contour-2-siot': 3,
+    'contour-3': 2,
+  },
 }
 
 // These are manually observed physical-jamo overlaps in the source outline;
@@ -107,24 +124,91 @@ function commandToSvg(command: OutlineCommand): string {
   }
 }
 
-function splitContours(commands: OutlineCommand[]): string[] {
-  const contours: string[] = []
-  let current: string[] = []
+function splitContours(commands: OutlineCommand[]): OutlineCommand[][] {
+  const contours: OutlineCommand[][] = []
+  let current: OutlineCommand[] = []
 
   for (const command of commands) {
     if (command.type === 'M' && current.length > 0) {
-      contours.push(current.join(' '))
+      contours.push(current)
       current = []
     }
-    current.push(commandToSvg(command))
+    current.push(command)
     if (command.type === 'Z') {
-      contours.push(current.join(' '))
+      contours.push(current)
       current = []
     }
   }
 
-  if (current.length > 0) contours.push(current.join(' '))
+  if (current.length > 0) contours.push(current)
   return contours
+}
+
+function commandsToSvg(commands: OutlineCommand[]): string {
+  return commands.map(commandToSvg).join(' ')
+}
+
+function assertLine(
+  command: OutlineCommand | undefined,
+  description: string,
+): asserts command is Required<Pick<OutlineCommand, 'x' | 'y'>> & OutlineCommand {
+  if (command?.type !== 'L' || command.x === undefined || command.y === undefined) {
+    throw new Error(`Unexpected Pretendard 값 contour structure at ${description}.`)
+  }
+}
+
+function splitGapsieotContour(
+  commands: OutlineCommand[],
+): [GlyphPiece, GlyphPiece] {
+  // This deliberately handles only the fixed Pretendard 600 값 outline. The
+  // font stores ㅂ and ㅅ as one unioned contour, omitting their shared interior
+  // edge. Every exterior command remains verbatim; only the two coincident
+  // interior closing segments are added to make independent fillable pieces.
+  const sharedTopEdge = commands[4]
+  const siotStart = commands[5]
+  assertLine(sharedTopEdge, 'ㅂ top-right edge')
+  assertLine(siotStart, 'ㅅ start')
+
+  if (sharedTopEdge.x !== siotStart.x) {
+    throw new Error('Unexpected Pretendard 값 shared ㅂ/ㅅ edge.')
+  }
+
+  const baseReturnIndex = commands.findIndex(
+    (command, index) =>
+      index > 5 &&
+      command.type === 'L' &&
+      command.x === sharedTopEdge.x &&
+      command.y !== undefined &&
+      command.y > siotStart.y,
+  )
+  const baseReturn = commands[baseReturnIndex]
+  assertLine(baseReturn, 'ㅂ return edge')
+
+  const bieupOuter = [
+    ...commands.slice(0, 5),
+    { type: 'L', x: sharedTopEdge.x, y: baseReturn.y },
+    ...commands.slice(baseReturnIndex + 1),
+  ]
+  const siot = [
+    { type: 'M', x: siotStart.x, y: siotStart.y },
+    ...commands.slice(6, baseReturnIndex + 1),
+    { type: 'Z' },
+  ]
+
+  return [
+    {
+      id: 'contour-2-bieup',
+      d: commandsToSvg(bieupOuter),
+      sourceContourId: 2,
+      wasSplitFromSourceContour: true,
+    },
+    {
+      id: 'contour-2-siot',
+      d: commandsToSvg(siot),
+      sourceContourId: 2,
+      wasSplitFromSourceContour: true,
+    },
+  ]
 }
 
 export async function extractPretendardGlyph(
@@ -137,8 +221,21 @@ export async function extractPretendardGlyph(
   // equally above and below the em box to match `line-height: 1` text layout.
   const baselineY = (font.unitsPerEm + font.ascender + font.descender) / 2
   const path = glyph.getPath(0, baselineY, font.unitsPerEm)
-  const contours = splitContours(path.commands)
+  const contourCommands = splitContours(path.commands)
+  const contours = contourCommands.map(commandsToSvg)
   const conflicts = CONTOUR_CONFLICTS[syllable] ?? {}
+  const splitPieces =
+    syllable === '값' ? splitGapsieotContour(contourCommands[2]) : []
+  const pieces = contourCommands.flatMap((commands, sourceContourId) => {
+    if (syllable === '값' && sourceContourId === 2) return splitPieces
+    return [
+      {
+        id: `contour-${sourceContourId}`,
+        d: commandsToSvg(commands),
+        sourceContourId,
+      },
+    ]
+  })
 
   return {
     advanceWidth: glyph.advanceWidth,
@@ -152,6 +249,11 @@ export async function extractPretendardGlyph(
       id,
       d,
       spansJamoSteps: conflicts[id],
+      splitPieceIds:
+        syllable === '값' && id === 2
+          ? splitPieces.map((piece) => piece.id)
+          : undefined,
     })),
+    pieces,
   }
 }

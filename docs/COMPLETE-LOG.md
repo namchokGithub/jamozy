@@ -506,3 +506,13 @@ Chronological log of completed units of work. One entry per meaningful change (n
   derived the SVG baseline (`1,752`) from its ascender (`1,950`) and descender
   (`-494`). The dev-only Original preview can now overlay the extracted outline
   to inspect the shared scale and position without per-syllable offsets.
+- Extended only the `/dev/jamo-svg` PoC for `값`: its mixed third source
+  contour is displayed alongside two inspectable, independently owned pieces
+  for final `ㅂ` and `ㅅ`. Every exterior source command is retained from the
+  local Pretendard 600 outline; the splitter introduces only the shared,
+  interior vertical closure needed to form two fillable paths.
+- The `값` export now contains one ordered combined path for each of `ㄱ`, `ㅏ`,
+  `ㅂ`, and `ㅅ`, and reports `requiresPathSplitting: false`. The dev tool also
+  provides a one-color source-outline overlay for visual reconstruction checks.
+- Per user direction, no build, lint, or automated tests were run for this
+  UI-only change; browser visual inspection was used instead.

@@ -4,7 +4,7 @@ import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { PageSurface } from '../../components/ui/PageSurface'
 import {
-  DEFAULT_CONTOUR_ASSIGNMENTS,
+  DEFAULT_PIECE_ASSIGNMENTS,
   extractPretendardGlyph,
   TARGET_SYLLABLES,
   type PretendardGlyph,
@@ -19,11 +19,13 @@ function GlyphSvg({
   paths,
   label,
   colored = false,
+  sourceOutlineD,
 }: {
   glyph: PretendardGlyph
   paths: Array<{ d: string; color?: string }>
   label: string
   colored?: boolean
+  sourceOutlineD?: string
 }) {
   return (
     <div className="flex h-52 items-center justify-center rounded-xl border border-[#d8e3f2] bg-[#fafcff] p-3">
@@ -42,6 +44,16 @@ function GlyphSvg({
             fillRule="evenodd"
           />
         ))}
+        {sourceOutlineD && (
+          <path
+            d={sourceOutlineD}
+            fill="none"
+            stroke="#253247"
+            strokeDasharray="18 12"
+            strokeWidth="8"
+            vectorEffect="non-scaling-stroke"
+          />
+        )}
       </svg>
     </div>
   )
@@ -68,10 +80,13 @@ export default function HangulSvgInspectorPage() {
   const [syllable, setSyllable] = useState<TargetSyllable>('가')
   const [glyph, setGlyph] = useState<PretendardGlyph | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [assignments, setAssignments] = useState<number[]>(
-    DEFAULT_CONTOUR_ASSIGNMENTS.가,
+  const [assignments, setAssignments] = useState<Record<string, number>>(
+    DEFAULT_PIECE_ASSIGNMENTS.가,
   )
   const [showAlignmentOverlay, setShowAlignmentOverlay] = useState(false)
+  const [showSplitSourceOverlay, setShowSplitSourceOverlay] = useState(false)
+  const [showMonochromeReconstruction, setShowMonochromeReconstruction] =
+    useState(false)
 
   const jamoSteps = TARGET_SYLLABLES[syllable]
 
@@ -98,15 +113,20 @@ export default function HangulSvgInspectorPage() {
         jamo,
         paths:
           glyph?.contours
-            .filter((contour) => assignments[contour.id] === step)
-            .map((contour) => contour.d) ?? [],
+            ? glyph.pieces
+                .filter((piece) => assignments[piece.id] === step)
+                .map((piece) => piece.d)
+            : [],
       })),
-    [assignments, glyph?.contours, jamoSteps],
+    [assignments, glyph, jamoSteps],
   )
 
   const conflicts =
     glyph?.contours.filter(
-      (contour) => contour.spansJamoSteps && contour.spansJamoSteps.length > 1,
+      (contour) =>
+        contour.spansJamoSteps &&
+        contour.spansJamoSteps.length > 1 &&
+        !contour.splitPieceIds,
     ) ?? []
 
   const exportPreview = glyph
@@ -126,7 +146,7 @@ export default function HangulSvgInspectorPage() {
     setSyllable(next)
     setGlyph(null)
     setError(null)
-    setAssignments(DEFAULT_CONTOUR_ASSIGNMENTS[next])
+    setAssignments(DEFAULT_PIECE_ASSIGNMENTS[next])
   }
 
   return (
@@ -219,25 +239,57 @@ export default function HangulSvgInspectorPage() {
               </div>
             </Card>
             <Card>
-              <h2 className="font-bold text-[#39465b]">
-                Per-jamo colored result
-              </h2>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="font-bold text-[#39465b]">
+                  Per-jamo colored result
+                </h2>
+                {glyph.contours.some((contour) => contour.splitPieceIds) && (
+                  <label className="flex items-center gap-1.5 text-xs font-semibold text-[#667085]">
+                    <input
+                      type="checkbox"
+                      checked={showSplitSourceOverlay}
+                      onChange={(event) =>
+                        setShowSplitSourceOverlay(event.target.checked)
+                      }
+                    />
+                    Overlay source contour
+                  </label>
+                )}
+              </div>
               <div className="mt-3">
                 <GlyphSvg
                   glyph={glyph}
-                  colored
+                  colored={!showMonochromeReconstruction}
                   label={`Colored physical jamo SVG ${syllable}`}
-                  paths={groupedPaths.flatMap(({ paths }, step) =>
-                    paths.map((d) => ({ d, color: COLORS[step] })),
-                  )}
+                  paths={groupedPaths.map(({ paths }, step) => ({
+                    d: combinedPath(paths),
+                    color: COLORS[step],
+                  }))}
+                  sourceOutlineD={
+                    showSplitSourceOverlay
+                      ? glyph.contours.find((contour) => contour.splitPieceIds)?.d
+                      : undefined
+                  }
                 />
               </div>
-              <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs font-semibold text-[#667085]">
+              <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-[#667085]">
                 {jamoSteps.map((jamo, step) => (
                   <span key={`${jamo}-${step}`} style={{ color: COLORS[step] }}>
                     {step + 1}. {jamo}
                   </span>
                 ))}
+                {glyph.contours.some((contour) => contour.splitPieceIds) && (
+                  <label className="ml-auto flex items-center gap-1.5 text-[#667085]">
+                    <input
+                      type="checkbox"
+                      checked={showMonochromeReconstruction}
+                      onChange={(event) =>
+                        setShowMonochromeReconstruction(event.target.checked)
+                      }
+                    />
+                    One color
+                  </label>
+                )}
               </div>
             </Card>
           </section>
@@ -247,12 +299,12 @@ export default function HangulSvgInspectorPage() {
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <div>
                   <h2 className="font-bold text-[#39465b]">
-                    Contours and ownership
+                    Source contours and piece ownership
                   </h2>
                   <p className="mt-1 text-sm text-[#667085]">
                     {glyph.contours.length} extracted contour
-                    {glyph.contours.length === 1 ? '' : 's'}; every selection is
-                    a physical typing step.
+                    {glyph.contours.length === 1 ? '' : 's'}; each resulting
+                    piece is assigned to a physical typing step.
                   </p>
                 </div>
                 <span className="text-xs text-[#667085]">
@@ -262,60 +314,106 @@ export default function HangulSvgInspectorPage() {
               </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 {glyph.contours.map((contour) => {
-                  const conflictJamo = contour.spansJamoSteps
+                  const sourceJamo = contour.spansJamoSteps
                     ?.map((step) => jamoSteps[step])
                     .join(' + ')
+                  const pieces = glyph.pieces.filter(
+                    (piece) => piece.sourceContourId === contour.id,
+                  )
+                  const wasSplit = pieces.some(
+                    (piece) => piece.wasSplitFromSourceContour,
+                  )
                   return (
                     <article
                       key={contour.id}
-                      className={`rounded-xl border p-3 ${conflictJamo ? 'border-[#e4bd79] bg-[#fff9ed]' : 'border-[#d8e3f2] bg-white/70'}`}
+                      className={`rounded-xl border p-3 ${wasSplit ? 'border-[#e4bd79] bg-[#fff9ed]' : 'border-[#d8e3f2] bg-white/70'}`}
                     >
                       <div className="flex items-center justify-between gap-3">
                         <h3 className="font-semibold text-[#39465b]">
-                          Contour {contour.id + 1}
+                          Source contour {contour.id + 1}
                         </h3>
-                        <select
-                          aria-label={`Assign contour ${contour.id + 1}`}
-                          className="rounded border border-[#c8d7ea] bg-white px-2 py-1 text-sm text-[#39465b]"
-                          value={assignments[contour.id]}
-                          onChange={(event) => {
-                            const step = Number(event.target.value)
-                            setAssignments((current) =>
-                              current.map((assignment, id) =>
-                                id === contour.id ? step : assignment,
-                              ),
-                            )
-                          }}
-                        >
-                          {jamoSteps.map((jamo, step) => (
-                            <option key={`${jamo}-${step}`} value={step}>
-                              {step + 1}. {jamo}
-                            </option>
-                          ))}
-                        </select>
+                        {wasSplit && (
+                          <span className="rounded-full bg-[#fff0d8] px-2 py-1 text-xs font-semibold text-[#9a6424]">
+                            split into {pieces.length} pieces
+                          </span>
+                        )}
                       </div>
-                      <div className="mt-3">
-                        <GlyphSvg
-                          glyph={glyph}
-                          label={`Contour ${contour.id + 1}`}
-                          colored
-                          paths={[
-                            {
-                              d: contour.d,
-                              color: COLORS[assignments[contour.id]],
-                            },
-                          ]}
-                        />
+                      {wasSplit && (
+                        <>
+                          <div className="mt-3">
+                            <GlyphSvg
+                              glyph={glyph}
+                              label={`Original source contour ${contour.id + 1}`}
+                              paths={[{ d: contour.d }]}
+                            />
+                          </div>
+                          <p className="mt-3 text-xs font-semibold text-[#9a6424]">
+                            Original source contour: {sourceJamo} share one
+                            unioned Pretendard outline. The two pieces below add
+                            only their shared interior closing seam.
+                          </p>
+                        </>
+                      )}
+                      <div
+                        className={`mt-3 grid gap-3 ${wasSplit ? 'sm:grid-cols-2' : ''}`}
+                      >
+                        {pieces.map((piece, pieceIndex) => (
+                          <div
+                            key={piece.id}
+                            className="rounded-lg border border-[#d8e3f2] bg-white/80 p-2"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-xs font-semibold text-[#39465b]">
+                                {wasSplit
+                                  ? `Piece ${pieceIndex + 1}`
+                                  : 'Assigned piece'}
+                              </span>
+                              <select
+                                aria-label={`Assign ${piece.id}`}
+                                className="rounded border border-[#c8d7ea] bg-white px-2 py-1 text-sm text-[#39465b]"
+                                value={assignments[piece.id]}
+                                onChange={(event) => {
+                                  const step = Number(event.target.value)
+                                  setAssignments((current) => ({
+                                    ...current,
+                                    [piece.id]: step,
+                                  }))
+                                }}
+                              >
+                                {jamoSteps.map((jamo, step) => (
+                                  <option key={`${jamo}-${step}`} value={step}>
+                                    {step + 1}. {jamo}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="mt-2">
+                              <GlyphSvg
+                                glyph={glyph}
+                                label={`${wasSplit ? 'Split piece' : 'Contour'} ${contour.id + 1}.${pieceIndex + 1}`}
+                                colored
+                                paths={[
+                                  {
+                                    d: piece.d,
+                                    color: COLORS[assignments[piece.id]],
+                                  },
+                                ]}
+                              />
+                            </div>
+                            <p className="mt-2 text-xs text-[#667085]">
+                              Assigned to {jamoSteps[assignments[piece.id]]}.
+                            </p>
+                          </div>
+                        ))}
                       </div>
-                      {conflictJamo ? (
+                      {wasSplit ? (
                         <p className="mt-3 text-xs font-semibold text-[#9a6424]">
-                          Requires splitting: this one Pretendard contour
-                          contains {conflictJamo} geometry. It cannot become
-                          separate physical-jamo paths unchanged.
+                          Split resolved: each piece now has an independent
+                          physical-jamo owner.
                         </p>
                       ) : (
                         <p className="mt-3 text-xs text-[#667085]">
-                          Assigned to {jamoSteps[assignments[contour.id]]}.
+                          Source outline is assigned without splitting.
                         </p>
                       )}
                     </article>
@@ -336,6 +434,14 @@ export default function HangulSvgInspectorPage() {
                   future path splitting.
                 </p>
               )}
+              {!conflicts.length &&
+                glyph.contours.some((contour) => contour.splitPieceIds) && (
+                  <p className="mt-3 rounded-lg bg-[#eaf5e8] p-3 text-sm text-[#4a7049]">
+                    Contour 3 was split into independently assigned ㅂ and ㅅ
+                    pieces. This preview is complete and no longer requires
+                    path splitting.
+                  </p>
+                )}
               <pre className="mt-4 max-h-[38rem] w-full overflow-auto rounded-xl bg-[#253247] p-4 text-xs leading-5 text-[#edf3fb]">
                 {JSON.stringify(exportPreview, null, 2)}
               </pre>
