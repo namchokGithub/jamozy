@@ -1,6 +1,6 @@
 import { compileReview, validateReview } from './compile'
 import { extractGlyph } from './extract'
-import type { GlyphReview, SplitRecipe } from './types'
+import type { GeometryRef, GlyphReview, SplitRecipe } from './types'
 
 const assignments: Record<string, number[]> = {
   가: [1, 0], 하: [1, 0, 0, 0], 녕: [0, 1, 2, 2], 죄: [0, 1, 2], 화: [2, 0, 1, 0], 값: [1, 0, 2, 2],
@@ -19,7 +19,7 @@ export async function seedReview(syllable: string): Promise<GlyphReview> {
       { id: 'siot', ownerStep: 3, tokens: [{ kind: 'move-to-anchor', anchor: { contourId: 2, commandIndex: 5, point: 'end' }, }, { kind: 'source-range', fromCommand: 6, toCommand: returnIndex }, { kind: 'close-to-start', reason: 'interior-closure-seam' }] },
     ] }]
   }
-  const steps = source.physicalSteps.map((physical, order) => ({ order, jamo: physical.jamo, geometry: source.contours.flatMap((contour) => {
+  const steps = source.physicalSteps.map((physical, order) => ({ order, jamo: physical.jamo, geometry: source.contours.flatMap<GeometryRef>((contour) => {
     if (syllable === '값' && contour.id === 2) return order === 2 ? [{ kind: 'split-piece' as const, recipeId: 'values-bieup-siot-v1', pieceId: 'bieup' }] : order === 3 ? [{ kind: 'split-piece' as const, recipeId: 'values-bieup-siot-v1', pieceId: 'siot' }] : []
     return sourceAssignments[contour.id] === order ? [{ kind: 'contour' as const, contourId: contour.id }] : []
   }) }))

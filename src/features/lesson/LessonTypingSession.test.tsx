@@ -82,6 +82,10 @@ function renderSession(
   )
 }
 
+function waitForTypingTarget(target: string) {
+  return screen.findByRole('img', { name: target })
+}
+
 describe('LessonTypingSession', () => {
   beforeEach(() => {
     useLessonSessionStore.setState({ session: null })
@@ -89,7 +93,7 @@ describe('LessonTypingSession', () => {
 
   /* it('highlights the current character and updates the composed text on a correct keydown', async () => {
     renderSession(vi.fn())
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
 
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
     expect(await screen.findByText('Typed: ㄱ')).toBeInTheDocument()
@@ -98,7 +102,7 @@ describe('LessonTypingSession', () => {
   it('hides the keyboard guide when showKeyboard is false', async () => {
     renderSession(vi.fn(), makeLesson(), undefined, makeKeyboardSettings({ showKeyboard: false }))
 
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
     expect(screen.queryByText('ㅂ')).not.toBeInTheDocument()
   })
 
@@ -110,7 +114,7 @@ describe('LessonTypingSession', () => {
       makeKeyboardSettings({ showEnglishKeys: false, keyboardOpacity: 0 }),
     )
 
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
     expect(screen.queryByText('r')).not.toBeInTheDocument()
     expect(screen.getByLabelText('Virtual Korean keyboard')).toHaveStyle({ opacity: '0' })
   })
@@ -118,7 +122,7 @@ describe('LessonTypingSession', () => {
   it('submits the aggregated result and calls onComplete once the lesson finishes', async () => {
     const onComplete = vi.fn()
     renderSession(onComplete)
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
 
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
@@ -133,7 +137,7 @@ describe('LessonTypingSession', () => {
   it('submits the action exactly once even if extra keydowns fire after completion', async () => {
     const actionSpy = vi.fn(async () => fakeOutcome)
     renderSession(vi.fn(), makeLesson(), actionSpy)
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
 
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
@@ -146,7 +150,7 @@ describe('LessonTypingSession', () => {
 
   it('stops handling keydowns after unmount', async () => {
     const { unmount } = renderSession(vi.fn())
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
 
     unmount()
     const sessionAfterUnmount = useLessonSessionStore.getState().session
@@ -172,7 +176,7 @@ describe('LessonTypingSession', () => {
     })
     const onCompleteA = vi.fn()
     const { unmount } = renderSession(onCompleteA, lessonA)
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
 
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
@@ -196,7 +200,7 @@ describe('LessonTypingSession', () => {
     const actionSpyB = vi.fn(async () => fakeOutcome)
     const onCompleteB = vi.fn()
     renderSession(onCompleteB, lessonB, actionSpyB)
-    await screen.findByText('나')
+    await waitForTypingTarget('나')
 
     // Give any stray effect a tick to fire before asserting it never did.
     await new Promise((resolve) => setTimeout(resolve, 50))

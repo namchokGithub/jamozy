@@ -59,6 +59,10 @@ function renderSession(
   )
 }
 
+function waitForTypingTarget(target: string) {
+  return screen.findByRole('img', { name: target })
+}
+
 describe('ReviewTypingSession', () => {
   beforeEach(() => {
     useLessonSessionStore.setState({ session: null })
@@ -66,7 +70,7 @@ describe('ReviewTypingSession', () => {
 
   /* it('highlights the current character and updates the composed text on a correct keydown', async () => {
     renderSession(vi.fn())
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
 
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
     expect(await screen.findByText('Typed: ㄱ')).toBeInTheDocument()
@@ -75,7 +79,7 @@ describe('ReviewTypingSession', () => {
   it('hides the keyboard guide when showKeyboard is false', async () => {
     renderSession(vi.fn(), [makeItem('a')], undefined, makeKeyboardSettings({ showKeyboard: false }))
 
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
     expect(screen.queryByText('ㅂ')).not.toBeInTheDocument()
   })
 
@@ -87,7 +91,7 @@ describe('ReviewTypingSession', () => {
       makeKeyboardSettings({ showEnglishKeys: false, keyboardOpacity: 0 }),
     )
 
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
     expect(screen.queryByText('r')).not.toBeInTheDocument()
     expect(screen.getByLabelText('Virtual Korean keyboard')).toHaveStyle({ opacity: '0' })
   })
@@ -95,7 +99,7 @@ describe('ReviewTypingSession', () => {
   it('submits the result and calls onComplete once the review session finishes', async () => {
     const onComplete = vi.fn()
     renderSession(onComplete)
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
 
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
@@ -114,7 +118,7 @@ describe('ReviewTypingSession', () => {
       }
     })
     renderSession(onComplete, [makeItem('a')], action)
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
 
     fireEvent.keyDown(window, { code: 'KeyT', shiftKey: false }) // wrong key first
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false }) // now correct
@@ -126,7 +130,7 @@ describe('ReviewTypingSession', () => {
 
   it('stops handling keydowns after unmount', async () => {
     const { unmount } = renderSession(vi.fn())
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
 
     unmount()
     const sessionAfterUnmount = useLessonSessionStore.getState().session
@@ -139,7 +143,7 @@ describe('ReviewTypingSession', () => {
     const itemsA = [makeItem('a')]
     const onCompleteA = vi.fn()
     const { unmount } = renderSession(onCompleteA, itemsA)
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
 
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
@@ -150,7 +154,7 @@ describe('ReviewTypingSession', () => {
     const actionSpyB = vi.fn(async () => fakeOutcome)
     const onCompleteB = vi.fn()
     renderSession(onCompleteB, itemsB, actionSpyB)
-    await screen.findByText('나')
+    await waitForTypingTarget('나')
 
     await new Promise((resolve) => setTimeout(resolve, 50))
     expect(actionSpyB).not.toHaveBeenCalled()

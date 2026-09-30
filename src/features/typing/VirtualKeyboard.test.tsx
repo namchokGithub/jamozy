@@ -5,18 +5,22 @@ import VirtualKeyboard from './VirtualKeyboard'
 describe('VirtualKeyboard', () => {
   it('highlights the key matching nextKey.code', () => {
     render(<VirtualKeyboard nextKey={{ code: 'KeyR', shift: false }} showEnglishKeys opacity={1} />)
-    expect(screen.getByText('ㄱ').closest('div')).toHaveClass('bg-[#fff0d8]')
+    expect(screen.getByLabelText('r')).toHaveClass('bg-[#fff0d8]')
   })
 
   it('highlights Shift when nextKey.shift is true', () => {
     render(<VirtualKeyboard nextKey={{ code: 'KeyQ', shift: true }} showEnglishKeys opacity={1} />)
-    expect(screen.getByText('Shift')).toHaveClass('bg-[#fff0d8]')
+    screen
+      .getAllByLabelText('Shift ⇧')
+      .forEach((key) => expect(key).toHaveClass('bg-[#fff0d8]'))
   })
 
   it('highlights nothing when nextKey is undefined', () => {
     render(<VirtualKeyboard showEnglishKeys opacity={1} />)
-    expect(screen.getByText('Shift')).not.toHaveClass('bg-amber-100')
-    expect(screen.getByText('ㄱ').closest('div')).not.toHaveClass('bg-amber-100')
+    screen
+      .getAllByLabelText('Shift ⇧')
+      .forEach((key) => expect(key).not.toHaveClass('bg-[#fff0d8]'))
+    expect(screen.getByLabelText('r')).not.toHaveClass('bg-[#fff0d8]')
   })
 
   it('hides English key labels when showEnglishKeys is false', () => {

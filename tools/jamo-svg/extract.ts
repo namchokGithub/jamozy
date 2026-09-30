@@ -6,13 +6,13 @@ import {
   COMPOUND_JUNGSEONG_PARTS,
   decomposeSyllable,
 } from '../../src/domain/korean/hangul'
-import type { JamoSlot } from '../../src/domain/korean/target-sequence'
 import {
   EXTRACTION_SCHEMA_VERSION,
   PATH_NORMALIZATION_VERSION,
   PHYSICAL_STEP_ALGORITHM_VERSION,
   type Bounds,
   type CachedGlyph,
+  type JamoSlot,
   type MedialLayoutClass,
   type OutlineCommand,
 } from './types'
@@ -26,11 +26,10 @@ export const FONT_PATH = 'src/assets/fonts/pretendard-latin-600-normal.ttf'
 function hash(value: string | Uint8Array) {
   return createHash('sha256').update(value).digest('hex')
 }
-function toArrayBuffer(buffer: Buffer) {
-  return buffer.buffer.slice(
-    buffer.byteOffset,
-    buffer.byteOffset + buffer.byteLength,
-  )
+function toArrayBuffer(buffer: Buffer): ArrayBuffer {
+  const result = new ArrayBuffer(buffer.byteLength)
+  new Uint8Array(result).set(buffer)
+  return result
 }
 function number(value: number | undefined) {
   return value === undefined ? undefined : Number(value.toFixed(6))
@@ -38,14 +37,30 @@ function number(value: number | undefined) {
 function normalizeCommand(
   command: import('opentype.js').PathCommand,
 ): OutlineCommand {
-  return {
-    type: command.type as OutlineCommand['type'],
-    x: number(command.x),
-    y: number(command.y),
-    x1: number(command.x1),
-    y1: number(command.y1),
-    x2: number(command.x2),
-    y2: number(command.y2),
+  switch (command.type) {
+    case 'Z':
+      return { type: 'Z' }
+    case 'M':
+    case 'L':
+      return { type: command.type, x: number(command.x), y: number(command.y) }
+    case 'Q':
+      return {
+        type: 'Q',
+        x: number(command.x),
+        y: number(command.y),
+        x1: number(command.x1),
+        y1: number(command.y1),
+      }
+    case 'C':
+      return {
+        type: 'C',
+        x: number(command.x),
+        y: number(command.y),
+        x1: number(command.x1),
+        y1: number(command.y1),
+        x2: number(command.x2),
+        y2: number(command.y2),
+      }
   }
 }
 export function commandToSvg(command: OutlineCommand): string {
@@ -122,6 +137,8 @@ export async function extractGlyph(
   const buffer = await readFile(fontPath)
   const font = opentype.parse(toArrayBuffer(buffer))
   const glyph = font.charToGlyph(syllable)
+  if (glyph.advanceWidth === undefined)
+    throw new Error(`Glyph ${syllable} does not have an advance width.`)
   const baselineY = (font.unitsPerEm + font.ascender + font.descender) / 2
   const contourCommands = splitContours(
     glyph.getPath(0, baselineY, font.unitsPerEm).commands.map(normalizeCommand),
