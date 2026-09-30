@@ -134,7 +134,12 @@ export function compileSplitPiecePreview(
       token.anchor.commandIndex,
       token.anchor.point,
     )
-    commands.push({ type: token.kind === 'move-to-anchor' ? 'M' : 'L', x, y })
+    commands.push({
+      type:
+        token.kind === 'move-to-anchor' || commands.length === 0 ? 'M' : 'L',
+      x,
+      y,
+    })
   }
   if (!commands.some((command) => command.type === 'M'))
     throw new Error('Add a source range beginning with M or a move-to-anchor.')

@@ -83,6 +83,22 @@ test('keeps a line seam between source ranges instead of starting a new subpath'
   ).toBe('M0 0 L10 0 L10 0 L10 10 Z')
 })
 
+test('uses a leading line seam as the start of a split path', () => {
+  expect(
+    compileSplitPiecePreview(contour, {
+      id: 'piece',
+      tokens: [
+        {
+          kind: 'line-to-anchor',
+          anchor: { contourId: 0, commandIndex: 1, point: 'end' },
+          reason: 'interior-closure-seam',
+        },
+        { kind: 'source-range', fromCommand: 2, toCommand: 3 },
+      ],
+    }),
+  ).toBe('M10 0 L10 10 Z')
+})
+
 test('normalizes painted bounds while preserving the piece’s other tokens', () => {
   expect(
     replacePrimarySourceRange(

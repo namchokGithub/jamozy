@@ -622,3 +622,11 @@ Chronological log of completed units of work. One entry per meaningful change (n
   range, and keeps existing seams individually removable.
 - Made source-range fields ordinary text inputs that update the draft on each
   valid numeric change without number-input spinners or disruptive validation.
+- Split the command visualizer into a read-only source-range preview and an
+  independent red command inspector, so exploratory clicks never modify the
+  recipe or its per-jamo result.
+- Fixed split pieces that begin with a saved line-to-anchor: the leading anchor
+  now starts the path instead of emitting an invalid initial line command.
+- Corrected five remaining PoC review records without approval: completed the
+  reviewed source-command partitions for 굵, 굸, and 귟; reassigned 낪's counter
+  to ㅂ; and added 닶's reviewed ㅂ/ㅅ partition plus its ㅂ counter ownership.

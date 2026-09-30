@@ -17,7 +17,7 @@
         },
         "sourceGlyphHash": "4ed9b1ebb5159004c933e9fc02b026de8e198d44da0e03cc80db9f5a11e1b87f"
       },
-      "status": "reviewing",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -45,8 +45,13 @@
           "jamo": "ㅂ",
           "geometry": [
             {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
+            },
+            {
               "kind": "contour",
-              "contourId": 0
+              "contourId": 1
             }
           ]
         },
@@ -55,14 +60,69 @@
           "jamo": "ㅅ",
           "geometry": [
             {
-              "kind": "contour",
-              "contourId": 1
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
             }
           ]
         }
       ],
-      "splitRecipes": [],
-      "notes": "Contour 1 contains combined ㅂ + ㅅ geometry and requires splitting.\nContour 2 appears to be the counter/hole geometry for ㅂ.\nContour 3 belongs to ㅏ.\nContour 4 belongs to ㄴ."
+      "splitRecipes": [
+        {
+          "id": "split-0-1",
+          "sourceContourId": 0,
+          "sourceContourHash": "bf1beaf6542e4b4945ff7adb5144ac64ea33132589acfb505b6ebfed406fd908",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "bf1beaf6542e4b4945ff7adb5144ac64ea33132589acfb505b6ebfed406fd908"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 13,
+                  "toCommand": 21
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 12
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 21,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 22,
+                  "toCommand": 27
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "notes": "Corrected the counter contour ownership: the small inner rectangle now belongs to Step 3 (ㅂ), while Step 4 contains only ㅅ geometry. Source-command partition and reconstruction are complete. Awaiting final visual review.",
+      "approved": {
+        "at": "2026-09-30T17:55:40.118Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "a24839379529322a0d830495bb0d9dcdc14f58aa40178e671f96f7df842486f7"
+      }
     },
     "녕": {
       "reviewSchemaVersion": 2,

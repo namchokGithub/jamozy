@@ -45,8 +45,13 @@
           "jamo": "ㅂ",
           "geometry": [
             {
+              "kind": "split-piece",
+              "recipeId": "daps-bieup-siot-v1",
+              "pieceId": "bieup"
+            },
+            {
               "kind": "contour",
-              "contourId": 2
+              "contourId": 3
             }
           ]
         },
@@ -55,14 +60,63 @@
           "jamo": "ㅅ",
           "geometry": [
             {
-              "kind": "contour",
-              "contourId": 3
+              "kind": "split-piece",
+              "recipeId": "daps-bieup-siot-v1",
+              "pieceId": "siot"
             }
           ]
         }
       ],
-      "splitRecipes": [],
-      "notes": "Combined ㅂ + ㅅ geometry requires splitting. The separate inner counter belongs to ㅂ."
+      "splitRecipes": [
+        {
+          "id": "daps-bieup-siot-v1",
+          "sourceContourId": 2,
+          "sourceContourHash": "d636610f30a7646f717ff21e3570c702b05782f32381b73227221b0111941fd9",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Reviewed Pretendard 600 final ㅂ/ㅅ union contour.",
+          "visualValidation": {
+            "sourceContourHash": "d636610f30a7646f717ff21e3570c702b05782f32381b73227221b0111941fd9"
+          },
+          "pieces": [
+            {
+              "id": "bieup",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 13,
+                  "toCommand": 21
+                }
+              ]
+            },
+            {
+              "id": "siot",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 12
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 2,
+                    "commandIndex": 21,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 22,
+                  "toCommand": 28
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "notes": "Corrected the final ㅂ/ㅅ union contour using a source-command partition. The small inner rectangle is now assigned to Step 3 (ㅂ); Step 4 contains only ㅅ geometry. Reconstruction is complete. Awaiting final visual review."
     }
   }
 }

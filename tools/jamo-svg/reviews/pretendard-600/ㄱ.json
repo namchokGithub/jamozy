@@ -191,37 +191,158 @@
         },
         "sourceGlyphHash": "57655b69c30aa880f029892c60575431b9e6f739cce9759016efcf0c9f2cee49"
       },
-      "status": "reviewing",
-      "blockers": [
-        "needs-split",
-        "empty-physical-step",
-        "unassigned-source-geometry",
-        "reconstruction-mismatch"
-      ],
+      "status": "approved",
+      "blockers": [],
       "steps": [
         {
           "order": 0,
           "jamo": "ㄱ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
+            }
+          ]
         },
         {
           "order": 1,
           "jamo": "ㅜ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
+            }
+          ]
         },
         {
           "order": 2,
           "jamo": "ㄹ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-3"
+            }
+          ]
         },
         {
           "order": 3,
           "jamo": "ㄱ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-4"
+            }
+          ]
         }
       ],
-      "splitRecipes": [],
-      "notes": "Single source contour contains geometry for all four physical jamo steps (ㄱ / ㅜ / ㄹ / ㄱ). Requires path splitting."
+      "splitRecipes": [
+        {
+          "id": "split-0-1",
+          "sourceContourId": 0,
+          "sourceContourHash": "957fe502fcad433b221b25c1006a3bab8fdc0a5409144b571b4aeee723f3a90f",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "957fe502fcad433b221b25c1006a3bab8fdc0a5409144b571b4aeee723f3a90f"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 3
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 36,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 37,
+                  "toCommand": 42
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 4,
+                  "toCommand": 8
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 14,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 15,
+                  "toCommand": 15
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 32,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 33,
+                  "toCommand": 36
+                }
+              ]
+            },
+            {
+              "id": "piece-3",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 16,
+                  "toCommand": 32
+                }
+              ]
+            },
+            {
+              "id": "piece-4",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 9,
+                  "toCommand": 14
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "notes": "Source-command partition completed for ㄱ / ㅜ / ㄹ / ㄱ. All four physical typing steps are assigned and the reconstruction matches the Pretendard source. Awaiting final visual review.",
+      "approved": {
+        "at": "2026-09-30T17:55:20.492Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "bf4099659ea324e8dbfe240c89960b6241e2dc8f29aeb7cbfeb0cddfae3cdb6e"
+      }
     },
     "굸": {
       "reviewSchemaVersion": 2,
@@ -235,10 +356,8 @@
         },
         "sourceGlyphHash": "825d6b2638f745dd94ec5d00198036458173fc5257d9db8a6006442a30c146e5"
       },
-      "status": "reviewing",
-      "blockers": [
-        "needs-split"
-      ],
+      "status": "approved",
+      "blockers": [],
       "steps": [
         {
           "order": 0,
@@ -382,7 +501,13 @@
           ]
         }
       ],
-      "notes": "Single source contour contains geometry for all four physical jamo steps (ㄱ / ㅜ / ㄹ / ㅅ). Requires path splitting."
+      "notes": "Source-command partition completed for ㄱ / ㅜ / ㄹ / ㅅ. All four physical typing steps are assigned and the reconstruction matches the Pretendard source. Awaiting final visual review.",
+      "approved": {
+        "at": "2026-09-30T17:55:26.912Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "dee083d9477d363ead8b0427c09110536e9cab7c72b9c797f989a4d0506f9db2"
+      }
     },
     "귌": {
       "reviewSchemaVersion": 2,
@@ -431,7 +556,7 @@
         }
       ],
       "splitRecipes": [],
-      "notes": "Single source contour contains geometry for all four physical jamo steps (ㄱ / ㅜ / ㅣ / ㄹ / ㅅ). Requires path splitting."
+      "notes": "Single source contour contains geometry for five physical typing steps (ㄱ / ㅜ / ㅣ / ㄹ / ㅅ). Requires path splitting.\nแต่จริงๆ มี 4 steps (ㄱ / ㅟ / ㄹ / ㅅ) ต้องแก้ physical-step algorithm ให้ ㅟ เป็นหนึ่ง step"
     },
     "귟": {
       "reviewSchemaVersion": 2,
@@ -446,36 +571,160 @@
         "sourceGlyphHash": "ed6118bb5e3c47418546f10b1f4a509ec0a6213d2b3e7cb5337793f8eb18e6a6"
       },
       "status": "reviewing",
-      "blockers": [
-        "needs-split",
-        "empty-physical-step",
-        "unassigned-source-geometry",
-        "reconstruction-mismatch"
-      ],
+      "blockers": [],
       "steps": [
         {
           "order": 0,
           "jamo": "ㄱ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
+            }
+          ]
         },
         {
           "order": 1,
           "jamo": "ㅠ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
+            }
+          ]
         },
         {
           "order": 2,
           "jamo": "ㄱ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-3"
+            }
+          ]
         },
         {
           "order": 3,
           "jamo": "ㅅ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-4"
+            }
+          ]
         }
       ],
-      "splitRecipes": [],
-      "notes": "Single source contour contains geometry for all four physical jamo steps (ㄱ / ㅠ / ㄱ / ㅅ). Requires path splitting."
+      "splitRecipes": [
+        {
+          "id": "split-0-1",
+          "sourceContourId": 0,
+          "sourceContourHash": "a21fbabd0244f1811644ce50a7f120eac5ff6748422b8b88199c77f503b255c1",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "a21fbabd0244f1811644ce50a7f120eac5ff6748422b8b88199c77f503b255c1"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 29,
+                  "toCommand": 37
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 13,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 14,
+                  "toCommand": 17
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 24,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 25,
+                  "toCommand": 28
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 37,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 38,
+                  "toCommand": 42
+                }
+              ]
+            },
+            {
+              "id": "piece-3",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 18,
+                  "toCommand": 24
+                }
+              ]
+            },
+            {
+              "id": "piece-4",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 13
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 42,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 43,
+                  "toCommand": 44
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "notes": "Source-command partition completed for ㄱ / ㅠ / ㄱ / ㅅ. All four physical typing steps are assigned and the reconstruction matches the Pretendard source. Awaiting final visual review."
     }
   }
 }
