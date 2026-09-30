@@ -1,0 +1,173 @@
+{
+  "shardSchemaVersion": 1,
+  "choseong": "ㄱ",
+  "fontFingerprint": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+  "physicalStepAlgorithmVersion": 1,
+  "splitRecipeSchemaVersion": 1,
+  "reviews": {
+    "가": {
+      "reviewSchemaVersion": 1,
+      "syllable": "가",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 1
+        },
+        "sourceGlyphHash": "80d6d205781eb499ccbba77a4bc0bc098e0246c7ad09975e9629fb97957d8159"
+      },
+      "status": "reviewing",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄱ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅏ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": []
+    },
+    "값": {
+      "reviewSchemaVersion": 1,
+      "syllable": "값",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 1
+        },
+        "sourceGlyphHash": "650e221b164ef2a94f1e2dacd8d5b1380ad56bda15060a9727e0e370f8edbb5f"
+      },
+      "status": "reviewing",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄱ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅏ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅂ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "values-bieup-siot-v1",
+              "pieceId": "bieup"
+            },
+            {
+              "kind": "contour",
+              "contourId": 3
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "jamo": "ㅅ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "values-bieup-siot-v1",
+              "pieceId": "siot"
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [
+        {
+          "splitRecipeSchemaVersion": 1,
+          "id": "values-bieup-siot-v1",
+          "sourceContourId": 2,
+          "sourceContourHash": "eded72fb8bb44c7f1e0a4e7ef7f7a9d1b6875f660351543bd2621bcb8c3df488",
+          "method": "source-command-partition",
+          "rationale": "Verified Pretendard 600 final ㅂ/ㅅ union contour.",
+          "visualValidation": {
+            "sourceContourHash": "eded72fb8bb44c7f1e0a4e7ef7f7a9d1b6875f660351543bd2621bcb8c3df488"
+          },
+          "pieces": [
+            {
+              "id": "bieup",
+              "ownerStep": 2,
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 4
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 2,
+                    "commandIndex": 23,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 24,
+                  "toCommand": 27
+                }
+              ]
+            },
+            {
+              "id": "siot",
+              "ownerStep": 3,
+              "tokens": [
+                {
+                  "kind": "move-to-anchor",
+                  "anchor": {
+                    "contourId": 2,
+                    "commandIndex": 5,
+                    "point": "end"
+                  }
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 6,
+                  "toCommand": 23
+                },
+                {
+                  "kind": "close-to-start",
+                  "reason": "interior-closure-seam"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

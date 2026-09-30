@@ -69,11 +69,20 @@ function recipeIsValid(source: CachedGlyph, recipe: SplitRecipe): boolean {
   const contour = source.contours.find(({ id }) => id === recipe.sourceContourId)
   if (!contour || recipe.splitRecipeSchemaVersion !== SPLIT_RECIPE_SCHEMA_VERSION || contour.commandHash !== recipe.sourceContourHash) return false
   const ids = new Set<string>()
-  return recipe.pieces.every((piece) => {
+  const covered = new Set<number>()
+  const valid = recipe.pieces.every((piece) => {
     if (ids.has(piece.id) || piece.ownerStep < 0 || piece.ownerStep >= source.physicalSteps.length) return false
     ids.add(piece.id)
-    return piece.tokens.every((token) => token.kind !== 'source-range' || (token.fromCommand >= 0 && token.toCommand >= token.fromCommand && token.toCommand < contour.commands.length))
+    return piece.tokens.every((token) => {
+      if (token.kind === 'source-range') {
+        if (token.fromCommand < 0 || token.toCommand < token.fromCommand || token.toCommand >= contour.commands.length) return false
+        for (let index = token.fromCommand; index <= token.toCommand; index += 1) covered.add(index)
+      }
+      if (token.kind === 'move-to-anchor') covered.add(token.anchor.commandIndex)
+      return true
+    })
   })
+  return valid && contour.commands.every((_, index) => covered.has(index))
 }
 
 export function validateReview(source: CachedGlyph, review: GlyphReview): { blockers: ReviewBlocker[] } {
@@ -81,20 +90,37 @@ export function validateReview(source: CachedGlyph, review: GlyphReview): { bloc
   if (review.reviewSchemaVersion !== REVIEW_SCHEMA_VERSION || review.syllable !== source.syllable || review.source.sourceGlyphHash !== source.sourceGlyphHash || JSON.stringify(review.source.extraction) !== JSON.stringify(source.extraction)) blockers.add('fingerprint-mismatch')
   if (review.steps.length !== source.physicalSteps.length || review.steps.some((step, index) => step.order !== source.physicalSteps[index]?.order || step.jamo !== source.physicalSteps[index]?.jamo)) blockers.add('ambiguous-ownership')
   const usedContours = new Map<number, number>()
+  const usedPieces = new Map<string, number>()
   for (const step of review.steps) {
     if (step.geometry.length === 0) blockers.add('empty-physical-step')
     for (const ref of step.geometry) {
       if (ref.kind === 'contour') usedContours.set(ref.contourId, (usedContours.get(ref.contourId) ?? 0) + 1)
+      else {
+        const key = `${ref.recipeId}/${ref.pieceId}`
+        usedPieces.set(key, (usedPieces.get(key) ?? 0) + 1)
+      }
     }
   }
   const replaced = new Set(review.splitRecipes.map(({ sourceContourId }) => sourceContourId))
   if (review.splitRecipes.some((recipe) => !recipeIsValid(source, recipe))) blockers.add('invalid-split-recipe')
+  for (const recipe of review.splitRecipes) {
+    for (const piece of recipe.pieces) {
+      const count = usedPieces.get(`${recipe.id}/${piece.id}`) ?? 0
+      if (count === 0) blockers.add('unassigned-source-geometry')
+      if (count > 1) blockers.add('duplicate-ownership')
+    }
+  }
   for (const contour of source.contours) {
     const count = usedContours.get(contour.id) ?? 0
     if (replaced.has(contour.id)) {
       if (count) blockers.add('duplicate-ownership')
     } else if (count === 0) blockers.add('unassigned-source-geometry')
     else if (count > 1) blockers.add('duplicate-ownership')
+  }
+  try {
+    if (compileReview(source, review).paths.some(({ d }) => !d.startsWith('M'))) blockers.add('reconstruction-mismatch')
+  } catch {
+    blockers.add('invalid-split-recipe')
   }
   return { blockers: [...blockers] }
 }

@@ -1,0 +1,33 @@
+{
+  "manifestSchemaVersion": 1,
+  "reviewRecordSchemaVersion": 1,
+  "splitRecipeSchemaVersion": 1,
+  "activeFontFingerprint": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+  "physicalStepAlgorithmVersion": 1,
+  "shards": [
+    {
+      "choseong": "ㄱ",
+      "file": "ㄱ.json",
+      "reviewCount": 2,
+      "sha256": "c1443762f35648c3153dee58f72fc296ae8ca5c1d5e640ab1ab6505fa4f9ada8"
+    },
+    {
+      "choseong": "ㄴ",
+      "file": "ㄴ.json",
+      "reviewCount": 1,
+      "sha256": "5444bcc0439d00d0c4d49e0bbf2bd427b2c75291f4ec5d34e256d35cf0440c4b"
+    },
+    {
+      "choseong": "ㅈ",
+      "file": "ㅈ.json",
+      "reviewCount": 1,
+      "sha256": "4db1384e640f203ee57e8e8cafa4ce4c8041606ed33ce438287cc30ac869e9ac"
+    },
+    {
+      "choseong": "ㅎ",
+      "file": "ㅎ.json",
+      "reviewCount": 2,
+      "sha256": "150f0c46331f25bacd7160cf59e26536a1ffaf268871439c43de3f0b608e73e3"
+    }
+  ]
+}

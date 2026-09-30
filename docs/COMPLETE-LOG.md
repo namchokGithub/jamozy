@@ -555,3 +555,15 @@ Chronological log of completed units of work. One entry per meaningful change (n
   monolithic-review migration as coverage grows.
 - The design intentionally defers implementation, production dataset
   generation, and any production renderer changes.
+
+### 2026-09-30 — Development-only Jamo SVG Tagger v1
+
+- Added the sharded Pretendard 600 extraction cache generator, source-outline
+  review compiler/validator, constrained verified `값` split recipe, and
+  durable choseong-sharded review/manifest plus separate queue stores.
+- Added `/dev/jamo-svg-tagger`, lazy-loaded only in development, with a queue,
+  source/contour ownership inspection, ordered colored and monochrome SVG
+  previews, source overlay, validation, safe save, and explicit approval.
+- Seeded the six verified references into committed review shards and a small,
+  explicit representative queue. The generated extraction cache remains
+  ignored; no production renderer, learner flow, or runtime SVG data changed.

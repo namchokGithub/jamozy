@@ -1,13 +1,20 @@
 # Jamo SVG Tagger v1 design
 
-Status: design only, 2026-09-30. This document specifies a development-only
-review tool. It does not authorize implementation, production SVG generation,
-or any change to the existing Canvas renderer.
+Status: approved development-only design, 2026-09-30. It specifies the review
+tool and its implementation boundary; it does not authorize production SVG
+generation or any change to the existing Canvas renderer.
 
 Read [the structural analysis](HANGUL_SVG_ANALYSIS.md) first. It is the source
 of truth for font choice, physical-jamo rules, measured full-block results,
 PoC findings, and project constraints. This document designs the next tool
 needed to act on those findings.
+
+### Implementation note
+
+The development implementation uses `pnpm jamo-svg:seed` to generate the
+ignored cache and create/update the bounded committed review and queue seeds.
+Vite serves the development-only Tagger API under `/__jamo-svg`; it is enabled
+only for `serve`, while `/dev/jamo-svg-tagger` remains a development route.
 
 ## Goal and non-goals
 
@@ -462,7 +469,7 @@ type QueueDocument = {
 The manifest is the compatibility gate. The adapter refuses to silently load
 or save when its schema versions, active font fingerprint, physical-step
 algorithm version, listed shard count, or checksum do not match. A missing
-shard is valid only when it is absent from the manifest; an empty chosen-initial
+shard is valid only when it is absent from the manifest; an empty choseong
 does not require an empty file. `GlyphReview.reviewSchemaVersion` and each
 `SplitRecipe.splitRecipeSchemaVersion` make record-level incompatibilities
 explicit as well.

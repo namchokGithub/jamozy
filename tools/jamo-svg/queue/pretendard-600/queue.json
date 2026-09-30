@@ -1,0 +1,198 @@
+{
+  "queueSchemaVersion": 1,
+  "fontFingerprint": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+  "entries": [
+    {
+      "syllable": "가",
+      "priority": 1,
+      "reasons": [
+        "verified-reference"
+      ],
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 2,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "값",
+      "priority": 1,
+      "reasons": [
+        "verified-reference"
+      ],
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": "ㅄ",
+        "physicalStepCount": 4,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "굵",
+      "priority": 3,
+      "reasons": [
+        "one-contour-multi-step"
+      ],
+      "queueKey": {
+        "medialLayout": "horizontal",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": "ㄺ",
+        "physicalStepCount": 4,
+        "contourRelation": "deficit"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "굸",
+      "priority": 3,
+      "reasons": [
+        "one-contour-multi-step"
+      ],
+      "queueKey": {
+        "medialLayout": "horizontal",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": "ㄽ",
+        "physicalStepCount": 4,
+        "contourRelation": "deficit"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "귌",
+      "priority": 4,
+      "reasons": [
+        "contour-surplus"
+      ],
+      "queueKey": {
+        "medialLayout": "compound-vertical-leading",
+        "hasFinal": true,
+        "compoundMedial": "ㅟ",
+        "compoundFinal": "ㄽ",
+        "physicalStepCount": 5,
+        "contourRelation": "deficit"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "귟",
+      "priority": 3,
+      "reasons": [
+        "one-contour-multi-step"
+      ],
+      "queueKey": {
+        "medialLayout": "horizontal",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": "ㄳ",
+        "physicalStepCount": 4,
+        "contourRelation": "deficit"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "낪",
+      "priority": 2,
+      "reasons": [
+        "compound-final-ㅄ"
+      ],
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": "ㅄ",
+        "physicalStepCount": 4,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "녕",
+      "priority": 1,
+      "reasons": [
+        "verified-reference"
+      ],
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "닶",
+      "priority": 2,
+      "reasons": [
+        "compound-final-ㅄ"
+      ],
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": "ㅄ",
+        "physicalStepCount": 4,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "죄",
+      "priority": 1,
+      "reasons": [
+        "verified-reference"
+      ],
+      "queueKey": {
+        "medialLayout": "compound-horizontal-leading",
+        "hasFinal": false,
+        "compoundMedial": "ㅚ",
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "하",
+      "priority": 1,
+      "reasons": [
+        "verified-reference"
+      ],
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 2,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "화",
+      "priority": 1,
+      "reasons": [
+        "verified-reference"
+      ],
+      "queueKey": {
+        "medialLayout": "compound-horizontal-leading",
+        "hasFinal": false,
+        "compoundMedial": "ㅘ",
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    }
+  ]
+}
