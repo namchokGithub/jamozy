@@ -516,3 +516,18 @@ Chronological log of completed units of work. One entry per meaningful change (n
   provides a one-color source-outline overlay for visual reconstruction checks.
 - Per user direction, no build, lint, or automated tests were run for this
   UI-only change; browser visual inspection was used instead.
+
+### 2026-09-30 — Full Pretendard Hangul SVG structural analysis
+
+- Added `docs/research/HANGUL_SVG_ANALYSIS.md`, recording the source-font
+  constraints, completed six-syllable PoC findings, full U+AC00–U+D7A3
+  measurements, count-signal limitations, and a recommended future tagger
+  architecture without implementing it.
+- Added the development-only `scripts/analyze-hangul-svg.ts` reproducer. It
+  scans all 11,172 modern Hangul syllables directly from the local Pretendard
+  600 TTF using the same outline coordinate convention as the SVG PoC and the
+  app's existing physical-jamo expansion rules.
+- The scan found 3,312 contour/step-count aligned glyphs, 1,715 contour-deficit
+  candidates, and 6,145 contour-surplus candidates. These remain review
+  signals, not automatic ownership or splitting decisions; the known `값`
+  union is count-aligned.
