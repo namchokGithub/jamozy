@@ -25,22 +25,30 @@ export function jamoSvgTaggerPlugin(): Plugin {
           const manifest = JSON.parse(await (await import('node:fs/promises')).readFile(join(reviewsRoot, 'manifest.json'), 'utf8')) as { activeFontFingerprint: string }
           const cacheRoot = join(ROOT, 'tools/jamo-svg/cache', manifest.activeFontFingerprint)
           const reviews = new ReviewStore(reviewsRoot, cacheRoot); const queue = new QueueStore(queueFile, manifest.activeFontFingerprint)
-          if (request.method === 'GET' && url.pathname === '/queue') return json(response, 200, { entries: await queue.list(), manifest: await reviews.getManifest() })
+          if (request.method === 'GET' && url.pathname === '/queue') {
+            const entries = await Promise.all((await queue.list()).map(async (entry) => {
+              const review = await reviews.get(entry.syllable)
+              return { ...entry, reviewStatus: review?.status ?? 'unreviewed', blockers: review?.blockers ?? [] }
+            }))
+            return json(response, 200, { entries, manifest: await reviews.getManifest() })
+          }
           const syllable = url.searchParams.get('syllable')
           if (request.method === 'GET' && url.pathname === '/glyph' && syllable) {
             const source = await loadCacheGlyph(cacheRoot, syllable); const { review: savedReview, revision } = await reviews.getWithRevision(syllable)
             const review = savedReview ?? createUnreviewedDraft(source)
             return json(response, 200, { source, review, revision, compiled: compileReview(source, review), validation: validateReview(source, review) })
           }
-          if (request.method === 'POST' && (url.pathname === '/save' || url.pathname === '/approve')) {
+          if (request.method === 'POST' && (url.pathname === '/preview' || url.pathname === '/save' || url.pathname === '/approve')) {
             const chunks: Buffer[] = []; for await (const chunk of request) chunks.push(Buffer.from(chunk)); const body = JSON.parse(Buffer.concat(chunks).toString('utf8')) as { review: GlyphReview; expectedRevision?: string; reviewer?: string }
             const review = body.review
+            const source = await loadCacheGlyph(cacheRoot, review.syllable)
+            if (url.pathname === '/preview') return json(response, 200, { compiled: compileReview(source, review), validation: validateReview(source, review) })
             if (url.pathname === '/approve') {
-              const source = await loadCacheGlyph(cacheRoot, review.syllable); const validation = validateReview(source, review)
+              const validation = validateReview(source, review)
               if (validation.blockers.length) return json(response, 422, { error: 'Cannot approve invalid review.', validation })
               review.status = 'approved'; review.approved = { at: new Date().toISOString(), reviewer: body.reviewer ?? 'local-reviewer', validatorVersion: 1, validationHash: createHash('sha256').update(JSON.stringify({ source: source.sourceGlyphHash, review })).digest('hex') }
             } else if (review.status === 'approved') { review.status = 'reviewing'; delete review.approved }
-            const saved = await reviews.save(review, body.expectedRevision); const source = await loadCacheGlyph(cacheRoot, review.syllable)
+            const saved = await reviews.save(review, body.expectedRevision)
             return json(response, 200, { review, revision: saved.revision, compiled: compileReview(source, review), validation: validateReview(source, review) })
           }
           return json(response, 404, { error: 'Unknown Jamo SVG Tagger endpoint.' })

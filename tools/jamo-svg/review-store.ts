@@ -27,7 +27,11 @@ export class ReviewStore {
   }
   async getManifest() { return this.manifest() }
   async save(review: GlyphReview, expectedRevision?: string) {
-    const source = await loadCacheGlyph(this.cacheRoot, review.syllable); const validation = validateReview(source, review); if (validation.blockers.length) throw new Error(`Review validation failed: ${validation.blockers.join(', ')}`)
+    const source = await loadCacheGlyph(this.cacheRoot, review.syllable); const validation = validateReview(source, review)
+    const unresolvedBlockers = new Set(['needs-split', 'unassigned-source-geometry', 'empty-physical-step', 'reconstruction-mismatch'])
+    const isSaveableUnresolved = review.status === 'reviewing' && validation.blockers.includes('needs-split') && validation.blockers.every((blocker) => unresolvedBlockers.has(blocker))
+    if (validation.blockers.length && !isSaveableUnresolved) throw new Error(`Review validation failed: ${validation.blockers.join(', ')}`)
+    review.blockers = validation.blockers
     const manifest = await this.manifest(); if (manifest.activeFontFingerprint !== source.extraction.fontSha256 || manifest.physicalStepAlgorithmVersion !== source.extraction.physicalStepAlgorithm) throw new Error('Stale review manifest fingerprint.')
     const choseong = source.hangul.choseong; const file = `${choseong}.json`; const existing = manifest.shards.find((item) => item.choseong === choseong)
     const shard: ReviewShard = existing ? JSON.parse(await readFile(join(this.reviewsRoot, existing.file), 'utf8')) : { shardSchemaVersion: 1, choseong, fontFingerprint: source.extraction.fontSha256, physicalStepAlgorithmVersion: 1, splitRecipeSchemaVersion: 1, reviews: {} }

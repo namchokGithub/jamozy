@@ -567,3 +567,14 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Seeded the six verified references into committed review shards and a small,
   explicit representative queue. The generated extraction cache remains
   ignored; no production renderer, learner flow, or runtime SVG data changed.
+- Added an unresolved split-review workflow: a reviewer can retain a
+  `reviewing` record with a `needs-split` blocker and note, save it without
+  inventing invalid contour ownership, and later revisit it through the
+  dedicated queue filter. Such records cannot be approved or exported.
+- Fixed a Tagger save-render crash: save responses intentionally omit immutable
+  source geometry, so the client now retains the currently loaded source glyph
+  while applying the returned review state.
+- Fixed contour reassignment previews: every dropdown edit now makes a
+  non-persisting dev-only preview request that recompiles the current draft and
+  refreshes automatic blockers. Out-of-order preview responses cannot overwrite
+  a newer draft; saving remains the only operation that writes a review shard.

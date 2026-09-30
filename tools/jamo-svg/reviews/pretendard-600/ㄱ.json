@@ -17,7 +17,7 @@
         },
         "sourceGlyphHash": "80d6d205781eb499ccbba77a4bc0bc098e0246c7ad09975e9629fb97957d8159"
       },
-      "status": "reviewing",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -41,7 +41,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-09-30T08:28:47.371Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "bbb40f3c25b225740b13460fb0222044acbed9852272aeb84058bbc83b347aa8"
+      }
     },
     "값": {
       "reviewSchemaVersion": 1,
@@ -168,6 +174,50 @@
           ]
         }
       ]
+    },
+    "굵": {
+      "reviewSchemaVersion": 1,
+      "syllable": "굵",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 1
+        },
+        "sourceGlyphHash": "57655b69c30aa880f029892c60575431b9e6f739cce9759016efcf0c9f2cee49"
+      },
+      "status": "reviewing",
+      "blockers": [
+        "needs-split",
+        "empty-physical-step",
+        "unassigned-source-geometry",
+        "reconstruction-mismatch"
+      ],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄱ",
+          "geometry": []
+        },
+        {
+          "order": 1,
+          "jamo": "ㅜ",
+          "geometry": []
+        },
+        {
+          "order": 2,
+          "jamo": "ㄹ",
+          "geometry": []
+        },
+        {
+          "order": 3,
+          "jamo": "ㄱ",
+          "geometry": []
+        }
+      ],
+      "splitRecipes": [],
+      "notes": "Single source contour contains geometry for all four physical jamo steps (ㄱ / ㅜ / ㄹ / ㄱ). Requires path splitting."
     }
   }
 }

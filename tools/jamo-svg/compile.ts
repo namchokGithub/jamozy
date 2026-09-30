@@ -87,6 +87,7 @@ function recipeIsValid(source: CachedGlyph, recipe: SplitRecipe): boolean {
 
 export function validateReview(source: CachedGlyph, review: GlyphReview): { blockers: ReviewBlocker[] } {
   const blockers = new Set<ReviewBlocker>()
+  if (review.blockers.includes('needs-split')) blockers.add('needs-split')
   if (review.reviewSchemaVersion !== REVIEW_SCHEMA_VERSION || review.syllable !== source.syllable || review.source.sourceGlyphHash !== source.sourceGlyphHash || JSON.stringify(review.source.extraction) !== JSON.stringify(source.extraction)) blockers.add('fingerprint-mismatch')
   if (review.steps.length !== source.physicalSteps.length || review.steps.some((step, index) => step.order !== source.physicalSteps[index]?.order || step.jamo !== source.physicalSteps[index]?.jamo)) blockers.add('ambiguous-ownership')
   const usedContours = new Map<number, number>()
