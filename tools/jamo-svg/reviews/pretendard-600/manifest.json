@@ -14,20 +14,26 @@
     {
       "choseong": "ㄴ",
       "file": "ㄴ.json",
+      "reviewCount": 2,
+      "sha256": "dd8f5e9debc842f2bc92554ae7655f901b212e96a6cab2d9b20b6a9ec5f7dee0"
+    },
+    {
+      "choseong": "ㄷ",
+      "file": "ㄷ.json",
       "reviewCount": 1,
-      "sha256": "5444bcc0439d00d0c4d49e0bbf2bd427b2c75291f4ec5d34e256d35cf0440c4b"
+      "sha256": "d2d4fa749e1c7cde379d7050df5e7340cd28d3de99e7c77fafca31ef798d760f"
     },
     {
       "choseong": "ㅈ",
       "file": "ㅈ.json",
       "reviewCount": 1,
-      "sha256": "4db1384e640f203ee57e8e8cafa4ce4c8041606ed33ce438287cc30ac869e9ac"
+      "sha256": "048b78a6491102b00dee4bee94b89cd8ccad206e5dc857f9b0b281a118f5a9ed"
     },
     {
       "choseong": "ㅎ",
       "file": "ㅎ.json",
       "reviewCount": 2,
-      "sha256": "150f0c46331f25bacd7160cf59e26536a1ffaf268871439c43de3f0b608e73e3"
+      "sha256": "8737251ae89fc86cced12c4760779a11b36bf2b6db83ae0f67afbf29fe4a0205"
     }
   ]
 }

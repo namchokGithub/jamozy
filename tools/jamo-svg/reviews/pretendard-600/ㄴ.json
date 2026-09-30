@@ -5,6 +5,65 @@
   "physicalStepAlgorithmVersion": 1,
   "splitRecipeSchemaVersion": 1,
   "reviews": {
+    "낪": {
+      "reviewSchemaVersion": 1,
+      "syllable": "낪",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 1
+        },
+        "sourceGlyphHash": "4ed9b1ebb5159004c933e9fc02b026de8e198d44da0e03cc80db9f5a11e1b87f"
+      },
+      "status": "reviewing",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄴ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅏ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅂ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "jamo": "ㅅ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 3
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "notes": "Contour 1 contains combined ㅂ + ㅅ geometry and requires splitting.\nContour 2 appears to be the counter/hole geometry for ㅂ.\nContour 3 belongs to ㅏ.\nContour 4 belongs to ㄴ."
+    },
     "녕": {
       "reviewSchemaVersion": 1,
       "syllable": "녕",
@@ -17,7 +76,7 @@
         },
         "sourceGlyphHash": "090d4564ebe5005249147442f82d5ad5f5751eaedde789989c9fe62ed4b80b84"
       },
-      "status": "reviewing",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -55,7 +114,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-09-30T08:59:27.334Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "1ac3863ee89a5b7564b12a5d10bf31e364cce1443d8439f2450e6f6393c3cd0c"
+      }
     }
   }
 }

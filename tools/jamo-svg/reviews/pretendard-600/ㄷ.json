@@ -1,13 +1,13 @@
 {
   "shardSchemaVersion": 1,
-  "choseong": "ㅈ",
+  "choseong": "ㄷ",
   "fontFingerprint": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
   "physicalStepAlgorithmVersion": 1,
   "splitRecipeSchemaVersion": 1,
   "reviews": {
-    "죄": {
+    "닶": {
       "reviewSchemaVersion": 1,
-      "syllable": "죄",
+      "syllable": "닶",
       "source": {
         "extraction": {
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
@@ -15,14 +15,14 @@
           "pathNormalization": 1,
           "physicalStepAlgorithm": 1
         },
-        "sourceGlyphHash": "ff9ea515870026bc1795823d9f61253815a5fc18612167b05bce1c0b19df1f57"
+        "sourceGlyphHash": "dccd315678edc6201e5c07635de39d34d6d385b44c8e9e320a3201c57019e19c"
       },
-      "status": "approved",
+      "status": "reviewing",
       "blockers": [],
       "steps": [
         {
           "order": 0,
-          "jamo": "ㅈ",
+          "jamo": "ㄷ",
           "geometry": [
             {
               "kind": "contour",
@@ -32,7 +32,7 @@
         },
         {
           "order": 1,
-          "jamo": "ㅗ",
+          "jamo": "ㅏ",
           "geometry": [
             {
               "kind": "contour",
@@ -42,22 +42,27 @@
         },
         {
           "order": 2,
-          "jamo": "ㅣ",
+          "jamo": "ㅂ",
           "geometry": [
             {
               "kind": "contour",
               "contourId": 2
             }
           ]
+        },
+        {
+          "order": 3,
+          "jamo": "ㅅ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 3
+            }
+          ]
         }
       ],
       "splitRecipes": [],
-      "approved": {
-        "at": "2026-09-30T09:00:49.488Z",
-        "reviewer": "local-reviewer",
-        "validatorVersion": 1,
-        "validationHash": "d128403961c40a869b6827a6ced1c4513084ba6b780bfece34cad44cb3bd3153"
-      }
+      "notes": "Combined ㅂ + ㅅ geometry requires splitting. The separate inner counter belongs to ㅂ."
     }
   }
 }

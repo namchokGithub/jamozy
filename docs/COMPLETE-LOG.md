@@ -583,3 +583,8 @@ Chronological log of completed units of work. One entry per meaningful change (n
   exposes ownership controls for the existing constrained split pieces so a
   reviewer can verify paths, combined coloring, and reconstruction before
   human approval.
+- Documented Split Workbench v2 before implementation: it covers the six
+  manually reviewed split candidates, preserves source-command partitioning,
+  removes V1 duplicate split-piece ownership in favor of reviewed-step refs,
+  defines a deterministic migration, and records the current note/blocker
+  inconsistency without mutating reviewed records.

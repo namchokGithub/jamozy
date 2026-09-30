@@ -1,8 +1,9 @@
 # Jamo SVG Tagger v1 design
 
-Status: approved development-only design, 2026-09-30. It specifies the review
-tool and its implementation boundary; it does not authorize production SVG
-generation or any change to the existing Canvas renderer.
+Status: approved development-only Tagger v1 design, with a proposed Split
+Workbench v2 design, 2026-09-30. It specifies the review tool and its
+implementation boundary; it does not authorize production SVG generation or
+any change to the existing Canvas renderer.
 
 Read [the structural analysis](HANGUL_SVG_ANALYSIS.md) first. It is the source
 of truth for font choice, physical-jamo rules, measured full-block results,
@@ -187,6 +188,11 @@ returns it to `reviewing` and clears its approval metadata.
 
 ## 3. Ownership schema
 
+The following is the implemented V1 shape. For all future Split Workbench
+work, the V2 ownership shape in [Split Workbench v2](#12-split-workbench-v2-design)
+supersedes it; V1 repeats piece ownership in two places and must not be
+extended.
+
 The review record owns no source geometry itself. It references immutable
 cache contours and, where needed, recipe-generated pieces. A source contour is
 either assigned as a whole to exactly one step, or replaced by one split recipe
@@ -235,6 +241,10 @@ cache's Jamozy physical typing sequence, so a compiled output always uses
 typing order rather than source-path order.
 
 ## 4. Auditable split recipes
+
+This V1 recipe shape is retained here for migration context. The V2 recipe
+shape in [Split Workbench v2](#12-split-workbench-v2-design) removes its
+duplicate `ownerStep` field while retaining every source-command token.
 
 A recipe is a constrained compiler input, not an arbitrary replacement SVG
 path. It can replay exact source command ranges, start a new subpath at a
@@ -597,3 +607,271 @@ Seed only the six PoC references and a small, explicit queue drawn from the
 review, multi-contour ownership, counter handling, one-color validation, and
 one auditable split before any attempt to scale or generate a production
 dataset.
+
+## 12. Split Workbench v2 design
+
+### Purpose and observed input
+
+V2 is a development-only manual workbench for cases that whole-contour
+ownership cannot express. It does not infer ownership, choose seams, redraw
+paths, run boolean geometry operations, or generate runtime data. A reviewer
+uses it to create an auditable split recipe from the authoritative Pretendard
+600 cache, then visually verifies the compiled result before clearing the
+existing blocker and approving the review.
+
+The first six manually reviewed split candidates define its scope:
+
+| Family | Candidates | Measured/reviewed condition | Intended representation |
+| --- | --- | --- | --- |
+| Mixed final `ㅂ + ㅅ` | `값`, `낪`, `닶` | An outer contour contains both physical final steps; a separate counter may belong to `ㅂ`. | Replace only the mixed contour with two recipe pieces; keep independently owned counter contours as whole refs. |
+| Compact / monolithic | `굵`, `굸`, `귟`, `귌` | One or a very small number of contours carries several physical steps. `귌` has two cached contours despite its current note describing one compact source case. | A reviewer selects the relevant contour(s) and creates as many manually owned recipe pieces as required; unaffected contours remain whole refs. |
+
+`값` remains the verified reference recipe. `낪` and `닶` are not assumed to
+share its exact command ranges or seams: they share only a family hypothesis
+that must be verified in the workbench. The compact family is intentionally
+not reduced to a single template; its piece boundaries are glyph-specific.
+
+### Non-negotiable geometry constraint
+
+Each V2 piece is a source-command partition. It may replay contiguous ranges
+of normalized commands from one selected source contour, start a subpath at a
+valid source anchor, and add an explicit straight closure seam between valid
+source anchors. It may not contain freehand drawing, an arbitrary replacement
+`d`, a curve that is not in the source, or output from a generic boolean path
+splitter. The recipe must identify every non-source seam so a reviewer can see
+why it exists.
+
+This preserves Pretendard geometry: exterior geometry is replayed directly
+from the bundled TTF; only declared interior closure seams make an otherwise
+open partition independently fillable.
+
+### V2 authoritative schema
+
+`ReviewedStep.geometry` is the sole persisted ownership source of truth for
+validation, preview, persistence, and eventual export. A split piece does not
+persist an `ownerStep`; its owner is derived by finding the one reviewed step
+that references `{ kind: 'split-piece', recipeId, pieceId }`.
+
+```ts
+type WholeContourRef = { kind: 'contour'; contourId: number }
+type SplitPieceRef = { kind: 'split-piece'; recipeId: string; pieceId: string }
+type GeometryRef = WholeContourRef | SplitPieceRef
+
+type ReviewedStepV2 = {
+  order: number
+  jamo: string
+  geometry: GeometryRef[] // ordered source of truth
+}
+
+type RecipeTokenV2 =
+  | { kind: 'source-range'; fromCommand: number; toCommand: number }
+  | { kind: 'move-to-anchor'; anchor: SourceAnchor }
+  | { kind: 'line-to-anchor'; anchor: SourceAnchor; reason: 'interior-closure-seam' }
+  | { kind: 'close-to-start'; reason: 'interior-closure-seam' }
+
+type SplitPieceV2 = {
+  id: string
+  tokens: RecipeTokenV2[]
+}
+
+type SplitRecipeV2 = {
+  splitRecipeSchemaVersion: 2
+  id: string
+  sourceContourId: number
+  sourceContourHash: string
+  method: 'source-command-partition'
+  pieces: SplitPieceV2[]
+  rationale: string
+  visualValidation: { sourceContourHash: string; reconstructionHash?: string }
+}
+
+type ApprovalRecord = {
+  at: string
+  reviewer: string
+  validatorVersion: number
+  validationHash: string
+}
+
+type GlyphReviewV2 = {
+  reviewSchemaVersion: 2
+  syllable: string
+  source: Pick<CachedGlyph, 'extraction' | 'sourceGlyphHash'>
+  status: ReviewStatus
+  blockers: ReviewBlocker[]
+  steps: ReviewedStepV2[]
+  splitRecipes: SplitRecipeV2[]
+  notes?: string
+  approved?: ApprovalRecord
+}
+
+type ReviewShardV2 = {
+  shardSchemaVersion: 2
+  choseong: string
+  fontFingerprint: string
+  physicalStepAlgorithmVersion: 1
+  splitRecipeSchemaVersion: 2
+  reviews: Record<string, GlyphReviewV2>
+}
+
+type ReviewManifestV2 = {
+  manifestSchemaVersion: 2
+  reviewRecordSchemaVersion: 2
+  splitRecipeSchemaVersion: 2
+  activeFontFingerprint: string
+  physicalStepAlgorithmVersion: 1
+  shards: Array<{ choseong: string; file: string; reviewCount: number; sha256: string }>
+}
+```
+
+The V2 compiler resolves a piece's owner only from `steps`. The UI derives the
+selected owner in the same way. A piece referenced zero times is unassigned;
+one time is assigned; more than once is duplicate ownership. This removes the
+V1 divergence risk between `SplitPiece.ownerStep` and `ReviewedStep.geometry`.
+
+`QueueDocument` remains schema version 1 because it stores workflow priority,
+not split geometry. It must not absorb review ownership or recipes.
+
+### V1 to V2 migration
+
+Migration is a deliberate development command, never an implicit load-time
+reinterpretation. It processes one choseong shard at a time, validates against
+the active extraction cache, writes a temporary V2 shard, validates it again,
+atomically replaces the shard, then updates the V2 manifest checksum. Git
+retains the V1 revision as recovery history.
+
+For every V1 `SplitPiece`:
+
+1. Read its V1 `ownerStep` only as a migration cross-check.
+2. Find the authoritative V1 `SplitPieceRef` in `review.steps`.
+3. If exactly one step references it, retain all recipe tokens unchanged,
+   remove `ownerStep`, and derive its V2 owner from that step.
+4. If the V1 field and step reference disagree, retain the `steps` assignment
+   as the documented V1 export source of truth, emit a migration diagnostic,
+   and require human review before approval.
+5. If a piece is unassigned or duplicated, migrate its tokens but preserve the
+   existing validation blocker; it remains reviewing and cannot be approved.
+
+The verified `값` recipe migrates deterministically: its `bieup` and `siot`
+piece tokens, source contour hash, rationale, closure seams, and step refs are
+copied unchanged; only each redundant `ownerStep` is removed. Its outer
+counter remains a whole-contour ref in the `ㅂ` reviewed step. No visible
+Pretendard geometry is lost or regenerated.
+
+Unknown V1/V2 record, recipe, shard, or manifest versions are a hard loading
+error. A tool must report that migration is required and refuse to save or
+approve until the known migration completes. Font/extraction fingerprint or
+physical-step-algorithm mismatches are separately stale-source conditions,
+not schema migrations.
+
+### Current review-state inconsistency
+
+The reviewed records currently contain two explicit states:
+
+- `굵`, `굸`, `귟`, and `귌` are `reviewing` with the persisted
+  `needs-split` blocker.
+- `낪` and `닶` have reviewer notes stating that `ㅂ + ㅅ` must split, but
+  their persisted blocker arrays are currently empty.
+
+V2 must not parse note prose as geometry or silently mutate either state. When
+a saved review has a note but no `needs-split`, the workbench presents a
+prominent **review-state consistency warning**: “This note may describe
+unresolved split work; confirm its blocker state.” The reviewer explicitly
+chooses either **Mark needs split** or **Keep note without a split blocker**.
+Both are intentional review actions; neither happens on load or as a side
+effect of recipe validation.
+
+`needs-split` remains a review blocker, not a second ownership model and not a
+lifecycle status. A structurally valid recipe does **not** remove it. The
+reviewer must inspect the final individual physical-step paths, the colored
+combined result, the one-color reconstruction, and the source overlay; then
+explicitly clear `needs-split` and perform human approval.
+
+### Split Workbench workflow
+
+```text
+open a needs-split review
+  → resolve any review-state consistency warning explicitly
+  → select one source contour to replace
+  → inspect its stable command index list and anchors
+  → create/edit named pieces from source command ranges
+  → add explicit anchor-to-anchor closure seams where needed
+  → assign each piece by adding its ref to an ordered physical step
+  → inspect live compiled previews and validation
+  → save reviewing recipe, or after visual verification clear blocker → approve
+```
+
+The workbench starts with a single selected source contour. It displays:
+
+1. The original source contour and a stable indexed command list. Each command
+   has its normalized cache index, type, coordinates/control points, and
+   stable source contour hash context.
+2. Piece cards with command-range selection, a token sequence, explicit seam
+   controls that only offer anchors from the selected contour, and a manually
+   selected physical-step owner derived from `ReviewedStep.geometry`.
+3. Live previews of the original source contour; separately colored split
+   pieces; each compiled physical step; the combined per-jamo colored result;
+   one-color reconstruction; and source/reconstruction overlay.
+4. A coverage ledger showing every source command as exactly once owned,
+   uncovered, or duplicate. Synthetic seams are displayed separately and are
+   never counted as source-command ownership.
+
+Changing any whole-contour assignment, piece range, seam, or piece reference
+recompiles the same exportable geometry used by the existing physical-step,
+colored-result, reconstruction, and overlay panels. The workbench stores no
+alternate preview paths.
+
+### Validation invariants
+
+V2 blocks saving an apparently resolved recipe or approving a review when any
+of the following fails:
+
+- The source fingerprint, source glyph hash, selected contour ID, and selected
+  contour command hash match the active cache exactly.
+- A range is non-empty, ordered, and within the selected contour's stable
+  command indexes.
+- Every source command in a replaced contour is covered exactly once across
+  that recipe's pieces; no command is omitted or owned by multiple pieces.
+- Every anchor names the selected source contour, a valid command index, and a
+  point available on that command. Closure seams are explicit and only use
+  valid source anchors.
+- A replaced source contour has no whole-contour ref. A non-replaced contour
+  has exactly one whole-contour ref. Each recipe piece has exactly one
+  `ReviewedStep.geometry` ref.
+- The reviewed step array exactly matches the physical typing count, order,
+  and jamo labels; every step compiles to non-empty geometry.
+- Every compiled path is valid SVG with `fill-rule="evenodd"`; the ordered
+  paths reconstruct the source under deterministic geometric/raster
+  comparison, allowing only declared interior seams.
+- `needs-split` prevents approval until explicitly cleared by the reviewer,
+  even if all structural and reconstruction checks pass.
+
+The workbench may save a clearly marked unresolved review with
+`needs-split`, but it must preserve blockers and must never allow runtime
+export or approval from that state.
+
+### Smallest useful implementation scope
+
+The first implementation is intentionally narrow:
+
+1. Add V2 review/recipe/shard/manifest schemas and the deterministic V1→V2
+   migration command with migration diagnostics.
+2. Upgrade the compiler and validator so ownership is derived solely from
+   `ReviewedStep.geometry`.
+3. Add one dev-only split workbench for one selected source contour: indexed
+   command inspection, range tokens, existing-anchor closure seams, manual
+   piece-to-step assignment, live compiled previews, coverage ledger, and
+   save/approval gating.
+4. Surface the note-without-blocker consistency warning and require an
+   explicit reviewer action; do not mutate `낪` or `닶` during migration.
+5. Verify the migrated `값` recipe and use `낪`/`닶` as the first manual mixed
+   family reviews, then use `굵`, `굸`, `귟`, and `귌` to assess compact cases.
+
+### Intentionally deferred
+
+- Automatic split-boundary discovery, automatic ownership inference, template
+  propagation, and a generic boolean geometry splitter.
+- Multi-contour split editing in one transaction beyond selecting one contour
+  at a time; multiple independent recipes may still compose a glyph.
+- Automatic conversion of review-note prose into blockers or geometry.
+- Full-block queue expansion, dataset generation, runtime SVG delivery, and
+  production renderer integration.
