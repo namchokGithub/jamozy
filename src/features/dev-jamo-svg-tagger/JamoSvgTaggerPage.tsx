@@ -565,7 +565,6 @@ const reviewStatuses = [
   'proposed',
   'reviewing',
   'approved',
-  'stale',
 ] as const
 /** What each validation blocker means and where to fix it in the Tagger. */
 const blockerHints: Record<string, string> = {
@@ -1509,25 +1508,27 @@ export default function JamoSvgTaggerPage() {
               <option value="needs-split">Needs split</option>
             </select>
           </label>
-          <fieldset className="mt-3 text-xs text-[#39465b]">
-            <legend className="font-semibold">
-              Status{' '}
+          <fieldset className="mt-4 rounded-xl border border-[#d8e3f2] bg-[#f9fbff] p-3 text-xs text-[#39465b]">
+            <legend className="sr-only">Status filters</legend>
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-bold">Status</span>
               <button
                 type="button"
-                className="ml-1 font-normal text-[#8d4c43] hover:underline"
+                className="rounded-full px-2 py-0.5 font-semibold text-[#8d4c43] transition hover:bg-[#fff0eb]"
                 onClick={() => applyStatusFilter([])}
               >
-                {statusFilter.length === 0 ? 'all shown' : 'show all'}
+                {statusFilter.length === 0 ? 'All shown' : 'Show all'}
               </button>
-            </legend>
-            <div className="mt-1 grid grid-cols-2 gap-1">
+            </div>
+            <div className="mt-2 grid gap-1.5">
               {reviewStatuses.map((status) => (
                 <label
                   key={status}
-                  className="flex items-center gap-1.5 rounded border px-2 py-1"
+                  className={`grid min-w-0 cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-lg border px-2.5 py-2 transition ${statusFilter.includes(status) ? 'border-[#7ca0df] bg-[#edf3ff] shadow-sm' : 'border-[#d8e3f2] bg-white hover:border-[#b7cbe8] hover:bg-[#f4f8ff]'}`}
                 >
                   <input
                     type="checkbox"
+                    className="accent-[#4c7fca]"
                     checked={statusFilter.includes(status)}
                     onChange={() =>
                       applyStatusFilter(
@@ -1537,8 +1538,10 @@ export default function JamoSvgTaggerPage() {
                       )
                     }
                   />
-                  <span className="capitalize">{status}</span>
-                  <span className="ml-auto text-[#667085]">
+                  <span className="min-w-0 truncate capitalize leading-none">
+                    {status}
+                  </span>
+                  <span className="shrink-0 rounded-full bg-[#e9eff8] px-1.5 py-0.5 font-semibold text-[#52647d]">
                     {statusCounts.get(status) ?? 0}
                   </span>
                 </label>
