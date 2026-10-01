@@ -203,6 +203,54 @@
         "validatorVersion": 1,
         "validationHash": "9b3c711bb38e2cf82ab0ee7f6121aa48f9f11bff9ae27869271943151e5079c6"
       }
+    },
+    "끼": {
+      "reviewSchemaVersion": 2,
+      "syllable": "끼",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 2
+        },
+        "sourceGlyphHash": "9a86548bcd46f6cbd7d50c99becc89dc6a11075dcb832aa697e643c0a844a734"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄲ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            },
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅣ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T10:59:07.482Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "6d6c17b1a67231685066ceba4237d6959495f86c1ab3ffd82ddea48e417609c9"
+      }
     }
   }
 }

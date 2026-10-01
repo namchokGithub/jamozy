@@ -693,3 +693,15 @@ Chronological log of completed units of work. One entry per meaningful change (n
   pair caused by approved `니`, whose ㄴ/ㅣ ownership is swapped. Errors appear
   from 400. `니` was excluded as a template.
 - Proposed 209 of 366 unreviewed syllables for human review (103 templates).
+
+### 2026-10-01 — Jamo SVG proposals transfer split recipes
+
+- `proposeReview` now also copies split recipes from approved templates. A
+  recipe transfers only onto a matched contour with the same command-type
+  sequence and every on-curve point within `--max-cost` of the template's.
+  Templates must share the target's medial vowel; a different vowel with
+  similar bounds (`게` from `키`) proposed a union contour as one jamo.
+- Leave-one-out over 350 approved reviews: 0 wrong proposals. The point check
+  rejected three transfers that passed validation but produced shards
+  (`돌 붙 벗`). Approved `니` still has ㄴ/ㅣ swapped and was excluded.
+- Proposed 18 of 146 unreviewed syllables; no existing review changed.

@@ -359,11 +359,11 @@ function CommandRangePainter({
       </svg>
       <div className="flex items-center gap-2 text-xs text-[#667085]">
         <p>
-        {inspectRange
-          ? `Selected commands ${Math.min(inspectRange.start, inspectRange.end)}–${Math.max(inspectRange.start, inspectRange.end)}.`
-          : ranges.length > 0
-            ? `Source ranges: ${ranges.map((range) => `${range.fromCommand}–${range.toCommand}`).join(', ')}.`
-            : 'Click a segment, or drag from the first segment to the last.'}
+          {inspectRange
+            ? `Selected commands ${Math.min(inspectRange.start, inspectRange.end)}–${Math.max(inspectRange.start, inspectRange.end)}.`
+            : ranges.length > 0
+              ? `Source ranges: ${ranges.map((range) => `${range.fromCommand}–${range.toCommand}`).join(', ')}.`
+              : 'Click a segment, or drag from the first segment to the last.'}
         </p>
         {inspectRange && onAddSelectedRange && (
           <button
@@ -921,9 +921,6 @@ export default function JamoSvgTaggerPage() {
                 .toUpperCase()}{' '}
               · {state.review.status}
             </p>
-            <p>
-              {state.source.physicalSteps.map(({ jamo }) => jamo).join(' / ')}
-            </p>
             <div className="flex items-center gap-4 text-xs font-semibold">
               {error && (
                 <span
@@ -954,7 +951,10 @@ export default function JamoSvgTaggerPage() {
               />
             </Card>
             <Card className="p-4">
-              <h2 className="font-bold text-[#39465b]">Per-jamo result</h2>
+              <h2 className="font-bold text-[#39465b]">
+                Per-jamo result{' '}
+                {state.source.physicalSteps.map(({ jamo }) => jamo).join(' / ')}
+              </h2>
               <p
                 className={`mt-1 text-xs text-[#667085] ${freezePreviews ? 'sr-only' : ''}`}
               >
@@ -1688,7 +1688,10 @@ export default function JamoSvgTaggerPage() {
                                 contour={activeContour}
                                 ranges={[]}
                                 inspect
-                                onAddSelectedRange={(fromCommand, toCommand) => {
+                                onAddSelectedRange={(
+                                  fromCommand,
+                                  toCommand,
+                                ) => {
                                   const latestSourceRangeIndex =
                                     piece.tokens.reduce(
                                       (latestIndex, token, tokenIndex) =>

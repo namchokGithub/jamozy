@@ -3961,7 +3961,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "얼"
+      ]
     },
     {
       "syllable": "답",
@@ -4323,7 +4325,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "걱"
+      ]
     },
     {
       "syllable": "키",
@@ -5159,7 +5163,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "엇"
+      ]
     },
     {
       "syllable": "불",
@@ -5176,7 +5182,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "물"
+      ]
     },
     {
       "syllable": "으",
@@ -5284,7 +5292,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "순"
+      ]
     },
     {
       "syllable": "난",
@@ -5502,7 +5512,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "물"
+      ]
     },
     {
       "syllable": "절",
@@ -5627,7 +5639,9 @@
         "physicalStepCount": 3,
         "contourRelation": "deficit"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "술"
+      ]
     },
     {
       "syllable": "설",
@@ -5644,7 +5658,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "절"
+      ]
     },
     {
       "syllable": "강",
@@ -5737,7 +5753,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "물"
+      ]
     },
     {
       "syllable": "농",
@@ -6245,7 +6263,9 @@
         "physicalStepCount": 3,
         "contourRelation": "deficit"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "돈"
+      ]
     },
     {
       "syllable": "삼",
@@ -7136,7 +7156,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "엇"
+      ]
     },
     {
       "syllable": "놈",
@@ -7206,7 +7228,9 @@
         "physicalStepCount": 4,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "삶"
+      ]
     },
     {
       "syllable": "맙",
@@ -7388,7 +7412,9 @@
         "physicalStepCount": 3,
         "contourRelation": "deficit"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "술"
+      ]
     },
     {
       "syllable": "확",
@@ -7405,7 +7431,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "활"
+      ]
     },
     {
       "syllable": "뉴",
@@ -8296,7 +8324,9 @@
         "physicalStepCount": 3,
         "contourRelation": "deficit"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "술"
+      ]
     },
     {
       "syllable": "록",
@@ -8366,7 +8396,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "동"
+      ]
     },
     {
       "syllable": "응",
@@ -8724,7 +8756,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "중"
+      ]
     },
     {
       "syllable": "에",
@@ -8832,7 +8866,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "법"
+      ]
     },
     {
       "syllable": "논",
