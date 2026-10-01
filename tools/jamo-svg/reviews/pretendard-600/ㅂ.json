@@ -65,7 +65,7 @@
         },
         "sourceGlyphHash": "82a3efd2bc4a21c9ce7cbb899427cc3fa922d43126d676b6832a1e7f03e75bb2"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -103,7 +103,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T04:49:13.808Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "281e8edfa7a91afec54bca0baec4dae30e3ae0c72427c1e6c87eb012874c17fa"
+      }
     },
     "받": {
       "reviewSchemaVersion": 2,
@@ -175,7 +181,7 @@
         },
         "sourceGlyphHash": "a43b5f3ddc213a9cb4ab2c024607821c2e3b1927d64cfb3fb8129a0a0d30ba7c"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -213,7 +219,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T04:48:51.124Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "89e6328ee09bfaef014ce48ec1ff9ac1f7d59004e13fbaf1a11b0d94681a1a51"
+      }
     },
     "밥": {
       "reviewSchemaVersion": 2,
@@ -227,7 +239,7 @@
         },
         "sourceGlyphHash": "0498e56fda5dafd7310fb062adcfee467ba9da15c94f68d0b20b220b4620fcd0"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -269,7 +281,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T04:48:10.533Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "1c92721eb5646674ecb1e5095730dd6c53b58ebb4e36177cbaad5e97dd7e3f30"
+      }
     },
     "방": {
       "reviewSchemaVersion": 2,
@@ -345,7 +363,7 @@
         },
         "sourceGlyphHash": "35735a65d9c7655ffc3320977bdc860431ec9d1a43069ca6653c991a892a8f4c"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -373,7 +391,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T04:48:30.069Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "d27662c1d8e1e913aeedf8dc34c436b92dc89491cb5a8eb9ab40ae6e3dd6ddc1"
+      }
     },
     "버": {
       "reviewSchemaVersion": 2,
@@ -557,7 +581,7 @@
         },
         "sourceGlyphHash": "40abcf2135a94dded6ea2fcd4468f18793b79888b1aade6370acb5dfbb7c8989"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -595,7 +619,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T04:47:58.772Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "0ab65e3017c7532c600ee4964f570cb8dc97c2c7114c2f68c967907120aa7e72"
+      }
     },
     "비": {
       "reviewSchemaVersion": 2,
@@ -609,7 +639,7 @@
         },
         "sourceGlyphHash": "31ef0c7666a71cf0923671bf67e5160cc3f4bc61722cd788a8f9555a391e4826"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -637,7 +667,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T04:48:32.401Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "a02ceb03dbfa23e5538b9d9789b22d16bff7d2f2d3d5090d363b979a3a0e6130"
+      }
     },
     "빛": {
       "reviewSchemaVersion": 2,
@@ -651,7 +687,7 @@
         },
         "sourceGlyphHash": "f00b8cb998113dbf200e7ed8758c694a2f39e2cc88288b99911f43c4d11b2df4"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -689,7 +725,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T04:49:33.573Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "e36d7ace36818a4ce4df6fa1033fc398dce0d4aabc04b2603dacf08a8ffa34e7"
+      }
     }
   }
 }

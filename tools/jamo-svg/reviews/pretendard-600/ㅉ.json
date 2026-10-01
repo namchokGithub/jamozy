@@ -17,7 +17,7 @@
         },
         "sourceGlyphHash": "8b7dc2295643086d38e1cd967571c44c641ac85d65b9fdffa303afc643dfb33c"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -51,7 +51,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T04:50:09.060Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "dc9bcac377599511785aa9454cead286d2512e3f1248990d11e470663c36f369"
+      }
     }
   }
 }

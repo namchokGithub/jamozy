@@ -389,6 +389,8 @@ function DraftSegmentationPreview({
   )
 }
 const QUEUE_PAGE_SIZE = 12
+const compactButton =
+  'rounded-full border border-[#d8dce6] px-3 py-1 text-xs font-semibold text-[#39465b] hover:bg-[#f7f7fa] disabled:cursor-not-allowed disabled:opacity-40'
 const statusSnapshotOf = (items: QueueEntry[]) =>
   new Map(
     items.map((item) => [item.syllable, item.reviewStatus ?? 'unreviewed']),
@@ -820,14 +822,15 @@ export default function JamoSvgTaggerPage() {
               · {state.review.status}
             </p>
             <div className="flex items-center gap-4 text-xs font-semibold">
-              <button
-                type="button"
-                className="text-[#8d4c43] hover:underline disabled:cursor-not-allowed disabled:text-[#98a2b3] disabled:no-underline"
-                disabled={!canApprove}
-                onClick={() => void save(true)}
-              >
-                Approve after visual review
-              </button>
+              {error && (
+                <span
+                  role="alert"
+                  title={error}
+                  className="max-w-md truncate font-semibold text-[#c0362c]"
+                >
+                  {error}
+                </span>
+              )}
               <label className="text-[#39465b]">
                 <input
                   type="checkbox"
@@ -838,7 +841,7 @@ export default function JamoSvgTaggerPage() {
               </label>
             </div>
           </div>
-          <section className="grid gap-3 md:grid-cols-3">
+          <section className="grid gap-3 md:grid-cols-4">
             <Card className="p-4">
               <h2 className="font-bold text-[#39465b]">Source glyph</h2>
               <GlyphPreview
@@ -896,10 +899,71 @@ export default function JamoSvgTaggerPage() {
                 paths={state.compiled.paths}
               />
             </Card>
+            <Card className="p-4">
+              <h2 className="font-bold text-[#39465b]">
+                Validation and review
+              </h2>
+              <p className="mt-1 text-xs">
+                {[
+                  ...new Set([
+                    ...state.validation.blockers,
+                    ...state.review.blockers,
+                  ]),
+                ].length
+                  ? `Blocked: ${[...new Set([...state.validation.blockers, ...state.review.blockers])].join(', ')}`
+                  : 'No automatic blockers. Human visual approval is still required.'}
+              </p>
+              <label className="mt-2 block text-xs font-semibold text-[#39465b]">
+                Review note
+                <textarea
+                  className="mt-1 min-h-14 w-full rounded border p-2 text-xs font-normal"
+                  value={state.review.notes ?? ''}
+                  onChange={(event) =>
+                    setState(
+                      (current) =>
+                        current && {
+                          ...current,
+                          review: {
+                            ...current.review,
+                            notes: event.target.value,
+                          },
+                        },
+                    )
+                  }
+                  placeholder="Why this glyph needs later split work…"
+                />
+              </label>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <button
+                  type="button"
+                  className={compactButton}
+                  onClick={toggleNeedsSplit}
+                >
+                  {state.review.blockers.includes('needs-split')
+                    ? 'Clear needs split'
+                    : 'Mark as needs split'}
+                </button>
+                <button
+                  type="button"
+                  className={`${compactButton} border-[#a85d4e] bg-[#a85d4e] text-white hover:bg-[#8d4c43]`}
+                  onClick={() => void save(false)}
+                >
+                  Save review
+                </button>
+                <button
+                  type="button"
+                  className={compactButton}
+                  disabled={!canApprove}
+                  onClick={() => void save(true)}
+                >
+                  Approve after visual review
+                </button>
+              </div>
+            </Card>
           </section>
         </div>
       )}
-      {error && <Card className="mt-4 text-[#9d3b32]">{error}</Card>}
+      {error && !state && <Card className="mt-4 text-[#9d3b32]">{error}</Card>}
       {reviewStateWarning && (
         <Card className="mt-4 border-[#e5b869] bg-[#fff9ed] text-[#7b4b17]">
           <strong>Review-state consistency warning.</strong> This saved note may
@@ -1574,59 +1638,6 @@ export default function JamoSvgTaggerPage() {
                   )}
                 </div>
               )}
-            </Card>
-            <Card className="mt-4">
-              <h2 className="font-bold text-[#39465b]">
-                Validation and review
-              </h2>
-              <p className="mt-2 text-sm">
-                {[
-                  ...new Set([
-                    ...state.validation.blockers,
-                    ...state.review.blockers,
-                  ]),
-                ].length
-                  ? `Blocked: ${[...new Set([...state.validation.blockers, ...state.review.blockers])].join(', ')}`
-                  : 'No automatic blockers. Human visual approval is still required.'}
-              </p>
-              <label className="mt-3 block text-sm font-semibold text-[#39465b]">
-                Review note
-                <textarea
-                  className="mt-1 min-h-20 w-full rounded border p-2 text-sm font-normal"
-                  value={state.review.notes ?? ''}
-                  onChange={(event) =>
-                    setState(
-                      (current) =>
-                        current && {
-                          ...current,
-                          review: {
-                            ...current.review,
-                            notes: event.target.value,
-                          },
-                        },
-                    )
-                  }
-                  placeholder="Why this glyph needs later split work…"
-                />
-              </label>
-              <p className="mt-1 text-xs text-[#667085]">
-                SVG paths use evenodd fill to preserve counters/holes.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Button variant="secondary" onClick={toggleNeedsSplit}>
-                  {state.review.blockers.includes('needs-split')
-                    ? 'Clear needs split'
-                    : 'Mark as needs split'}
-                </Button>
-                <Button onClick={() => void save(false)}>Save review</Button>
-                <Button
-                  variant="secondary"
-                  disabled={!canApprove}
-                  onClick={() => void save(true)}
-                >
-                  Approve after visual review
-                </Button>
-              </div>
             </Card>
           </main>
         )}
