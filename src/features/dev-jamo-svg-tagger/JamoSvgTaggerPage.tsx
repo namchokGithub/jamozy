@@ -8,6 +8,7 @@ import { retainSourceAfterSave } from './tagger-state'
 import { counterContours } from '../../../tools/jamo-svg/compile'
 import {
   commandCoverage as coverageOf,
+  moveSourceRange,
   removeSourceRange,
 } from '../../../tools/jamo-svg/split-workbench'
 import type {
@@ -1987,6 +1988,46 @@ export default function JamoSvgTaggerPage() {
                                           key={`${piece.id}-${tokenIndex}`}
                                           className="rounded border border-[#d8e3f2] p-2"
                                         >
+                                          {ranges.length > 1 && (
+                                            <div className="mb-1 flex justify-end gap-1">
+                                              {(
+                                                [
+                                                  [-1, '↑ Move up'],
+                                                  [1, '↓ Move down'],
+                                                ] as const
+                                              ).map(([direction, text]) => {
+                                                const position =
+                                                  ranges.indexOf(token)
+                                                const disabled =
+                                                  position + direction < 0 ||
+                                                  position + direction >=
+                                                    ranges.length
+                                                return (
+                                                  <button
+                                                    key={direction}
+                                                    type="button"
+                                                    className={compactButton}
+                                                    disabled={disabled}
+                                                    title="Reorder this range; seams between ranges are rebuilt"
+                                                    onClick={() =>
+                                                      updatePiece(
+                                                        activeRecipe.id,
+                                                        piece.id,
+                                                        moveSourceRange(
+                                                          piece.tokens,
+                                                          tokenIndex,
+                                                          direction,
+                                                          activeRecipe.sourceContourId,
+                                                        ),
+                                                      )
+                                                    }
+                                                  >
+                                                    {text}
+                                                  </button>
+                                                )
+                                              })}
+                                            </div>
+                                          )}
                                           {recipeContours.length > 1 && (
                                             <label className="mb-1 flex items-center text-xs font-semibold">
                                               <span

@@ -1,7 +1,8 @@
-import { expect, test } from 'vitest'
+import { describe, expect, test } from 'vitest'
 import {
   commandCoverage,
   compileSplitPiecePreview,
+  moveSourceRange,
   removeSourceRange,
   replacePrimarySourceRange,
 } from './split-workbench'
@@ -171,4 +172,81 @@ test('counts coverage only for ranges on the requested contour', () => {
   expect(commandCoverage({ ...contour, id: 7 }, pieces, 0)).toEqual([
     0, 1, 1, 0,
   ])
+})
+
+describe('moveSourceRange', () => {
+  const range = (
+    fromCommand: number,
+    toCommand: number,
+    contourId?: number,
+  ) => ({
+    kind: 'source-range' as const,
+    fromCommand,
+    toCommand,
+    ...(contourId === undefined ? {} : { contourId }),
+  })
+  const seam = (contourId: number, commandIndex: number) => ({
+    kind: 'line-to-anchor' as const,
+    anchor: { contourId, commandIndex, point: 'end' as const },
+    reason: 'interior-closure-seam' as const,
+  })
+
+  // 역's ㅕ piece: outline 0–4, counter 1–3, outline 19–21.
+  const yeok = [
+    range(0, 4),
+    seam(3, 0),
+    range(1, 3, 3),
+    seam(1, 18),
+    range(19, 21),
+  ]
+
+  test('moves a range down and rebuilds each seam to end before the next range', () => {
+    expect(moveSourceRange(yeok, 2, 1, 1)).toEqual([
+      range(0, 4),
+      seam(1, 18),
+      range(19, 21),
+      seam(3, 0),
+      range(1, 3, 3),
+    ])
+  })
+
+  test('moves a range up to the front without a leading seam', () => {
+    expect(moveSourceRange(yeok, 4, -1, 1)).toEqual([
+      range(0, 4),
+      seam(1, 18),
+      range(19, 21),
+      seam(3, 0),
+      range(1, 3, 3),
+    ])
+    // A range starting at command 0 needs no seam before it.
+    expect(moveSourceRange(yeok, 2, -1, 1)).toEqual([
+      range(1, 3, 3),
+      range(0, 4),
+      seam(1, 18),
+      range(19, 21),
+    ])
+  })
+
+  test('leaves tokens unchanged at the ends or for a non-range token', () => {
+    expect(moveSourceRange(yeok, 0, -1, 1)).toBe(yeok)
+    expect(moveSourceRange(yeok, 4, 1, 1)).toBe(yeok)
+    expect(moveSourceRange(yeok, 1, 1, 1)).toBe(yeok)
+  })
+
+  test('keeps a trailing close-to-start seam last', () => {
+    const tokens = [
+      range(4, 10),
+      range(4, 7, 2),
+      {
+        kind: 'close-to-start' as const,
+        reason: 'interior-closure-seam' as const,
+      },
+    ]
+    expect(moveSourceRange(tokens, 1, -1, 0)).toEqual([
+      range(4, 7, 2),
+      seam(0, 3),
+      range(4, 10),
+      { kind: 'close-to-start', reason: 'interior-closure-seam' },
+    ])
+  })
 })

@@ -2992,7 +2992,7 @@
         },
         "sourceGlyphHash": "591e215be8059f2b1c55b9592fd3a00a178b44683a915119d434af2bf2b1b5fc"
       },
-      "status": "reviewing",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -3014,10 +3014,6 @@
           "order": 1,
           "jamo": "ㅖ",
           "geometry": [
-            {
-              "kind": "contour",
-              "contourId": 4
-            },
             {
               "kind": "contour",
               "contourId": 0
@@ -3063,6 +3059,21 @@
                 {
                   "kind": "line-to-anchor",
                   "anchor": {
+                    "contourId": 4,
+                    "commandIndex": 0,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 1,
+                  "toCommand": 3,
+                  "contourId": 4
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
                     "contourId": 1,
                     "commandIndex": 18,
                     "point": "end"
@@ -3083,12 +3094,39 @@
                   "kind": "source-range",
                   "fromCommand": 5,
                   "toCommand": 18
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 4,
+                    "commandIndex": 3,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 4,
+                  "toCommand": 7,
+                  "contourId": 4
                 }
               ]
             }
+          ],
+          "counterContours": [
+            {
+              "contourId": 4,
+              "contourHash": "9f260ec358282fe085d4786a806932070c64991ab2df81856e80489653dbc8b7"
+            }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-01T18:28:48.234Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "d0b7abe3b302e96145b6e8761198cf1f64a10d1bbcef847970eb9294c63267c0"
+      }
     },
     "오": {
       "reviewSchemaVersion": 2,

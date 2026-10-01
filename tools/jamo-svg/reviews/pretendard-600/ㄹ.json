@@ -1807,13 +1807,13 @@
           "jamo": "ㅠ",
           "geometry": [
             {
-              "kind": "contour",
-              "contourId": 2
-            },
-            {
               "kind": "split-piece",
               "recipeId": "split-0-1",
               "pieceId": "piece-1"
+            },
+            {
+              "kind": "contour",
+              "contourId": 2
             }
           ]
         },
@@ -1821,10 +1821,6 @@
           "order": 2,
           "jamo": "ㅇ",
           "geometry": [
-            {
-              "kind": "contour",
-              "contourId": 3
-            },
             {
               "kind": "split-piece",
               "recipeId": "split-0-1",
@@ -1856,6 +1852,21 @@
                 {
                   "kind": "line-to-anchor",
                   "anchor": {
+                    "contourId": 3,
+                    "commandIndex": 10,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 11,
+                  "toCommand": 11,
+                  "contourId": 3
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
                     "contourId": 0,
                     "commandIndex": 16,
                     "point": "end"
@@ -1876,8 +1887,29 @@
                   "kind": "source-range",
                   "fromCommand": 4,
                   "toCommand": 16
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 3,
+                    "commandIndex": 0,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 1,
+                  "toCommand": 10,
+                  "contourId": 3
                 }
               ]
+            }
+          ],
+          "counterContours": [
+            {
+              "contourId": 3,
+              "contourHash": "5911b4f3c105db6d2955f382c611e99370fbf496a5c7c20a7f399cbd1f8b7986"
             }
           ]
         }
