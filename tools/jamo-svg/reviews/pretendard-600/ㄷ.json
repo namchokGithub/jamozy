@@ -800,10 +800,8 @@
         },
         "sourceGlyphHash": "03294a1d816edec3004d12d693d3f9be1c7234e2ee523018692b61e5aacfd3f7"
       },
-      "status": "reviewing",
-      "blockers": [
-        "needs-split"
-      ],
+      "status": "approved",
+      "blockers": [],
       "steps": [
         {
           "order": 0,
@@ -887,7 +885,13 @@
           ]
         }
       ],
-      "notes": "돈 has three physical typing steps: ㄷ + ㅗ + ㄴ. Keep each component assigned to its corresponding physical typing step."
+      "notes": "",
+      "approved": {
+        "at": "2026-10-01T10:00:03.050Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "6470ecdec6f0f7beea93d16a6afe9fea46f12514a0d5eefccbe1e5a586e940d1"
+      }
     },
     "동": {
       "reviewSchemaVersion": 2,

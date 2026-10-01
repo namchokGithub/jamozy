@@ -856,11 +856,37 @@
         },
         "sourceGlyphHash": "0070c9d70d3396df39e9a94b92db589aadb1ef188d40180fad9eabe51a15e05c"
       },
-      "status": "reviewing",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
           "order": 0,
+          "jamo": "ㅁ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-2-1",
+              "pieceId": "piece-1"
+            },
+            {
+              "kind": "contour",
+              "contourId": 3
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅗ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-2-1",
+              "pieceId": "piece-2"
+            }
+          ]
+        },
+        {
+          "order": 2,
           "jamo": "ㅁ",
           "geometry": [
             {
@@ -872,30 +898,64 @@
               "contourId": 1
             }
           ]
-        },
+        }
+      ],
+      "splitRecipes": [
         {
-          "order": 1,
-          "jamo": "ㅗ",
-          "geometry": [
+          "id": "split-2-1",
+          "sourceContourId": 2,
+          "sourceContourHash": "440e2006d635a192d4fc7f7185134fb44127dba2f7586f24f2496f5cef486b3c",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "440e2006d635a192d4fc7f7185134fb44127dba2f7586f24f2496f5cef486b3c"
+          },
+          "pieces": [
             {
-              "kind": "contour",
-              "contourId": 2
-            }
-          ]
-        },
-        {
-          "order": 2,
-          "jamo": "ㅁ",
-          "geometry": [
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 2
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 2,
+                    "commandIndex": 9,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 10,
+                  "toCommand": 12
+                }
+              ]
+            },
             {
-              "kind": "contour",
-              "contourId": 3
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 3,
+                  "toCommand": 9
+                }
+              ]
             }
           ]
         }
       ],
-      "splitRecipes": [],
-      "notes": "몸 has three physical typing steps: ㅁ + ㅗ + ㅁ. Keep each component assigned to its corresponding physical typing step."
+      "notes": "",
+      "approved": {
+        "at": "2026-10-01T10:13:30.859Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "686283b055a42f10c72c92f69f6807ad015f46eda0545101d77aff5707ab9ce8"
+      }
     },
     "무": {
       "reviewSchemaVersion": 2,

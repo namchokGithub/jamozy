@@ -150,31 +150,62 @@ function commandSegmentPath(
   }
   return undefined
 }
-function SourceRangeInput({
-  value,
-  onChange,
+function SourceRangeEditor({
+  fromCommand,
+  toCommand,
+  onUpdate,
+  onRemove,
 }: {
-  value: number
-  onChange: (value: number) => void
+  fromCommand: number
+  toCommand: number
+  onUpdate: (fromCommand: number, toCommand: number) => void
+  onRemove: () => void
 }) {
-  const [draft, setDraft] = useState(String(value))
-  const [syncedValue, setSyncedValue] = useState(value)
-  if (value !== syncedValue) {
-    setSyncedValue(value)
-    setDraft(String(value))
+  const [fromDraft, setFromDraft] = useState(String(fromCommand))
+  const [toDraft, setToDraft] = useState(String(toCommand))
+  const update = () => {
+    const nextFrom = Number(fromDraft)
+    const nextTo = Number(toDraft)
+    if (!Number.isInteger(nextFrom) || !Number.isInteger(nextTo)) return
+    onUpdate(nextFrom, nextTo)
   }
   return (
-    <input
-      className="mt-1 w-full rounded border p-2 font-normal"
-      type="text"
-      value={draft}
-      onChange={(event) => {
-        const next = event.target.value
-        setDraft(next)
-        const number = Number(next)
-        if (next !== '' && Number.isInteger(number)) onChange(number)
-      }}
-    />
+    <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+      <label className="text-xs font-semibold">
+        Range from
+        <input
+          className="mt-1 w-full rounded border p-2 font-normal"
+          type="text"
+          value={fromDraft}
+          onChange={(event) => setFromDraft(event.target.value)}
+        />
+      </label>
+      <label className="text-xs font-semibold">
+        Range to
+        <input
+          className="mt-1 w-full rounded border p-2 font-normal"
+          type="text"
+          value={toDraft}
+          onChange={(event) => setToDraft(event.target.value)}
+        />
+      </label>
+      <div className="flex flex-col justify-end gap-1">
+        <Button
+          className="rounded px-2 py-1 text-xs"
+          variant="secondary"
+          onClick={update}
+        >
+          Update
+        </Button>
+        <Button
+          className="rounded px-2 py-1 text-xs"
+          variant="secondary"
+          onClick={onRemove}
+        >
+          Remove
+        </Button>
+      </div>
+    </div>
   )
 }
 function CommandRangePainter({
@@ -182,11 +213,13 @@ function CommandRangePainter({
   contour,
   ranges,
   inspect = false,
+  onAddSelectedRange,
 }: {
   glyph: Glyph
   contour: CachedContour
   ranges: Array<{ fromCommand: number; toCommand: number }>
   inspect?: boolean
+  onAddSelectedRange?: (fromCommand: number, toCommand: number) => void
 }) {
   const [inspectRange, setInspectRange] = useState<
     { start: number; end: number } | undefined
@@ -324,13 +357,29 @@ function CommandRangePainter({
           )
         })}
       </svg>
-      <p className="text-xs text-[#667085]">
+      <div className="flex items-center gap-2 text-xs text-[#667085]">
+        <p>
         {inspectRange
           ? `Selected commands ${Math.min(inspectRange.start, inspectRange.end)}–${Math.max(inspectRange.start, inspectRange.end)}.`
           : ranges.length > 0
             ? `Source ranges: ${ranges.map((range) => `${range.fromCommand}–${range.toCommand}`).join(', ')}.`
             : 'Click a segment, or drag from the first segment to the last.'}
-      </p>
+        </p>
+        {inspectRange && onAddSelectedRange && (
+          <button
+            type="button"
+            className="rounded border border-[#d8e3f2] bg-white px-1.5 py-0.5 text-[11px] font-semibold text-[#39465b] hover:border-[#a85d4e] hover:text-[#8d4c43]"
+            onClick={() =>
+              onAddSelectedRange(
+                Math.min(inspectRange.start, inspectRange.end),
+                Math.max(inspectRange.start, inspectRange.end),
+              )
+            }
+          >
+            Add to latest range
+          </button>
+        )}
+      </div>
     </div>
   )
 }
@@ -764,12 +813,15 @@ export default function JamoSvgTaggerPage() {
   const save = async (approve = false) => {
     if (!state) return
     previewSequence.current += 1
+    const review = approve
+      ? { ...state.review, notes: undefined }
+      : state.review
     try {
       const result = await api<SaveResponse>(approve ? '/approve' : '/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          review: state.review,
+          review,
           expectedRevision: revision,
           reviewer: 'local-reviewer',
         }),
@@ -868,6 +920,9 @@ export default function JamoSvgTaggerPage() {
                 ?.toString(16)
                 .toUpperCase()}{' '}
               · {state.review.status}
+            </p>
+            <p>
+              {state.source.physicalSteps.map(({ jamo }) => jamo).join(' / ')}
             </p>
             <div className="flex items-center gap-4 text-xs font-semibold">
               {error && (
@@ -1480,49 +1535,31 @@ export default function JamoSvgTaggerPage() {
                                           key={`${piece.id}-${tokenIndex}`}
                                           className="rounded border border-[#d8e3f2] p-2"
                                         >
-                                          <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
-                                            <label className="text-xs font-semibold">
-                                              Range from
-                                              <SourceRangeInput
-                                                value={token.fromCommand}
-                                                onChange={(value) =>
-                                                  updateSourceRange(
-                                                    tokenIndex,
-                                                    value,
-                                                    token.toCommand,
-                                                  )
-                                                }
-                                              />
-                                            </label>
-                                            <label className="text-xs font-semibold">
-                                              Range to
-                                              <SourceRangeInput
-                                                value={token.toCommand}
-                                                onChange={(value) =>
-                                                  updateSourceRange(
-                                                    tokenIndex,
-                                                    token.fromCommand,
-                                                    value,
-                                                  )
-                                                }
-                                              />
-                                            </label>
-                                            <Button
-                                              variant="secondary"
-                                              onClick={() =>
-                                                updatePiece(
-                                                  activeRecipe.id,
-                                                  piece.id,
-                                                  removeSourceRange(
-                                                    piece.tokens,
-                                                    tokenIndex,
-                                                  ),
-                                                )
-                                              }
-                                            >
-                                              Remove
-                                            </Button>
-                                          </div>
+                                          <SourceRangeEditor
+                                            key={`${token.fromCommand}-${token.toCommand}`}
+                                            fromCommand={token.fromCommand}
+                                            toCommand={token.toCommand}
+                                            onUpdate={(
+                                              fromCommand,
+                                              toCommand,
+                                            ) =>
+                                              updateSourceRange(
+                                                tokenIndex,
+                                                fromCommand,
+                                                toCommand,
+                                              )
+                                            }
+                                            onRemove={() =>
+                                              updatePiece(
+                                                activeRecipe.id,
+                                                piece.id,
+                                                removeSourceRange(
+                                                  piece.tokens,
+                                                  tokenIndex,
+                                                ),
+                                              )
+                                            }
+                                          />
                                           {seamAfterRange ? (
                                             <div className="mt-2 flex items-center justify-between gap-2 rounded bg-[#fff8ed] p-2 text-xs">
                                               <span>
@@ -1651,6 +1688,38 @@ export default function JamoSvgTaggerPage() {
                                 contour={activeContour}
                                 ranges={[]}
                                 inspect
+                                onAddSelectedRange={(fromCommand, toCommand) => {
+                                  const latestSourceRangeIndex =
+                                    piece.tokens.reduce(
+                                      (latestIndex, token, tokenIndex) =>
+                                        token.kind === 'source-range'
+                                          ? tokenIndex
+                                          : latestIndex,
+                                      -1,
+                                    )
+                                  updatePiece(
+                                    activeRecipe.id,
+                                    piece.id,
+                                    latestSourceRangeIndex === -1
+                                      ? [
+                                          ...piece.tokens,
+                                          {
+                                            kind: 'source-range',
+                                            fromCommand,
+                                            toCommand,
+                                          },
+                                        ]
+                                      : piece.tokens.map((token, tokenIndex) =>
+                                          tokenIndex === latestSourceRangeIndex
+                                            ? {
+                                                kind: 'source-range',
+                                                fromCommand,
+                                                toCommand,
+                                              }
+                                            : token,
+                                        ),
+                                  )
+                                }}
                               />
                             </div>
                             <div className="mt-2 flex flex-wrap gap-2">
