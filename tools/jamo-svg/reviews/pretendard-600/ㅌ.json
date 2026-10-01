@@ -249,6 +249,64 @@
         "validationHash": "f79ae6be462503d17109fd8717e28e1839b925fd6c8e719e7974d75d60b17857"
       }
     },
+    "텔": {
+      "reviewSchemaVersion": 2,
+      "syllable": "텔",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 2
+        },
+        "sourceGlyphHash": "12a78544d30cec926fe7fcca5b6a243bdb12f5838e23a787801530201b2cc55e"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅌ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅔ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            },
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㄹ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 3
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T11:57:19.511Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "7ef716a5fac8fb77b443b759adc0c85e996ca224dca549ece28904ee25248738"
+      }
+    },
     "통": {
       "reviewSchemaVersion": 2,
       "syllable": "통",
