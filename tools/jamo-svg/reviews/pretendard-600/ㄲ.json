@@ -5,6 +5,90 @@
   "physicalStepAlgorithmVersion": 2,
   "splitRecipeSchemaVersion": 2,
   "reviews": {
+    "까": {
+      "reviewSchemaVersion": 2,
+      "syllable": "까",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 2
+        },
+        "sourceGlyphHash": "71b03c028f1bf53c019354664a6158f7ce46cab113d6a02491bd82da7521af92"
+      },
+      "status": "proposed",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄲ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            },
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅏ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": []
+    },
+    "깨": {
+      "reviewSchemaVersion": 2,
+      "syllable": "깨",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 2
+        },
+        "sourceGlyphHash": "d9cb943cc99e8904242b9c2c15bb8cbb06071fd58c6497c2355606a919278540"
+      },
+      "status": "proposed",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄲ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            },
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅐ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": []
+    },
     "께": {
       "reviewSchemaVersion": 2,
       "syllable": "께",

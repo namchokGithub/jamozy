@@ -427,6 +427,28 @@ export default function JamoSvgTaggerPage() {
     [filter, queue, query, statusFilter, statusSnapshot],
   )
   const selected = filteredQueue[index]
+  const queueLength = filteredQueue.length
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
+        return
+      const target = event.target as HTMLElement | null
+      if (
+        target?.isContentEditable ||
+        ['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName ?? '')
+      )
+        return
+      event.preventDefault()
+      setIndex((current) =>
+        event.key === 'ArrowLeft'
+          ? Math.max(0, current - 1)
+          : Math.min(Math.max(0, queueLength - 1), current + 1),
+      )
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [queueLength])
   const page = Math.floor(index / QUEUE_PAGE_SIZE)
   const pageCount = Math.max(
     1,

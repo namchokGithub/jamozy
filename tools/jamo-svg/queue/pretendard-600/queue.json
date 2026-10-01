@@ -2334,7 +2334,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "거"
+      ]
     },
     {
       "syllable": "라",
@@ -2351,7 +2353,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "타"
+      ]
     },
     {
       "syllable": "내",
@@ -2368,7 +2372,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "대"
+      ]
     },
     {
       "syllable": "앉",
@@ -2402,7 +2408,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "러"
+      ]
     },
     {
       "syllable": "손",
@@ -2419,7 +2427,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "속"
+      ]
     },
     {
       "syllable": "삶",
@@ -2453,7 +2463,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "살"
+      ]
     },
     {
       "syllable": "특",
@@ -2470,7 +2482,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "른"
+      ]
     },
     {
       "syllable": "히",
@@ -2487,7 +2501,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "하"
+      ]
     },
     {
       "syllable": "금",
@@ -2521,7 +2537,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "아"
+      ]
     },
     {
       "syllable": "육",
@@ -2555,7 +2573,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "살"
+      ]
     },
     {
       "syllable": "잡",
@@ -2572,7 +2592,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "람"
+      ]
     },
     {
       "syllable": "님",
@@ -2589,7 +2611,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "집"
+      ]
     },
     {
       "syllable": "선",
@@ -2606,7 +2630,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "런"
+      ]
     },
     {
       "syllable": "술",
@@ -2657,7 +2683,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "러"
+      ]
     },
     {
       "syllable": "읽",
@@ -2708,7 +2736,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "죄"
+      ]
     },
     {
       "syllable": "용",
@@ -2742,7 +2772,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "만"
+      ]
     },
     {
       "syllable": "책",
@@ -2759,7 +2791,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "것"
+      ]
     },
     {
       "syllable": "일",
@@ -2776,7 +2810,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "말"
+      ]
     },
     {
       "syllable": "당",
@@ -2793,7 +2829,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "남"
+      ]
     },
     {
       "syllable": "신",
@@ -2810,7 +2848,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "친"
+      ]
     },
     {
       "syllable": "넣",
@@ -2827,7 +2867,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "렇"
+      ]
     },
     {
       "syllable": "요",
@@ -2861,7 +2903,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "든"
+      ]
     },
     {
       "syllable": "끼",
@@ -2895,7 +2939,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "령"
+      ]
     },
     {
       "syllable": "힘",
@@ -2912,7 +2958,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "함"
+      ]
     },
     {
       "syllable": "미",
@@ -2929,7 +2977,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "이"
+      ]
     },
     {
       "syllable": "밝",
@@ -2963,7 +3013,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "시"
+      ]
     },
     {
       "syllable": "민",
@@ -2980,7 +3032,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "인"
+      ]
     },
     {
       "syllable": "얘",
@@ -3048,7 +3102,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "습"
+      ]
     },
     {
       "syllable": "건",
@@ -3065,7 +3121,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "런"
+      ]
     },
     {
       "syllable": "및",
@@ -3082,7 +3140,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "있"
+      ]
     },
     {
       "syllable": "쉽",
@@ -3116,7 +3176,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "친"
+      ]
     },
     {
       "syllable": "한",
@@ -3133,7 +3195,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "학"
+      ]
     },
     {
       "syllable": "유",
@@ -3150,7 +3214,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "우"
+      ]
     },
     {
       "syllable": "는",
@@ -3167,7 +3233,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "든"
+      ]
     },
     {
       "syllable": "필",
@@ -3184,7 +3252,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "알"
+      ]
     },
     {
       "syllable": "글",
@@ -3218,7 +3288,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "만"
+      ]
     },
     {
       "syllable": "밖",
@@ -3252,7 +3324,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "람"
+      ]
     },
     {
       "syllable": "품",
@@ -3303,7 +3377,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "든"
+      ]
     },
     {
       "syllable": "따",
@@ -3320,7 +3396,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "때"
+      ]
     },
     {
       "syllable": "태",
@@ -3337,7 +3415,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "대"
+      ]
     },
     {
       "syllable": "욱",
@@ -3405,7 +3485,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "죄"
+      ]
     },
     {
       "syllable": "실",
@@ -3422,7 +3504,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "길"
+      ]
     },
     {
       "syllable": "현",
@@ -3439,7 +3523,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "학"
+      ]
     },
     {
       "syllable": "환",
@@ -3473,7 +3559,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "령"
+      ]
     },
     {
       "syllable": "터",
@@ -3490,7 +3578,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "러"
+      ]
     },
     {
       "syllable": "퓨",
@@ -3507,7 +3597,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "무"
+      ]
     },
     {
       "syllable": "먼",
@@ -3541,7 +3633,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "러"
+      ]
     },
     {
       "syllable": "체",
@@ -3558,7 +3652,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "세"
+      ]
     },
     {
       "syllable": "열",
@@ -3592,7 +3688,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "문"
+      ]
     },
     {
       "syllable": "업",
@@ -3677,7 +3775,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "남"
+      ]
     },
     {
       "syllable": "곧",
@@ -3694,7 +3794,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "곳"
+      ]
     },
     {
       "syllable": "심",
@@ -3711,7 +3813,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "집"
+      ]
     },
     {
       "syllable": "광",
@@ -3762,7 +3866,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "두"
+      ]
     },
     {
       "syllable": "침",
@@ -3779,7 +3885,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "집"
+      ]
     },
     {
       "syllable": "웃",
@@ -3796,7 +3904,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "운"
+      ]
     },
     {
       "syllable": "떠",
@@ -3813,7 +3923,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "때"
+      ]
     },
     {
       "syllable": "전",
@@ -3830,7 +3942,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "런"
+      ]
     },
     {
       "syllable": "얻",
@@ -3864,7 +3978,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "람"
+      ]
     },
     {
       "syllable": "끝",
@@ -3898,7 +4014,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "속"
+      ]
     },
     {
       "syllable": "조",
@@ -3915,7 +4033,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "소"
+      ]
     },
     {
       "syllable": "듯",
@@ -3932,7 +4052,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "듣"
+      ]
     },
     {
       "syllable": "입",
@@ -4000,7 +4122,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "들"
+      ]
     },
     {
       "syllable": "밥",
@@ -4017,7 +4141,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "방"
+      ]
     },
     {
       "syllable": "려",
@@ -4034,7 +4160,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "러"
+      ]
     },
     {
       "syllable": "램",
@@ -4051,7 +4179,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "생"
+      ]
     },
     {
       "syllable": "프",
@@ -4085,7 +4215,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "집"
+      ]
     },
     {
       "syllable": "혼",
@@ -4119,7 +4251,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "주"
+      ]
     },
     {
       "syllable": "랑",
@@ -4136,7 +4270,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "람"
+      ]
     },
     {
       "syllable": "돌",
@@ -4204,7 +4340,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "기"
+      ]
     },
     {
       "syllable": "커",
@@ -4221,7 +4359,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "거"
+      ]
     },
     {
       "syllable": "피",
@@ -4238,7 +4378,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "이"
+      ]
     },
     {
       "syllable": "슴",
@@ -4255,7 +4397,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "습"
+      ]
     },
     {
       "syllable": "맛",
@@ -4272,7 +4416,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "만"
+      ]
     },
     {
       "syllable": "산",
@@ -4289,7 +4435,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "간"
+      ]
     },
     {
       "syllable": "매",
@@ -4306,7 +4454,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "마"
+      ]
     },
     {
       "syllable": "식",
@@ -4323,7 +4473,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "같"
+      ]
     },
     {
       "syllable": "표",
@@ -4357,7 +4509,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "습"
+      ]
     },
     {
       "syllable": "획",
@@ -4459,7 +4613,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "함"
+      ]
     },
     {
       "syllable": "련",
@@ -4476,7 +4632,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "런"
+      ]
     },
     {
       "syllable": "형",
@@ -4493,7 +4651,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "함"
+      ]
     },
     {
       "syllable": "믿",
@@ -4510,7 +4670,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "말"
+      ]
     },
     {
       "syllable": "꾸",
@@ -4544,7 +4706,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "렇"
+      ]
     },
     {
       "syllable": "큼",
@@ -4578,7 +4742,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "바"
+      ]
     },
     {
       "syllable": "할",
@@ -4595,7 +4761,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "학"
+      ]
     },
     {
       "syllable": "옆",
@@ -4646,7 +4814,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "바"
+      ]
     },
     {
       "syllable": "장",
@@ -4663,7 +4833,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "람"
+      ]
     },
     {
       "syllable": "래",
@@ -4680,7 +4852,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "대"
+      ]
     },
     {
       "syllable": "흐",
@@ -4714,7 +4888,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "싶"
+      ]
     },
     {
       "syllable": "꽃",
@@ -4748,7 +4924,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "간"
+      ]
     },
     {
       "syllable": "올",
@@ -4782,7 +4960,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "남"
+      ]
     },
     {
       "syllable": "넘",
@@ -4799,7 +4979,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "녕"
+      ]
     },
     {
       "syllable": "을",
@@ -4833,7 +5015,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "습"
+      ]
     },
     {
       "syllable": "목",
@@ -4884,7 +5068,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "좀"
+      ]
     },
     {
       "syllable": "움",
@@ -4935,7 +5121,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "것"
+      ]
     },
     {
       "syllable": "혀",
@@ -4952,7 +5140,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "하"
+      ]
     },
     {
       "syllable": "언",
@@ -5037,7 +5227,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "거"
+      ]
     },
     {
       "syllable": "존",
@@ -5054,7 +5246,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "속"
+      ]
     },
     {
       "syllable": "해",
@@ -5071,7 +5265,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "하"
+      ]
     },
     {
       "syllable": "준",
@@ -5105,7 +5301,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "간"
+      ]
     },
     {
       "syllable": "젊",
@@ -5156,7 +5354,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "른"
+      ]
     },
     {
       "syllable": "쟁",
@@ -5173,7 +5373,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "생"
+      ]
     },
     {
       "syllable": "꿈",
@@ -5207,7 +5409,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "좀"
+      ]
     },
     {
       "syllable": "극",
@@ -5241,7 +5445,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "간"
+      ]
     },
     {
       "syllable": "펴",
@@ -5258,7 +5464,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "퍼"
+      ]
     },
     {
       "syllable": "차",
@@ -5275,7 +5483,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "사"
+      ]
     },
     {
       "syllable": "풀",
@@ -5309,7 +5519,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "각"
+      ]
     },
     {
       "syllable": "개",
@@ -5326,7 +5538,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "대"
+      ]
     },
     {
       "syllable": "발",
@@ -5343,7 +5557,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "받"
+      ]
     },
     {
       "syllable": "효",
@@ -5445,7 +5661,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "람"
+      ]
     },
     {
       "syllable": "험",
@@ -5462,7 +5680,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "함"
+      ]
     },
     {
       "syllable": "악",
@@ -5479,7 +5699,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "말"
+      ]
     },
     {
       "syllable": "양",
@@ -5496,7 +5718,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "방"
+      ]
     },
     {
       "syllable": "울",
@@ -5547,7 +5771,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "느"
+      ]
     },
     {
       "syllable": "은",
@@ -5581,7 +5807,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "길"
+      ]
     },
     {
       "syllable": "담",
@@ -5598,7 +5826,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "남"
+      ]
     },
     {
       "syllable": "씨",
@@ -5615,7 +5845,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "시"
+      ]
     },
     {
       "syllable": "옛",
@@ -5649,7 +5881,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "년"
+      ]
     },
     {
       "syllable": "딸",
@@ -5683,7 +5917,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "말"
+      ]
     },
     {
       "syllable": "벌",
@@ -5734,7 +5970,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "살"
+      ]
     },
     {
       "syllable": "녁",
@@ -5751,7 +5989,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "것"
+      ]
     },
     {
       "syllable": "면",
@@ -5802,7 +6042,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "람"
+      ]
     },
     {
       "syllable": "씬",
@@ -5819,7 +6061,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "친"
+      ]
     },
     {
       "syllable": "훨",
@@ -5887,7 +6131,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "말"
+      ]
     },
     {
       "syllable": "팔",
@@ -5904,7 +6150,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "알"
+      ]
     },
     {
       "syllable": "례",
@@ -5921,7 +6169,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "세"
+      ]
     },
     {
       "syllable": "팀",
@@ -5938,7 +6188,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "집"
+      ]
     },
     {
       "syllable": "첫",
@@ -5955,7 +6207,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "런"
+      ]
     },
     {
       "syllable": "감",
@@ -5972,7 +6226,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "남"
+      ]
     },
     {
       "syllable": "독",
@@ -6006,7 +6262,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "람"
+      ]
     },
     {
       "syllable": "써",
@@ -6023,7 +6281,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "나"
+      ]
     },
     {
       "syllable": "즐",
@@ -6040,7 +6300,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "듣"
+      ]
     },
     {
       "syllable": "맞",
@@ -6057,7 +6319,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "말"
+      ]
     },
     {
       "syllable": "추",
@@ -6074,7 +6338,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "주"
+      ]
     },
     {
       "syllable": "쌀",
@@ -6091,7 +6357,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "잘"
+      ]
     },
     {
       "syllable": "반",
@@ -6108,7 +6376,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "만"
+      ]
     },
     {
       "syllable": "달",
@@ -6125,7 +6395,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "날"
+      ]
     },
     {
       "syllable": "붙",
@@ -6176,7 +6448,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "느"
+      ]
     },
     {
       "syllable": "견",
@@ -6210,7 +6484,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "친"
+      ]
     },
     {
       "syllable": "잇",
@@ -6227,7 +6503,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "인"
+      ]
     },
     {
       "syllable": "적",
@@ -6244,7 +6522,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "것"
+      ]
     },
     {
       "syllable": "코",
@@ -6261,7 +6541,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "교"
+      ]
     },
     {
       "syllable": "옮",
@@ -6295,7 +6577,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "함"
+      ]
     },
     {
       "syllable": "잃",
@@ -6312,7 +6596,9 @@
         "physicalStepCount": 4,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "많"
+      ]
     },
     {
       "syllable": "임",
@@ -6363,7 +6649,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "든"
+      ]
     },
     {
       "syllable": "째",
@@ -6448,7 +6736,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "같"
+      ]
     },
     {
       "syllable": "까",
@@ -6465,7 +6755,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "때"
+      ]
     },
     {
       "syllable": "꺼",
@@ -6499,7 +6791,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "데"
+      ]
     },
     {
       "syllable": "완",
@@ -6567,7 +6861,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "친"
+      ]
     },
     {
       "syllable": "디",
@@ -6584,7 +6880,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "리"
+      ]
     },
     {
       "syllable": "닦",
@@ -6618,7 +6916,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "습"
+      ]
     },
     {
       "syllable": "괜",
@@ -6635,7 +6935,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "관"
+      ]
     },
     {
       "syllable": "찮",
@@ -6669,7 +6971,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "른"
+      ]
     },
     {
       "syllable": "종",
@@ -6686,7 +6990,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "좀"
+      ]
     },
     {
       "syllable": "빛",
@@ -6703,7 +7009,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "받"
+      ]
     },
     {
       "syllable": "류",
@@ -6720,7 +7028,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "두"
+      ]
     },
     {
       "syllable": "징",
@@ -6737,7 +7047,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "집"
+      ]
     },
     {
       "syllable": "겪",
@@ -6771,7 +7083,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "정"
+      ]
     },
     {
       "syllable": "귀",
@@ -6856,7 +7170,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "아"
+      ]
     },
     {
       "syllable": "끔",
@@ -6907,7 +7223,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "앞"
+      ]
     },
     {
       "syllable": "롯",
@@ -6958,7 +7276,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "방"
+      ]
     },
     {
       "syllable": "게",
@@ -6975,7 +7295,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "기"
+      ]
     },
     {
       "syllable": "룹",
@@ -6992,7 +7314,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "좀"
+      ]
     },
     {
       "syllable": "잔",
@@ -7009,7 +7333,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "간"
+      ]
     },
     {
       "syllable": "랗",
@@ -7026,7 +7352,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "렇"
+      ]
     },
     {
       "syllable": "평",
@@ -7094,7 +7422,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "누"
+      ]
     },
     {
       "syllable": "겨",
@@ -7128,7 +7458,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "습"
+      ]
     },
     {
       "syllable": "럽",
@@ -7145,7 +7477,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "령"
+      ]
     },
     {
       "syllable": "잊",
@@ -7162,7 +7496,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "있"
+      ]
     },
     {
       "syllable": "혹",
@@ -7196,7 +7532,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "성"
+      ]
     },
     {
       "syllable": "레",
@@ -7213,7 +7551,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "세"
+      ]
     },
     {
       "syllable": "텔",
@@ -7247,7 +7587,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "런"
+      ]
     },
     {
       "syllable": "호",
@@ -7281,7 +7623,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "친"
+      ]
     },
     {
       "syllable": "닭",
@@ -7315,7 +7659,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "리"
+      ]
     },
     {
       "syllable": "석",
@@ -7332,7 +7678,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "것"
+      ]
     },
     {
       "syllable": "륭",
@@ -7417,7 +7765,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "살"
+      ]
     },
     {
       "syllable": "깨",
@@ -7434,7 +7784,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "때"
+      ]
     },
     {
       "syllable": "눕",
@@ -7451,7 +7803,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "좀"
+      ]
     },
     {
       "syllable": "죽",
@@ -7485,7 +7839,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "습"
+      ]
     },
     {
       "syllable": "빼",
@@ -7519,7 +7875,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "령"
+      ]
     },
     {
       "syllable": "흔",
@@ -7553,7 +7911,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "람"
+      ]
     },
     {
       "syllable": "싸",
@@ -7570,7 +7930,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "자"
+      ]
     },
     {
       "syllable": "갈",
@@ -7587,7 +7949,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "같"
+      ]
     },
     {
       "syllable": "껴",
@@ -7621,7 +7985,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "소"
+      ]
     },
     {
       "syllable": "며",
@@ -7655,7 +8021,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "날"
+      ]
     },
     {
       "syllable": "론",
@@ -7689,7 +8057,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "두"
+      ]
     },
     {
       "syllable": "숲",
@@ -7740,7 +8110,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "느"
+      ]
     },
     {
       "syllable": "섭",
@@ -7757,7 +8129,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "령"
+      ]
     },
     {
       "syllable": "참",
@@ -7774,7 +8148,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "람"
+      ]
     },
     {
       "syllable": "크",
@@ -7791,7 +8167,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "그"
+      ]
     },
     {
       "syllable": "져",
@@ -7808,7 +8186,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "러"
+      ]
     },
     {
       "syllable": "냄",
@@ -7825,7 +8205,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "령"
+      ]
     },
     {
       "syllable": "떼",
@@ -7876,7 +8258,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "하"
+      ]
     },
     {
       "syllable": "골",
@@ -7893,7 +8277,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "곳"
+      ]
     },
     {
       "syllable": "출",
@@ -7944,7 +8330,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "잘"
+      ]
     },
     {
       "syllable": "벗",
@@ -7995,7 +8383,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "음"
+      ]
     },
     {
       "syllable": "므",
@@ -8046,7 +8436,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "것"
+      ]
     },
     {
       "syllable": "약",
@@ -8063,7 +8455,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "말"
+      ]
     },
     {
       "syllable": "숨",
@@ -8097,7 +8491,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "살"
+      ]
     },
     {
       "syllable": "왕",
@@ -8131,7 +8527,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "인"
+      ]
     },
     {
       "syllable": "척",
@@ -8148,7 +8546,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "것"
+      ]
     },
     {
       "syllable": "옳",
@@ -8233,7 +8633,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "잘"
+      ]
     },
     {
       "syllable": "볍",
@@ -8267,7 +8669,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "든"
+      ]
     },
     {
       "syllable": "군",
@@ -8301,7 +8705,9 @@
         "physicalStepCount": 2,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "러"
+      ]
     },
     {
       "syllable": "충",
@@ -8352,7 +8758,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "작"
+      ]
     },
     {
       "syllable": "염",
@@ -8386,7 +8794,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "간"
+      ]
     },
     {
       "syllable": "푸",
@@ -8403,7 +8813,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "무"
+      ]
     },
     {
       "syllable": "범",
@@ -8488,7 +8900,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "것"
+      ]
     },
     {
       "syllable": "합",
@@ -8505,7 +8919,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "함"
+      ]
     },
     {
       "syllable": "락",
@@ -8522,7 +8938,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "작"
+      ]
     }
   ]
 }

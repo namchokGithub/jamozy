@@ -5,6 +5,48 @@
   "physicalStepAlgorithmVersion": 2,
   "splitRecipeSchemaVersion": 2,
   "reviews": {
+    "따": {
+      "reviewSchemaVersion": 2,
+      "syllable": "따",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 2
+        },
+        "sourceGlyphHash": "9c2bc8849f83222c7ef0e13a288e73aafa67f8462a8324667b3f51804988dafb"
+      },
+      "status": "proposed",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄸ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            },
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅏ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": []
+    },
     "때": {
       "reviewSchemaVersion": 2,
       "syllable": "때",
@@ -52,6 +94,48 @@
         "validatorVersion": 1,
         "validationHash": "6ce17bf09da3c48e8578adcc2afcf765d4933f71f98f7a0826f10e3c4e5b2ee2"
       }
+    },
+    "떠": {
+      "reviewSchemaVersion": 2,
+      "syllable": "떠",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 2
+        },
+        "sourceGlyphHash": "d135c4e7753dd892b4fd61d8222f94f9c331c6afdce6cb28b0ff1ba57348a759"
+      },
+      "status": "proposed",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄸ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅓ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        }
+      ],
+      "splitRecipes": []
     },
     "떤": {
       "reviewSchemaVersion": 2,

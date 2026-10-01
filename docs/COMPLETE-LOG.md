@@ -679,3 +679,17 @@ Chronological log of completed units of work. One entry per meaningful change (n
   blocker flags exactly the 16 `reviewing` drafts that painted a hole as a
   vowel or final (`경 동 머 명 모 몸 버 번 어 없 엇 여 오 중 통 회`). `계` and
   `께` have union outlines without a hole and still need visual review.
+
+### 2026-10-01 — Jamo SVG proposals from approved templates
+
+- Added `pnpm jamo-svg:propose [--max-cost N] [--exclude syllables] [--dry-run]`.
+  For each queue syllable without a review, it copies whole-contour step
+  ownership from the closest approved glyph with the same step count and medial
+  layout, pairing contours by bounds (worst edge displacement ≤ `--max-cost`
+  font units, default 250). A proposal is written as `proposed` only if
+  `validateReview` reports no blockers; existing reviews are never modified.
+  The template syllable is recorded in the queue's `nearestApprovedSyllables`.
+- Leave-one-out over approved reviews: no wrong proposals at 250–350 except a
+  pair caused by approved `니`, whose ㄴ/ㅣ ownership is swapped. Errors appear
+  from 400. `니` was excluded as a template.
+- Proposed 209 of 366 unreviewed syllables for human review (103 templates).
