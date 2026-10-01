@@ -30,13 +30,16 @@ for (const { file } of manifest.shards) {
 const store = new ReviewStore(reviewsRoot, cacheRoot)
 const entries = await queue.list()
 const proposedFrom = new Map<string, string>()
+const lines: string[] = []
 for (const entry of entries) {
   if (reviewed.has(entry.syllable)) continue
   const proposal = proposeReview(await extractGlyph(entry.syllable), templates, maxCost)
   if (!proposal) continue
   proposedFrom.set(entry.syllable, proposal.templateSyllable)
+  lines.push(`  ${entry.syllable} ← ${proposal.templateSyllable}  cost ${proposal.cost}${proposal.review.splitRecipes.length ? '  split' : ''}`)
   if (!values['dry-run']) await store.save(proposal.review)
 }
 if (!values['dry-run']) await queue.save(entries.map((entry) => (proposedFrom.has(entry.syllable) ? { ...entry, nearestApprovedSyllables: [proposedFrom.get(entry.syllable)!] } : entry)))
 const unreviewed = entries.filter(({ syllable }) => !reviewed.has(syllable)).length
+if (lines.length) console.log(lines.join('\n'))
 console.log(`${templates.length} approved templates; ${values['dry-run'] ? 'would propose' : 'proposed'} ${proposedFrom.size} of ${unreviewed} unreviewed syllables (max cost ${maxCost}).`)

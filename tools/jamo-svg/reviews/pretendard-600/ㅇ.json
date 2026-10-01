@@ -3049,6 +3049,64 @@
         "validationHash": "b4875b83b4c0345ab34cc02caecdc3c09dd2c7bba4c1dd7bad4c8af346a7c6ea"
       }
     },
+    "은": {
+      "reviewSchemaVersion": 2,
+      "syllable": "은",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 2
+        },
+        "sourceGlyphHash": "c299392d984c7a21e5b45a38a308631831be581042dd5af37570283fb379e1b1"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅇ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            },
+            {
+              "kind": "contour",
+              "contourId": 3
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅡ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㄴ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T11:52:57.536Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "8be437dea1c6038b79a96be471c00313fbf8bf24881542bbcc0cc5a015e59cd2"
+      }
+    },
     "을": {
       "reviewSchemaVersion": 2,
       "syllable": "을",

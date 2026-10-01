@@ -4200,7 +4200,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "으"
+      ]
     },
     {
       "syllable": "림",
@@ -4583,7 +4585,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "종"
+      ]
     },
     {
       "syllable": "놀",
@@ -5808,7 +5812,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "을"
+      ]
     },
     {
       "syllable": "질",
@@ -7759,7 +7765,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "으"
+      ]
     },
     {
       "syllable": "봄",
@@ -8434,7 +8442,9 @@
         "physicalStepCount": 2,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "으"
+      ]
     },
     {
       "syllable": "포",

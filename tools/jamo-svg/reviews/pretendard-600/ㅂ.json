@@ -1143,6 +1143,54 @@
         "validationHash": "af12aecec88638654721d812020025b92680452788bc3debadb1645fe4009b1e"
       }
     },
+    "브": {
+      "reviewSchemaVersion": 2,
+      "syllable": "브",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 2
+        },
+        "sourceGlyphHash": "e39b4ac8ccbf2b29388b4aed4d901678d1c5fcfe161cecc610396869db7fee42"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅂ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            },
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅡ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T11:53:01.846Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "e311b8dd9c3f36a57b844be03e758d1b998cb0502557ff73d46ca507ad763a92"
+      }
+    },
     "비": {
       "reviewSchemaVersion": 2,
       "syllable": "비",
