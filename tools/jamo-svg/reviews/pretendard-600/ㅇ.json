@@ -531,7 +531,7 @@
         },
         "sourceGlyphHash": "5786af8afdf4b8f8599f0e17a98e88ec0211772c510962cdf0684b7ba5c26c12"
       },
-      "status": "reviewing",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -540,7 +540,12 @@
           "geometry": [
             {
               "kind": "contour",
-              "contourId": 0
+              "contourId": 1
+            },
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
             }
           ]
         },
@@ -549,14 +554,69 @@
           "jamo": "ㅓ",
           "geometry": [
             {
-              "kind": "contour",
-              "contourId": 1
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
             }
           ]
         }
       ],
-      "splitRecipes": [],
-      "notes": "어 has two physical typing steps: ㅇ + ㅓ. Keep each component assigned to its corresponding physical typing step."
+      "splitRecipes": [
+        {
+          "id": "split-0-1",
+          "sourceContourId": 0,
+          "sourceContourHash": "4f4c2ae8d376fd0d69e6ec45a9f80f552acd6bf2311d91559b09d25a6d55dbd2",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "4f4c2ae8d376fd0d69e6ec45a9f80f552acd6bf2311d91559b09d25a6d55dbd2"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 3
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 11,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 12,
+                  "toCommand": 23
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 4,
+                  "toCommand": 11
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "notes": "",
+      "approved": {
+        "at": "2026-10-01T06:50:37.785Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "6adee21f5e55bb85ed691746038fc41faa573a089a9edc0be5d9e75aaa0c8bdc"
+      }
     },
     "얼": {
       "reviewSchemaVersion": 2,
@@ -839,11 +899,12 @@
           "geometry": [
             {
               "kind": "contour",
-              "contourId": 0
+              "contourId": 1
             },
             {
-              "kind": "contour",
-              "contourId": 1
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
             }
           ]
         },
@@ -852,14 +913,67 @@
           "jamo": "ㅕ",
           "geometry": [
             {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
+            },
+            {
               "kind": "contour",
               "contourId": 2
             }
           ]
         }
       ],
-      "splitRecipes": [],
-      "notes": "여 has two physical typing steps: ㅇ + ㅕ. Keep each component assigned to its corresponding physical typing step."
+      "splitRecipes": [
+        {
+          "id": "split-0-1",
+          "sourceContourId": 0,
+          "sourceContourHash": "488f0e18d42c9dfa15386535c5ccdcf03a713df499bae824d6bb1f3bb44cb156",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "488f0e18d42c9dfa15386535c5ccdcf03a713df499bae824d6bb1f3bb44cb156"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 3
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 10,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 11,
+                  "toCommand": 21
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 4,
+                  "toCommand": 10
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "notes": ""
     },
     "역": {
       "reviewSchemaVersion": 2,

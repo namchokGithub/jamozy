@@ -1135,8 +1135,9 @@
           "jamo": "ㄱ",
           "geometry": [
             {
-              "kind": "contour",
-              "contourId": 1
+              "kind": "split-piece",
+              "recipeId": "split-1-1",
+              "pieceId": "piece-1"
             }
           ]
         },
@@ -1145,14 +1146,67 @@
           "jamo": "ㅖ",
           "geometry": [
             {
+              "kind": "split-piece",
+              "recipeId": "split-1-1",
+              "pieceId": "piece-2"
+            },
+            {
               "kind": "contour",
               "contourId": 0
             }
           ]
         }
       ],
-      "splitRecipes": [],
-      "notes": "계 has three physical typing steps: ㄱ + ㅖ + ㅣ. Keep each component assigned to its corresponding physical typing step."
+      "splitRecipes": [
+        {
+          "id": "split-1-1",
+          "sourceContourId": 1,
+          "sourceContourHash": "573e73cd753d39e177bc440e6a44cc33492a41cb41feede74c47593fbeed6b12",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "573e73cd753d39e177bc440e6a44cc33492a41cb41feede74c47593fbeed6b12"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 9,
+                  "toCommand": 19
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 8
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 1,
+                    "commandIndex": 20,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 20,
+                  "toCommand": 23
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "notes": ""
     },
     "고": {
       "reviewSchemaVersion": 2,
@@ -1638,23 +1692,30 @@
         },
         "sourceGlyphHash": "aca73337fd4fa62224df2a48e7cd826afbcccc9c87ca2c5f7e4abc834a520e90"
       },
-      "status": "reviewing",
-      "blockers": [
-        "needs-split",
-        "empty-physical-step",
-        "unassigned-source-geometry",
-        "reconstruction-mismatch"
-      ],
+      "status": "approved",
+      "blockers": [],
       "steps": [
         {
           "order": 0,
           "jamo": "ㄱ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
+            }
+          ]
         },
         {
           "order": 1,
           "jamo": "ㅜ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
+            }
+          ]
         }
       ],
       "splitRecipes": [
@@ -1705,7 +1766,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-01T09:29:47.234Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "aeef46f4f132106f8a4d43d64db10edc74e28555093315f0256b01f66f3b4f95"
+      }
     },
     "국": {
       "reviewSchemaVersion": 2,

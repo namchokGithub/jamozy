@@ -277,7 +277,7 @@ function CommandRangePainter({
           const color = selected(index) ? '#e66c58' : '#4c8f8b'
           return segment.point ? (
             <g key={index}>
-              {index === 0 && (
+              {/* {index === 0 && (
                 <text
                   x={segment.point.x + 84 * scale}
                   y={segment.point.y - 64 * scale}
@@ -288,7 +288,7 @@ function CommandRangePainter({
                 >
                   start 0
                 </text>
-              )}
+              )} */}
               <circle
                 cx={segment.point.x}
                 cy={segment.point.y}
@@ -442,6 +442,7 @@ export default function JamoSvgTaggerPage() {
   const [state, setState] = useState<State | null>(null)
   const [revision, setRevision] = useState<string>()
   const [error, setError] = useState<string>()
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false)
   const [overlay, setOverlay] = useState(true)
   const [splitContourId, setSplitContourId] = useState<number>()
   const previewSequence = useRef(0)
@@ -532,6 +533,11 @@ export default function JamoSvgTaggerPage() {
         ),
       )
   }, [selected])
+  useEffect(() => {
+    if (!showSaveSuccess) return
+    const timeout = window.setTimeout(() => setShowSaveSuccess(false), 2000)
+    return () => window.clearTimeout(timeout)
+  }, [showSaveSuccess])
   const refreshPreview = async (review: Review) => {
     const sequence = ++previewSequence.current
     try {
@@ -784,6 +790,7 @@ export default function JamoSvgTaggerPage() {
         ),
       )
       setError(undefined)
+      if (!approve) setShowSaveSuccess(true)
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Save failed.')
     }
@@ -818,6 +825,14 @@ export default function JamoSvgTaggerPage() {
   )
   return (
     <PageSurface className="overflow-visible!" contentClassName="max-w-7xl">
+      {showSaveSuccess && (
+        <div
+          role="status"
+          className="fixed top-4 right-4 z-50 rounded-lg bg-[#39465b] px-4 py-3 text-sm font-semibold text-white shadow-lg"
+        >
+          Preview saved
+        </div>
+      )}
       <header className="flex items-end justify-between gap-4">
         <div>
           <p className="text-sm font-semibold uppercase text-[#a85d4e]">

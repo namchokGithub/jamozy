@@ -706,23 +706,30 @@
         },
         "sourceGlyphHash": "fe9c77802866aafd63e0fb531424e5d3d8a89652b2e9c947d2e8abeb4fb5be2d"
       },
-      "status": "reviewing",
-      "blockers": [
-        "needs-split",
-        "empty-physical-step",
-        "unassigned-source-geometry",
-        "reconstruction-mismatch"
-      ],
+      "status": "approved",
+      "blockers": [],
       "steps": [
         {
           "order": 0,
           "jamo": "ㄷ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
+            }
+          ]
         },
         {
           "order": 1,
           "jamo": "ㅗ",
-          "geometry": []
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
+            }
+          ]
         }
       ],
       "splitRecipes": [
@@ -773,7 +780,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-01T09:30:02.528Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "ecfa354410a5c828fd4ebcb0d2f0ea1d254f58d4781b2ede2a618b6a50517647"
+      }
     },
     "돈": {
       "reviewSchemaVersion": 2,

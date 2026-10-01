@@ -113,7 +113,7 @@
         },
         "sourceGlyphHash": "81cebf60fe3765f9c9a027305951c4567bee59b3d64d48033cac047a8e89e514"
       },
-      "status": "reviewing",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -125,8 +125,9 @@
               "contourId": 0
             },
             {
-              "kind": "contour",
-              "contourId": 1
+              "kind": "split-piece",
+              "recipeId": "split-1-1",
+              "pieceId": "piece-1"
             }
           ]
         },
@@ -137,12 +138,71 @@
             {
               "kind": "contour",
               "contourId": 2
+            },
+            {
+              "kind": "split-piece",
+              "recipeId": "split-1-1",
+              "pieceId": "piece-2"
             }
           ]
         }
       ],
-      "splitRecipes": [],
-      "notes": "께 has two physical typing steps: ㄲ + ㅔ. Keep each component assigned to its corresponding physical typing step; ㄲ is a single physical typing step."
+      "splitRecipes": [
+        {
+          "id": "split-1-1",
+          "sourceContourId": 1,
+          "sourceContourHash": "f83365cc8015f027e8bb8d10deac6eb3d9d84b40e608e2f1cb52aa9547cc4627",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "f83365cc8015f027e8bb8d10deac6eb3d9d84b40e608e2f1cb52aa9547cc4627"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 3
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 1,
+                    "commandIndex": 10,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 11,
+                  "toCommand": 20
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 4,
+                  "toCommand": 10
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "notes": "",
+      "approved": {
+        "at": "2026-10-01T09:27:48.209Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "9b3c711bb38e2cf82ab0ee7f6121aa48f9f11bff9ae27869271943151e5079c6"
+      }
     }
   }
 }
