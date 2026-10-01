@@ -214,12 +214,14 @@ function CommandRangePainter({
   ranges,
   inspect = false,
   onAddSelectedRange,
+  onAddNewRange,
 }: {
   glyph: Glyph
   contour: CachedContour
   ranges: Array<{ fromCommand: number; toCommand: number }>
   inspect?: boolean
   onAddSelectedRange?: (fromCommand: number, toCommand: number) => void
+  onAddNewRange?: (fromCommand: number, toCommand: number) => void
 }) {
   const [inspectRange, setInspectRange] = useState<
     { start: number; end: number } | undefined
@@ -379,6 +381,20 @@ function CommandRangePainter({
             Add to latest range
           </button>
         )}
+        {inspectRange && onAddNewRange && (
+          <button
+            type="button"
+            className="rounded border border-[#d8e3f2] bg-white px-1.5 py-0.5 text-[11px] font-semibold text-[#39465b] hover:border-[#a85d4e] hover:text-[#8d4c43]"
+            onClick={() =>
+              onAddNewRange(
+                Math.min(inspectRange.start, inspectRange.end),
+                Math.max(inspectRange.start, inspectRange.end),
+              )
+            }
+          >
+            Add new range
+          </button>
+        )}
       </div>
     </div>
   )
@@ -514,7 +530,21 @@ export default function JamoSvgTaggerPage() {
   const queueLength = filteredQueue.length
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+      if (
+        ![
+          'ArrowLeft',
+          'ArrowRight',
+          'a',
+          'd',
+          's',
+          'f',
+          'ฟ',
+          'ก',
+          'ห',
+          'ด',
+        ].includes(event.key)
+      )
+        return
       if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
         return
       const target = event.target as HTMLElement | null
@@ -524,15 +554,23 @@ export default function JamoSvgTaggerPage() {
       )
         return
       event.preventDefault()
+      if (event.key === 's' || event.key === 'ห') {
+        void save()
+        return
+      }
+      if (event.key === 'f' || event.key === 'ด') {
+        void save(true)
+        return
+      }
       setIndex((current) =>
-        event.key === 'ArrowLeft'
+        event.key === 'ArrowLeft' || event.key === 'a' || event.key === 'ฟ'
           ? Math.max(0, current - 1)
           : Math.min(Math.max(0, queueLength - 1), current + 1),
       )
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [queueLength])
+  }, [queueLength, save])
   const page = Math.floor(index / QUEUE_PAGE_SIZE)
   const pageCount = Math.max(
     1,
@@ -810,7 +848,8 @@ export default function JamoSvgTaggerPage() {
           ),
         )
       : []
-  const save = async (approve = false) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  async function save(approve = false) {
     if (!state) return
     previewSequence.current += 1
     const review = approve
@@ -1442,24 +1481,48 @@ export default function JamoSvgTaggerPage() {
                           tokenIndex: number,
                           fromCommand: number,
                           toCommand: number,
-                        ) =>
-                          updatePiece(
-                            activeRecipe.id,
-                            piece.id,
-                            piece.tokens.map((token, index) =>
+                        ) => {
+                          const nextFrom = Math.min(fromCommand, toCommand)
+                          const nextTo = Math.max(fromCommand, toCommand)
+                          const previousRangeIndex = piece.tokens.reduce(
+                            (latestIndex, token, index) =>
+                              index < tokenIndex &&
+                              token.kind === 'source-range'
+                                ? index
+                                : latestIndex,
+                            -1,
+                          )
+                          const tokens = piece.tokens
+                            .map((token, index) =>
                               index === tokenIndex &&
                               token.kind === 'source-range'
                                 ? {
-                                    kind: 'source-range',
-                                    fromCommand: Math.min(
-                                      fromCommand,
-                                      toCommand,
-                                    ),
-                                    toCommand: Math.max(fromCommand, toCommand),
+                                    kind: 'source-range' as const,
+                                    fromCommand: nextFrom,
+                                    toCommand: nextTo,
                                   }
                                 : token,
-                            ),
-                          )
+                            )
+                            .filter(
+                              (token, index) =>
+                                !(
+                                  index === previousRangeIndex + 1 &&
+                                  token.kind === 'line-to-anchor'
+                                ),
+                            )
+                          if (previousRangeIndex !== -1 && nextFrom > 0) {
+                            tokens.splice(previousRangeIndex + 1, 0, {
+                              kind: 'line-to-anchor',
+                              anchor: {
+                                contourId: activeContour.id,
+                                commandIndex: nextFrom - 1,
+                                point: 'end',
+                              },
+                              reason: 'interior-closure-seam',
+                            })
+                          }
+                          updatePiece(activeRecipe.id, piece.id, tokens)
+                        }
                         return (
                           <article
                             className="rounded border border-[#d8e3f2] p-3"
@@ -1596,7 +1659,10 @@ export default function JamoSvgTaggerPage() {
                                               </span>
                                               <select
                                                 className="mt-1 w-full rounded border p-2 font-normal"
-                                                defaultValue=""
+                                                defaultValue={
+                                                  suggestedAnchor?.toString() ??
+                                                  ''
+                                                }
                                                 onChange={(event) => {
                                                   if (event.target.value === '')
                                                     return
@@ -1723,9 +1789,19 @@ export default function JamoSvgTaggerPage() {
                                         ),
                                   )
                                 }}
+                                onAddNewRange={(fromCommand, toCommand) =>
+                                  updatePiece(activeRecipe.id, piece.id, [
+                                    ...piece.tokens,
+                                    {
+                                      kind: 'source-range',
+                                      fromCommand,
+                                      toCommand,
+                                    },
+                                  ])
+                                }
                               />
                             </div>
-                            <div className="mt-2 flex flex-wrap gap-2">
+                            <div className="mt-2 flex-wrap gap-2 hidden">
                               <Button
                                 variant="secondary"
                                 onClick={() =>

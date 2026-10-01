@@ -73,6 +73,100 @@
         "validationHash": "31b138893419112fe2b99101adf9c64be3b2192ed782c9e894f826f3cc7722eb"
       }
     },
+    "째": {
+      "reviewSchemaVersion": 2,
+      "syllable": "째",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "f0e2b32a682c1dc892c5c6ef18ea148956aefe9c1a9bf4ebf808593c17e2ff74"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅉ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅐ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [
+        {
+          "id": "split-0-1",
+          "sourceContourId": 0,
+          "sourceContourHash": "58e37ba7eb4ac17859993f4fcc65ff4ee3faf4be3102f90b133b9b7f5e4c3a92",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "58e37ba7eb4ac17859993f4fcc65ff4ee3faf4be3102f90b133b9b7f5e4c3a92"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 8,
+                  "toCommand": 46
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 7
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 46,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 47,
+                  "toCommand": 52
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "approved": {
+        "at": "2026-10-01T14:27:31.476Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "37c158315b19ffa61e1e4319e6550bc2a8f80d689fac4672e90e52f1be982a3c"
+      }
+    },
     "찍": {
       "reviewSchemaVersion": 2,
       "syllable": "찍",

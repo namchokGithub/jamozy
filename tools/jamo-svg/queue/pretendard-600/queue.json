@@ -5790,7 +5790,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "높"
+      ]
     },
     {
       "syllable": "드",
@@ -7205,7 +7207,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "높"
+      ]
     },
     {
       "syllable": "파",
@@ -8102,7 +8106,9 @@
         "physicalStepCount": 3,
         "contourRelation": "deficit"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "롯"
+      ]
     },
     {
       "syllable": "투",
@@ -8379,7 +8385,9 @@
         "physicalStepCount": 3,
         "contourRelation": "deficit"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "롯"
+      ]
     },
     {
       "syllable": "썰",
@@ -8724,7 +8732,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "병"
+      ]
     },
     {
       "syllable": "득",
@@ -8925,7 +8935,9 @@
         "physicalStepCount": 3,
         "contourRelation": "deficit"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "놀"
+      ]
     },
     {
       "syllable": "뽑",

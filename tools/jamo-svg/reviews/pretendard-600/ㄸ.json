@@ -451,6 +451,58 @@
         "validationHash": "cc13196bad702753152868fe7fdcc2a1116e0792e1358f78c82b0bad27e5eb4c"
       }
     },
+    "떼": {
+      "reviewSchemaVersion": 2,
+      "syllable": "떼",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "ac1c39b60c3f2b477e6ffec4ba981d4a1e21d556d48b37973576c5523dce4610"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄸ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            },
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅔ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            },
+            {
+              "kind": "contour",
+              "contourId": 3
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T12:40:49.355Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "ac8f27e5e2f07bbcaf9b0671cb0d82a5c4084ce81aa3d9ccd81e75f579c0be38"
+      }
+    },
     "또": {
       "reviewSchemaVersion": 2,
       "syllable": "또",
