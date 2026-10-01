@@ -912,7 +912,7 @@
         },
         "sourceGlyphHash": "7c05ddcbee6fea8c7e0d291b87d178ac77802064b2ce1dd9024da18cb14e4977"
       },
-      "status": "reviewing",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -920,8 +920,13 @@
           "jamo": "ㅇ",
           "geometry": [
             {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
+            },
+            {
               "kind": "contour",
-              "contourId": 0
+              "contourId": 1
             }
           ]
         },
@@ -930,14 +935,69 @@
           "jamo": "ㅗ",
           "geometry": [
             {
-              "kind": "contour",
-              "contourId": 1
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
             }
           ]
         }
       ],
-      "splitRecipes": [],
-      "notes": "오 has two physical typing steps: ㅇ + ㅗ. Assign the circular consonant geometry to ㅇ and the lower vowel geometry to ㅗ."
+      "splitRecipes": [
+        {
+          "id": "split-0-1",
+          "sourceContourId": 0,
+          "sourceContourHash": "e7caa615e0548c16686a40757db54a507a170336ea34361b24772608e04c668a",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "e7caa615e0548c16686a40757db54a507a170336ea34361b24772608e04c668a"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 7
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 15,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 16,
+                  "toCommand": 23
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 8,
+                  "toCommand": 15
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "notes": "",
+      "approved": {
+        "at": "2026-10-01T05:57:29.011Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "646dd6f4ad7a5ed346bae8dea55cc42cdf670dbe5c3750bc3cda8d78d23b7ff4"
+      }
     },
     "왜": {
       "reviewSchemaVersion": 2,

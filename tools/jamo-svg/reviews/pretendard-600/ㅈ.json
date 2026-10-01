@@ -1335,7 +1335,7 @@
         },
         "sourceGlyphHash": "96e6be720c3dbf803b8e14a4c001deaba0c604f85d086a21e652802dff05b3e7"
       },
-      "status": "reviewing",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -1353,8 +1353,9 @@
           "jamo": "ㅜ",
           "geometry": [
             {
-              "kind": "contour",
-              "contourId": 0
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
             }
           ]
         },
@@ -1365,12 +1366,71 @@
             {
               "kind": "contour",
               "contourId": 1
+            },
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
             }
           ]
         }
       ],
-      "splitRecipes": [],
-      "notes": "중 has three physical typing steps: ㅈ + ㅜ + ㅇ. Keep each component assigned to its corresponding physical typing step."
+      "splitRecipes": [
+        {
+          "id": "split-0-1",
+          "sourceContourId": 0,
+          "sourceContourHash": "af80c3fbb2cea54e4df5924ea51524106c52dcfc44b72a159a6415bb10e52dcb",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "af80c3fbb2cea54e4df5924ea51524106c52dcfc44b72a159a6415bb10e52dcb"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 3
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 17,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 18,
+                  "toCommand": 21
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 4,
+                  "toCommand": 17
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "notes": "",
+      "approved": {
+        "at": "2026-10-01T06:40:57.760Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "b86c1be04fabad9546279ff620657533fcc0cf14ca5c7eba04e2282d7d219c74"
+      }
     },
     "즉": {
       "reviewSchemaVersion": 2,

@@ -207,6 +207,18 @@ function CommandRangePainter({
   const finish = () => {
     dragRange.current = undefined
   }
+  // Inspect mode zooms to the contour itself; marks keep the same on-screen
+  // size by scaling with the zoomed view.
+  const pad = 140
+  const view = inspect
+    ? {
+        x: contour.bounds.x1 - pad,
+        y: contour.bounds.y1 - pad,
+        width: contour.bounds.x2 - contour.bounds.x1 + pad * 2,
+        height: contour.bounds.y2 - contour.bounds.y1 + pad * 2,
+      }
+    : { x: 0, y: 0, width: glyph.advanceWidth, height: 2048 }
+  const scale = inspect ? Math.max(view.width, view.height) / 2048 : 1
   return (
     <div className="mt-3 rounded border border-[#d8e3f2] bg-[#f9fbff] p-3">
       <p className="text-xs font-semibold text-[#39465b]">
@@ -218,8 +230,8 @@ function CommandRangePainter({
           : 'Preview only: reads the source ranges entered below.'}
       </p>
       <svg
-        className="mt-2 h-36 w-full touch-none"
-        viewBox={`0 0 ${glyph.advanceWidth} 2048`}
+        className={`mt-2 w-full touch-none ${inspect ? 'h-80' : 'h-36'}`}
+        viewBox={`${view.x} ${view.y} ${view.width} ${view.height}`}
         role="img"
         aria-label="Paint a source-command range"
         onPointerUp={inspect ? finish : undefined}
@@ -253,33 +265,53 @@ function CommandRangePainter({
             : undefined
         }
       >
-        <path d={contour.d} fill="none" stroke="#c4cfdf" strokeWidth="18" />
+        <path
+          d={contour.d}
+          fill="none"
+          stroke="#c4cfdf"
+          strokeWidth={18 * scale}
+        />
         {contour.commands.map((_, index) => {
           const segment = commandSegmentPath(contour.commands, index)
           if (!segment) return null
           const color = selected(index) ? '#e66c58' : '#4c8f8b'
           return segment.point ? (
-            <circle
-              key={index}
-              cx={segment.point.x}
-              cy={segment.point.y}
-              r="22"
-              fill={color}
-              className={inspect ? 'cursor-crosshair' : undefined}
-              onPointerDown={() => {
-                if (!inspect) return
-                dragRange.current = { start: index, end: index }
-                setInspectRange({ start: index, end: index })
-              }}
-              data-command-index={index}
-            />
+            <g key={index}>
+              {index === 0 && (
+                <text
+                  x={segment.point.x + 84 * scale}
+                  y={segment.point.y - 64 * scale}
+                  fontSize={96 * scale}
+                  fontWeight={700}
+                  fill={color}
+                  pointerEvents="none"
+                >
+                  start 0
+                </text>
+              )}
+              <circle
+                cx={segment.point.x}
+                cy={segment.point.y}
+                r={(index === 0 ? 64 : 22) * scale}
+                fill={color}
+                stroke={index === 0 ? '#ffffff' : undefined}
+                strokeWidth={index === 0 ? 12 * scale : undefined}
+                className={inspect ? 'cursor-crosshair' : undefined}
+                onPointerDown={() => {
+                  if (!inspect) return
+                  dragRange.current = { start: index, end: index }
+                  setInspectRange({ start: index, end: index })
+                }}
+                data-command-index={index}
+              />
+            </g>
           ) : (
             <path
               key={index}
               d={segment.d}
               fill="none"
               stroke={color}
-              strokeWidth="28"
+              strokeWidth={28 * scale}
               strokeLinecap="round"
               className={inspect ? 'cursor-crosshair' : undefined}
               onPointerDown={() => {
