@@ -665,6 +665,7 @@ export default function JamoSvgTaggerPage() {
   const [state, setState] = useState<State | null>(null)
   const [revision, setRevision] = useState<string>()
   const [error, setError] = useState<string>()
+  const [zoomOpen, setZoomOpen] = useState(false)
   const [saveFailure, setSaveFailure] = useState<{
     action: 'Save' | 'Approve'
     message: string
@@ -1218,6 +1219,64 @@ export default function JamoSvgTaggerPage() {
           </div>
         )}
       </Modal>
+      <Modal
+        open={zoomOpen && Boolean(state)}
+        title={
+          state
+            ? `${state.source.syllable} · ${state.review.status}`
+            : 'Per-jamo result'
+        }
+        sizeClassName="max-w-4xl"
+        onClose={() => setZoomOpen(false)}
+      >
+        {state && (
+          <div className="mt-2">
+            <div className="flex flex-wrap items-center gap-3 text-sm">
+              {state.source.physicalSteps.map(({ order, jamo }) => (
+                <span key={order} className="flex items-center gap-1.5">
+                  <span
+                    aria-hidden="true"
+                    className="inline-block size-3 rounded-full"
+                    style={{ backgroundColor: colors[order % colors.length] }}
+                  />
+                  {order + 1}. {jamo}
+                </span>
+              ))}
+              <span className="ml-auto text-xs text-[#667085]">
+                {selected ? `${index + 1} / ${filteredQueue.length}` : ''}
+              </span>
+            </div>
+            {hasCompleteCompiledPreview ? (
+              <GlyphPreview
+                svgClassName="mt-2 h-[65vh] w-full"
+                glyph={state.source}
+                colored
+                paths={state.compiled.paths}
+              />
+            ) : (
+              <DraftSegmentationPreview
+                svgClassName="mt-2 h-[65vh] w-full"
+                glyph={state.source}
+                review={state.review}
+              />
+            )}
+            <p className="mt-2 text-xs text-[#667085]">
+              {[
+                ...new Set([
+                  ...state.validation.blockers,
+                  ...state.review.blockers,
+                ]),
+              ].join(', ') || 'No automatic blockers.'}{' '}
+              · ← / a previous · → / d next · f approve · s save · Esc close
+            </p>
+            {error && (
+              <p className="mt-1 text-xs font-semibold text-[#c0362c]">
+                {error}
+              </p>
+            )}
+          </div>
+        )}
+      </Modal>
       {showSaveSuccess && (
         <div
           role="status"
@@ -1302,20 +1361,27 @@ export default function JamoSvgTaggerPage() {
                   ? 'Combined compiled/exportable geometry, colored by physical step.'
                   : 'Draft segmentation from selected source commands, colored by physical step.'}
               </p>
-              {hasCompleteCompiledPreview ? (
-                <GlyphPreview
-                  svgClassName={previewSvgClass}
-                  glyph={state.source}
-                  colored
-                  paths={state.compiled.paths}
-                />
-              ) : (
-                <DraftSegmentationPreview
-                  svgClassName={previewSvgClass}
-                  glyph={state.source}
-                  review={state.review}
-                />
-              )}
+              <button
+                type="button"
+                className="block w-full cursor-zoom-in rounded"
+                title="Enlarge (arrows or a/d move, f approves, Esc closes)"
+                onClick={() => setZoomOpen(true)}
+              >
+                {hasCompleteCompiledPreview ? (
+                  <GlyphPreview
+                    svgClassName={previewSvgClass}
+                    glyph={state.source}
+                    colored
+                    paths={state.compiled.paths}
+                  />
+                ) : (
+                  <DraftSegmentationPreview
+                    svgClassName={previewSvgClass}
+                    glyph={state.source}
+                    review={state.review}
+                  />
+                )}
+              </button>
               {!hasCompleteCompiledPreview && (
                 <p className="text-xs font-semibold text-[#9a6424]">
                   Draft only — resolve coverage, seams, and all blockers to
