@@ -3059,6 +3059,214 @@
         "validationHash": "96e09be17172edc4ffd30cf401d81ac12b01d4fb2393bb0b317e3983ae0becb9"
       }
     },
+    "극": {
+      "reviewSchemaVersion": 2,
+      "syllable": "극",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "14612c0787c3cec431223a0182957f8ca4ae6657cbff36b62bb993976b211b27"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄱ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅡ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㄱ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [
+        {
+          "id": "split-0-1",
+          "sourceContourId": 0,
+          "sourceContourHash": "2026eb0771e146923a7bc0a7116428a9adab2b095031c66d4a01b0259d5fd523",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Proposed from 글: Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "2026eb0771e146923a7bc0a7116428a9adab2b095031c66d4a01b0259d5fd523"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 4
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 9,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 10,
+                  "toCommand": 15
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 5,
+                  "toCommand": 9
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "approved": {
+        "at": "2026-10-01T12:31:10.907Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "5dbe867b10e06561691dcdcb52d5403974841c11de37d29aba997807f43f2ed9"
+      }
+    },
+    "근": {
+      "reviewSchemaVersion": 2,
+      "syllable": "근",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "bb78a589f2a4d0915b5c514e12d57b0e97f555de3ef9d036832a0d6a209a16c7"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄱ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅡ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㄴ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [
+        {
+          "id": "split-0-1",
+          "sourceContourId": 0,
+          "sourceContourHash": "c7adab404214b5a96a3fd591a0362cd1862c9871381762189176bcfa991cdb14",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Proposed from 글: Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "c7adab404214b5a96a3fd591a0362cd1862c9871381762189176bcfa991cdb14"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 4
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 9,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 10,
+                  "toCommand": 15
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 5,
+                  "toCommand": 9
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "approved": {
+        "at": "2026-10-01T12:31:07.313Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "6851da81bfa0bb2d72bbf65b02b8e5c53aa9a34bd3ab04ffbff6070caee27f41"
+      }
+    },
     "글": {
       "reviewSchemaVersion": 2,
       "syllable": "글",

@@ -3470,7 +3470,9 @@
         "physicalStepCount": 3,
         "contourRelation": "deficit"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "글"
+      ]
     },
     {
       "syllable": "최",
@@ -3709,7 +3711,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "엄"
+      ]
     },
     {
       "syllable": "변",
@@ -5450,7 +5454,9 @@
         "physicalStepCount": 3,
         "contourRelation": "deficit"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "글"
+      ]
     },
     {
       "syllable": "찬",
@@ -8297,7 +8303,9 @@
         "physicalStepCount": 4,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "밝"
+      ]
     },
     {
       "syllable": "허",
