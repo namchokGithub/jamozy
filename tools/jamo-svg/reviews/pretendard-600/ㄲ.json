@@ -1,0 +1,52 @@
+{
+  "shardSchemaVersion": 2,
+  "choseong": "ㄲ",
+  "fontFingerprint": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+  "physicalStepAlgorithmVersion": 2,
+  "splitRecipeSchemaVersion": 2,
+  "reviews": {
+    "께": {
+      "reviewSchemaVersion": 2,
+      "syllable": "께",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 2
+        },
+        "sourceGlyphHash": "81cebf60fe3765f9c9a027305951c4567bee59b3d64d48033cac047a8e89e514"
+      },
+      "status": "reviewing",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄲ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅔ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "notes": "께 has two physical typing steps: ㄲ + ㅔ. Keep each component assigned to its corresponding physical typing step; ㄲ is a single physical typing step."
+    }
+  }
+}

@@ -1,10 +1,12 @@
 import { describe, expect, test } from 'vitest'
 import {
   compileReview,
+  counterContours,
   validateReview,
   type CachedGlyph,
   type GlyphReview,
 } from './compile'
+import { extractGlyph } from './extract'
 
 const source: CachedGlyph = {
   syllable: '하',
@@ -308,4 +310,54 @@ describe('review compiler', () => {
       'invalid-split-recipe',
     )
   })
+})
+
+describe('counter ownership', () => {
+  const reviewOf = (glyph: CachedGlyph, owners: number[][]): GlyphReview => ({
+    reviewSchemaVersion: 2,
+    syllable: glyph.syllable,
+    source: {
+      extraction: glyph.extraction,
+      sourceGlyphHash: glyph.sourceGlyphHash,
+    },
+    status: 'reviewing',
+    blockers: [],
+    steps: glyph.physicalSteps.map(({ order, jamo }) => ({
+      order,
+      jamo,
+      geometry: owners[order].map((contourId) => ({
+        kind: 'contour' as const,
+        contourId,
+      })),
+    })),
+    splitRecipes: [],
+  })
+
+  test('pairs each counter with the outline that encloses it', async () => {
+    expect(counterContours(await extractGlyph('방'))).toEqual([
+      { counterId: 1, outerId: 0 },
+      { counterId: 4, outerId: 3 },
+    ])
+    expect(counterContours(await extractGlyph('가'))).toEqual([])
+  })
+
+  test('accepts a counter owned with its enclosing outline', async () => {
+    const glyph = await extractGlyph('아')
+    expect(
+      validateReview(glyph, reviewOf(glyph, [[0, 1], [2]])).blockers,
+    ).toEqual([])
+  })
+
+  test.each([
+    ['어', [[0], [1]]],
+    ['중', [[2], [0], [1]]],
+  ])(
+    'blocks %s when its counter is painted as another jamo',
+    async (syllable, owners) => {
+      const glyph = await extractGlyph(syllable)
+      expect(validateReview(glyph, reviewOf(glyph, owners)).blockers).toEqual([
+        'counter-owner-mismatch',
+      ])
+    },
+  )
 })

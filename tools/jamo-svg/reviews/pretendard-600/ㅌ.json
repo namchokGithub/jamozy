@@ -1,0 +1,146 @@
+{
+  "shardSchemaVersion": 2,
+  "choseong": "ㅌ",
+  "fontFingerprint": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+  "physicalStepAlgorithmVersion": 2,
+  "splitRecipeSchemaVersion": 2,
+  "reviews": {
+    "타": {
+      "reviewSchemaVersion": 2,
+      "syllable": "타",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 2
+        },
+        "sourceGlyphHash": "041742bfdd2e530f5ae16d1a32f43f58be0e935a2e0351de0c83520072e59c81"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅌ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅏ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T04:10:37.894Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "338cf223f7d3e930e3b91b49cbc88b64d35d474cb27ba143ac4762e359171315"
+      }
+    },
+    "통": {
+      "reviewSchemaVersion": 2,
+      "syllable": "통",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 2
+        },
+        "sourceGlyphHash": "26bee790c089250ae2da28e6cb4fd460da333f979fe801f036771f189c172fe3"
+      },
+      "status": "reviewing",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅌ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅗ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅇ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "notes": "통 has three physical typing steps: ㅌ + ㅗ + ㅇ. Keep each component assigned to its corresponding physical typing step."
+    },
+    "트": {
+      "reviewSchemaVersion": 2,
+      "syllable": "트",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 2
+        },
+        "sourceGlyphHash": "989028bd00f023ecdc6cf3c8170a8b8cae1a4893d8b31468c1c62a10496f130b"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅌ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅡ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T03:54:38.560Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "bae5e185fd764078b51567d81aae27ae502df209d512f31bfe2047ad79f9d313"
+      }
+    }
+  }
+}

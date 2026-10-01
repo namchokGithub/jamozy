@@ -169,7 +169,13 @@ type ReviewBlocker =
   | 'invalid-split-recipe'
   | 'reconstruction-mismatch'
   | 'fingerprint-mismatch'
+  | 'counter-owner-mismatch'
 ```
+
+`counter-owner-mismatch` fires when a counter (hole) contour and the outline
+enclosing it belong to different physical steps. That assignment passes
+coverage checks but paints the hole as a solid shape; it means the enclosing
+outline is a union of two jamo and needs a split.
 
 Allowed transitions:
 

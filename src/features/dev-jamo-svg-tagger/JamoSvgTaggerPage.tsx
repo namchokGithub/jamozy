@@ -747,6 +747,12 @@ export default function JamoSvgTaggerPage() {
     state?.review.status !== 'approved' &&
     Boolean(state?.review.notes?.trim()) &&
     !state?.review.blockers.includes('needs-split')
+  const canApprove = Boolean(
+    state &&
+    state.review.status !== 'approved' &&
+    state.validation.blockers.length === 0 &&
+    !state.review.blockers.includes('needs-split'),
+  )
   const previewSvgClass = freezePreviews ? 'h-32 w-full' : 'h-48 w-full'
   const hasCompleteCompiledPreview = Boolean(
     state &&
@@ -791,14 +797,24 @@ export default function JamoSvgTaggerPage() {
                 .toUpperCase()}{' '}
               · {state.review.status}
             </p>
-            <label className="text-xs font-semibold text-[#39465b]">
-              <input
-                type="checkbox"
-                checked={freezePreviews}
-                onChange={(event) => setFreezePreviews(event.target.checked)}
-              />{' '}
-              Freeze previews
-            </label>
+            <div className="flex items-center gap-4 text-xs font-semibold">
+              <button
+                type="button"
+                className="text-[#8d4c43] hover:underline disabled:cursor-not-allowed disabled:text-[#98a2b3] disabled:no-underline"
+                disabled={!canApprove}
+                onClick={() => void save(true)}
+              >
+                Approve after visual review
+              </button>
+              <label className="text-[#39465b]">
+                <input
+                  type="checkbox"
+                  checked={freezePreviews}
+                  onChange={(event) => setFreezePreviews(event.target.checked)}
+                />{' '}
+                Freeze previews
+              </label>
+            </div>
           </div>
           <section className="grid gap-3 md:grid-cols-3">
             <Card className="p-4">
@@ -1583,10 +1599,7 @@ export default function JamoSvgTaggerPage() {
                 <Button onClick={() => void save(false)}>Save review</Button>
                 <Button
                   variant="secondary"
-                  disabled={
-                    state.validation.blockers.length > 0 ||
-                    state.review.blockers.includes('needs-split')
-                  }
+                  disabled={!canApprove}
                   onClick={() => void save(true)}
                 >
                   Approve after visual review

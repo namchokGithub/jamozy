@@ -120,6 +120,56 @@ function recipeIsValid(source: CachedGlyph, recipe: SplitRecipe): boolean {
   )
 }
 
+type Point = { x: number; y: number }
+const outlinePoints = (contour: CachedGlyph['contours'][number]): Point[] =>
+  contour.commands.flatMap((command) =>
+    command.x === undefined || command.y === undefined
+      ? []
+      : [{ x: command.x, y: command.y }],
+  )
+const signedArea = (points: Point[]) =>
+  points.reduce((sum, point, index) => {
+    const next = points[(index + 1) % points.length]
+    return sum + point.x * next.y - next.x * point.y
+  }, 0) / 2
+const containsPoint = (points: Point[], { x, y }: Point) =>
+  points.reduce((inside, point, index) => {
+    const previous = points[(index + points.length - 1) % points.length]
+    return point.y > y !== previous.y > y &&
+      x <
+        ((previous.x - point.x) * (y - point.y)) / (previous.y - point.y) +
+          point.x
+      ? !inside
+      : inside
+  }, false)
+
+/**
+ * Pairs each counter (hole) contour with the innermost contour enclosing it.
+ * A counter winds opposite to its enclosing outline. Outlines are
+ * approximated by their on-curve points, which is sufficient for containment.
+ */
+export function counterContours(
+  source: CachedGlyph,
+): Array<{ counterId: number; outerId: number }> {
+  const shapes = source.contours.map((contour) => {
+    const points = outlinePoints(contour)
+    return { id: contour.id, points, area: signedArea(points) }
+  })
+  return shapes.flatMap((counter) => {
+    if (!counter.area || !counter.points.length) return []
+    const enclosing = shapes
+      .filter(
+        (outer) =>
+          outer.id !== counter.id &&
+          Math.sign(outer.area) === -Math.sign(counter.area) &&
+          Math.abs(outer.area) > Math.abs(counter.area) &&
+          counter.points.every((point) => containsPoint(outer.points, point)),
+      )
+      .sort((a, b) => Math.abs(a.area) - Math.abs(b.area))[0]
+    return enclosing ? [{ counterId: counter.id, outerId: enclosing.id }] : []
+  })
+}
+
 export function validateReview(
   source: CachedGlyph,
   review: GlyphReview,
@@ -178,6 +228,25 @@ export function validateReview(
     } else if (count === 0) blockers.add('unassigned-source-geometry')
     else if (count > 1) blockers.add('duplicate-ownership')
   }
+  // A counter is part of the letter whose outline encloses it. Giving it to a
+  // different step paints the hole as a solid shape, which coverage checks
+  // alone cannot see; the union outline needs a split instead.
+  const ownerOf = new Map(
+    review.steps.flatMap((step) =>
+      step.geometry.flatMap((ref) =>
+        ref.kind === 'contour' ? [[ref.contourId, step.order] as const] : [],
+      ),
+    ),
+  )
+  if (
+    counterContours(source).some(
+      ({ counterId, outerId }) =>
+        ownerOf.has(counterId) &&
+        ownerOf.has(outerId) &&
+        ownerOf.get(counterId) !== ownerOf.get(outerId),
+    )
+  )
+    blockers.add('counter-owner-mismatch')
   try {
     if (compileReview(source, review).paths.some(({ d }) => !d.startsWith('M')))
       blockers.add('reconstruction-mismatch')

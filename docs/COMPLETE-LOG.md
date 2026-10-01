@@ -667,3 +667,15 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Enqueued the first 1,000 words: 495 syllables, 490 new; the queue now holds
   502 entries (12 approved). The cache is gitignored, so another checkout must
   rerun the same enqueue command before opening the tagger.
+
+### 2026-10-01 — Jamo SVG counter-ownership blocker
+
+- `validateReview` now reports `counter-owner-mismatch` when a counter (hole)
+  contour and its enclosing outline belong to different physical steps. The
+  outline/hole pairing (`counterContours`) uses opposite winding plus
+  point-in-polygon containment. Such a draft can still be saved as
+  `needs-split` work, but cannot be approved.
+- A visual audit of all 151 stored reviews found no faulty approvals. The
+  blocker flags exactly the 16 `reviewing` drafts that painted a hole as a
+  vowel or final (`경 동 머 명 모 몸 버 번 어 없 엇 여 오 중 통 회`). `계` and
+  `께` have union outlines without a hole and still need visual review.

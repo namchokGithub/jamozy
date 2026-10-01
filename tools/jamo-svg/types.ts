@@ -88,6 +88,7 @@ export type ReviewBlocker =
   | 'invalid-split-recipe'
   | 'reconstruction-mismatch'
   | 'fingerprint-mismatch'
+  | 'counter-owner-mismatch'
 export type SourceAnchor = { contourId: number; commandIndex: number; point: 'start' | 'end' | 'control1' | 'control2' }
 export type RecipeToken =
   | { kind: 'source-range'; fromCommand: number; toCommand: number }

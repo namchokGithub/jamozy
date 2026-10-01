@@ -28,7 +28,7 @@ export class ReviewStore {
   async getManifest() { return this.manifest() }
   async save(review: GlyphReview, expectedRevision?: string) {
     const source = await loadCacheGlyph(this.cacheRoot, review.syllable); const validation = validateReview(source, review)
-    const unresolvedBlockers = new Set(['needs-split', 'unassigned-source-geometry', 'empty-physical-step', 'reconstruction-mismatch'])
+    const unresolvedBlockers = new Set(['needs-split', 'unassigned-source-geometry', 'empty-physical-step', 'reconstruction-mismatch', 'counter-owner-mismatch'])
     const isSaveableUnresolved = review.status === 'reviewing' && validation.blockers.includes('needs-split') && validation.blockers.every((blocker) => unresolvedBlockers.has(blocker))
     if (validation.blockers.length && !isSaveableUnresolved) throw new Error(`Review validation failed: ${validation.blockers.join(', ')}`)
     review.blockers = validation.blockers
