@@ -2634,6 +2634,70 @@
         "validationHash": "c6f003e015a090147a93b38ca0c4423e0ee8184e7e7f6ca0c1b7cfe55c41e15e"
       }
     },
+    "늙": {
+      "reviewSchemaVersion": 2,
+      "syllable": "늙",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "4fd44d377b3aec9d4b28d9a9062f1e161f7ad5c4208cf354f2129ca1d6e3e629"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄴ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅡ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㄹ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "jamo": "ㄱ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 3
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T19:19:57.755Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "2b679f5943a375a7451f006cae2b5e5bf47b42e40d0765ea440b1af7c7732259"
+      }
+    },
     "능": {
       "reviewSchemaVersion": 2,
       "syllable": "능",
