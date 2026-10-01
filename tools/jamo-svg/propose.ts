@@ -259,3 +259,43 @@ export function proposeReview(
   }
   return undefined
 }
+
+/**
+ * Suggests a review order for glyphs with no review yet: repeatedly picks the
+ * glyph whose approval would let `proposeReview` reach the most others (same
+ * vowel and step count, contours within `maxCost`). This assumes whole-contour
+ * ownership; a template that needs a split helps only targets whose split
+ * contours share its command shape.
+ */
+export function rankTemplateCandidates(
+  glyphs: CachedGlyph[],
+  maxCost: number,
+): Array<{ template: string; proposes: string[] }> {
+  const reaches = (template: CachedGlyph, target: CachedGlyph) =>
+    template !== target &&
+    template.hangul.jungseong === target.hangul.jungseong &&
+    template.physicalSteps.length === target.physicalSteps.length &&
+    (matchContours(
+      target.contours.map(({ bounds }) => bounds),
+      template.contours.map(({ bounds }) => bounds),
+    )?.cost ?? Infinity) <= maxCost
+  const remaining = new Set(glyphs)
+  const groups: Array<{ template: string; proposes: string[] }> = []
+  for (;;) {
+    let best: { template: CachedGlyph; targets: CachedGlyph[] } | undefined
+    for (const template of remaining) {
+      const targets = [...remaining].filter((target) =>
+        reaches(template, target),
+      )
+      if (targets.length > (best?.targets.length ?? 0))
+        best = { template, targets }
+    }
+    if (!best) return groups
+    groups.push({
+      template: best.template.syllable,
+      proposes: best.targets.map(({ syllable }) => syllable),
+    })
+    remaining.delete(best.template)
+    best.targets.forEach((target) => remaining.delete(target))
+  }
+}

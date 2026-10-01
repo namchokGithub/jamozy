@@ -2,13 +2,15 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { parseArgs } from 'node:util'
 import { extractGlyph } from '../tools/jamo-svg/extract'
-import { proposeReview, type ApprovedTemplate } from '../tools/jamo-svg/propose'
+import { proposeReview, rankTemplateCandidates, type ApprovedTemplate } from '../tools/jamo-svg/propose'
 import { QueueStore, ReviewStore, type ReviewManifest, type ReviewShard } from '../tools/jamo-svg/review-store'
 
 // Writes `proposed` reviews for queue syllables that have no review yet, by
-// copying whole-contour ownership from the closest approved glyph. Existing
-// reviews of any status are never touched. A human still approves each one.
-const { values } = parseArgs({ options: { 'max-cost': { type: 'string', default: '250' }, exclude: { type: 'string', default: '' }, 'dry-run': { type: 'boolean', default: false }, 'replace-reviewing': { type: 'boolean', default: false } } })
+// copying ownership (and transferable split recipes) from the closest approved
+// glyph. Approved reviews are never touched; `--replace-reviewing` also
+// re-proposes unapproved `reviewing` drafts. `--rank` only prints which
+// unreviewed glyphs to approve first. A human still approves each proposal.
+const { values } = parseArgs({ options: { 'max-cost': { type: 'string', default: '250' }, exclude: { type: 'string', default: '' }, 'dry-run': { type: 'boolean', default: false }, 'replace-reviewing': { type: 'boolean', default: false }, rank: { type: 'boolean', default: false } } })
 const maxCost = Number(values['max-cost'])
 if (!Number.isFinite(maxCost)) throw new Error(`--max-cost must be a number, received ${values['max-cost']}.`)
 const excluded = new Set([...values.exclude].filter((char) => char.trim() && char !== ','))
@@ -29,6 +31,15 @@ for (const { file } of manifest.shards) {
   }
 }
 const store = new ReviewStore(reviewsRoot, cacheRoot)
+// --rank only suggests which unreviewed glyphs to approve first; it writes nothing.
+if (values.rank) {
+  const unreviewed = await Promise.all((await queue.list()).filter(({ syllable }) => !reviewed.has(syllable)).map(({ syllable }) => extractGlyph(syllable)))
+  const groups = rankTemplateCandidates(unreviewed, maxCost)
+  const grouped = new Set(groups.flatMap(({ template, proposes }) => [template, ...proposes]))
+  console.log(groups.map(({ template, proposes }) => `  ${template} → ${proposes.join(' ')}`).join('\n'))
+  console.log(`${groups.length} groups (max cost ${maxCost}); approve each first syllable with whole contours, then propose. Alone (${unreviewed.length - grouped.size}): ${unreviewed.filter(({ syllable }) => !grouped.has(syllable)).map(({ syllable }) => syllable).join(' ')}`)
+  process.exit(0)
+}
 const entries = await queue.list()
 const proposedFrom = new Map<string, string>()
 const lines: string[] = []

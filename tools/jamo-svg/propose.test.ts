@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { extractGlyph } from './extract'
-import { matchContours, proposeReview, type ApprovedTemplate } from './propose'
+import { matchContours, proposeReview, rankTemplateCandidates, type ApprovedTemplate } from './propose'
 import { seedReview } from './seed'
 import { yeoCounterSplit } from './counter-split.fixture'
 import type { CachedGlyph, GlyphReview } from './types'
@@ -169,5 +169,20 @@ describe('approved-template proposals', () => {
       })
       expect(proposeReview(target, [await yeoTemplate()], 250)).toBeUndefined()
     })
+  })
+})
+
+describe('rankTemplateCandidates', () => {
+  test('groups each unreviewed glyph under the one whose approval would propose the most others', async () => {
+    const glyphs = await Promise.all(['가', '카', '나', '거'].map((syllable) => extractGlyph(syllable)))
+    const groups = rankTemplateCandidates(glyphs, 10_000)
+    // Only 가/카/나 share a vowel and step count; 거 has a different vowel.
+    expect(groups).toHaveLength(1)
+    expect([groups[0].template, ...groups[0].proposes].sort()).toEqual(['가', '나', '카'])
+  })
+
+  test('returns no group when nothing is within the cost limit', async () => {
+    const glyphs = await Promise.all(['가', '나'].map((syllable) => extractGlyph(syllable)))
+    expect(rankTemplateCandidates(glyphs, 1)).toEqual([])
   })
 })

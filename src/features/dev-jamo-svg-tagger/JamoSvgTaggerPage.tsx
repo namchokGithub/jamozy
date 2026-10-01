@@ -219,6 +219,60 @@ function SourceRangeEditor({
     </div>
   )
 }
+/** Step choice as a row of radio buttons; a glyph has at most a handful of steps. */
+function StepRadioGroup({
+  name,
+  steps,
+  value,
+  onChange,
+}: {
+  name: string
+  steps: Array<{ order: number; jamo: string }>
+  value: number | null
+  onChange: (order: number | null) => void
+}) {
+  const options = [
+    { order: null, label: 'Unassigned' },
+    ...steps.map(({ order, jamo }) => ({
+      order,
+      label: `${order + 1}. ${jamo}`,
+    })),
+  ]
+  return (
+    <div role="radiogroup" className="mt-2 flex flex-wrap gap-1.5">
+      {options.map(({ order, label }) => {
+        const checked = value === order
+        return (
+          <label
+            key={order ?? 'none'}
+            className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1 text-sm ${checked ? 'border-[#a85d4e] bg-[#fff1ee] font-semibold text-[#8d4c43]' : 'border-[#d8dce6] text-[#39465b] hover:bg-[#f7f7fa]'}`}
+          >
+            <input
+              type="radio"
+              className="sr-only"
+              name={name}
+              checked={checked}
+              onChange={(event) => {
+                onChange(order)
+                // Drop focus so arrow keys keep moving between glyphs instead
+                // of switching this radio group's choice.
+                event.currentTarget.blur()
+              }}
+            />
+            {order !== null && (
+              <span
+                aria-hidden="true"
+                className="inline-block size-2.5 rounded-full"
+                style={{ backgroundColor: colors[order % colors.length] }}
+              />
+            )}
+            {label}
+          </label>
+        )
+      })}
+    </div>
+  )
+}
 /**
  * Per-contour colors in a recipe: the source contour first, then each counter.
  * `selected` marks commands in a range; `idle` marks the rest of that contour.
@@ -1734,8 +1788,9 @@ export default function JamoSvgTaggerPage() {
                         </p>
                       </div>
                     ) : (
-                      <select
-                        className="mt-2 w-full rounded border p-2"
+                      <StepRadioGroup
+                        name={`contour-${contour.id}-owner`}
+                        steps={state.source.physicalSteps}
                         value={
                           state.review.steps.find((step) =>
                             step.geometry.some(
@@ -1743,24 +1798,10 @@ export default function JamoSvgTaggerPage() {
                                 geometry.kind === 'contour' &&
                                 geometry.contourId === contour.id,
                             ),
-                          )?.order ?? ''
+                          )?.order ?? null
                         }
-                        onChange={(event) =>
-                          assign(
-                            contour.id,
-                            event.target.value === ''
-                              ? null
-                              : Number(event.target.value),
-                          )
-                        }
-                      >
-                        <option value="">Unassigned</option>
-                        {state.source.physicalSteps.map((step) => (
-                          <option key={step.order} value={step.order}>
-                            {step.order + 1}. {step.jamo}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(order) => assign(contour.id, order)}
+                      />
                     )}
                   </article>
                 ))}

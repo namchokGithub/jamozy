@@ -9760,7 +9760,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "춤"
+      ]
     },
     {
       "syllable": "둡",
@@ -10348,7 +10350,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "백"
+      ]
     },
     {
       "syllable": "잎",
@@ -10513,7 +10517,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "백"
+      ]
     },
     {
       "syllable": "률",
@@ -11182,7 +11188,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "멈"
+      ]
     },
     {
       "syllable": "먹",
@@ -11252,7 +11260,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "면"
+      ]
     },
     {
       "syllable": "촬",
@@ -11269,7 +11279,9 @@
         "physicalStepCount": 4,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "관"
+      ]
     },
     {
       "syllable": "빵",
@@ -12282,7 +12294,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "백"
+      ]
     },
     {
       "syllable": "붕",
@@ -12299,7 +12313,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "풍"
+      ]
     },
     {
       "syllable": "짜",
@@ -12392,7 +12408,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "핵"
+      ]
     }
   ]
 }

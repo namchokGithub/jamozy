@@ -703,6 +703,64 @@
         "validationHash": "845785ecd47e50fa137ef8ee62ae5efdf3a46c2cc8130c2817e229b4707c0586"
       }
     },
+    "뱃": {
+      "reviewSchemaVersion": 2,
+      "syllable": "뱃",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "c09baecd625c535b559fa871ec488ddc8149afd5cfde9653be2deb3decc7a1e2"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅂ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            },
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅐ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 3
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅅ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T19:01:31.438Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "a60cd3afec0c8cfabdf7299161ffea6eb613fa5d2a349bc3e9b5bfbaca641620"
+      }
+    },
     "버": {
       "reviewSchemaVersion": 2,
       "syllable": "버",
@@ -2665,6 +2723,118 @@
         "reviewer": "local-reviewer",
         "validatorVersion": 1,
         "validationHash": "af12aecec88638654721d812020025b92680452788bc3debadb1645fe4009b1e"
+      }
+    },
+    "붕": {
+      "reviewSchemaVersion": 2,
+      "syllable": "붕",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "065065aedae0010b16f652c1f6d2ace12aadf5a6af3c4a35431be8caa06bfad8"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅂ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            },
+            {
+              "kind": "contour",
+              "contourId": 3
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅜ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅇ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            },
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [
+        {
+          "id": "split-0-1",
+          "sourceContourId": 0,
+          "sourceContourHash": "92039f29b545f028935918f53c6ae75678bb5fdfd8d23dd90908e350053c3483",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Proposed from 풍: Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "92039f29b545f028935918f53c6ae75678bb5fdfd8d23dd90908e350053c3483"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 3
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 17,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 18,
+                  "toCommand": 21
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 4,
+                  "toCommand": 17
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "approved": {
+        "at": "2026-10-01T19:01:33.360Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "071ab25d5c904d6fae8c18fa7f94efb2ff05d9f88b14a03ec6e98c59dacb2a23"
       }
     },
     "붙": {
