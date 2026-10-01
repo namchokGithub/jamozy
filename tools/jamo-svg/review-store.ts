@@ -7,7 +7,7 @@ import { PHYSICAL_STEP_ALGORITHM_VERSION, type GlyphReview } from './types'
 
 export type ReviewShard = { shardSchemaVersion: 2; choseong: string; fontFingerprint: string; physicalStepAlgorithmVersion: typeof PHYSICAL_STEP_ALGORITHM_VERSION; splitRecipeSchemaVersion: 2; reviews: Record<string, GlyphReview> }
 export type ReviewManifest = { manifestSchemaVersion: 2; reviewRecordSchemaVersion: 2; splitRecipeSchemaVersion: 2; activeFontFingerprint: string; physicalStepAlgorithmVersion: typeof PHYSICAL_STEP_ALGORITHM_VERSION; shards: Array<{ choseong: string; file: string; reviewCount: number; sha256: string }> }
-export type QueueEntry = { syllable: string; priority: number; reasons: string[]; queueKey: { medialLayout: string; hasFinal: boolean; compoundMedial: string | null; compoundFinal: string | null; physicalStepCount: number; contourRelation: 'deficit' | 'aligned' | 'surplus' }; nearestApprovedSyllables: string[] }
+export type QueueEntry = { syllable: string; priority: number; reasons: string[]; sourceRank?: number; queueKey: { medialLayout: string; hasFinal: boolean; compoundMedial: string | null; compoundFinal: string | null; physicalStepCount: number; contourRelation: 'deficit' | 'aligned' | 'surplus' }; nearestApprovedSyllables: string[] }
 export type QueueDocument = { queueSchemaVersion: 1; fontFingerprint: string; entries: QueueEntry[] }
 const stable = (value: unknown) => JSON.stringify(value, null, 2) + '\n'
 const checksum = (text: string) => createHash('sha256').update(text).digest('hex')
@@ -47,6 +47,6 @@ export class ReviewStore {
 export class QueueStore {
   constructor(private readonly file: string, private readonly fontFingerprint: string) {}
   async list(): Promise<QueueEntry[]> { try { const queue = JSON.parse(await readFile(this.file, 'utf8')) as QueueDocument; if (queue.queueSchemaVersion !== 1 || queue.fontFingerprint !== this.fontFingerprint) throw new Error('Stale queue fingerprint.'); return queue.entries } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []; throw error } }
-  async save(entries: QueueEntry[]) { await atomicWrite(this.file, stable({ queueSchemaVersion: 1, fontFingerprint: this.fontFingerprint, entries: [...entries].sort((a, b) => a.syllable.localeCompare(b.syllable)) })) }
+  async save(entries: QueueEntry[]) { await atomicWrite(this.file, stable({ queueSchemaVersion: 1, fontFingerprint: this.fontFingerprint, entries: [...entries].sort((a, b) => a.priority - b.priority || (a.sourceRank ?? 0) - (b.sourceRank ?? 0) || a.syllable.localeCompare(b.syllable)) })) }
 }
 export async function initializeReviewManifest(reviewsRoot: string, fontFingerprint: string) { await atomicWrite(join(reviewsRoot, 'manifest.json'), stable({ manifestSchemaVersion: 2, reviewRecordSchemaVersion: 2, splitRecipeSchemaVersion: 2, activeFontFingerprint: fontFingerprint, physicalStepAlgorithmVersion: PHYSICAL_STEP_ALGORITHM_VERSION, shards: [] } satisfies ReviewManifest)) }

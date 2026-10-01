@@ -654,3 +654,16 @@ Chronological log of completed units of work. One entry per meaningful change (n
   against the bundled font, so compiler or extraction changes cannot silently
   invalidate approvals. The extractor now parses the font once per process
   (about 50 ms to 2 ms per glyph), which keeps a full-block check practical.
+
+### 2026-10-01 — Jamo SVG Tagger frequency-list enqueue
+
+- Added `pnpm jamo-svg:enqueue [--top N] [--words path] [--reason tag]`. It
+  adds the unique syllables of a word list (default: Korean 5800 frequency
+  list) to the tagger queue in first-appearance order, and extends the
+  extraction cache without dropping cached glyphs. It never touches review
+  records or the review manifest, unlike `jamo-svg:seed`, and is idempotent.
+- The queue now sorts by priority, then `sourceRank`, then syllable. New
+  frequency entries use priority 5 after the curated references.
+- Enqueued the first 1,000 words: 495 syllables, 490 new; the queue now holds
+  502 entries (12 approved). The cache is gitignored, so another checkout must
+  rerun the same enqueue command before opening the tagger.
