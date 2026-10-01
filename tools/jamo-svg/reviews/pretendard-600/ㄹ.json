@@ -1789,7 +1789,7 @@
         },
         "sourceGlyphHash": "3bce60833901981c00d9a226cd30d777600afe1769ab5f01d38c35df1381e873"
       },
-      "status": "reviewing",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -1810,10 +1810,6 @@
               "kind": "split-piece",
               "recipeId": "split-0-1",
               "pieceId": "piece-1"
-            },
-            {
-              "kind": "contour",
-              "contourId": 2
             }
           ]
         },
@@ -1825,6 +1821,10 @@
               "kind": "split-piece",
               "recipeId": "split-0-1",
               "pieceId": "piece-2"
+            },
+            {
+              "kind": "contour",
+              "contourId": 3
             }
           ]
         }
@@ -1852,17 +1852,26 @@
                 {
                   "kind": "line-to-anchor",
                   "anchor": {
-                    "contourId": 3,
-                    "commandIndex": 10,
+                    "contourId": 2,
+                    "commandIndex": 2,
                     "point": "end"
                   },
                   "reason": "interior-closure-seam"
                 },
                 {
                   "kind": "source-range",
-                  "fromCommand": 11,
-                  "toCommand": 11,
-                  "contourId": 3
+                  "fromCommand": 3,
+                  "toCommand": 5,
+                  "contourId": 2
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 16,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
                 },
                 {
                   "kind": "line-to-anchor",
@@ -1891,7 +1900,22 @@
                 {
                   "kind": "line-to-anchor",
                   "anchor": {
-                    "contourId": 3,
+                    "contourId": 2,
+                    "commandIndex": 5,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 6,
+                  "toCommand": 7,
+                  "contourId": 2
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 2,
                     "commandIndex": 0,
                     "point": "end"
                   },
@@ -1900,20 +1924,26 @@
                 {
                   "kind": "source-range",
                   "fromCommand": 1,
-                  "toCommand": 10,
-                  "contourId": 3
+                  "toCommand": 2,
+                  "contourId": 2
                 }
               ]
             }
           ],
           "counterContours": [
             {
-              "contourId": 3,
-              "contourHash": "5911b4f3c105db6d2955f382c611e99370fbf496a5c7c20a7f399cbd1f8b7986"
+              "contourId": 2,
+              "contourHash": "9bc4b2aed1fff61b1ca94a08a21b3fe5ed58acaf91c76ed0df5526ae43680018"
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-01T18:36:29.249Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "2d01ad9c379de13c750751fc346df0039799f053c29a6b2b4f35dae1993bebb3"
+      }
     },
     "르": {
       "reviewSchemaVersion": 2,
