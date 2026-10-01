@@ -782,6 +782,50 @@
         "validationHash": "0a8713a74eb11b03b805670a36b4674d408d15f80dab6390a711aebbce8e5600"
       }
     },
+    "냐": {
+      "reviewSchemaVersion": 2,
+      "syllable": "냐",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "5021acf78519a6604843d3ca1ac428c086ab84cd98d99f7383cf13bb5cd45cd4"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄴ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅑ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T19:11:10.441Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "19a04bfa7862b14db4209583f07a1668d4cb2ce2d5d9529c608fcc702c5260ef"
+      }
+    },
     "냥": {
       "reviewSchemaVersion": 2,
       "syllable": "냥",

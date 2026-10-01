@@ -2027,29 +2027,21 @@ export default function JamoSvgTaggerPage() {
                                 Delete piece
                               </Button>
                             </div>
-                            <label className="mt-2 block text-xs font-semibold">
+                            <div className="mt-2 text-xs font-semibold">
                               This geometry belongs to
-                              <select
-                                className="mt-1 w-full rounded border p-2 font-normal"
-                                value={owner?.order ?? ''}
-                                onChange={(event) =>
+                              <StepRadioGroup
+                                name={`piece-${activeRecipe.id}-${piece.id}-owner`}
+                                steps={state.source.physicalSteps}
+                                value={owner?.order ?? null}
+                                onChange={(order) =>
                                   assignSplitPiece(
                                     activeRecipe.id,
                                     piece.id,
-                                    event.target.value === ''
-                                      ? null
-                                      : Number(event.target.value),
+                                    order,
                                   )
                                 }
-                              >
-                                <option value="">Choose a jamo to paint</option>
-                                {state.source.physicalSteps.map((step) => (
-                                  <option key={step.order} value={step.order}>
-                                    {step.order + 1}. {step.jamo}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
+                              />
+                            </div>
                             <div className="mt-3 grid gap-3 lg:grid-cols-2">
                               <div>
                                 <CommandRangePainter

@@ -265,6 +265,101 @@
         "validationHash": "37c158315b19ffa61e1e4319e6550bc2a8f80d689fac4672e90e52f1be982a3c"
       }
     },
+    "쨌": {
+      "reviewSchemaVersion": 2,
+      "syllable": "쨌",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "bf4d229f7ad134e0cae63292815c399a9190ed1a6eb7280aa828cabb646ed0fe"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅉ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅐ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅆ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [
+        {
+          "id": "split-0-1",
+          "sourceContourId": 0,
+          "sourceContourHash": "461374fd2f42b8b0c5651bedac89360078cc6f965c71548df00c0d13d4a4a647",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "461374fd2f42b8b0c5651bedac89360078cc6f965c71548df00c0d13d4a4a647"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 12,
+                  "toCommand": 45
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 46,
+                  "toCommand": 48
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 11
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "approved": {
+        "at": "2026-10-01T19:16:40.489Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "b3001c3044541cbf25a4a253666cb3f41fc53abcf20958e06d069fd76bb7eeac"
+      }
+    },
     "쩌": {
       "reviewSchemaVersion": 2,
       "syllable": "쩌",
