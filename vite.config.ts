@@ -5,6 +5,17 @@ import { jamoSvgTaggerPlugin } from './tools/jamo-svg/vite-plugin'
 
 export default defineConfig({
   plugins: [react(), tailwindcss(), jamoSvgTaggerPlugin()],
+  server: {
+    watch: {
+      // Jamo SVG Tagger data is written by its dev API on every save; watching
+      // it makes Vite reload the page. Its tools/*.ts sources stay watched.
+      ignored: [
+        '**/tools/jamo-svg/reviews/**',
+        '**/tools/jamo-svg/queue/**',
+        '**/tools/jamo-svg/cache/**',
+      ],
+    },
+  },
   build: {
     rollupOptions: {
       output: {

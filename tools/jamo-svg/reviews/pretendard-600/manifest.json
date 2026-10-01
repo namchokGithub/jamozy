@@ -8,8 +8,8 @@
     {
       "choseong": "ㄱ",
       "file": "ㄱ.json",
-      "reviewCount": 6,
-      "sha256": "b07141f47e2c105f854e4c06f36171cc195dd76d779730d2c18e7ae6aae6521e"
+      "reviewCount": 7,
+      "sha256": "d64a6d316b016bc6363811beaefe7ffb6ecdc3a1e1cf7b54c0b3f1a5d07177ad"
     },
     {
       "choseong": "ㄴ",
@@ -20,8 +20,14 @@
     {
       "choseong": "ㄷ",
       "file": "ㄷ.json",
+      "reviewCount": 2,
+      "sha256": "5c21d920dc62ba4bde5371d1675b71f2acfe15dc13a35885187ffed0f41db2d4"
+    },
+    {
+      "choseong": "ㅇ",
+      "file": "ㅇ.json",
       "reviewCount": 1,
-      "sha256": "43e951bad6eca6099008e5bbdacd1718110f1371f0abdbd6dfcdd189d4636254"
+      "sha256": "cab67dddd5c2cf68af3b3c98e126ef332ff6e098be65c9c12ff0227c353cbb81"
     },
     {
       "choseong": "ㅈ",

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router'
+// import { Link } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { PageSurface } from '../../components/ui/PageSurface'
@@ -65,7 +65,9 @@ function GlyphPreview({
   paths,
   colored,
   overlay,
+  svgClassName = 'h-48 w-full',
 }: {
+  svgClassName?: string
   glyph: Glyph
   paths: Array<{ d: string; jamo?: string }>
   colored?: boolean
@@ -73,7 +75,7 @@ function GlyphPreview({
 }) {
   return (
     <svg
-      className="h-48 w-full"
+      className={svgClassName}
       viewBox={`0 0 ${glyph.advanceWidth} 2048`}
       role="img"
       aria-label={`${glyph.syllable} SVG preview`}
@@ -303,13 +305,15 @@ function CommandRangePainter({
 function DraftSegmentationPreview({
   glyph,
   review,
+  svgClassName = 'h-48 w-full',
 }: {
+  svgClassName?: string
   glyph: Glyph
   review: Review
 }) {
   return (
     <svg
-      className="h-48 w-full"
+      className={svgClassName}
       viewBox={`0 0 ${glyph.advanceWidth} 2048`}
       role="img"
       aria-label={`${glyph.syllable} draft jamo segmentation`}
@@ -384,12 +388,23 @@ function DraftSegmentationPreview({
     </svg>
   )
 }
+const QUEUE_PAGE_SIZE = 12
+const statusSnapshotOf = (items: QueueEntry[]) =>
+  new Map(
+    items.map((item) => [item.syllable, item.reviewStatus ?? 'unreviewed']),
+  )
 export default function JamoSvgTaggerPage() {
   const [queue, setQueue] = useState<QueueEntry[]>([])
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<'all' | 'needs-split'>('all')
-  const [statusFilter, setStatusFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('unreviewed')
+  // Status membership is captured when the filter is applied, so saving the
+  // selected glyph does not drop it out of the list mid-review.
+  const [statusSnapshot, setStatusSnapshot] = useState<Map<string, string>>(
+    new Map(),
+  )
   const [index, setIndex] = useState(0)
+  const [freezePreviews, setFreezePreviews] = useState(true)
   const [state, setState] = useState<State | null>(null)
   const [revision, setRevision] = useState<string>()
   const [error, setError] = useState<string>()
@@ -402,19 +417,45 @@ export default function JamoSvgTaggerPage() {
         (item) =>
           (filter === 'all' || item.blockers?.includes('needs-split')) &&
           (statusFilter === 'all' ||
-            (item.reviewStatus ?? 'unreviewed') === statusFilter) &&
+            statusSnapshot.get(item.syllable) === statusFilter) &&
           (!query ||
             item.syllable.includes(query) ||
             `U+${item.syllable.codePointAt(0)?.toString(16).toUpperCase()}`.includes(
               query.toUpperCase(),
             )),
       ),
-    [filter, queue, query, statusFilter],
+    [filter, queue, query, statusFilter, statusSnapshot],
   )
   const selected = filteredQueue[index]
+  const page = Math.floor(index / QUEUE_PAGE_SIZE)
+  const pageCount = Math.max(
+    1,
+    Math.ceil(filteredQueue.length / QUEUE_PAGE_SIZE),
+  )
+  const pageItems = filteredQueue.slice(
+    page * QUEUE_PAGE_SIZE,
+    (page + 1) * QUEUE_PAGE_SIZE,
+  )
+  const applyStatusFilter = (status: string) => {
+    setStatusFilter(status)
+    setStatusSnapshot(statusSnapshotOf(queue))
+    setIndex(0)
+  }
   useEffect(() => {
     void api<{ entries: QueueEntry[] }>('/queue')
-      .then(({ entries }) => setQueue(entries))
+      .then(({ entries }) => {
+        const snapshot = statusSnapshotOf(entries)
+        const has = (status: string) => [...snapshot.values()].includes(status)
+        setQueue(entries)
+        setStatusSnapshot(snapshot)
+        setStatusFilter(
+          has('unreviewed')
+            ? 'unreviewed'
+            : has('reviewing')
+              ? 'reviewing'
+              : 'all',
+        )
+      })
       .catch((reason: unknown) =>
         setError(
           reason instanceof Error ? reason.message : 'Could not load queue.',
@@ -706,6 +747,7 @@ export default function JamoSvgTaggerPage() {
     state?.review.status !== 'approved' &&
     Boolean(state?.review.notes?.trim()) &&
     !state?.review.blockers.includes('needs-split')
+  const previewSvgClass = freezePreviews ? 'h-32 w-full' : 'h-48 w-full'
   const hasCompleteCompiledPreview = Boolean(
     state &&
     state.source.physicalSteps.every((step) =>
@@ -713,7 +755,7 @@ export default function JamoSvgTaggerPage() {
     ),
   )
   return (
-    <PageSurface contentClassName="max-w-7xl">
+    <PageSurface className="overflow-visible!" contentClassName="max-w-7xl">
       <header className="flex items-end justify-between gap-4">
         <div>
           <p className="text-sm font-semibold uppercase text-[#a85d4e]">
@@ -725,13 +767,100 @@ export default function JamoSvgTaggerPage() {
             This does not affect the learner renderer.
           </p>
         </div>
-        <Link
+        {/* <Link
           to="/"
           className="text-sm font-semibold text-[#8d4c43] hover:underline"
         >
           Back to learner
-        </Link>
+        </Link> */}
       </header>
+      {state && (
+        <div
+          className={
+            freezePreviews
+              ? 'sticky top-0 z-30 -mx-4 mt-4 bg-[#fffaf1]/95 px-4 py-3 shadow-[0_12px_20px_-18px_rgba(54,41,31,0.7)] backdrop-blur sm:-mx-6 sm:px-6'
+              : 'mt-4'
+          }
+        >
+          <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+            <p className="font-semibold text-[#39465b]">
+              {state.source.syllable} · U+
+              {state.source.syllable
+                .codePointAt(0)
+                ?.toString(16)
+                .toUpperCase()}{' '}
+              · {state.review.status}
+            </p>
+            <label className="text-xs font-semibold text-[#39465b]">
+              <input
+                type="checkbox"
+                checked={freezePreviews}
+                onChange={(event) => setFreezePreviews(event.target.checked)}
+              />{' '}
+              Freeze previews
+            </label>
+          </div>
+          <section className="grid gap-3 md:grid-cols-3">
+            <Card className="p-4">
+              <h2 className="font-bold text-[#39465b]">Source glyph</h2>
+              <GlyphPreview
+                svgClassName={previewSvgClass}
+                glyph={state.source}
+                paths={[{ d: state.source.sourcePath }]}
+              />
+            </Card>
+            <Card className="p-4">
+              <h2 className="font-bold text-[#39465b]">Per-jamo result</h2>
+              <p
+                className={`mt-1 text-xs text-[#667085] ${freezePreviews ? 'sr-only' : ''}`}
+              >
+                {hasCompleteCompiledPreview
+                  ? 'Combined compiled/exportable geometry, colored by physical step.'
+                  : 'Draft segmentation from selected source commands, colored by physical step.'}
+              </p>
+              {hasCompleteCompiledPreview ? (
+                <GlyphPreview
+                  svgClassName={previewSvgClass}
+                  glyph={state.source}
+                  colored
+                  paths={state.compiled.paths}
+                />
+              ) : (
+                <DraftSegmentationPreview
+                  svgClassName={previewSvgClass}
+                  glyph={state.source}
+                  review={state.review}
+                />
+              )}
+              {!hasCompleteCompiledPreview && (
+                <p className="text-xs font-semibold text-[#9a6424]">
+                  Draft only — resolve coverage, seams, and all blockers to
+                  inspect exportable filled paths.
+                </p>
+              )}
+            </Card>
+            <Card className="p-4">
+              <div className="flex justify-between">
+                <h2 className="font-bold text-[#39465b]">Reconstruction</h2>
+                <label className="text-xs">
+                  <input
+                    type="checkbox"
+                    checked={overlay}
+                    onChange={(event) => setOverlay(event.target.checked)}
+                  />{' '}
+                  Overlay source
+                </label>
+              </div>
+              <GlyphPreview
+                svgClassName={previewSvgClass}
+                glyph={state.source}
+                overlay={overlay}
+                paths={state.compiled.paths}
+              />
+            </Card>
+          </section>
+        </div>
+      )}
       {error && <Card className="mt-4 text-[#9d3b32]">{error}</Card>}
       {reviewStateWarning && (
         <Card className="mt-4 border-[#e5b869] bg-[#fff9ed] text-[#7b4b17]">
@@ -774,10 +903,7 @@ export default function JamoSvgTaggerPage() {
             <select
               className="mt-1 w-full rounded border p-2"
               value={statusFilter}
-              onChange={(event) => {
-                setStatusFilter(event.target.value)
-                setIndex(0)
-              }}
+              onChange={(event) => applyStatusFilter(event.target.value)}
             >
               <option value="all">All statuses</option>
               <option value="unreviewed">Unreviewed</option>
@@ -792,10 +918,10 @@ export default function JamoSvgTaggerPage() {
             {state?.review.status ?? 'loading'}
           </p>
           <div className="mt-3 space-y-1">
-            {filteredQueue.map((item, itemIndex) => (
+            {pageItems.map((item, itemIndex) => (
               <button
                 key={item.syllable}
-                onClick={() => setIndex(itemIndex)}
+                onClick={() => setIndex(page * QUEUE_PAGE_SIZE + itemIndex)}
                 className={`w-full rounded p-2 text-left text-sm ${selected?.syllable === item.syllable ? 'bg-[#e9efff] font-bold' : 'hover:bg-[#f7f7fa]'}`}
               >
                 {item.syllable}{' '}
@@ -825,6 +951,31 @@ export default function JamoSvgTaggerPage() {
               </button>
             ))}
           </div>
+          <div className="mt-3 flex items-center justify-between gap-2 text-xs text-[#667085]">
+            <button
+              className="rounded border px-2 py-1 font-semibold text-[#39465b] disabled:opacity-40"
+              disabled={page === 0}
+              onClick={() => setIndex((page - 1) * QUEUE_PAGE_SIZE)}
+            >
+              ‹ Page
+            </button>
+            <span>
+              Page {page + 1} / {pageCount}
+            </span>
+            <button
+              className="rounded border px-2 py-1 font-semibold text-[#39465b] disabled:opacity-40"
+              disabled={page >= pageCount - 1}
+              onClick={() => setIndex((page + 1) * QUEUE_PAGE_SIZE)}
+            >
+              Page ›
+            </button>
+          </div>
+          <button
+            className="mt-2 text-xs font-semibold text-[#8d4c43] hover:underline"
+            onClick={() => applyStatusFilter(statusFilter)}
+          >
+            Refresh status filter
+          </button>
           <div className="mt-4 flex gap-2">
             <Button
               variant="secondary"
@@ -846,59 +997,6 @@ export default function JamoSvgTaggerPage() {
         </Card>
         {state && (
           <main className="min-w-0">
-            <section className="grid gap-4 md:grid-cols-3">
-              <Card>
-                <h2 className="font-bold text-[#39465b]">Source glyph</h2>
-                <GlyphPreview
-                  glyph={state.source}
-                  paths={[{ d: state.source.sourcePath }]}
-                />
-              </Card>
-              <Card>
-                <h2 className="font-bold text-[#39465b]">Per-jamo result</h2>
-                <p className="mt-1 text-xs text-[#667085]">
-                  {hasCompleteCompiledPreview
-                    ? 'Combined compiled/exportable geometry, colored by physical step.'
-                    : 'Draft segmentation from selected source commands, colored by physical step.'}
-                </p>
-                {hasCompleteCompiledPreview ? (
-                  <GlyphPreview
-                    glyph={state.source}
-                    colored
-                    paths={state.compiled.paths}
-                  />
-                ) : (
-                  <DraftSegmentationPreview
-                    glyph={state.source}
-                    review={state.review}
-                  />
-                )}
-                {!hasCompleteCompiledPreview && (
-                  <p className="text-xs font-semibold text-[#9a6424]">
-                    Draft only — resolve coverage, seams, and all blockers to
-                    inspect exportable filled paths.
-                  </p>
-                )}
-              </Card>
-              <Card>
-                <div className="flex justify-between">
-                  <h2 className="font-bold text-[#39465b]">Reconstruction</h2>
-                  <label className="text-xs">
-                    <input
-                      type="checkbox"
-                      checked={overlay}
-                      onChange={(event) => setOverlay(event.target.checked)}
-                    />{' '}
-                    Overlay source
-                  </label>
-                </div>
-                <GlyphPreview
-                  glyph={state.source}
-                  overlay={overlay}
-                  paths={state.compiled.paths}
-                />
-              </Card>
-            </section>
             <Card className="mt-4">
               <h2 className="font-bold text-[#39465b]">Physical-step result</h2>
               <p className="mt-1 text-sm text-[#667085]">
