@@ -2,7 +2,7 @@
   "shardSchemaVersion": 2,
   "choseong": "ㄴ",
   "fontFingerprint": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
-  "physicalStepAlgorithmVersion": 2,
+  "physicalStepAlgorithmVersion": 3,
   "splitRecipeSchemaVersion": 2,
   "reviews": {
     "나": {
@@ -13,7 +13,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "68f0e64401861b15eab73b3d6861783724c568b9eade3c8c0bd78d966b76b453"
       },
@@ -57,7 +57,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "0ff5e602cea0e5f1e6be7afd9eb5d2670653282dce531117674518ea7175d1b7"
       },
@@ -111,7 +111,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "046bcd7d27535e0c679f8876d05f17c07c6d221ae327d297de0e8fb7985e0b73"
       },
@@ -165,7 +165,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "bddb4a0eabea800bdc53aeaa239cf010848d5f01b33cc3112284d513c49c8080"
       },
@@ -223,7 +223,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "4ed9b1ebb5159004c933e9fc02b026de8e198d44da0e03cc80db9f5a11e1b87f"
       },
@@ -342,7 +342,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "3eda22f85d792e8b52895e15f558bee822b1c931e0a6c5e90a0dd96436553325"
       },
@@ -396,7 +396,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "aa08ca0af4a2d291ca8a26c76e9d3d95fae7f4e966fec69a586ed040447e4237"
       },
@@ -458,7 +458,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "476348186b154e076633e6e8af1c54ce5c92ad9f60c21e9146050b39afd461a8"
       },
@@ -502,7 +502,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "1642177a4949dd30c6a40043a45135fe9c04e94c79dc729b3c7cca03d2acea16"
       },
@@ -560,7 +560,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "5da171cc6a4daee010e8230d22a5bdd43f36bcfc8845ecddc3af8aa3f9458e9a"
       },
@@ -618,7 +618,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "10c947e5dd6c2b3877dff04a6efd9f434c6cbd1bb112c755fb54d73715d7bdf4"
       },
@@ -662,7 +662,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "19bb88dfc5382aab0aa447443c6c58cbe0659921384a2b4608feed4f6eb2e3cd"
       },
@@ -720,7 +720,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "5acd679320945a3149dbfdc8858bcfc34c74a73ac0ba75f3dc2a00cb6e9be937"
       },
@@ -782,7 +782,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "0b16372a899e5e917adec343913a32f770923753ab7aa03735f4a3d891e95a4a"
       },
@@ -830,7 +830,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "637ae9b675801f0a6810cd81904154590964a479bd47a5f42b94bb58490d0408"
       },
@@ -874,7 +874,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "b808a8d9eb1b13b47aecf49c047d8e2c7325bfc3e3963687fdbb9ef921ca2e4a"
       },
@@ -928,7 +928,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "f8df6e142d9cfd3776775d93c3458b0ad12a9abd55e318336c5b13bf3c86730b"
       },
@@ -982,7 +982,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "090d4564ebe5005249147442f82d5ad5f5751eaedde789989c9fe62ed4b80b84"
       },
@@ -1040,7 +1040,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "f5e601b37e49aa26cbbe333ba7287de504dee2f8c4b31f08a54a01441c470fdf"
       },
@@ -1152,7 +1152,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "23e7e4084abb49c528ea7db7f3ec995a983a1f79fa05c6aa3f35be01e411ed3d"
       },
@@ -1196,7 +1196,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "a3de66762523fced34879c95b307717dfc1b3b6347f44f166b9499c660c68a1a"
       },
@@ -1250,7 +1250,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "b5aa2b2bf861d086a5301ad277585eb041c2348bccfd83f6bee035836ef7072f"
       },
@@ -1308,7 +1308,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "a036eecf34f97b8f08e528bc74d38677484834020c10362751dd49049ee1f82c"
       },
@@ -1352,7 +1352,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "7433afc2aaa8a4132d01711cfdde8412ac072e4fb9123e92a9e9037e79b1c915"
       },
@@ -1396,7 +1396,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "738cd87223be2a1e920898376d118c6407ead07fbd9114b0f375d20e8bb18965"
       },
@@ -1450,7 +1450,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "dca3d8bf8c00bb0eeb38a1686c48baa8052272a23b5499574fa6e4d1c3a2366b"
       },
@@ -1504,7 +1504,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "6cbdb6a774846ce6b5ea930743b6cb4a2aeb14f7906fe3af73a8c27b76ed0734"
       },
@@ -1562,7 +1562,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "d3dd73438ed9aeb86ec27da0128357502de965a4433bd4ad7d2ef5c080db5193"
       },
@@ -1606,7 +1606,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "ee971626dbf9067c32a377efa827e53e7a21840277b042c04fe01bef6a01ab24"
       },

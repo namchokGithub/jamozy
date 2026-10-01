@@ -61,8 +61,8 @@
         "hasFinal": false,
         "compoundMedial": "ㅚ",
         "compoundFinal": null,
-        "physicalStepCount": 2,
-        "contourRelation": "surplus"
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
       },
       "nearestApprovedSyllables": []
     },
@@ -93,7 +93,7 @@
         "hasFinal": false,
         "compoundMedial": "ㅘ",
         "compoundFinal": null,
-        "physicalStepCount": 2,
+        "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []
@@ -189,7 +189,7 @@
         "hasFinal": true,
         "compoundMedial": "ㅟ",
         "compoundFinal": "ㄽ",
-        "physicalStepCount": 4,
+        "physicalStepCount": 5,
         "contourRelation": "deficit"
       },
       "nearestApprovedSyllables": []
@@ -257,8 +257,8 @@
         "hasFinal": false,
         "compoundMedial": "ㅚ",
         "compoundFinal": null,
-        "physicalStepCount": 2,
-        "contourRelation": "aligned"
+        "physicalStepCount": 3,
+        "contourRelation": "deficit"
       },
       "nearestApprovedSyllables": []
     },
@@ -512,7 +512,7 @@
         "hasFinal": false,
         "compoundMedial": "ㅟ",
         "compoundFinal": null,
-        "physicalStepCount": 2,
+        "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []
@@ -614,7 +614,7 @@
         "hasFinal": false,
         "compoundMedial": "ㅚ",
         "compoundFinal": null,
-        "physicalStepCount": 2,
+        "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []
@@ -1260,8 +1260,8 @@
         "hasFinal": false,
         "compoundMedial": "ㅟ",
         "compoundFinal": null,
-        "physicalStepCount": 2,
-        "contourRelation": "surplus"
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
       },
       "nearestApprovedSyllables": []
     },
@@ -1464,7 +1464,7 @@
         "hasFinal": false,
         "compoundMedial": "ㅢ",
         "compoundFinal": null,
-        "physicalStepCount": 2,
+        "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []
@@ -2025,8 +2025,8 @@
         "hasFinal": true,
         "compoundMedial": "ㅘ",
         "compoundFinal": null,
-        "physicalStepCount": 3,
-        "contourRelation": "surplus"
+        "physicalStepCount": 4,
+        "contourRelation": "aligned"
       },
       "nearestApprovedSyllables": []
     },
@@ -2127,8 +2127,8 @@
         "hasFinal": false,
         "compoundMedial": "ㅙ",
         "compoundFinal": null,
-        "physicalStepCount": 2,
-        "contourRelation": "surplus"
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
       },
       "nearestApprovedSyllables": []
     },
@@ -2246,7 +2246,7 @@
         "hasFinal": true,
         "compoundMedial": "ㅘ",
         "compoundFinal": null,
-        "physicalStepCount": 3,
+        "physicalStepCount": 4,
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []
@@ -2733,8 +2733,8 @@
         "hasFinal": false,
         "compoundMedial": "ㅘ",
         "compoundFinal": null,
-        "physicalStepCount": 2,
-        "contourRelation": "surplus"
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
       },
       "nearestApprovedSyllables": [
         "죄"
@@ -3156,7 +3156,7 @@
         "hasFinal": true,
         "compoundMedial": "ㅟ",
         "compoundFinal": null,
-        "physicalStepCount": 3,
+        "physicalStepCount": 4,
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []
@@ -3359,7 +3359,7 @@
         "hasFinal": true,
         "compoundMedial": "ㅘ",
         "compoundFinal": null,
-        "physicalStepCount": 3,
+        "physicalStepCount": 4,
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []
@@ -3484,8 +3484,8 @@
         "hasFinal": false,
         "compoundMedial": "ㅚ",
         "compoundFinal": null,
-        "physicalStepCount": 2,
-        "contourRelation": "surplus"
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
       },
       "nearestApprovedSyllables": [
         "죄"
@@ -3541,7 +3541,7 @@
         "hasFinal": true,
         "compoundMedial": "ㅘ",
         "compoundFinal": null,
-        "physicalStepCount": 3,
+        "physicalStepCount": 4,
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []
@@ -3835,7 +3835,7 @@
         "hasFinal": true,
         "compoundMedial": "ㅘ",
         "compoundFinal": null,
-        "physicalStepCount": 3,
+        "physicalStepCount": 4,
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []
@@ -4095,7 +4095,7 @@
         "hasFinal": false,
         "compoundMedial": "ㅝ",
         "compoundFinal": null,
-        "physicalStepCount": 2,
+        "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []
@@ -4539,7 +4539,7 @@
         "hasFinal": true,
         "compoundMedial": "ㅚ",
         "compoundFinal": null,
-        "physicalStepCount": 3,
+        "physicalStepCount": 4,
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []
@@ -5117,7 +5117,7 @@
         "hasFinal": true,
         "compoundMedial": "ㅝ",
         "compoundFinal": null,
-        "physicalStepCount": 3,
+        "physicalStepCount": 4,
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []
@@ -6113,7 +6113,7 @@
         "hasFinal": true,
         "compoundMedial": "ㅝ",
         "compoundFinal": null,
-        "physicalStepCount": 3,
+        "physicalStepCount": 4,
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []
@@ -6149,8 +6149,8 @@
         "hasFinal": false,
         "compoundMedial": "ㅚ",
         "compoundFinal": null,
-        "physicalStepCount": 2,
-        "contourRelation": "surplus"
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
       },
       "nearestApprovedSyllables": []
     },
@@ -6669,8 +6669,8 @@
         "hasFinal": false,
         "compoundMedial": "ㅟ",
         "compoundFinal": null,
-        "physicalStepCount": 2,
-        "contourRelation": "aligned"
+        "physicalStepCount": 3,
+        "contourRelation": "deficit"
       },
       "nearestApprovedSyllables": []
     },
@@ -6849,8 +6849,8 @@
         "hasFinal": true,
         "compoundMedial": "ㅘ",
         "compoundFinal": null,
-        "physicalStepCount": 3,
-        "contourRelation": "surplus"
+        "physicalStepCount": 4,
+        "contourRelation": "aligned"
       },
       "nearestApprovedSyllables": []
     },
@@ -6866,7 +6866,7 @@
         "hasFinal": true,
         "compoundMedial": "ㅝ",
         "compoundFinal": null,
-        "physicalStepCount": 3,
+        "physicalStepCount": 4,
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []
@@ -6976,8 +6976,8 @@
         "hasFinal": true,
         "compoundMedial": "ㅙ",
         "compoundFinal": null,
-        "physicalStepCount": 3,
-        "contourRelation": "surplus"
+        "physicalStepCount": 4,
+        "contourRelation": "aligned"
       },
       "nearestApprovedSyllables": [
         "관"
@@ -7143,8 +7143,8 @@
         "hasFinal": false,
         "compoundMedial": "ㅟ",
         "compoundFinal": null,
-        "physicalStepCount": 2,
-        "contourRelation": "aligned"
+        "physicalStepCount": 3,
+        "contourRelation": "deficit"
       },
       "nearestApprovedSyllables": []
     },
@@ -7452,7 +7452,7 @@
         "hasFinal": true,
         "compoundMedial": "ㅘ",
         "compoundFinal": null,
-        "physicalStepCount": 3,
+        "physicalStepCount": 4,
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": [
@@ -8569,7 +8569,7 @@
         "hasFinal": true,
         "compoundMedial": "ㅘ",
         "compoundFinal": null,
-        "physicalStepCount": 3,
+        "physicalStepCount": 4,
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []
@@ -8948,7 +8948,7 @@
         "hasFinal": false,
         "compoundMedial": "ㅢ",
         "compoundFinal": null,
-        "physicalStepCount": 2,
+        "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []

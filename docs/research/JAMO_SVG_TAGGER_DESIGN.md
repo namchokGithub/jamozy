@@ -100,7 +100,7 @@ type ExtractionFingerprint = {
   fontSha256: string
   extractionSchema: 1
   pathNormalization: 1
-  physicalStepAlgorithm: 2 // v2: compound medials are one step (DEC-036)
+  physicalStepAlgorithm: 3 // v3: one step per typed key, incl. compound medials (DEC-037)
 }
 
 type SourceAnchor = {

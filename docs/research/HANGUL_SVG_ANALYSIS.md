@@ -31,10 +31,11 @@ font contour that contains more than one step.
   expands the seven compound medials and eleven compound finals defined in
   [`src/domain/korean/hangul.ts`](../../src/domain/korean/hangul.ts). Tense
   initials remain one shifted-key step. For example, `값` is `ㄱ / ㅏ / ㅂ / ㅅ`.
-- **SVG step rule (algorithm v2, 2026-10-01):** the Tagger keeps each compound
-  medial as one visual step while compound finals stay expanded; see
-  [DEC-036](../DECISIONS.md). The measurements below were taken with v1, which
-  also expanded compound medials.
+- **SVG step rule (algorithm v3, 2026-10-01):** the Tagger expands compound
+  medials and compound finals into one step per typed key, matching the
+  typing engine; see [DEC-037](../DECISIONS.md), which superseded DEC-036's
+  merged medial step. The measurements below were taken with v1, which used
+  the same expansion.
 
 ## 3. Target architecture
 

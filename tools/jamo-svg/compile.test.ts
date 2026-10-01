@@ -15,7 +15,7 @@ const source: CachedGlyph = {
     fontSha256: 'font-hash',
     extractionSchema: 1,
     pathNormalization: 1,
-    physicalStepAlgorithm: 2,
+    physicalStepAlgorithm: 3,
   },
   advanceWidth: 1770,
   bounds: { x1: 0, y1: 0, x2: 10, y2: 10 },

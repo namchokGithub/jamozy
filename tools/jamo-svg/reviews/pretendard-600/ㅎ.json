@@ -2,7 +2,7 @@
   "shardSchemaVersion": 2,
   "choseong": "ㅎ",
   "fontFingerprint": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
-  "physicalStepAlgorithmVersion": 2,
+  "physicalStepAlgorithmVersion": 3,
   "splitRecipeSchemaVersion": 2,
   "reviews": {
     "하": {
@@ -13,7 +13,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "87e4af414d641a6a602641b9e82c16068190f32dad52d1edc132b901264f2dda"
       },
@@ -65,7 +65,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "ef47555c885c9b19db7cab55d938cc3b9eb03136367985545cf9c62c15a6d2d5"
       },
@@ -127,7 +127,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "99786151f5bce7ffc6f16cb659f51ce89d6c12bfdb06c8ce0063fbb3a9b3bd06"
       },
@@ -189,7 +189,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "0eba3fe70389791226845fc067e2ac9ac54ad5a50e0e0b1eee16bde3e2d5f57e"
       },
@@ -251,7 +251,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "8b5983487df2f02a548809d2bba11785a8d579089782875b5a4e14d74a8c1f87"
       },
@@ -317,7 +317,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "1c6c584de84240f3f2f3f45a53b9ea6a69e17635dfd99b33780abbdc8d49db84"
       },
@@ -383,7 +383,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "acd86911d126aa86a8e3fd53b006ea9218db66093f707b0e6c30afe6d6377c84"
       },
@@ -449,7 +449,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "80329a11499a55292d55dd44731ae231b0154ba6eb22d5fe0dc770317e4081ce"
       },
@@ -501,7 +501,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "d55c5cabe88727c999bfb1ec438a49f5f60abb49a591d135e8dd1faf84cd0a74"
       },
@@ -567,7 +567,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "e66bde971ae3ccf77fcc4b460684489e7df281cddaeac8b322806712c35a8825"
       },
@@ -619,7 +619,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "8adab67b0398df9afc38b5e18f8ffebb1d89e74b6256a63f64b71c0f2a941f6a"
       },
@@ -685,7 +685,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "e527f85da70ebf076cdefebb85f069694b37598188f07fce10c4883fef1348d1"
       },
@@ -737,7 +737,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "f9e476abe1490c42d7b1279753b2922076a1a55cbb0cb4bf9141cc8ed88a1e24"
       },
@@ -799,7 +799,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "81621432e2358fca1d953a8090ff5fd51a5470a1daa5f111b4170bc35eb10e45"
       },
@@ -865,7 +865,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "371b869b21cabca92244e748203faafc3355d6f9c145aa6f4132337686e67f93"
       },
@@ -893,13 +893,19 @@
         },
         {
           "order": 1,
-          "jamo": "ㅘ",
+          "jamo": "ㅗ",
           "geometry": [
             {
               "kind": "split-piece",
               "recipeId": "hieut-o-1",
               "pieceId": "o-stem-bar"
-            },
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅏ",
+          "geometry": [
             {
               "kind": "contour",
               "contourId": 0
@@ -961,10 +967,10 @@
         }
       ],
       "approved": {
-        "at": "2026-09-30T18:27:22.462Z",
+        "at": "2026-10-01T12:28:50.675Z",
         "reviewer": "local-reviewer",
         "validatorVersion": 1,
-        "validationHash": "34d12930ff848b18a5c80e3926dfcf74aa96d68f597d2bfaa1c43b5cdba55711"
+        "validationHash": "b230ec1befe1d50c552cb45e33697b2636d45617ae3ac2950cf06a233e5b5c44"
       }
     },
     "확": {
@@ -975,7 +981,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "d586160c5029a5015132a27bfb448741d6a87f0ae60f57cb9d750d851bbaec9d"
       },
@@ -1003,12 +1009,8 @@
         },
         {
           "order": 1,
-          "jamo": "ㅘ",
+          "jamo": "ㅗ",
           "geometry": [
-            {
-              "kind": "contour",
-              "contourId": 0
-            },
             {
               "kind": "split-piece",
               "recipeId": "split-2-1",
@@ -1018,6 +1020,16 @@
         },
         {
           "order": 2,
+          "jamo": "ㅏ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 3,
           "jamo": "ㄱ",
           "geometry": [
             {
@@ -1077,10 +1089,10 @@
         }
       ],
       "approved": {
-        "at": "2026-10-01T11:21:37.657Z",
+        "at": "2026-10-01T12:29:39.809Z",
         "reviewer": "local-reviewer",
         "validatorVersion": 1,
-        "validationHash": "41259a15d19941ac9e52ed35d7be3866a23f6863ed32399e16cfea26d5ddfb6f"
+        "validationHash": "927f369586e69563833722ac83e85793d04bbcd053b21ed31627122cdcb92311"
       }
     },
     "활": {
@@ -1091,7 +1103,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "696066093522827cc44537bcfe263ef4f10aebac612aef0f1199754447442168"
       },
@@ -1119,13 +1131,19 @@
         },
         {
           "order": 1,
-          "jamo": "ㅘ",
+          "jamo": "ㅗ",
           "geometry": [
             {
               "kind": "split-piece",
               "recipeId": "split-2-1",
               "pieceId": "piece-2"
-            },
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅏ",
+          "geometry": [
             {
               "kind": "contour",
               "contourId": 0
@@ -1133,7 +1151,7 @@
           ]
         },
         {
-          "order": 2,
+          "order": 3,
           "jamo": "ㄹ",
           "geometry": [
             {
@@ -1193,10 +1211,10 @@
         }
       ],
       "approved": {
-        "at": "2026-10-01T10:54:43.036Z",
+        "at": "2026-10-01T12:29:18.141Z",
         "reviewer": "local-reviewer",
         "validatorVersion": 1,
-        "validationHash": "44900e93b051fb80f0ae15f16841e41ac7cbdb32cb5860f226b4909701ea283e"
+        "validationHash": "b569a4f6d07331fe76208c0ef71f9eb1ec12af809be9ebb0daccf577b9636b49"
       }
     },
     "황": {
@@ -1207,7 +1225,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "eb179e4f5e153d6a5ff176c9092d6b4b39dce097854475fff8b065fb5d116864"
       },
@@ -1235,12 +1253,8 @@
         },
         {
           "order": 1,
-          "jamo": "ㅘ",
+          "jamo": "ㅗ",
           "geometry": [
-            {
-              "kind": "contour",
-              "contourId": 0
-            },
             {
               "kind": "split-piece",
               "recipeId": "split-3-1",
@@ -1250,6 +1264,16 @@
         },
         {
           "order": 2,
+          "jamo": "ㅏ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 3,
           "jamo": "ㅇ",
           "geometry": [
             {
@@ -1313,10 +1337,10 @@
         }
       ],
       "approved": {
-        "at": "2026-10-01T12:12:03.443Z",
+        "at": "2026-10-01T12:29:32.233Z",
         "reviewer": "local-reviewer",
         "validatorVersion": 1,
-        "validationHash": "b63946bcd8946dbdc7b687589be2927d3472467a1dfaa4f3b789961a2c1e7813"
+        "validationHash": "97b3585f9c8ea0089b937dc42810a1e378684c06227d61b90076aaf0a5e3c6f7"
       }
     },
     "회": {
@@ -1327,7 +1351,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "b4f23d56b43d81a8cff0e25149b572c63a8e74949998d1cb3c8b5aa32f4b9b81"
       },
@@ -1355,16 +1379,22 @@
         },
         {
           "order": 1,
-          "jamo": "ㅚ",
+          "jamo": "ㅗ",
           "geometry": [
-            {
-              "kind": "contour",
-              "contourId": 0
-            },
             {
               "kind": "split-piece",
               "recipeId": "split-1-1",
               "pieceId": "piece-2"
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅣ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
             }
           ]
         }
@@ -1418,12 +1448,11 @@
           ]
         }
       ],
-      "notes": "",
       "approved": {
-        "at": "2026-10-01T05:40:21.715Z",
+        "at": "2026-10-01T12:28:58.690Z",
         "reviewer": "local-reviewer",
         "validatorVersion": 1,
-        "validationHash": "cdbc4a0a0cd07ddd62e9a80789b48150c7a43a9d938b14c3565d65267ca8332e"
+        "validationHash": "fefe09d15e179415b5d773afd1bd28e4e3834c258cd134358aeda5f89611d543"
       }
     },
     "후": {
@@ -1434,7 +1463,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "96c58c094888fc23571cf769d4ce4f4a2d0526bbf39913abee4ff6a45eaa0cfe"
       },
@@ -1486,7 +1515,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "d4f6d40f452336487060f9b947cc4fcc04d5bc69750b29e49d20407624d23732"
       },
@@ -1538,7 +1567,7 @@
           "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
           "extractionSchema": 1,
           "pathNormalization": 1,
-          "physicalStepAlgorithm": 2
+          "physicalStepAlgorithm": 3
         },
         "sourceGlyphHash": "850d47b2b907ac7ba2aa2945ca9280de7332f1d61f9f8be41eea30a3a234e5eb"
       },

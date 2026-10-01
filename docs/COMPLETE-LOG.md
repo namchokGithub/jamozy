@@ -705,3 +705,14 @@ Chronological log of completed units of work. One entry per meaningful change (n
   rejected three transfers that passed validation but produced shards
   (`돌 붙 벗`). Approved `니` still has ㄴ/ㅣ swapped and was excluded.
 - Proposed 18 of 146 unreviewed syllables; no existing review changed.
+
+### 2026-10-01 — Jamo SVG physical-step algorithm v3
+
+- Compound medials are again one SVG step per typed key (`황` is
+  `ㅎ / ㅗ / ㅏ / ㅇ`), matching the typing engine ([[DEC-037]], superseding
+  DEC-036).
+- `pnpm jamo-svg:migrate-step-algorithm [--dry-run]` now migrates v2→v3. It
+  divides each compound medial's geometry by shape (widest piece → ㅗ/ㅜ/ㅡ,
+  rest → second key). Result: 21 compound-medial reviews returned to
+  `reviewing`, all divided without blockers; 379 approved reviews kept
+  approval. Seed `화` and migration tests updated.

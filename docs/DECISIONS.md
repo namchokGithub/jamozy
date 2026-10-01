@@ -741,7 +741,7 @@ back to its first three courses and replays their exercises; the existing
 ## DEC-036 — Jamo SVG steps follow visual jamo for compound medials
 
 **Date:** 2026-10-01
-**Status:** Accepted
+**Status:** Superseded by DEC-037
 
 **Decision:** The Jamo SVG Tagger's physical-step algorithm v2 keeps each
 compound medial (`ㅘ ㅙ ㅚ ㅝ ㅞ ㅟ ㅢ`) as one SVG step, following the
@@ -760,3 +760,26 @@ onto one path. The version bump changes every extraction fingerprint;
 unchanged (including approval) and merges compound-medial steps' geometry for
 the rest, returning them to `reviewing` for human re-approval. The measured
 step-count tables in `HANGUL_SVG_ANALYSIS.md` describe algorithm v1.
+
+---
+
+## DEC-037 — Jamo SVG steps follow typed keys, including compound medials
+
+**Date:** 2026-10-01
+**Status:** Accepted
+
+**Decision:** Physical-step algorithm v3 gives every typed key its own SVG
+step. A compound medial contributes both keys, as compound finals already do:
+`황` is `ㅎ / ㅗ / ㅏ / ㅇ`, `값` stays `ㄱ / ㅏ / ㅂ / ㅅ`. SVG steps therefore
+match the typing engine's keystroke sequence (`hangul.ts`,
+`target-sequence.ts`), which is unchanged.
+
+**Why:** Jamozy shows typing progress one keystroke at a time. With one merged
+medial step (DEC-036), typing ㅗ in `황` could only reveal the whole ㅘ.
+
+**Consequences:** Supersedes DEC-036. The v2→v3 migration
+(`pnpm jamo-svg:migrate-step-algorithm`) keeps approval for unchanged step
+sequences. It divides each compound medial's geometry by shape: the widest
+piece is the horizontal first key (ㅗ ㅜ ㅡ) and the rest is the second key;
+those 21 reviews returned to `reviewing` for re-approval. A medial that cannot
+be divided this way is marked `needs-split`.

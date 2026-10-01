@@ -7,7 +7,7 @@ const assignments: Record<string, number[]> = {
   하: [1, 0, 0, 0],
   녕: [0, 1, 2, 2],
   죄: [0, 1, 2],
-  화: [1, 0, 0, 0],
+  화: [2, 0, 0, 0],
   값: [1, 0, 2, 2],
 }
 export const REFERENCE_SYLLABLES = ['가', '하', '녕', '죄', '화', '값'] as const
@@ -143,13 +143,15 @@ export async function seedReview(syllable: string): Promise<GlyphReview> {
               ]
             : []
       if (syllable === '화' && contour.id === 1)
-        return [
-          {
-            kind: 'split-piece' as const,
-            recipeId: 'hieut-o-1',
-            pieceId: order === 0 ? 'hieut-ring' : 'o-stem-bar',
-          },
-        ]
+        return order < 2
+          ? [
+              {
+                kind: 'split-piece' as const,
+                recipeId: 'hieut-o-1',
+                pieceId: order === 0 ? 'hieut-ring' : 'o-stem-bar',
+              },
+            ]
+          : []
       return sourceAssignments[contour.id] === order
         ? [{ kind: 'contour' as const, contourId: contour.id }]
         : []
