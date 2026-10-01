@@ -38,7 +38,11 @@ function anchorCommand(
 }
 
 /** Only source ranges consume source geometry; anchors and seams are synthetic path controls. */
-export function commandCoverage(contour: CachedContour, pieces: SplitPiece[]) {
+export function commandCoverage(
+  contour: CachedContour,
+  pieces: SplitPiece[],
+  sourceContourId = contour.id,
+) {
   return contour.commands.map((_, index) =>
     pieces.reduce(
       (count, piece) =>
@@ -46,6 +50,7 @@ export function commandCoverage(contour: CachedContour, pieces: SplitPiece[]) {
         piece.tokens.filter(
           (token) =>
             token.kind === 'source-range' &&
+            (token.contourId ?? sourceContourId) === contour.id &&
             index >= token.fromCommand &&
             index <= token.toCommand,
         ).length,
@@ -99,11 +104,19 @@ export function removeSourceRange(tokens: RecipeToken[], tokenIndex: number) {
 export function compileSplitPiecePreview(
   contour: CachedContour,
   piece: SplitPiece,
+  counters: CachedContour[] = [],
 ) {
+  const contourOf = (id = contour.id) =>
+    id === contour.id ? contour : counters.find((counter) => counter.id === id)
   const commands: OutlineCommand[] = []
   for (const [tokenIndex, token] of piece.tokens.entries()) {
     if (token.kind === 'source-range') {
-      const firstCommand = contour.commands[token.fromCommand]
+      const target = contourOf(token.contourId)
+      if (!target)
+        throw new Error(
+          'Source range is on a contour this recipe does not declare.',
+        )
+      const firstCommand = target.commands[token.fromCommand]
       const previousToken = piece.tokens[tokenIndex - 1]
       const hasExplicitCursor =
         previousToken?.kind === 'move-to-anchor' ||
@@ -113,13 +126,13 @@ export function compileSplitPiecePreview(
         commands.at(-1)?.type !== 'M' &&
         !hasExplicitCursor
       ) {
-        const cursor = cursorBeforeCommand(contour, token.fromCommand)
+        const cursor = cursorBeforeCommand(target, token.fromCommand)
         if (!cursor)
           throw new Error('Source range has no recoverable start point.')
         commands.push({ type: 'M', x: cursor.x, y: cursor.y })
       }
       commands.push(
-        ...contour.commands.slice(token.fromCommand, token.toCommand + 1),
+        ...target.commands.slice(token.fromCommand, token.toCommand + 1),
       )
       continue
     }
@@ -127,10 +140,11 @@ export function compileSplitPiecePreview(
       commands.push({ type: 'Z' })
       continue
     }
-    if (token.anchor.contourId !== contour.id)
-      throw new Error('Selected anchor is outside this contour.')
+    const target = contourOf(token.anchor.contourId)
+    if (!target)
+      throw new Error("Selected anchor is outside this recipe's contours.")
     const { x, y } = anchorCommand(
-      contour,
+      target,
       token.anchor.commandIndex,
       token.anchor.point,
     )

@@ -6,6 +6,7 @@ import {
   type CachedGlyph,
   type GlyphReview,
 } from './compile'
+import { yeoCounterSplit } from './counter-split.fixture'
 import { extractGlyph } from './extract'
 
 const source: CachedGlyph = {
@@ -360,4 +361,163 @@ describe('counter ownership', () => {
       ])
     },
   )
+})
+
+describe('counter-aware split recipes', () => {
+  const recipeOf = (review: GlyphReview) => review.splitRecipes[0]
+  const withRecipe = (
+    review: GlyphReview,
+    edit: (recipe: GlyphReview['splitRecipes'][number]) => void,
+  ) => {
+    const next = structuredClone(review)
+    edit(recipeOf(next))
+    return next
+  }
+
+  test('accepts 여 partitioned with the counter between ㅇ and ㅕ', async () => {
+    const glyph = await extractGlyph('여')
+    expect(validateReview(glyph, yeoCounterSplit(glyph)).blockers).toEqual([])
+  })
+
+  test('rejects a counter whose hash is stale', async () => {
+    const glyph = await extractGlyph('여')
+    const review = withRecipe(yeoCounterSplit(glyph), (recipe) => {
+      recipe.counterContours![0].contourHash = 'stale'
+    })
+    expect(validateReview(glyph, review).blockers).toContain(
+      'invalid-split-recipe',
+    )
+  })
+
+  test('rejects a declared contour that is not a counter of the source outline', async () => {
+    // Only counters that counterContours() pairs with the source contour qualify;
+    // the outline itself (or a counter of another outline, e.g. 영's c3 ⊂ c2) does not.
+    const glyph = await extractGlyph('여')
+    const review = withRecipe(yeoCounterSplit(glyph), (recipe) => {
+      recipe.counterContours = [
+        ...recipe.counterContours!,
+        { contourId: 0, contourHash: glyph.contours[0].commandHash },
+      ]
+    })
+    expect(validateReview(glyph, review).blockers).toContain(
+      'invalid-split-recipe',
+    )
+    expect(counterContours(await extractGlyph('영'))).toContainEqual({
+      counterId: 3,
+      outerId: 2,
+    })
+  })
+
+  test('rejects a counter range that consumes the counter M command', async () => {
+    const glyph = await extractGlyph('여')
+    const review = withRecipe(yeoCounterSplit(glyph), (recipe) => {
+      recipe.pieces[0].tokens[2] = {
+        kind: 'source-range',
+        contourId: 2,
+        fromCommand: 0,
+        toCommand: 3,
+      }
+    })
+    expect(validateReview(glyph, review).blockers).toContain(
+      'invalid-split-recipe',
+    )
+  })
+
+  test('rejects a counter whose commands are not all consumed exactly once', async () => {
+    const glyph = await extractGlyph('여')
+    const review = withRecipe(yeoCounterSplit(glyph), (recipe) => {
+      recipe.pieces[1].tokens[2] = {
+        kind: 'source-range',
+        contourId: 2,
+        fromCommand: 4,
+        toCommand: 6,
+      }
+    })
+    expect(validateReview(glyph, review).blockers).toContain(
+      'invalid-split-recipe',
+    )
+  })
+
+  test('rejects a range on a contour the recipe did not declare', async () => {
+    const glyph = await extractGlyph('여')
+    const review = withRecipe(yeoCounterSplit(glyph), (recipe) => {
+      recipe.counterContours = []
+    })
+    expect(validateReview(glyph, review).blockers).toContain(
+      'invalid-split-recipe',
+    )
+  })
+
+  test('reports a consumed counter that is also split by a second recipe', async () => {
+    const glyph = await extractGlyph('여')
+    const review = yeoCounterSplit(glyph)
+    const gap = glyph.contours[2]
+    review.splitRecipes.push({
+      splitRecipeSchemaVersion: 2,
+      id: 'gap-again',
+      sourceContourId: 2,
+      sourceContourHash: gap.commandHash,
+      method: 'source-command-partition',
+      rationale: 'Second claim on the consumed counter.',
+      visualValidation: { sourceContourHash: gap.commandHash },
+      pieces: [
+        {
+          id: 'all',
+          tokens: [{ kind: 'source-range', fromCommand: 0, toCommand: 7 }],
+        },
+      ],
+    })
+    review.steps[1].geometry.push({
+      kind: 'split-piece',
+      recipeId: 'gap-again',
+      pieceId: 'all',
+    })
+    expect(validateReview(glyph, review).blockers).toContain(
+      'duplicate-ownership',
+    )
+  })
+
+  test('reports a consumed counter that is also assigned whole', async () => {
+    const glyph = await extractGlyph('여')
+    const review = yeoCounterSplit(glyph)
+    review.steps[1].geometry.push({ kind: 'contour', contourId: 2 })
+    expect(validateReview(glyph, review).blockers).toContain(
+      'duplicate-ownership',
+    )
+  })
+
+  // Even-odd containment over the compiled on-curve points of every subpath.
+  const contains = (d: string, x: number, y: number) =>
+    d
+      .split('M')
+      .filter(Boolean)
+      .reduce((inside, subpath) => {
+        // Q commands list the control point first; keep only on-curve endpoints.
+        const onCurve = subpath.split(/(?=[LQZ])/).flatMap((part) => {
+          const values = (part.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number)
+          return values.length >= 2
+            ? [[values.at(-2)!, values.at(-1)!] as [number, number]]
+            : []
+        })
+        let crossings = 0
+        onCurve.forEach(([px, py], index) => {
+          const [qx, qy] =
+            onCurve[(index + onCurve.length - 1) % onCurve.length]
+          if (py > y !== qy > y && x < ((qx - px) * (y - py)) / (qy - py) + px)
+            crossings += 1
+        })
+        return crossings % 2 === 1 ? !inside : inside
+      }, false)
+
+  test('gives the crescent left of the counter curve to ㅇ, not ㅕ', async () => {
+    const glyph = await extractGlyph('여')
+    const [ieung, yeo] = compileReview(glyph, yeoCounterSplit(glyph)).paths
+    // (975, 900) lies between the straight seam (x≈940) and the counter's curve (x≈1010).
+    expect(contains(ieung.d, 975, 900)).toBe(true)
+    expect(contains(yeo.d, 975, 900)).toBe(false)
+    // The counter interior stays empty for both.
+    expect(contains(ieung.d, 1200, 900)).toBe(false)
+    expect(contains(yeo.d, 1200, 900)).toBe(false)
+    expect(contains(yeo.d, 1466, 900)).toBe(true)
+  })
 })

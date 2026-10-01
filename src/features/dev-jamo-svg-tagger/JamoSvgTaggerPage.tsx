@@ -4,8 +4,16 @@ import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { PageSurface } from '../../components/ui/PageSurface'
 import { retainSourceAfterSave } from './tagger-state'
-import { removeSourceRange } from '../../../tools/jamo-svg/split-workbench'
-import type { CachedContour, RecipeToken } from '../../../tools/jamo-svg/types'
+import { counterContours } from '../../../tools/jamo-svg/compile'
+import {
+  commandCoverage as coverageOf,
+  removeSourceRange,
+} from '../../../tools/jamo-svg/split-workbench'
+import type {
+  CachedContour,
+  CachedGlyph,
+  RecipeToken,
+} from '../../../tools/jamo-svg/types'
 
 type Geometry =
   | { kind: 'contour'; contourId: number }
@@ -20,6 +28,7 @@ type Review = {
     id: string
     sourceContourId: number
     sourceContourHash: string
+    counterContours?: Array<{ contourId: number; contourHash: string }>
     splitRecipeSchemaVersion: number
     rationale: string
     visualValidation: { sourceContourHash: string }
@@ -211,6 +220,7 @@ function SourceRangeEditor({
 function CommandRangePainter({
   glyph,
   contour,
+  counters = [],
   ranges,
   inspect = false,
   onAddSelectedRange,
@@ -218,27 +228,44 @@ function CommandRangePainter({
 }: {
   glyph: Glyph
   contour: CachedContour
-  ranges: Array<{ fromCommand: number; toCommand: number }>
+  /** Counters the recipe partitions with `contour`; drawn and selectable too. */
+  counters?: CachedContour[]
+  ranges: Array<{ fromCommand: number; toCommand: number; contourId?: number }>
   inspect?: boolean
-  onAddSelectedRange?: (fromCommand: number, toCommand: number) => void
-  onAddNewRange?: (fromCommand: number, toCommand: number) => void
+  onAddSelectedRange?: (
+    fromCommand: number,
+    toCommand: number,
+    contourId: number,
+  ) => void
+  onAddNewRange?: (
+    fromCommand: number,
+    toCommand: number,
+    contourId: number,
+  ) => void
 }) {
   const [inspectRange, setInspectRange] = useState<
-    { start: number; end: number } | undefined
+    { contourId: number; start: number; end: number } | undefined
   >()
-  const dragRange = useRef<{ start: number; end: number } | undefined>(
-    undefined,
-  )
-  const selected = (index: number) => {
+  const dragRange = useRef<
+    { contourId: number; start: number; end: number } | undefined
+  >(undefined)
+  const selected = (contourId: number, index: number) => {
     if (inspectRange)
       return (
+        inspectRange.contourId === contourId &&
         index >= Math.min(inspectRange.start, inspectRange.end) &&
         index <= Math.max(inspectRange.start, inspectRange.end)
       )
     return ranges.some(
-      (range) => index >= range.fromCommand && index <= range.toCommand,
+      (range) =>
+        (range.contourId ?? contour.id) === contourId &&
+        index >= range.fromCommand &&
+        index <= range.toCommand,
     )
   }
+  const drawn = [contour, ...counters]
+  const label = (contourId: number) =>
+    contourId === contour.id ? '' : `Contour ${contourId + 1} `
   const finish = () => {
     dragRange.current = undefined
   }
@@ -273,21 +300,19 @@ function CommandRangePainter({
         onPointerMove={
           inspect
             ? (event) => {
-                const attribute = (event.target as Element).getAttribute(
-                  'data-command-index',
-                )
+                const target = event.target as Element
+                const attribute = target.getAttribute('data-command-index')
                 if (attribute === null) return
                 const commandIndex = Number(attribute)
                 if (
                   event.buttons === 1 &&
                   dragRange.current &&
+                  Number(target.getAttribute('data-contour-id')) ===
+                    dragRange.current.contourId &&
                   Number.isInteger(commandIndex)
                 ) {
                   dragRange.current.end = commandIndex
-                  setInspectRange({
-                    start: dragRange.current.start,
-                    end: commandIndex,
-                  })
+                  setInspectRange({ ...dragRange.current })
                 }
               }
             : undefined
@@ -300,19 +325,21 @@ function CommandRangePainter({
             : undefined
         }
       >
-        <path
-          d={contour.d}
-          fill="none"
-          stroke="#c4cfdf"
-          strokeWidth={18 * scale}
-        />
-        {contour.commands.map((_, index) => {
-          const segment = commandSegmentPath(contour.commands, index)
-          if (!segment) return null
-          const color = selected(index) ? '#e66c58' : '#4c8f8b'
-          return segment.point ? (
-            <g key={index}>
-              {/* {index === 0 && (
+        {drawn.map((item) => (
+          <g key={item.id}>
+            <path
+              d={item.d}
+              fill="none"
+              stroke="#c4cfdf"
+              strokeWidth={18 * scale}
+            />
+            {item.commands.map((_, index) => {
+              const segment = commandSegmentPath(item.commands, index)
+              if (!segment) return null
+              const color = selected(item.id, index) ? '#e66c58' : '#4c8f8b'
+              return segment.point ? (
+                <g key={index}>
+                  {/* {index === 0 && (
                 <text
                   x={segment.point.x + 84 * scale}
                   y={segment.point.y - 64 * scale}
@@ -324,47 +351,67 @@ function CommandRangePainter({
                   start 0
                 </text>
               )} */}
-              <circle
-                cx={segment.point.x}
-                cy={segment.point.y}
-                r={(index === 0 ? 64 : 22) * scale}
-                fill={color}
-                stroke={index === 0 ? '#ffffff' : undefined}
-                strokeWidth={index === 0 ? 12 * scale : undefined}
-                className={inspect ? 'cursor-crosshair' : undefined}
-                onPointerDown={() => {
-                  if (!inspect) return
-                  dragRange.current = { start: index, end: index }
-                  setInspectRange({ start: index, end: index })
-                }}
-                data-command-index={index}
-              />
-            </g>
-          ) : (
-            <path
-              key={index}
-              d={segment.d}
-              fill="none"
-              stroke={color}
-              strokeWidth={28 * scale}
-              strokeLinecap="round"
-              className={inspect ? 'cursor-crosshair' : undefined}
-              onPointerDown={() => {
-                if (!inspect) return
-                dragRange.current = { start: index, end: index }
-                setInspectRange({ start: index, end: index })
-              }}
-              data-command-index={index}
-            />
-          )
-        })}
+                  <circle
+                    cx={segment.point.x}
+                    cy={segment.point.y}
+                    r={(index === 0 ? 64 : 22) * scale}
+                    fill={color}
+                    stroke={index === 0 ? '#ffffff' : undefined}
+                    strokeWidth={index === 0 ? 12 * scale : undefined}
+                    className={inspect ? 'cursor-crosshair' : undefined}
+                    onPointerDown={() => {
+                      if (!inspect) return
+                      dragRange.current = {
+                        contourId: item.id,
+                        start: index,
+                        end: index,
+                      }
+                      setInspectRange({
+                        contourId: item.id,
+                        start: index,
+                        end: index,
+                      })
+                    }}
+                    data-command-index={index}
+                    data-contour-id={item.id}
+                  />
+                </g>
+              ) : (
+                <path
+                  key={index}
+                  d={segment.d}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth={28 * scale}
+                  strokeLinecap="round"
+                  className={inspect ? 'cursor-crosshair' : undefined}
+                  onPointerDown={() => {
+                    if (!inspect) return
+                    dragRange.current = {
+                      contourId: item.id,
+                      start: index,
+                      end: index,
+                    }
+                    setInspectRange({
+                      contourId: item.id,
+                      start: index,
+                      end: index,
+                    })
+                  }}
+                  data-command-index={index}
+                  data-contour-id={item.id}
+                />
+              )
+            })}
+          </g>
+        ))}
       </svg>
       <div className="flex items-center gap-2 text-xs text-[#667085]">
         <p>
           {inspectRange
-            ? `Selected commands ${Math.min(inspectRange.start, inspectRange.end)}–${Math.max(inspectRange.start, inspectRange.end)}.`
+            ? `Selected ${label(inspectRange.contourId)}commands ${Math.min(inspectRange.start, inspectRange.end)}–${Math.max(inspectRange.start, inspectRange.end)}.`
             : ranges.length > 0
-              ? `Source ranges: ${ranges.map((range) => `${range.fromCommand}–${range.toCommand}`).join(', ')}.`
+              ? `Source ranges: ${ranges.map((range) => `${label(range.contourId ?? contour.id)}${range.fromCommand}–${range.toCommand}`).join(', ')}.`
               : 'Click a segment, or drag from the first segment to the last.'}
         </p>
         {inspectRange && onAddSelectedRange && (
@@ -375,6 +422,7 @@ function CommandRangePainter({
               onAddSelectedRange(
                 Math.min(inspectRange.start, inspectRange.end),
                 Math.max(inspectRange.start, inspectRange.end),
+                inspectRange.contourId,
               )
             }
           >
@@ -389,6 +437,7 @@ function CommandRangePainter({
               onAddNewRange(
                 Math.min(inspectRange.start, inspectRange.end),
                 Math.max(inspectRange.start, inspectRange.end),
+                inspectRange.contourId,
               )
             }
           >
@@ -442,44 +491,53 @@ function DraftSegmentationPreview({
           const recipe = review.splitRecipes.find(
             (item) => item.id === geometry.recipeId,
           )
-          const contour = glyph.contours.find(
-            (item) => item.id === recipe?.sourceContourId,
-          )
           const piece = recipe?.pieces.find(
             (item) => item.id === geometry.pieceId,
           )
-          if (!contour || !piece) return []
-          return contour.commands.flatMap((_, commandIndex) => {
-            const selected = piece.tokens.some(
-              (token) =>
-                token.kind === 'source-range' &&
-                commandIndex >= token.fromCommand &&
-                commandIndex <= token.toCommand,
-            )
-            if (!selected) return []
-            const segment = commandSegmentPath(contour.commands, commandIndex)
-            if (!segment) return []
-            return segment.point
-              ? [
-                  <circle
-                    key={`piece-${step.order}-${piece.id}-${commandIndex}`}
-                    cx={segment.point.x}
-                    cy={segment.point.y}
-                    r="20"
-                    fill={color}
-                  />,
-                ]
-              : [
-                  <path
-                    key={`piece-${step.order}-${piece.id}-${commandIndex}`}
-                    d={segment.d}
-                    fill="none"
-                    stroke={color}
-                    strokeWidth="24"
-                    strokeLinecap="round"
-                  />,
-                ]
-          })
+          if (!recipe || !piece) return []
+          // Ranges may sit on a declared counter; resolve each one's contour.
+          const recipeContours = glyph.contours.filter(
+            (item) =>
+              item.id === recipe.sourceContourId ||
+              recipe.counterContours?.some(
+                ({ contourId }) => contourId === item.id,
+              ),
+          )
+          return recipeContours.flatMap((contour) =>
+            contour.commands.flatMap((_, commandIndex) => {
+              const selected = piece.tokens.some(
+                (token) =>
+                  token.kind === 'source-range' &&
+                  (token.contourId ?? recipe.sourceContourId) === contour.id &&
+                  commandIndex >= token.fromCommand &&
+                  commandIndex <= token.toCommand,
+              )
+              if (!selected) return []
+              const segment = commandSegmentPath(contour.commands, commandIndex)
+              if (!segment) return []
+              const key = `piece-${step.order}-${piece.id}-${contour.id}-${commandIndex}`
+              return segment.point
+                ? [
+                    <circle
+                      key={key}
+                      cx={segment.point.x}
+                      cy={segment.point.y}
+                      r="20"
+                      fill={color}
+                    />,
+                  ]
+                : [
+                    <path
+                      key={key}
+                      d={segment.d}
+                      fill="none"
+                      stroke={color}
+                      strokeWidth="24"
+                      strokeLinecap="round"
+                    />,
+                  ]
+            }),
+          )
         }),
       )}
     </svg>
@@ -832,22 +890,91 @@ export default function JamoSvgTaggerPage() {
   const activeContour = state?.source.contours.find(
     (contour) => contour.id === splitContourId,
   )
-  const commandCoverage =
-    activeContour && activeRecipe
-      ? activeContour.commands.map((_, index) =>
-          activeRecipe.pieces.reduce(
-            (count, piece) =>
-              count +
-              piece.tokens.filter(
-                (token) =>
-                  token.kind === 'source-range' &&
-                  index >= token.fromCommand &&
-                  index <= token.toCommand,
-              ).length,
-            0,
-          ),
-        )
+  const enclosedCounters =
+    state && activeContour
+      ? counterContours(state.source as unknown as CachedGlyph)
+          .filter(({ outerId }) => outerId === activeContour.id)
+          .flatMap(({ counterId }) =>
+            state.source.contours.filter(({ id }) => id === counterId),
+          )
       : []
+  const declaredCounters = enclosedCounters.filter(({ id }) =>
+    activeRecipe?.counterContours?.some((item) => item.contourId === id),
+  )
+  const recipeContours = activeContour
+    ? [activeContour, ...declaredCounters]
+    : []
+  const contourName = (contourId: number) =>
+    `Contour ${contourId + 1}${contourId === activeRecipe?.sourceContourId ? '' : ' (counter)'}`
+  // A counter's leading M carries no geometry and is never consumed.
+  const coverageLines =
+    activeRecipe && activeContour
+      ? recipeContours.map((contour) => {
+          const counts = coverageOf(
+            contour,
+            activeRecipe.pieces,
+            activeRecipe.sourceContourId,
+          ).slice(contour.id === activeContour.id ? 0 : 1)
+          const outOfRange = activeRecipe.pieces
+            .flatMap(({ tokens }) => tokens)
+            .filter(
+              (token) =>
+                token.kind === 'source-range' &&
+                (token.contourId ?? activeRecipe.sourceContourId) ===
+                  contour.id &&
+                token.toCommand >= contour.commands.length,
+            ).length
+          return { contour, counts, outOfRange }
+        })
+      : []
+  const toggleCounter = (counterId: number) => {
+    if (!state || !activeRecipe) return
+    const counter = state.source.contours.find(({ id }) => id === counterId)
+    if (!counter) return
+    const declared = activeRecipe.counterContours?.some(
+      (item) => item.contourId === counterId,
+    )
+    const review = beginReview({
+      ...state.review,
+      splitRecipes: state.review.splitRecipes.map((recipe) =>
+        recipe.id !== activeRecipe.id
+          ? recipe
+          : {
+              ...recipe,
+              counterContours: declared
+                ? recipe.counterContours?.filter(
+                    (item) => item.contourId !== counterId,
+                  )
+                : [
+                    ...(recipe.counterContours ?? []),
+                    { contourId: counterId, contourHash: counter.commandHash },
+                  ],
+              // Removing a counter also removes every range and seam on it.
+              pieces: declared
+                ? recipe.pieces.map((piece) => ({
+                    ...piece,
+                    tokens: piece.tokens.filter((token) =>
+                      token.kind === 'source-range'
+                        ? token.contourId !== counterId
+                        : token.kind === 'close-to-start' ||
+                          token.anchor.contourId !== counterId,
+                    ),
+                  }))
+                : recipe.pieces,
+            },
+      ),
+      // A consumed counter can no longer be owned whole.
+      steps: declared
+        ? state.review.steps
+        : state.review.steps.map((step) => ({
+            ...step,
+            geometry: step.geometry.filter(
+              (ref) => ref.kind !== 'contour' || ref.contourId !== counterId,
+            ),
+          })),
+    })
+    updateDraft(review)
+  }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   async function save(approve = false) {
     if (!state) return
@@ -1451,15 +1578,43 @@ export default function JamoSvgTaggerPage() {
                           Add piece
                         </Button>
                       </div>
-                      <p className="text-xs">
-                        Coverage:{' '}
-                        {commandCoverage.filter((count) => count === 1).length}/
-                        {commandCoverage.length} exactly once ·{' '}
-                        {commandCoverage.filter((count) => count === 0).length}{' '}
-                        uncovered ·{' '}
-                        {commandCoverage.filter((count) => count > 1).length}{' '}
-                        duplicate
-                      </p>
+                      {coverageLines.map(({ contour, counts, outOfRange }) => (
+                        <p className="text-xs" key={contour.id}>
+                          {recipeContours.length > 1
+                            ? `${contourName(contour.id)} coverage: `
+                            : 'Coverage: '}
+                          {counts.filter((count) => count === 1).length}/
+                          {counts.length} exactly once ·{' '}
+                          {counts.filter((count) => count === 0).length}{' '}
+                          uncovered ·{' '}
+                          {counts.filter((count) => count > 1).length} duplicate
+                          {outOfRange > 0 && (
+                            <span className="font-semibold text-[#c0362c]">
+                              {' '}
+                              · {outOfRange} out of range
+                            </span>
+                          )}
+                        </p>
+                      ))}
+                      {enclosedCounters.length > 0 && (
+                        <div className="rounded border border-dashed border-[#d8e3f2] p-2 text-xs">
+                          <strong>Counters inside this contour</strong>
+                          {enclosedCounters.map((counter) => (
+                            <label key={counter.id} className="mt-1 block">
+                              <input
+                                type="checkbox"
+                                checked={declaredCounters.some(
+                                  ({ id }) => id === counter.id,
+                                )}
+                                onChange={() => toggleCounter(counter.id)}
+                              />{' '}
+                              Split with Contour {counter.id + 1} (
+                              {counter.commands.length} commands; command 0 is
+                              its start and is never consumed)
+                            </label>
+                          ))}
+                        </div>
+                      )}
                       {activeRecipe.pieces.map((piece) => {
                         const ranges = piece.tokens.filter(
                           (
@@ -1492,12 +1647,18 @@ export default function JamoSvgTaggerPage() {
                                 : latestIndex,
                             -1,
                           )
+                          const edited = piece.tokens[tokenIndex]
+                          const rangeContourId =
+                            edited?.kind === 'source-range'
+                              ? (edited.contourId ??
+                                activeRecipe.sourceContourId)
+                              : activeRecipe.sourceContourId
                           const tokens = piece.tokens
                             .map((token, index) =>
                               index === tokenIndex &&
                               token.kind === 'source-range'
                                 ? {
-                                    kind: 'source-range' as const,
+                                    ...token,
                                     fromCommand: nextFrom,
                                     toCommand: nextTo,
                                   }
@@ -1514,7 +1675,7 @@ export default function JamoSvgTaggerPage() {
                             tokens.splice(previousRangeIndex + 1, 0, {
                               kind: 'line-to-anchor',
                               anchor: {
-                                contourId: activeContour.id,
+                                contourId: rangeContourId,
                                 commandIndex: nextFrom - 1,
                                 point: 'end',
                               },
@@ -1567,6 +1728,7 @@ export default function JamoSvgTaggerPage() {
                                 <CommandRangePainter
                                   glyph={state.source}
                                   contour={activeContour}
+                                  counters={declaredCounters}
                                   ranges={ranges}
                                 />
                                 <div className="mt-2">
@@ -1589,17 +1751,92 @@ export default function JamoSvgTaggerPage() {
                                           (candidate) =>
                                             candidate.kind === 'source-range',
                                         )
+                                      const nextRangeContourId =
+                                        nextRange?.kind === 'source-range'
+                                          ? (nextRange.contourId ??
+                                            activeRecipe.sourceContourId)
+                                          : activeRecipe.sourceContourId
                                       const suggestedAnchor =
                                         nextRange && nextRange.fromCommand > 0
-                                          ? nextRange.fromCommand - 1
+                                          ? `${nextRangeContourId}:${nextRange.fromCommand - 1}`
                                           : undefined
+                                      const anchorLabel = (value: string) => {
+                                        const [contourId, commandIndex] = value
+                                          .split(':')
+                                          .map(Number)
+                                        return `${recipeContours.length > 1 ? `${contourName(contourId)} · ` : ''}command ${commandIndex} end`
+                                      }
                                       return (
                                         <div
                                           key={`${piece.id}-${tokenIndex}`}
                                           className="rounded border border-[#d8e3f2] p-2"
                                         >
+                                          {recipeContours.length > 1 && (
+                                            <label className="mb-1 block text-xs font-semibold">
+                                              Contour
+                                              <select
+                                                className="ml-2 rounded border p-1 font-normal"
+                                                value={
+                                                  token.contourId ??
+                                                  activeRecipe.sourceContourId
+                                                }
+                                                onChange={(event) => {
+                                                  const contourId = Number(
+                                                    event.target.value,
+                                                  )
+                                                  const onSource =
+                                                    contourId ===
+                                                    activeRecipe.sourceContourId
+                                                  updatePiece(
+                                                    activeRecipe.id,
+                                                    piece.id,
+                                                    piece.tokens.map(
+                                                      (item, index) =>
+                                                        index === tokenIndex &&
+                                                        item.kind ===
+                                                          'source-range'
+                                                          ? {
+                                                              kind: 'source-range',
+                                                              fromCommand:
+                                                                onSource
+                                                                  ? item.fromCommand
+                                                                  : Math.max(
+                                                                      1,
+                                                                      item.fromCommand,
+                                                                    ),
+                                                              toCommand:
+                                                                Math.max(
+                                                                  onSource
+                                                                    ? item.fromCommand
+                                                                    : 1,
+                                                                  item.toCommand,
+                                                                ),
+                                                              ...(onSource
+                                                                ? {}
+                                                                : {
+                                                                    contourId,
+                                                                  }),
+                                                            }
+                                                          : item,
+                                                    ),
+                                                  )
+                                                }}
+                                              >
+                                                {recipeContours.map(
+                                                  (contour) => (
+                                                    <option
+                                                      key={contour.id}
+                                                      value={contour.id}
+                                                    >
+                                                      {contourName(contour.id)}
+                                                    </option>
+                                                  ),
+                                                )}
+                                              </select>
+                                            </label>
+                                          )}
                                           <SourceRangeEditor
-                                            key={`${token.fromCommand}-${token.toCommand}`}
+                                            key={`${token.contourId ?? ''}-${token.fromCommand}-${token.toCommand}`}
                                             fromCommand={token.fromCommand}
                                             toCommand={token.toCommand}
                                             onUpdate={(
@@ -1626,12 +1863,10 @@ export default function JamoSvgTaggerPage() {
                                           {seamAfterRange ? (
                                             <div className="mt-2 flex items-center justify-between gap-2 rounded bg-[#fff8ed] p-2 text-xs">
                                               <span>
-                                                Seam before next range → command{' '}
-                                                {
-                                                  seamAfterRange.anchor
-                                                    .commandIndex
-                                                }{' '}
-                                                end
+                                                Seam before next range →{' '}
+                                                {anchorLabel(
+                                                  `${seamAfterRange.anchor.contourId}:${seamAfterRange.anchor.commandIndex}`,
+                                                )}
                                               </span>
                                               <Button
                                                 variant="secondary"
@@ -1654,8 +1889,11 @@ export default function JamoSvgTaggerPage() {
                                             <label className="mt-2 block text-xs font-semibold text-[#39465b]">
                                               Line seam to next range
                                               <span className="ml-1 font-normal text-[#667085]">
-                                                (usually command{' '}
-                                                {suggestedAnchor ?? 0} end)
+                                                (usually{' '}
+                                                {suggestedAnchor
+                                                  ? anchorLabel(suggestedAnchor)
+                                                  : 'command 0 end'}
+                                                )
                                               </span>
                                               <select
                                                 className="mt-1 w-full rounded border p-2 font-normal"
@@ -1666,6 +1904,12 @@ export default function JamoSvgTaggerPage() {
                                                 onChange={(event) => {
                                                   if (event.target.value === '')
                                                     return
+                                                  const [
+                                                    contourId,
+                                                    commandIndex,
+                                                  ] = event.target.value
+                                                    .split(':')
+                                                    .map(Number)
                                                   const tokens = [
                                                     ...piece.tokens,
                                                   ]
@@ -1675,11 +1919,8 @@ export default function JamoSvgTaggerPage() {
                                                     {
                                                       kind: 'line-to-anchor',
                                                       anchor: {
-                                                        contourId:
-                                                          activeContour.id,
-                                                        commandIndex: Number(
-                                                          event.target.value,
-                                                        ),
+                                                        contourId,
+                                                        commandIndex,
                                                         point: 'end',
                                                       },
                                                       reason:
@@ -1701,21 +1942,27 @@ export default function JamoSvgTaggerPage() {
                                                   <option
                                                     value={suggestedAnchor}
                                                   >
-                                                    Suggested: command{' '}
-                                                    {suggestedAnchor} end
+                                                    Suggested:{' '}
+                                                    {anchorLabel(
+                                                      suggestedAnchor,
+                                                    )}
                                                   </option>
                                                 )}
-                                                {activeContour.commands.map(
-                                                  (_, commandIndex) =>
-                                                    commandIndex ===
-                                                    suggestedAnchor ? null : (
-                                                      <option
-                                                        key={commandIndex}
-                                                        value={commandIndex}
-                                                      >
-                                                        command {commandIndex}{' '}
-                                                        end
-                                                      </option>
+                                                {recipeContours.flatMap(
+                                                  (contour) =>
+                                                    contour.commands.map(
+                                                      (_, commandIndex) => {
+                                                        const value = `${contour.id}:${commandIndex}`
+                                                        return value ===
+                                                          suggestedAnchor ? null : (
+                                                          <option
+                                                            key={value}
+                                                            value={value}
+                                                          >
+                                                            {anchorLabel(value)}
+                                                          </option>
+                                                        )
+                                                      },
                                                     ),
                                                 )}
                                               </select>
@@ -1752,12 +1999,23 @@ export default function JamoSvgTaggerPage() {
                               <CommandRangePainter
                                 glyph={state.source}
                                 contour={activeContour}
+                                counters={declaredCounters}
                                 ranges={[]}
                                 inspect
                                 onAddSelectedRange={(
                                   fromCommand,
                                   toCommand,
+                                  contourId,
                                 ) => {
+                                  const range = {
+                                    kind: 'source-range' as const,
+                                    fromCommand,
+                                    toCommand,
+                                    ...(contourId ===
+                                    activeRecipe.sourceContourId
+                                      ? {}
+                                      : { contourId }),
+                                  }
                                   const latestSourceRangeIndex =
                                     piece.tokens.reduce(
                                       (latestIndex, token, tokenIndex) =>
@@ -1770,32 +2028,29 @@ export default function JamoSvgTaggerPage() {
                                     activeRecipe.id,
                                     piece.id,
                                     latestSourceRangeIndex === -1
-                                      ? [
-                                          ...piece.tokens,
-                                          {
-                                            kind: 'source-range',
-                                            fromCommand,
-                                            toCommand,
-                                          },
-                                        ]
+                                      ? [...piece.tokens, range]
                                       : piece.tokens.map((token, tokenIndex) =>
                                           tokenIndex === latestSourceRangeIndex
-                                            ? {
-                                                kind: 'source-range',
-                                                fromCommand,
-                                                toCommand,
-                                              }
+                                            ? range
                                             : token,
                                         ),
                                   )
                                 }}
-                                onAddNewRange={(fromCommand, toCommand) =>
+                                onAddNewRange={(
+                                  fromCommand,
+                                  toCommand,
+                                  contourId,
+                                ) =>
                                   updatePiece(activeRecipe.id, piece.id, [
                                     ...piece.tokens,
                                     {
                                       kind: 'source-range',
                                       fromCommand,
                                       toCommand,
+                                      ...(contourId ===
+                                      activeRecipe.sourceContourId
+                                        ? {}
+                                        : { contourId }),
                                     },
                                   ])
                                 }
@@ -1822,7 +2077,7 @@ export default function JamoSvgTaggerPage() {
                               {piece.tokens
                                 .map((token) =>
                                   token.kind === 'source-range'
-                                    ? `${token.fromCommand}–${token.toCommand}`
+                                    ? `${token.contourId === undefined ? '' : `C${token.contourId + 1} `}${token.fromCommand}–${token.toCommand}`
                                     : token.kind,
                                 )
                                 .join(', ') || 'none'}

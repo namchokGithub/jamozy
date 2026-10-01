@@ -716,3 +716,12 @@ Chronological log of completed units of work. One entry per meaningful change (n
   rest → second key). Result: 21 compound-medial reviews returned to
   `reviewing`, all divided without blockers; 379 approved reviews kept
   approval. Seed `화` and migration tests updated.
+
+### 2026-10-01 — Jamo SVG counter-aware split recipes
+
+- Split recipes can partition an enclosed counter together with its outline
+  ([[DEC-038]]), so ㅇ/ㅎ/ㄹ seams follow the counter's curve next to
+  ㅕ ㅖ ㅛ ㅠ. Validation, compilation, proposals, and the Split Workbench
+  support it; existing recipes are unchanged.
+  `pnpm jamo-svg:propose --replace-reviewing` can re-propose unapproved
+  `reviewing` drafts; approved reviews are never touched.

@@ -148,3 +148,27 @@ test('removes only the selected source range from a piece', () => {
     },
   ])
 })
+
+test('counts coverage only for ranges on the requested contour', () => {
+  const pieces = [
+    {
+      id: 'a',
+      tokens: [{ kind: 'source-range' as const, fromCommand: 0, toCommand: 3 }],
+    },
+    {
+      id: 'b',
+      tokens: [
+        {
+          kind: 'source-range' as const,
+          contourId: 7,
+          fromCommand: 1,
+          toCommand: 2,
+        },
+      ],
+    },
+  ]
+  expect(commandCoverage(contour, pieces)).toEqual([1, 1, 1, 1])
+  expect(commandCoverage({ ...contour, id: 7 }, pieces, 0)).toEqual([
+    0, 1, 1, 0,
+  ])
+})

@@ -4,7 +4,6 @@ import type {
   CachedGlyph,
   GlyphReview,
   RecipeToken,
-  SourceAnchor,
   SplitRecipe,
 } from './types'
 
@@ -93,37 +92,58 @@ function transferRecipes(
 ): SplitRecipe[] | undefined {
   const recipes: SplitRecipe[] = []
   for (const recipe of review.splitRecipes) {
-    const from = template.contours.find(
-      ({ id }) => id === recipe.sourceContourId,
+    const matched = (templateId: number) => {
+      const from = template.contours.find(({ id }) => id === templateId)
+      const index = from && targetIndexOf.get(template.contours.indexOf(from))
+      const to = index === undefined ? undefined : target.contours[index]
+      // Same command shape is not enough: a contour can start elsewhere or bend
+      // differently, so every command must also land near its template point.
+      return from &&
+        to &&
+        to.commandTypes === from.commandTypes &&
+        to.commands.length === from.commands.length &&
+        pointDistance(to, from) <= maxCost
+        ? { from, to }
+        : undefined
+    }
+    const source = matched(recipe.sourceContourId)
+    const counters = (recipe.counterContours ?? []).map(({ contourId }) =>
+      matched(contourId),
     )
-    const index = from && targetIndexOf.get(template.contours.indexOf(from))
-    const to = index === undefined ? undefined : target.contours[index]
-    // Same command shape is not enough: a contour can start elsewhere or bend
-    // differently, so every command must also land near its template point.
-    if (
-      !from ||
-      !to ||
-      to.commandTypes !== from.commandTypes ||
-      to.commands.length !== from.commands.length ||
-      pointDistance(to, from) > maxCost
-    )
-      return undefined
-    const anchor = (value: SourceAnchor): SourceAnchor => ({
-      ...value,
-      contourId: to.id,
-    })
+    if (!source || counters.some((counter) => !counter)) return undefined
+    const idOf = new Map([
+      [source.from.id, source.to.id],
+      ...counters.map((counter) => [counter!.from.id, counter!.to.id] as const),
+    ])
+    const retarget = (id: number) => idOf.get(id) ?? source.to.id
     recipes.push({
       ...recipe,
-      sourceContourId: to.id,
-      sourceContourHash: to.commandHash,
-      visualValidation: { sourceContourHash: to.commandHash },
+      sourceContourId: source.to.id,
+      sourceContourHash: source.to.commandHash,
+      ...(recipe.counterContours
+        ? {
+            counterContours: counters.map((counter) => ({
+              contourId: counter!.to.id,
+              contourHash: counter!.to.commandHash,
+            })),
+          }
+        : {}),
+      visualValidation: { sourceContourHash: source.to.commandHash },
       rationale: `Proposed from ${template.syllable}: ${recipe.rationale}`,
       pieces: recipe.pieces.map((piece) => ({
         ...piece,
         tokens: piece.tokens.map((token): RecipeToken =>
           token.kind === 'move-to-anchor' || token.kind === 'line-to-anchor'
-            ? { ...token, anchor: anchor(token.anchor) }
-            : token,
+            ? {
+                ...token,
+                anchor: {
+                  ...token.anchor,
+                  contourId: retarget(token.anchor.contourId),
+                },
+              }
+            : token.kind === 'source-range' && token.contourId !== undefined
+              ? { ...token, contourId: retarget(token.contourId) }
+              : token,
         ),
       })),
     })

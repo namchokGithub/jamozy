@@ -8,7 +8,7 @@ import { QueueStore, ReviewStore, type ReviewManifest, type ReviewShard } from '
 // Writes `proposed` reviews for queue syllables that have no review yet, by
 // copying whole-contour ownership from the closest approved glyph. Existing
 // reviews of any status are never touched. A human still approves each one.
-const { values } = parseArgs({ options: { 'max-cost': { type: 'string', default: '250' }, exclude: { type: 'string', default: '' }, 'dry-run': { type: 'boolean', default: false } } })
+const { values } = parseArgs({ options: { 'max-cost': { type: 'string', default: '250' }, exclude: { type: 'string', default: '' }, 'dry-run': { type: 'boolean', default: false }, 'replace-reviewing': { type: 'boolean', default: false } } })
 const maxCost = Number(values['max-cost'])
 if (!Number.isFinite(maxCost)) throw new Error(`--max-cost must be a number, received ${values['max-cost']}.`)
 const excluded = new Set([...values.exclude].filter((char) => char.trim() && char !== ','))
@@ -23,7 +23,8 @@ const templates: ApprovedTemplate[] = []
 for (const { file } of manifest.shards) {
   const shard = JSON.parse(await readFile(join(reviewsRoot, file), 'utf8')) as ReviewShard
   for (const [syllable, review] of Object.entries(shard.reviews)) {
-    reviewed.add(syllable)
+    // --replace-reviewing lets unapproved drafts be re-proposed; approved reviews are never touched.
+    if (!(values['replace-reviewing'] && review.status === 'reviewing')) reviewed.add(syllable)
     if (review.status === 'approved' && !excluded.has(syllable)) templates.push({ glyph: await extractGlyph(syllable), review })
   }
 }

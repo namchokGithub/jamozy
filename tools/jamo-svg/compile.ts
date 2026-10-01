@@ -1,6 +1,7 @@
 import {
   REVIEW_SCHEMA_VERSION,
   SPLIT_RECIPE_SCHEMA_VERSION,
+  type CachedContour,
   type CachedGlyph,
   type CompiledGlyph,
   type GlyphReview,
@@ -21,7 +22,10 @@ export function compileRecipePiece(
   )
   const piece = recipe.pieces.find(({ id }) => id === pieceId)
   if (!contour || !piece) throw new Error('Unknown split recipe piece.')
-  return compileSplitPiecePreview(contour, piece)
+  const counters = (recipe.counterContours ?? []).flatMap(({ contourId }) =>
+    source.contours.filter(({ id }) => id === contourId),
+  )
+  return compileSplitPiecePreview(contour, piece, counters)
 }
 
 export function compileReview(
@@ -63,17 +67,37 @@ function recipeIsValid(source: CachedGlyph, recipe: SplitRecipe): boolean {
     contour.commandHash !== recipe.sourceContourHash
   )
     return false
+  // A recipe may also partition counters that this outline encloses, so a
+  // seam can follow a counter's edge. Their M command carries no geometry.
+  const enclosed = new Set(
+    counterContours(source)
+      .filter(({ outerId }) => outerId === contour.id)
+      .map(({ counterId }) => counterId),
+  )
+  const counters = new Map<number, CachedContour>()
+  for (const declared of recipe.counterContours ?? []) {
+    const counter = source.contours.find(({ id }) => id === declared.contourId)
+    if (
+      !counter ||
+      !enclosed.has(counter.id) ||
+      counter.commandHash !== declared.contourHash ||
+      counters.has(counter.id)
+    )
+      return false
+    counters.set(counter.id, counter)
+  }
+  const contourOf = (id = contour.id) =>
+    id === contour.id ? contour : counters.get(id)
   const ids = new Set<string>()
-  // Only source ranges consume source geometry. Move anchors establish a path
-  // cursor and line anchors declare closure seams; neither replaces a command.
-  const coverage = new Map<number, number>()
-  const consume = (index: number) =>
-    coverage.set(index, (coverage.get(index) ?? 0) + 1)
+  const coverage = new Map<string, number>()
+  const consume = (id: number, index: number) =>
+    coverage.set(`${id}:${index}`, (coverage.get(`${id}:${index}`) ?? 0) + 1)
   const anchorIsUsable = (
+    target: CachedContour,
     index: number,
     point: 'start' | 'end' | 'control1' | 'control2',
   ) => {
-    const command = contour.commands[index]
+    const command = target.commands[index]
     if (!command) return false
     if (point === 'control1')
       return command.x1 !== undefined && command.y1 !== undefined
@@ -86,10 +110,13 @@ function recipeIsValid(source: CachedGlyph, recipe: SplitRecipe): boolean {
     ids.add(piece.id)
     return piece.tokens.every((token) => {
       if (token.kind === 'source-range') {
+        const target = contourOf(token.contourId)
+        if (!target || (target !== contour && token.fromCommand < 1))
+          return false
         if (
           token.fromCommand < 0 ||
           token.toCommand < token.fromCommand ||
-          token.toCommand >= contour.commands.length
+          token.toCommand >= target.commands.length
         )
           return false
         for (
@@ -97,26 +124,30 @@ function recipeIsValid(source: CachedGlyph, recipe: SplitRecipe): boolean {
           index <= token.toCommand;
           index += 1
         )
-          consume(index)
+          consume(target.id, index)
+        return true
       }
-      if (token.kind === 'move-to-anchor') {
-        if (
-          token.anchor.contourId !== contour.id ||
-          !anchorIsUsable(token.anchor.commandIndex, token.anchor.point)
+      if (token.kind === 'move-to-anchor' || token.kind === 'line-to-anchor') {
+        const target = contourOf(token.anchor.contourId)
+        return Boolean(
+          target &&
+          anchorIsUsable(target, token.anchor.commandIndex, token.anchor.point),
         )
-          return false
       }
-      if (
-        token.kind === 'line-to-anchor' &&
-        (token.anchor.contourId !== contour.id ||
-          !anchorIsUsable(token.anchor.commandIndex, token.anchor.point))
-      )
-        return false
       return true
     })
   })
   return (
-    valid && contour.commands.every((_, index) => coverage.get(index) === 1)
+    valid &&
+    contour.commands.every(
+      (_, index) => coverage.get(`${contour.id}:${index}`) === 1,
+    ) &&
+    [...counters.values()].every((counter) =>
+      counter.commands.every(
+        (_, index) =>
+          index === 0 || coverage.get(`${counter.id}:${index}`) === 1,
+      ),
+    )
   )
 }
 
@@ -209,9 +240,15 @@ export function validateReview(
       }
     }
   }
-  const replaced = new Set(
-    review.splitRecipes.map(({ sourceContourId }) => sourceContourId),
+  const consumed = review.splitRecipes.flatMap(
+    ({ sourceContourId, counterContours = [] }) => [
+      sourceContourId,
+      ...counterContours.map(({ contourId }) => contourId),
+    ],
   )
+  const replaced = new Set(consumed)
+  // A contour may be consumed by at most one recipe, as its source or a counter.
+  if (replaced.size !== consumed.length) blockers.add('duplicate-ownership')
   if (review.splitRecipes.some((recipe) => !recipeIsValid(source, recipe)))
     blockers.add('invalid-split-recipe')
   for (const recipe of review.splitRecipes) {

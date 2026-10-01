@@ -783,3 +783,26 @@ sequences. It divides each compound medial's geometry by shape: the widest
 piece is the horizontal first key (ㅗ ㅜ ㅡ) and the rest is the second key;
 those 21 reviews returned to `reviewing` for re-approval. A medial that cannot
 be divided this way is marked `needs-split`.
+
+---
+
+## DEC-038 — Split recipes may partition an enclosed counter with its outline
+
+**Date:** 2026-10-01
+**Status:** Accepted
+
+**Decision:** A split recipe may declare `counterContours`: counters that
+`counterContours(source)` pairs with the recipe's source contour. Its pieces
+may then consume source ranges and use anchors on those counters. Every
+source-contour command and every counter command except the counter's leading
+`M` must be consumed exactly once; a consumed counter cannot also be owned
+whole. Recipes without counters are unchanged.
+
+**Why:** Where a rounded initial touches a two-bar vowel (`여 요 효 륭`), the
+counter between them is bounded by the initial's curve. A seam restricted to
+the outline's own points can only be straight, so part of the initial was
+painted as the vowel.
+
+**Consequences:** Geometry is still only replayed font commands plus declared
+straight seams. Proposals transfer counter recipes under the same command-
+shape and point-distance guards as other recipes.

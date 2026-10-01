@@ -70,15 +70,28 @@ export type CachedGlyph = {
   bounds: Bounds
   sourcePath: string
   contours: CachedContour[]
-  signals: { contourRelation: 'deficit' | 'aligned' | 'surplus'; commandCount: number; oneContourMultiStep: boolean }
+  signals: {
+    contourRelation: 'deficit' | 'aligned' | 'surplus'
+    commandCount: number
+    oneContourMultiStep: boolean
+  }
   family: GlyphFamilyKey
 }
 
 export type WholeContourRef = { kind: 'contour'; contourId: number }
-export type SplitPieceRef = { kind: 'split-piece'; recipeId: string; pieceId: string }
+export type SplitPieceRef = {
+  kind: 'split-piece'
+  recipeId: string
+  pieceId: string
+}
 export type GeometryRef = WholeContourRef | SplitPieceRef
-export type ReviewedStep = { order: number; jamo: string; geometry: GeometryRef[] }
-export type ReviewStatus = 'unreviewed' | 'proposed' | 'reviewing' | 'approved' | 'stale'
+export type ReviewedStep = {
+  order: number
+  jamo: string
+  geometry: GeometryRef[]
+}
+export type ReviewStatus =
+  'unreviewed' | 'proposed' | 'reviewing' | 'approved' | 'stale'
 export type ReviewBlocker =
   | 'unassigned-source-geometry'
   | 'duplicate-ownership'
@@ -89,11 +102,24 @@ export type ReviewBlocker =
   | 'reconstruction-mismatch'
   | 'fingerprint-mismatch'
   | 'counter-owner-mismatch'
-export type SourceAnchor = { contourId: number; commandIndex: number; point: 'start' | 'end' | 'control1' | 'control2' }
+export type SourceAnchor = {
+  contourId: number
+  commandIndex: number
+  point: 'start' | 'end' | 'control1' | 'control2'
+}
 export type RecipeToken =
-  | { kind: 'source-range'; fromCommand: number; toCommand: number }
+  | {
+      kind: 'source-range'
+      fromCommand: number
+      toCommand: number
+      contourId?: number
+    }
   | { kind: 'move-to-anchor'; anchor: SourceAnchor }
-  | { kind: 'line-to-anchor'; anchor: SourceAnchor; reason: 'interior-closure-seam' }
+  | {
+      kind: 'line-to-anchor'
+      anchor: SourceAnchor
+      reason: 'interior-closure-seam'
+    }
   | { kind: 'close-to-start'; reason: 'interior-closure-seam' }
 export type SplitPiece = { id: string; tokens: RecipeToken[] }
 export type SplitRecipe = {
@@ -101,6 +127,8 @@ export type SplitRecipe = {
   id: string
   sourceContourId: number
   sourceContourHash: string
+  /** Counters inside the source contour that this recipe partitions with it. */
+  counterContours?: Array<{ contourId: number; contourHash: string }>
   method: 'source-command-partition'
   pieces: SplitPiece[]
   rationale: string
@@ -115,6 +143,14 @@ export type GlyphReview = {
   steps: ReviewedStep[]
   splitRecipes: SplitRecipe[]
   notes?: string
-  approved?: { at: string; reviewer: string; validatorVersion: 1; validationHash: string }
+  approved?: {
+    at: string
+    reviewer: string
+    validatorVersion: 1
+    validationHash: string
+  }
 }
-export type CompiledGlyph = { width: number; paths: Array<{ jamo: string; d: string }> }
+export type CompiledGlyph = {
+  width: number
+  paths: Array<{ jamo: string; d: string }>
+}

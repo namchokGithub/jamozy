@@ -177,6 +177,11 @@ enclosing it belong to different physical steps. That assignment passes
 coverage checks but paints the hole as a solid shape; it means the enclosing
 outline is a union of two jamo and needs a split.
 
+A recipe may also partition counters enclosed by its source contour
+(`counterContours`, DEC-038). `source-range.contourId` and anchor `contourId`
+select the contour; omitted, they mean the recipe's source contour. A
+counter's leading `M` is never consumed.
+
 Allowed transitions:
 
 ```text

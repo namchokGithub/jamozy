@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest'
 import { extractGlyph } from './extract'
 import { matchContours, proposeReview, type ApprovedTemplate } from './propose'
 import { seedReview } from './seed'
+import { yeoCounterSplit } from './counter-split.fixture'
 import type { CachedGlyph, GlyphReview } from './types'
 
 const approved = (
@@ -133,6 +134,40 @@ describe('approved-template proposals', () => {
       expect(
         proposeReview(target, [await valuesTemplate()], 250),
       ).toBeUndefined()
+    })
+    const yeoTemplate = async (): Promise<ApprovedTemplate> => {
+      const glyph = await extractGlyph('여')
+      return { glyph, review: yeoCounterSplit(glyph, 'approved') }
+    }
+    const renamedYeo = async (edit?: (glyph: CachedGlyph) => void) => {
+      const glyph = structuredClone(await extractGlyph('여'))
+      glyph.syllable = '혀'
+      edit?.(glyph)
+      return glyph
+    }
+
+    test('re-targets a counter recipe onto the matched outline and counter', async () => {
+      const proposal = proposeReview(
+        await renamedYeo(),
+        [await yeoTemplate()],
+        250,
+      )
+      expect(proposal?.review.splitRecipes[0].counterContours).toEqual([
+        {
+          contourId: 2,
+          contourHash: (await extractGlyph('여')).contours[2].commandHash,
+        },
+      ])
+      expect(proposal?.review.blockers).toEqual([])
+      // An identical target keeps every range and anchor on its original contour.
+      expect(proposal?.review.splitRecipes[0].pieces).toEqual((await yeoTemplate()).review.splitRecipes[0].pieces)
+    })
+
+    test('rejects a counter recipe when the counter has a different command shape', async () => {
+      const target = await renamedYeo((glyph) => {
+        glyph.contours[2].commandTypes += 'L'
+      })
+      expect(proposeReview(target, [await yeoTemplate()], 250)).toBeUndefined()
     })
   })
 })
