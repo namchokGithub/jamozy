@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 // import { Link } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
+import { Modal } from '../../components/ui/Modal'
 import { PageSurface } from '../../components/ui/PageSurface'
 import { retainSourceAfterSave } from './tagger-state'
 import { counterContours } from '../../../tools/jamo-svg/compile'
@@ -217,6 +218,17 @@ function SourceRangeEditor({
     </div>
   )
 }
+/**
+ * Per-contour colors in a recipe: the source contour first, then each counter.
+ * `selected` marks commands in a range; `idle` marks the rest of that contour.
+ */
+const contourPalette = [
+  { selected: '#e66c58', idle: '#4c8f8b' },
+  { selected: '#7c3aed', idle: '#b9a7ef' },
+  { selected: '#d97706', idle: '#f2c98a' },
+]
+const contourColor = (order: number) =>
+  contourPalette[order % contourPalette.length]
 function CommandRangePainter({
   glyph,
   contour,
@@ -288,7 +300,7 @@ function CommandRangePainter({
       </p>
       <p className="mt-1 text-xs text-[#667085]">
         {inspect
-          ? 'Click or drag to highlight a command range in red. This does not change any source range.'
+          ? 'Click or drag to highlight a command range (darker color). This does not change any source range.'
           : 'Preview only: reads the source ranges entered below.'}
       </p>
       <svg
@@ -336,7 +348,10 @@ function CommandRangePainter({
             {item.commands.map((_, index) => {
               const segment = commandSegmentPath(item.commands, index)
               if (!segment) return null
-              const color = selected(item.id, index) ? '#e66c58' : '#4c8f8b'
+              const palette = contourColor(drawn.indexOf(item))
+              const color = selected(item.id, index)
+                ? palette.selected
+                : palette.idle
               return segment.point ? (
                 <g key={index}>
                   {/* {index === 0 && (
@@ -544,6 +559,89 @@ function DraftSegmentationPreview({
   )
 }
 const QUEUE_PAGE_SIZE = 12
+const reviewStatuses = [
+  'unreviewed',
+  'proposed',
+  'reviewing',
+  'approved',
+  'stale',
+] as const
+/** What each validation blocker means and where to fix it in the Tagger. */
+const blockerHints: Record<string, string> = {
+  'invalid-split-recipe':
+    'A split recipe is not a valid partition. Keep every range inside its contour, use every command exactly once, start counter ranges at 1, and point seams only at the recipe’s own contours.',
+  'duplicate-ownership':
+    'A contour or piece belongs to more than one step, or a contour used by a split recipe is also assigned whole in Contour ownership.',
+  'unassigned-source-geometry':
+    'A contour or split piece has no step. Assign it in Contour ownership or Split Workbench.',
+  'empty-physical-step': 'A typing step has no geometry yet.',
+  'counter-owner-mismatch':
+    'A counter (hole) belongs to a different step than the outline around it. Split that outline instead.',
+  'reconstruction-mismatch':
+    'A step’s compiled path is empty or does not start with a move.',
+  'needs-split':
+    'The review is marked “needs split”. Clear it once the split is finished.',
+  'ambiguous-ownership': 'Review steps do not match this glyph’s typing steps.',
+  'fingerprint-mismatch':
+    'The review was made for different source geometry. Re-review this glyph.',
+}
+const commandList = (indexes: number[]) => indexes.join(', ')
+/** Concrete split-recipe problems, so a failed save can say where to look. */
+function recipeIssues(state: State): string[] {
+  const issues: string[] = []
+  const consumed = new Set<number>()
+  for (const recipe of state.review.splitRecipes) {
+    const ids = [
+      recipe.sourceContourId,
+      ...(recipe.counterContours ?? []).map(({ contourId }) => contourId),
+    ]
+    for (const id of ids) {
+      const contour = state.source.contours.find((item) => item.id === id)
+      if (!contour) continue
+      consumed.add(id)
+      const isCounter = id !== recipe.sourceContourId
+      const name = `Contour ${id + 1}${isCounter ? ' (counter)' : ''}`
+      const ranges = recipe.pieces.flatMap(({ id: pieceId, tokens }) =>
+        tokens.flatMap((token) =>
+          token.kind === 'source-range' &&
+          (token.contourId ?? recipe.sourceContourId) === id
+            ? [{ pieceId, token }]
+            : [],
+        ),
+      )
+      for (const { pieceId, token } of ranges) {
+        if (token.toCommand >= contour.commands.length)
+          issues.push(
+            `${name}, ${pieceId}: range ${token.fromCommand}–${token.toCommand} ends past the last command (${contour.commands.length - 1}).`,
+          )
+        if (isCounter && token.fromCommand < 1)
+          issues.push(
+            `${name}, ${pieceId}: range ${token.fromCommand}–${token.toCommand} uses command 0 (the counter start); start it at 1.`,
+          )
+      }
+      const counts = coverageOf(contour, recipe.pieces, recipe.sourceContourId)
+      const missing = counts.flatMap((count, index) =>
+        count === 0 && !(isCounter && index === 0) ? [index] : [],
+      )
+      const repeated = counts.flatMap((count, index) =>
+        count > 1 ? [index] : [],
+      )
+      if (missing.length)
+        issues.push(`${name}: commands ${commandList(missing)} are not used.`)
+      if (repeated.length)
+        issues.push(
+          `${name}: commands ${commandList(repeated)} are used more than once.`,
+        )
+    }
+  }
+  for (const step of state.review.steps)
+    for (const ref of step.geometry)
+      if (ref.kind === 'contour' && consumed.has(ref.contourId))
+        issues.push(
+          `Contour ${ref.contourId + 1} is used by a split recipe but also assigned whole to ${step.jamo}; clear it in Contour ownership.`,
+        )
+  return issues
+}
 const compactButton =
   'rounded-full border border-[#d8dce6] px-3 py-1 text-xs font-semibold text-[#39465b] hover:bg-[#f7f7fa] disabled:cursor-not-allowed disabled:opacity-40'
 const statusSnapshotOf = (items: QueueEntry[]) =>
@@ -554,7 +652,8 @@ export default function JamoSvgTaggerPage() {
   const [queue, setQueue] = useState<QueueEntry[]>([])
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<'all' | 'needs-split'>('all')
-  const [statusFilter, setStatusFilter] = useState('unreviewed')
+  // Empty means every status.
+  const [statusFilter, setStatusFilter] = useState<string[]>(['unreviewed'])
   // Status membership is captured when the filter is applied, so saving the
   // selected glyph does not drop it out of the list mid-review.
   const [statusSnapshot, setStatusSnapshot] = useState<Map<string, string>>(
@@ -565,6 +664,12 @@ export default function JamoSvgTaggerPage() {
   const [state, setState] = useState<State | null>(null)
   const [revision, setRevision] = useState<string>()
   const [error, setError] = useState<string>()
+  const [saveFailure, setSaveFailure] = useState<{
+    action: 'Save' | 'Approve'
+    message: string
+    blockers: string[]
+    issues: string[]
+  }>()
   const [showSaveSuccess, setShowSaveSuccess] = useState(false)
   const [overlay, setOverlay] = useState(true)
   const [splitContourId, setSplitContourId] = useState<number>()
@@ -574,8 +679,10 @@ export default function JamoSvgTaggerPage() {
       queue.filter(
         (item) =>
           (filter === 'all' || item.blockers?.includes('needs-split')) &&
-          (statusFilter === 'all' ||
-            statusSnapshot.get(item.syllable) === statusFilter) &&
+          (statusFilter.length === 0 ||
+            statusFilter.includes(
+              statusSnapshot.get(item.syllable) ?? 'unreviewed',
+            )) &&
           (!query ||
             item.syllable.includes(query) ||
             `U+${item.syllable.codePointAt(0)?.toString(16).toUpperCase()}`.includes(
@@ -638,8 +745,16 @@ export default function JamoSvgTaggerPage() {
     page * QUEUE_PAGE_SIZE,
     (page + 1) * QUEUE_PAGE_SIZE,
   )
-  const applyStatusFilter = (status: string) => {
-    setStatusFilter(status)
+  const statusCounts = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const item of queue) {
+      const status = item.reviewStatus ?? 'unreviewed'
+      counts.set(status, (counts.get(status) ?? 0) + 1)
+    }
+    return counts
+  }, [queue])
+  const applyStatusFilter = (statuses: string[]) => {
+    setStatusFilter(statuses)
     setStatusSnapshot(statusSnapshotOf(queue))
     setIndex(0)
   }
@@ -652,10 +767,10 @@ export default function JamoSvgTaggerPage() {
         setStatusSnapshot(snapshot)
         setStatusFilter(
           has('unreviewed')
-            ? 'unreviewed'
+            ? ['unreviewed']
             : has('reviewing')
-              ? 'reviewing'
-              : 'all',
+              ? ['reviewing']
+              : [],
         )
       })
       .catch((reason: unknown) =>
@@ -910,11 +1025,15 @@ export default function JamoSvgTaggerPage() {
   const coverageLines =
     activeRecipe && activeContour
       ? recipeContours.map((contour) => {
-          const counts = coverageOf(
+          const allCounts = coverageOf(
             contour,
             activeRecipe.pieces,
             activeRecipe.sourceContourId,
-          ).slice(contour.id === activeContour.id ? 0 : 1)
+          )
+          const isCounter = contour.id !== activeContour.id
+          const counts = allCounts.slice(isCounter ? 1 : 0)
+          // Validation rejects any counter range that consumes its start M.
+          const usesCounterStart = isCounter && allCounts[0] > 0
           const outOfRange = activeRecipe.pieces
             .flatMap(({ tokens }) => tokens)
             .filter(
@@ -924,7 +1043,7 @@ export default function JamoSvgTaggerPage() {
                   contour.id &&
                 token.toCommand >= contour.commands.length,
             ).length
-          return { contour, counts, outOfRange }
+          return { contour, counts, outOfRange, usesCounterStart }
         })
       : []
   const toggleCounter = (counterId: number) => {
@@ -1011,7 +1130,21 @@ export default function JamoSvgTaggerPage() {
       if (approve) window.scrollTo({ top: 0, behavior: 'smooth' })
       else setShowSaveSuccess(true)
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Save failed.')
+      const message = reason instanceof Error ? reason.message : 'Save failed.'
+      setError(message)
+      setSaveFailure({
+        action: approve ? 'Approve' : 'Save',
+        message,
+        blockers: [
+          ...new Set([
+            ...Object.keys(blockerHints).filter((blocker) =>
+              message.includes(blocker),
+            ),
+            ...state.validation.blockers,
+          ]),
+        ],
+        issues: recipeIssues(state),
+      })
     }
   }
   const toggleNeedsSplit = () => {
@@ -1044,6 +1177,46 @@ export default function JamoSvgTaggerPage() {
   )
   return (
     <PageSurface className="overflow-visible!" contentClassName="max-w-7xl">
+      <Modal
+        open={Boolean(saveFailure)}
+        title={`${saveFailure?.action ?? 'Save'} failed`}
+        onClose={() => setSaveFailure(undefined)}
+      >
+        {saveFailure && (
+          <div className="mt-3 max-h-[60vh] space-y-3 overflow-auto text-sm text-[#39465b]">
+            <p className="rounded bg-[#fff4f2] p-2 font-mono text-xs text-[#9d3b32]">
+              {saveFailure.message}
+            </p>
+            {saveFailure.blockers.length > 0 && (
+              <div>
+                <p className="font-semibold">Blockers</p>
+                <ul className="mt-1 space-y-1.5">
+                  {saveFailure.blockers.map((blocker) => (
+                    <li key={blocker}>
+                      <code className="text-xs font-semibold">{blocker}</code>
+                      {blockerHints[blocker] && (
+                        <span className="block text-xs text-[#667085]">
+                          {blockerHints[blocker]}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {saveFailure.issues.length > 0 && (
+              <div>
+                <p className="font-semibold">Where to look</p>
+                <ul className="mt-1 list-disc space-y-1 pl-4 text-xs">
+                  {saveFailure.issues.map((issue) => (
+                    <li key={issue}>{issue}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
       {showSaveSuccess && (
         <div
           role="status"
@@ -1269,21 +1442,42 @@ export default function JamoSvgTaggerPage() {
               <option value="needs-split">Needs split</option>
             </select>
           </label>
-          <label className="mt-3 block text-xs font-semibold text-[#39465b]">
-            Status
-            <select
-              className="mt-1 w-full rounded border p-2"
-              value={statusFilter}
-              onChange={(event) => applyStatusFilter(event.target.value)}
-            >
-              <option value="all">All statuses</option>
-              <option value="unreviewed">Unreviewed</option>
-              <option value="proposed">Proposed</option>
-              <option value="reviewing">Reviewing</option>
-              <option value="approved">Approved</option>
-              <option value="stale">Stale</option>
-            </select>
-          </label>
+          <fieldset className="mt-3 text-xs text-[#39465b]">
+            <legend className="font-semibold">
+              Status{' '}
+              <button
+                type="button"
+                className="ml-1 font-normal text-[#8d4c43] hover:underline"
+                onClick={() => applyStatusFilter([])}
+              >
+                {statusFilter.length === 0 ? 'all shown' : 'show all'}
+              </button>
+            </legend>
+            <div className="mt-1 grid grid-cols-2 gap-1">
+              {reviewStatuses.map((status) => (
+                <label
+                  key={status}
+                  className="flex items-center gap-1.5 rounded border px-2 py-1"
+                >
+                  <input
+                    type="checkbox"
+                    checked={statusFilter.includes(status)}
+                    onChange={() =>
+                      applyStatusFilter(
+                        statusFilter.includes(status)
+                          ? statusFilter.filter((item) => item !== status)
+                          : [...statusFilter, status],
+                      )
+                    }
+                  />
+                  <span className="capitalize">{status}</span>
+                  <span className="ml-auto text-[#667085]">
+                    {statusCounts.get(status) ?? 0}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <p className="mt-3 text-xs text-[#667085]">
             {selected ? `${index + 1} / ${filteredQueue.length}` : '0'} shown ·{' '}
             {state?.review.status ?? 'loading'}
@@ -1578,24 +1772,46 @@ export default function JamoSvgTaggerPage() {
                           Add piece
                         </Button>
                       </div>
-                      {coverageLines.map(({ contour, counts, outOfRange }) => (
-                        <p className="text-xs" key={contour.id}>
-                          {recipeContours.length > 1
-                            ? `${contourName(contour.id)} coverage: `
-                            : 'Coverage: '}
-                          {counts.filter((count) => count === 1).length}/
-                          {counts.length} exactly once ·{' '}
-                          {counts.filter((count) => count === 0).length}{' '}
-                          uncovered ·{' '}
-                          {counts.filter((count) => count > 1).length} duplicate
-                          {outOfRange > 0 && (
-                            <span className="font-semibold text-[#c0362c]">
-                              {' '}
-                              · {outOfRange} out of range
-                            </span>
-                          )}
-                        </p>
-                      ))}
+                      {coverageLines.map(
+                        (
+                          { contour, counts, outOfRange, usesCounterStart },
+                          order,
+                        ) => (
+                          <p className="text-xs" key={contour.id}>
+                            {recipeContours.length > 1 && (
+                              <span
+                                aria-hidden="true"
+                                className="mr-1.5 inline-block size-2.5 rounded-full align-middle"
+                                style={{
+                                  backgroundColor: contourColor(order).selected,
+                                }}
+                              />
+                            )}
+                            {recipeContours.length > 1
+                              ? `${contourName(contour.id)} coverage: `
+                              : 'Coverage: '}
+                            {counts.filter((count) => count === 1).length}/
+                            {counts.length} exactly once ·{' '}
+                            {counts.filter((count) => count === 0).length}{' '}
+                            uncovered ·{' '}
+                            {counts.filter((count) => count > 1).length}{' '}
+                            duplicate
+                            {outOfRange > 0 && (
+                              <span className="font-semibold text-[#c0362c]">
+                                {' '}
+                                · {outOfRange} out of range
+                              </span>
+                            )}
+                            {usesCounterStart && (
+                              <span className="font-semibold text-[#c0362c]">
+                                {' '}
+                                · command 0 (start) is used — counter ranges
+                                must start at 1
+                              </span>
+                            )}
+                          </p>
+                        ),
+                      )}
                       {enclosedCounters.length > 0 && (
                         <div className="rounded border border-dashed border-[#d8e3f2] p-2 text-xs">
                           <strong>Counters inside this contour</strong>
@@ -1772,7 +1988,24 @@ export default function JamoSvgTaggerPage() {
                                           className="rounded border border-[#d8e3f2] p-2"
                                         >
                                           {recipeContours.length > 1 && (
-                                            <label className="mb-1 block text-xs font-semibold">
+                                            <label className="mb-1 flex items-center text-xs font-semibold">
+                                              <span
+                                                aria-hidden="true"
+                                                className="mr-1.5 inline-block size-2.5 rounded-full"
+                                                style={{
+                                                  backgroundColor: contourColor(
+                                                    Math.max(
+                                                      0,
+                                                      recipeContours.findIndex(
+                                                        ({ id }) =>
+                                                          id ===
+                                                          (token.contourId ??
+                                                            activeRecipe.sourceContourId),
+                                                      ),
+                                                    ),
+                                                  ).selected,
+                                                }}
+                                              />
                                               Contour
                                               <select
                                                 className="ml-2 rounded border p-1 font-normal"
@@ -2007,10 +2240,17 @@ export default function JamoSvgTaggerPage() {
                                   toCommand,
                                   contourId,
                                 ) => {
+                                  const onCounter =
+                                    contourId !== activeRecipe.sourceContourId
+                                  // A counter's command 0 is its start M and is never consumed.
                                   const range = {
                                     kind: 'source-range' as const,
-                                    fromCommand,
-                                    toCommand,
+                                    fromCommand: onCounter
+                                      ? Math.max(1, fromCommand)
+                                      : fromCommand,
+                                    toCommand: onCounter
+                                      ? Math.max(1, toCommand)
+                                      : toCommand,
                                     ...(contourId ===
                                     activeRecipe.sourceContourId
                                       ? {}
@@ -2045,8 +2285,16 @@ export default function JamoSvgTaggerPage() {
                                     ...piece.tokens,
                                     {
                                       kind: 'source-range',
-                                      fromCommand,
-                                      toCommand,
+                                      fromCommand:
+                                        contourId ===
+                                        activeRecipe.sourceContourId
+                                          ? fromCommand
+                                          : Math.max(1, fromCommand),
+                                      toCommand:
+                                        contourId ===
+                                        activeRecipe.sourceContourId
+                                          ? toCommand
+                                          : Math.max(1, toCommand),
                                       ...(contourId ===
                                       activeRecipe.sourceContourId
                                         ? {}
