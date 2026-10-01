@@ -619,7 +619,7 @@
         },
         "sourceGlyphHash": "298c793ea3bea5e2c13a5b030ce94c2f8999cedeb8031e931271c7c1bad45385"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -711,7 +711,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-01T11:21:43.675Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "5a89e4d72ade0da18a13523c2d186ce6bf657661951b9177b3f8399a720ded9e"
+      }
     },
     "법": {
       "reviewSchemaVersion": 2,
@@ -1041,7 +1047,7 @@
         },
         "sourceGlyphHash": "5e40a376b48a96697030568fbc0b870cca47a510f12eb95528646997813de145"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -1129,7 +1135,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-01T11:21:22.396Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "af12aecec88638654721d812020025b92680452788bc3debadb1645fe4009b1e"
+      }
     },
     "비": {
       "reviewSchemaVersion": 2,

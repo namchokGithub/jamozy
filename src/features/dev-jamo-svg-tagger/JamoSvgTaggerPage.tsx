@@ -1039,7 +1039,7 @@ export default function JamoSvgTaggerPage() {
               <div className="mt-2 flex flex-wrap gap-1.5">
                 <button
                   type="button"
-                  className={compactButton}
+                  className={compactButton + ' hidden'}
                   onClick={toggleNeedsSplit}
                 >
                   {state.review.blockers.includes('needs-split')
@@ -1051,7 +1051,7 @@ export default function JamoSvgTaggerPage() {
                   className={`${compactButton} border-[#a85d4e] bg-[#a85d4e] text-white hover:bg-[#8d4c43]`}
                   onClick={() => void save(false)}
                 >
-                  Save review
+                  Save
                 </button>
                 <button
                   type="button"
@@ -1089,7 +1089,7 @@ export default function JamoSvgTaggerPage() {
               placeholder="syllable or U+"
             />
           </label>
-          <label className="mt-3 block text-xs font-semibold text-[#39465b]">
+          <label className="mt-3 text-xs font-semibold text-[#39465b] hidden">
             Filter
             <select
               className="mt-1 w-full rounded border p-2"

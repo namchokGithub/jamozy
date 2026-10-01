@@ -748,7 +748,7 @@
         },
         "sourceGlyphHash": "3e27518d26d972c9cfb6c4aba063fe31491553a33f6c48d83fca8ccc77934d9b"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -836,7 +836,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-01T11:21:30.456Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "0f3722f3aa8a335f08371bb933937522c47d717391ec08c7a726d4640e5f65bd"
+      }
     },
     "언": {
       "reviewSchemaVersion": 2,
@@ -850,7 +856,7 @@
         },
         "sourceGlyphHash": "291a8c0cb1555b5773e490881ebc848339453cc9752b343008b9580c46dc103c"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -938,7 +944,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-01T11:21:21.243Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "f6f46c6ab0abfb102a85f0447b823f22eecb5defb5279dc38644429e75a9b2b8"
+      }
     },
     "얻": {
       "reviewSchemaVersion": 2,
@@ -952,7 +964,7 @@
         },
         "sourceGlyphHash": "5c4ff70d418ad663a2337e386ed7c7f27302ed1d279151a8b80623811bbdef2a"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -1040,7 +1052,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-01T11:21:15.470Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "880ef2c6638f9435fe8051842702f6b267b57b948ac1764d3c5a455a109ccadb"
+      }
     },
     "얼": {
       "reviewSchemaVersion": 2,
@@ -2275,7 +2293,7 @@
         },
         "sourceGlyphHash": "24299c023bcacc3e449baac69b6528c70fb8d11b874f5fd202466e8b675b36a2"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -2363,7 +2381,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-01T11:21:28.102Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "42b718f05bfb64bf22fb6cd00e3f56c292d80f63714ee0d5c491816cc31903ef"
+      }
     },
     "웃": {
       "reviewSchemaVersion": 2,

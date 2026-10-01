@@ -1463,7 +1463,7 @@
           "geometry": [
             {
               "kind": "contour",
-              "contourId": 0
+              "contourId": 1
             }
           ]
         },
@@ -1473,17 +1473,17 @@
           "geometry": [
             {
               "kind": "contour",
-              "contourId": 1
+              "contourId": 0
             }
           ]
         }
       ],
       "splitRecipes": [],
       "approved": {
-        "at": "2026-10-01T03:02:13.988Z",
+        "at": "2026-10-01T11:22:32.798Z",
         "reviewer": "local-reviewer",
         "validatorVersion": 1,
-        "validationHash": "e46efe3caf6796b3f60fef4bdd030f5a3381b1c80d9c9e4a63ebc43917be90c9"
+        "validationHash": "dab7736c22912abc36a66bf881cd20a0dcbca682bddc386185781f618e8226b4"
       }
     },
     "님": {

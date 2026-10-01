@@ -800,7 +800,7 @@
         },
         "sourceGlyphHash": "865511905bd3ff810a2661ee37c0c0655782787c4a1d3d1659a8f1d3d025e304"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -884,7 +884,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-01T11:21:29.439Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "e42d2b544c55556913de750f3895ae18d57741f7a1fcef17a72a2f79aaf3214f"
+      }
     },
     "돈": {
       "reviewSchemaVersion": 2,
@@ -1003,7 +1009,7 @@
         },
         "sourceGlyphHash": "3758c9da142277707e2d22be8a14b731e8d351232ea235e15f3b6c3bafe0663d"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -1091,7 +1097,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-01T11:21:41.486Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "f7ec24418f642e7bed55f1076488d3508c2f233d6984b831554f6cc19e9da0a3"
+      }
     },
     "동": {
       "reviewSchemaVersion": 2,
@@ -1357,7 +1369,7 @@
         },
         "sourceGlyphHash": "cb5349aeb28f46fdbc9cfcecbe3fca43fe02cf0d9214c566e4de011559fe6875"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -1441,7 +1453,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-01T11:21:25.885Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "247765f8e5a4ad8f7f6930ac3d5fe0bbb51b8c54abac60ff2db82ba78bd6083f"
+      }
     },
     "뒤": {
       "reviewSchemaVersion": 2,

@@ -979,7 +979,7 @@
         },
         "sourceGlyphHash": "d586160c5029a5015132a27bfb448741d6a87f0ae60f57cb9d750d851bbaec9d"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -1075,7 +1075,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-01T11:21:37.657Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "41259a15d19941ac9e52ed35d7be3866a23f6863ed32399e16cfea26d5ddfb6f"
+      }
     },
     "활": {
       "reviewSchemaVersion": 2,
