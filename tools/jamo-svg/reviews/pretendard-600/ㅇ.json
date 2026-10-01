@@ -299,7 +299,7 @@
         },
         "sourceGlyphHash": "d99f41aa04218a30463fa8e60be0f6e87419827daa52c97c864ab657aeb7e039"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -355,7 +355,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T18:44:06.499Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "af267c0c72d942c36231885feee3c00da2b82df95ed97cccb37296231f5b9d54"
+      }
     },
     "알": {
       "reviewSchemaVersion": 2,
@@ -427,7 +433,7 @@
         },
         "sourceGlyphHash": "ec4108eb61c1bac26219e11d85cfe35012f634385dee765c6ddc2c0a517ce18a"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -483,7 +489,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T18:44:19.208Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "80bc750c91c9026452a8a22c2ad070af8efb2b6ac9ae0ef3228b15bc070abc88"
+      }
     },
     "압": {
       "reviewSchemaVersion": 2,
@@ -497,7 +509,7 @@
         },
         "sourceGlyphHash": "85afc271824a110f830c1777c4bb800ed6d2134ef34e6c8da407f63deed01b15"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -539,7 +551,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T18:44:14.853Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "f8470d1bd87c9702903f647e2ca3eab8478f590f930eaf6264f5365664c434c8"
+      }
     },
     "앙": {
       "reviewSchemaVersion": 2,
@@ -677,7 +695,7 @@
         },
         "sourceGlyphHash": "38ea166a86398e289a548273b7eb491b336b934890e0c051e56ab68bde626f81"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -705,7 +723,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T18:43:49.850Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "f8307f0583a2e4d20b58408423ac2862a582e9dfbe6af0b446b674a962c32a27"
+      }
     },
     "야": {
       "reviewSchemaVersion": 2,
@@ -1976,7 +2000,7 @@
         },
         "sourceGlyphHash": "3ec9d5da7231e04a234543d4b17fd338f537ef5f0170fbc6f0531310be4236d7"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -2064,7 +2088,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-01T18:44:24.157Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "6b7e094c70967c82292b503348a8a86fd87a573b0802a859e2908c57deb4cbc6"
+      }
     },
     "에": {
       "reviewSchemaVersion": 2,
@@ -3579,7 +3609,7 @@
         },
         "sourceGlyphHash": "fdd4591d91fad06a25ea6f62db0f96c40d9692adcd13ceb566b8e2b4e3426a99"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -3667,7 +3697,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-01T18:43:24.520Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "2177b06ea1e5031e281151f873e92ffa22502bdaafbf6d2d056df7a18349125c"
+      }
     },
     "올": {
       "reviewSchemaVersion": 2,
@@ -5405,7 +5441,7 @@
         },
         "sourceGlyphHash": "b491ee5358db8c27150362de6222f63fe716d001c96792ecf4ce57f8fac0712e"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -5443,7 +5479,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T18:44:44.102Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "d4f28907b10adb64f3ec3f1766cebaf93cb5a0504b259cd6825a9b2192a124be"
+      }
     },
     "원": {
       "reviewSchemaVersion": 2,
@@ -6205,7 +6247,7 @@
         },
         "sourceGlyphHash": "2df10c58f3ddfc125fba597ab91b231462962c5cc7aa20a2355540683dc8e156"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -6243,7 +6285,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T18:43:17.214Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "e62992907278022e0fca7526f10d3150882abf0471d5eb5b320793c65da9f428"
+      }
     },
     "인": {
       "reviewSchemaVersion": 2,
@@ -6816,7 +6864,7 @@
         },
         "sourceGlyphHash": "f071110447f23373f68deabf7f47a8386eed26c04715f60e6cb526bbe32d8e65"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -6858,7 +6906,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-01T18:43:51.828Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "867ce2f4a2c49bf5c0dde403a389bab6946b67bc91e0a8995367cc86016b28b9"
+      }
     }
   }
 }
