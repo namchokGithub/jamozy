@@ -790,7 +790,8 @@ export default function JamoSvgTaggerPage() {
         ),
       )
       setError(undefined)
-      if (!approve) setShowSaveSuccess(true)
+      if (approve) window.scrollTo({ top: 0, behavior: 'smooth' })
+      else setShowSaveSuccess(true)
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Save failed.')
     }

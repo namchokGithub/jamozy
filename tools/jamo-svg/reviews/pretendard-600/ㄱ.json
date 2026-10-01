@@ -1127,7 +1127,7 @@
         },
         "sourceGlyphHash": "b10e20d081b75d8c3649341cffbf5da3c3a51ab0ef3423a79100774d8f9609e2"
       },
-      "status": "reviewing",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -1206,7 +1206,13 @@
           ]
         }
       ],
-      "notes": ""
+      "notes": "",
+      "approved": {
+        "at": "2026-10-01T09:35:33.242Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "78a0d03048f96b0010a97758c6c27e45b13bc78ccf0dc5dda496864956c0be06"
+      }
     },
     "고": {
       "reviewSchemaVersion": 2,

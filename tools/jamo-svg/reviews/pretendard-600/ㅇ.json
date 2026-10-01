@@ -841,7 +841,7 @@
         },
         "sourceGlyphHash": "16ac93ffa278aed11b05054fbb2715fe8e7b0faa12b0f75b48d98f54ecf6ea99"
       },
-      "status": "reviewing",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -850,7 +850,12 @@
           "geometry": [
             {
               "kind": "contour",
-              "contourId": 0
+              "contourId": 1
+            },
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
             }
           ]
         },
@@ -859,8 +864,9 @@
           "jamo": "ㅓ",
           "geometry": [
             {
-              "kind": "contour",
-              "contourId": 1
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
             }
           ]
         },
@@ -875,8 +881,62 @@
           ]
         }
       ],
-      "splitRecipes": [],
-      "notes": "엇 has three physical typing steps: ㅇ + ㅓ + ㅅ. Keep each component assigned to its corresponding physical typing step."
+      "splitRecipes": [
+        {
+          "id": "split-0-1",
+          "sourceContourId": 0,
+          "sourceContourHash": "f3f6690b117abed36ebcde39d59f4c8b3c6230bb9a80cb751eb194777ab22c53",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "f3f6690b117abed36ebcde39d59f4c8b3c6230bb9a80cb751eb194777ab22c53"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 5,
+                  "toCommand": 20
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 4
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 20,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 21,
+                  "toCommand": 23
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "notes": "",
+      "approved": {
+        "at": "2026-10-01T09:39:14.065Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "0d0341e48a765b584a7352171d0c7d19cf3186bb5eebb763a5c3f508c8dd0b6c"
+      }
     },
     "여": {
       "reviewSchemaVersion": 2,

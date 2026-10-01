@@ -901,7 +901,7 @@
         },
         "sourceGlyphHash": "45d3de038873f66e6bd30536f633259efdf657c34f3da29ea8e8e9c53f69b66d"
       },
-      "status": "reviewing",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -909,8 +909,9 @@
           "jamo": "ㄷ",
           "geometry": [
             {
-              "kind": "contour",
-              "contourId": 0
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
             }
           ]
         },
@@ -919,8 +920,9 @@
           "jamo": "ㅗ",
           "geometry": [
             {
-              "kind": "contour",
-              "contourId": 2
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
             }
           ]
         },
@@ -931,12 +933,70 @@
             {
               "kind": "contour",
               "contourId": 1
+            },
+            {
+              "kind": "contour",
+              "contourId": 2
             }
           ]
         }
       ],
-      "splitRecipes": [],
-      "notes": "동  has three physical typing steps: ㄷ + ㅗ + ㅇ. Keep each component assigned to its corresponding physical typing step."
+      "splitRecipes": [
+        {
+          "id": "split-0-1",
+          "sourceContourId": 0,
+          "sourceContourHash": "370e2f44a3d79996361c53476cd0acf1cbb3b6788a5f9907562ae3300a48dd3b",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "370e2f44a3d79996361c53476cd0acf1cbb3b6788a5f9907562ae3300a48dd3b"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 6,
+                  "toCommand": 14
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 5
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 14,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 15,
+                  "toCommand": 16
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "notes": "",
+      "approved": {
+        "at": "2026-10-01T09:37:40.025Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "7aaaedc1369f8866db5609653237bd86887f254f69b1be2e693a730c5548d4a2"
+      }
     },
     "되": {
       "reviewSchemaVersion": 2,

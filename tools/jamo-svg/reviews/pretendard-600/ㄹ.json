@@ -1031,10 +1031,8 @@
         },
         "sourceGlyphHash": "43d1118d6d4aa8596ec9b4291d3a19aa8bedbfec34bd6fcb89e1c2d12587c13f"
       },
-      "status": "reviewing",
-      "blockers": [
-        "needs-split"
-      ],
+      "status": "approved",
+      "blockers": [],
       "steps": [
         {
           "order": 0,
@@ -1107,7 +1105,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-01T09:37:53.630Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "49f8703df53f4db3ce352403d160e5eb4a96e77c3a6b4e6a1d85d4033e11eabc"
+      }
     },
     "루": {
       "reviewSchemaVersion": 2,
