@@ -2773,7 +2773,7 @@
         },
         "sourceGlyphHash": "3d41649a2681e1953c4893e24e7893b0185371980118209bf9509d814722d228"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -2861,7 +2861,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-02T10:53:36.388Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "87b331fbe911e9aa02c0f717317a7af1541345fba27a5fd91b99debffdaad445"
+      }
     },
     "엉": {
       "reviewSchemaVersion": 2,
@@ -6638,6 +6644,124 @@
         "reviewer": "local-reviewer",
         "validatorVersion": 1,
         "validationHash": "6d3aa767c1af2f205dfa788602f8bb62c7cf68b80d688e53f3f19481d5790aa1"
+      }
+    },
+    "왔": {
+      "reviewSchemaVersion": 2,
+      "syllable": "왔",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "4983c7301d6073729e115e03061cd720da3fa687a70b25995105f368217eb5b0"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅇ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 3
+            },
+            {
+              "kind": "split-piece",
+              "recipeId": "split-2-1",
+              "pieceId": "piece-1"
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅗ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-2-1",
+              "pieceId": "piece-2"
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅏ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "jamo": "ㅆ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [
+        {
+          "id": "split-2-1",
+          "sourceContourId": 2,
+          "sourceContourHash": "fbc14a53ddc801879d873b7ec7f700b95ed0beb365c7b6f75f9546ba9f8916b0",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "fbc14a53ddc801879d873b7ec7f700b95ed0beb365c7b6f75f9546ba9f8916b0"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 6,
+                  "toCommand": 21
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 5
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 2,
+                    "commandIndex": 21,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 22,
+                  "toCommand": 29
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "approved": {
+        "at": "2026-10-02T10:53:43.404Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "1060c61b78659173d0ad670e860e52e9a9a4b5a187932e847caeaad966f41566"
       }
     },
     "왕": {
