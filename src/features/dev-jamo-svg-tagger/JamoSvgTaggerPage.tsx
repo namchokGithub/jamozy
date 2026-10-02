@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
 // import { Link } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
@@ -392,6 +398,9 @@ function CommandRangePainter({
         index <= range.toCommand,
     )
   }
+  const [hovered, setHovered] = useState<
+    { contourId: number; index: number } | undefined
+  >()
   const drawn = [contour, ...counters]
   const label = (contourId: number) =>
     contourId === contour.id ? '' : `Contour ${contourId + 1} `
@@ -417,7 +426,7 @@ function CommandRangePainter({
       </p>
       <p className="mt-1 text-xs text-[#667085]">
         {inspect
-          ? 'Click or drag to highlight a command range (darker color). This does not change any source range.'
+          ? 'Click a segment, then Shift+click (or drag) to the last one to highlight a range. Hover shows the command number. This does not change any source range.'
           : 'Preview only: reads the source ranges entered below.'}
       </p>
       <svg
@@ -449,6 +458,7 @@ function CommandRangePainter({
         onPointerLeave={
           inspect
             ? (event) => {
+                setHovered(undefined)
                 if (event.buttons === 0) finish()
               }
             : undefined
@@ -462,77 +472,107 @@ function CommandRangePainter({
               stroke="#c4cfdf"
               strokeWidth={18 * scale}
             />
-            {item.commands.map((_, index) => {
+            {item.commands.map((command, index) => {
               const segment = commandSegmentPath(item.commands, index)
               if (!segment) return null
               const palette = contourColor(drawn.indexOf(item))
+              const isHovered =
+                inspect &&
+                hovered?.contourId === item.id &&
+                hovered.index === index
               const color = selected(item.id, index)
                 ? palette.selected
                 : palette.idle
-              return segment.point ? (
+              // Shift+click extends the current selection on the same contour;
+              // a plain press starts a new selection (and a drag).
+              const onPointerDown = (event: ReactPointerEvent) => {
+                if (!inspect) return
+                if (event.shiftKey && inspectRange?.contourId === item.id) {
+                  setInspectRange({ ...inspectRange, end: index })
+                  return
+                }
+                dragRange.current = {
+                  contourId: item.id,
+                  start: index,
+                  end: index,
+                }
+                setInspectRange({
+                  contourId: item.id,
+                  start: index,
+                  end: index,
+                })
+              }
+              const hit = {
+                className: inspect ? 'cursor-crosshair' : undefined,
+                pointerEvents: inspect ? ('all' as const) : ('none' as const),
+                onPointerDown,
+                onPointerEnter: inspect
+                  ? () => setHovered({ contourId: item.id, index })
+                  : undefined,
+                'data-command-index': index,
+                'data-contour-id': item.id,
+              }
+              return (
                 <g key={index}>
-                  {/* {index === 0 && (
-                <text
-                  x={segment.point.x + 84 * scale}
-                  y={segment.point.y - 64 * scale}
-                  fontSize={96 * scale}
-                  fontWeight={700}
-                  fill={color}
-                  pointerEvents="none"
-                >
-                  start 0
-                </text>
-              )} */}
-                  <circle
-                    cx={segment.point.x}
-                    cy={segment.point.y}
-                    r={(index === 0 ? 64 : 22) * scale}
-                    fill={color}
-                    stroke={index === 0 ? '#ffffff' : undefined}
-                    strokeWidth={index === 0 ? 12 * scale : undefined}
-                    className={inspect ? 'cursor-crosshair' : undefined}
-                    onPointerDown={() => {
-                      if (!inspect) return
-                      dragRange.current = {
-                        contourId: item.id,
-                        start: index,
-                        end: index,
-                      }
-                      setInspectRange({
-                        contourId: item.id,
-                        start: index,
-                        end: index,
-                      })
-                    }}
-                    data-command-index={index}
-                    data-contour-id={item.id}
-                  />
+                  {segment.point ? (
+                    <circle
+                      cx={segment.point.x}
+                      cy={segment.point.y}
+                      r={(index === 0 ? 64 : isHovered ? 34 : 22) * scale}
+                      fill={color}
+                      stroke={index === 0 ? '#ffffff' : undefined}
+                      strokeWidth={index === 0 ? 12 * scale : undefined}
+                      pointerEvents="none"
+                    />
+                  ) : (
+                    <path
+                      d={segment.d}
+                      fill="none"
+                      stroke={color}
+                      strokeWidth={(isHovered ? 44 : 28) * scale}
+                      strokeLinecap="round"
+                      pointerEvents="none"
+                    />
+                  )}
+                  {/* Wide invisible hit target so thin segments and small points are easy to press. */}
+                  {inspect &&
+                    (segment.point ? (
+                      <circle
+                        cx={segment.point.x}
+                        cy={segment.point.y}
+                        r={90 * scale}
+                        fill="transparent"
+                        {...hit}
+                      />
+                    ) : (
+                      <path
+                        d={segment.d}
+                        fill="none"
+                        stroke="transparent"
+                        strokeWidth={110 * scale}
+                        strokeLinecap="round"
+                        {...hit}
+                      />
+                    ))}
+                  {isHovered &&
+                    command.x !== undefined &&
+                    command.y !== undefined && (
+                      <text
+                        x={command.x + 60 * scale}
+                        y={command.y - 50 * scale}
+                        fontSize={84 * scale}
+                        fontWeight={700}
+                        fill={palette.selected}
+                        stroke="#ffffff"
+                        strokeWidth={18 * scale}
+                        paintOrder="stroke"
+                        pointerEvents="none"
+                        className="select-none"
+                      >
+                        {label(item.id)}cmd {index}
+                      </text>
+                    )}
                 </g>
-              ) : (
-                <path
-                  key={index}
-                  d={segment.d}
-                  fill="none"
-                  stroke={color}
-                  strokeWidth={28 * scale}
-                  strokeLinecap="round"
-                  className={inspect ? 'cursor-crosshair' : undefined}
-                  onPointerDown={() => {
-                    if (!inspect) return
-                    dragRange.current = {
-                      contourId: item.id,
-                      start: index,
-                      end: index,
-                    }
-                    setInspectRange({
-                      contourId: item.id,
-                      start: index,
-                      end: index,
-                    })
-                  }}
-                  data-command-index={index}
-                  data-contour-id={item.id}
-                />
               )
             })}
           </g>
