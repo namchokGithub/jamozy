@@ -197,6 +197,12 @@ approved   → reviewing | stale
 stale      → unreviewed | proposed | reviewing
 ```
 
+A `reviewing` review marked `needs-split` is a draft: it may be saved with
+in-progress blockers (unassigned or duplicate ownership, an invalid split
+recipe, empty steps) so unfinished work can resume later. Stale source
+geometry (`fingerprint-mismatch`) and step mismatches still refuse to save.
+The Tagger's “Save draft” adds `needs-split` and saves.
+
 `approved` requires zero blocking validation errors and an explicit human
 approval action. Any source fingerprint/hash mismatch automatically changes an
 approved record to `stale`; it cannot be exported. Editing an approved record

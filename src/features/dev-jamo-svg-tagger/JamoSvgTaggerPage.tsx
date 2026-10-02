@@ -827,10 +827,12 @@ export default function JamoSvgTaggerPage() {
           'd',
           's',
           'f',
+          'r',
           'ฟ',
           'ก',
           'ห',
           'ด',
+          'พ',
         ].includes(event.key)
       )
         return
@@ -849,6 +851,10 @@ export default function JamoSvgTaggerPage() {
       }
       if (event.key === 'f' || event.key === 'ด') {
         void save(true)
+        return
+      }
+      if (event.key === 'r' || event.key === 'พ') {
+        void save(false, true)
         return
       }
       setIndex((current) =>
@@ -1219,13 +1225,34 @@ export default function JamoSvgTaggerPage() {
     })
     updateDraft(review)
   }
+  /** `draft` keeps unfinished work: it marks the review needs-split so any in-progress blocker can be saved. */
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  async function save(approve = false) {
+  async function save(approve = false, draft = false) {
     if (!state) return
     previewSequence.current += 1
-    const review = approve
-      ? { ...state.review, notes: undefined }
+    // Once needs-split is the only blocker left, the split is finished: a plain
+    // Save or Approve clears the flag instead of keeping the review a draft.
+    const splitFinished =
+      !draft &&
+      state.review.blockers.includes('needs-split') &&
+      state.validation.blockers.every((blocker) => blocker === 'needs-split')
+    const current = splitFinished
+      ? {
+          ...state.review,
+          blockers: state.review.blockers.filter(
+            (blocker) => blocker !== 'needs-split',
+          ),
+        }
       : state.review
+    const review = approve
+      ? { ...current, notes: undefined }
+      : draft
+        ? {
+            ...state.review,
+            status: 'reviewing',
+            blockers: [...new Set([...state.review.blockers, 'needs-split'])],
+          }
+        : current
     try {
       const result = await api<SaveResponse>(approve ? '/approve' : '/save', {
         method: 'POST',
@@ -1289,8 +1316,8 @@ export default function JamoSvgTaggerPage() {
   const canApprove = Boolean(
     state &&
     state.review.status !== 'approved' &&
-    state.validation.blockers.length === 0 &&
-    !state.review.blockers.includes('needs-split'),
+    // A finished draft (only needs-split left) approves and clears the flag.
+    state.validation.blockers.every((blocker) => blocker === 'needs-split'),
   )
   const previewSvgClass = freezePreviews ? 'h-32 w-full' : 'h-48 w-full'
   const hasCompleteCompiledPreview = Boolean(
@@ -1597,6 +1624,15 @@ export default function JamoSvgTaggerPage() {
                   onClick={() => void save(false)}
                 >
                   Save
+                </button>
+                <button
+                  type="button"
+                  className={compactButton}
+                  title="Save unfinished work as needs split; finish and approve later"
+                  disabled={state.review.status === 'approved'}
+                  onClick={() => void save(false, true)}
+                >
+                  Draft
                 </button>
                 <button
                   type="button"

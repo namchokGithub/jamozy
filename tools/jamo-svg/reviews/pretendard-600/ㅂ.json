@@ -2487,7 +2487,7 @@
         },
         "sourceGlyphHash": "d698d09ccf595ea30adbfbac3f7d1504106166107a5378ce06d09b4fa317b93d"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -2575,7 +2575,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-02T06:40:25.120Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "fcf6fbf996b586eec0f56783c2996f4d9257d74ad3f03fd0c09dee97006cc684"
+      }
     },
     "봄": {
       "reviewSchemaVersion": 2,
@@ -2701,7 +2707,7 @@
         },
         "sourceGlyphHash": "49689dbc34d18fdf915d552af6f6df542dd962782fcb82f05fbaa342159931f1"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -2793,7 +2799,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-02T06:39:16.826Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "f0f3e9fe6cd26abc599fc4515620c7057204f49e1488c7dbce01c1d00f173952"
+      }
     },
     "부": {
       "reviewSchemaVersion": 2,
@@ -3540,7 +3552,7 @@
         },
         "sourceGlyphHash": "5206f39b970a754b8f0ec32cf9431a1cebc7a0c8235b4db96ff5de53d4dbd661"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -3578,7 +3590,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-02T06:39:10.222Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "98c3af0131d995c4af033c07b899255c0ed28ebf3be0b2660f4f0e1d43a83fe7"
+      }
     },
     "비": {
       "reviewSchemaVersion": 2,
@@ -3698,7 +3716,7 @@
         },
         "sourceGlyphHash": "05098cec1413729d5b8000f3725073b186944845c6b16d08e02fa19e0046bca7"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -3736,7 +3754,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-02T06:40:25.870Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "d498244b8de75d2632c7564cb8a52309d4e1dc0d78f7e38fff5b14f68a4d86f0"
+      }
     },
     "빛": {
       "reviewSchemaVersion": 2,

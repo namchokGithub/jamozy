@@ -7,6 +7,7 @@ import { extractGlyph } from './extract'
 import { ConflictError, initializeReviewManifest, ReviewStore } from './review-store'
 import { seedReview } from './seed'
 import { createUnreviewedDraft } from './review-draft'
+import { yeoCounterSplit } from './counter-split.fixture'
 
 const roots: string[] = []
 afterEach(async () => { await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true }))) })
@@ -31,5 +32,19 @@ describe('sharded review store', () => {
     const store = new ReviewStore(reviewsRoot, cache)
     await expect(store.save(review)).resolves.toEqual(expect.objectContaining({ revision: expect.any(String) }))
     expect(await store.get(syllable)).toMatchObject({ status: 'reviewing', blockers: expect.arrayContaining(['needs-split']), notes: review.notes })
+  })
+
+  test('saves an unfinished split as a needs-split draft but not as a plain review', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'jamo-svg-')); roots.push(root)
+    const source = await extractGlyph('여'); const cache = join(root, 'cache', source.extraction.fontSha256)
+    await generateCache(cache, ['여']); const reviewsRoot = join(root, 'reviews'); await initializeReviewManifest(reviewsRoot, source.extraction.fontSha256)
+    const store = new ReviewStore(reviewsRoot, cache)
+    // Mid-edit: a range past the last command (invalid recipe) and the counter still owned whole (duplicate).
+    const unfinished = yeoCounterSplit(source)
+    unfinished.splitRecipes[0].pieces[1].tokens[0] = { kind: 'source-range', fromCommand: 4, toCommand: 30 }
+    unfinished.steps[1].geometry.push({ kind: 'contour', contourId: 2 })
+    await expect(store.save(structuredClone(unfinished))).rejects.toThrow(/invalid-split-recipe/)
+    await store.save({ ...unfinished, blockers: ['needs-split'] })
+    expect(await store.get('여')).toMatchObject({ status: 'reviewing', blockers: expect.arrayContaining(['needs-split', 'invalid-split-recipe', 'duplicate-ownership']) })
   })
 })
