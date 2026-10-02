@@ -74,7 +74,7 @@ def show(title, items, limit):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--words", default="docs/informations/korean_words.md", help="plain word list")
+    parser.add_argument("--words", default="docs/informations/korean_words.txt", help="plain word list")
     parser.add_argument("--leveled", default="docs/informations/5800_korean_words_with_lvl.txt", help="leveled TSV list")
     parser.add_argument("--queue", default="tools/jamo-svg/queue/pretendard-600/queue.json", help="Tagger queue file")
     parser.add_argument("--strip-parentheses", action="store_true", help="drop (…) from leveled words")

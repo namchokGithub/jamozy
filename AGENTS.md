@@ -115,7 +115,7 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 - `docs/COMPLETE-LOG.md` — chronological record of meaningful completed work.
 - `docs/research/JAMO_SVG_TAGGER_DESIGN.md` — Jamo SVG Tagger design: review records, split recipes, blockers, runtime-data boundary.
 - `docs/research/HANGUL_SVG_ANALYSIS.md` — glyph-outline measurements behind the Tagger.
-- `docs/informations/korean_words.md` — Korean 5800 frequency list that feeds the Tagger queue.
+- `docs/informations/korean_words.txt` — Korean 5800 frequency list that feeds the Tagger queue.
 - `docs/informations/korean-inflection-sample.md` — inflection/particle syllables the dictionary-form list lacks.
 - `docs/superpowers/plans/` — implementation plans for completed and in-flight work.
 - `CLAUDE.md` — Claude Code-specific workflow additions.

@@ -15,7 +15,7 @@ import { QueueStore, type ReviewManifest } from '../tools/jamo-svg/review-store'
 // `--dry-run` lists the syllables it would add and writes nothing.
 const { values } = parseArgs({
   options: {
-    words: { type: 'string', default: 'docs/informations/korean_words.md' },
+    words: { type: 'string', default: 'docs/informations/korean_words.txt' },
     top: { type: 'string' },
     reason: { type: 'string', default: 'frequency-list:korean-5800' },
     'dry-run': { type: 'boolean', default: false },
