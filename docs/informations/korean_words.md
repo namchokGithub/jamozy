@@ -5484,9 +5484,6 @@
 저곳
 초등학생
 하얀색
-
-## Additional words (from korean_words_with_lvl.txt)
-
 걔
 컵
 핵

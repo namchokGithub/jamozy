@@ -359,6 +359,13 @@ For document-backed domain entities, the domain `id` is the Firestore document I
 
 Vocabulary sources, attribution, and licenses are recorded in [docs/CREDITS.md](docs/CREDITS.md) before their data is imported.
 
+Current sources:
+
+- Korean-English Learners' Dictionary vocabulary list (5,800 words),
+  National Institute of Korean Language (국립국어원) —
+  <https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=71&pageIndex=1>
+- 현대 국어 사용 빈도 조사 2, National Institute of Korean Language (국립국어원)
+
 > Lesson content is treated as shared application data, while progress, review
 > history, EXP, levels, and statistics belong to individual users.
 
