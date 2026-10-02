@@ -8,8 +8,8 @@
     {
       "choseong": "ㄱ",
       "file": "ㄱ.json",
-      "reviewCount": 84,
-      "sha256": "b0be764052e1afc43ed154ae50381bd1c4f9fc2da7dc258aec7c7ffb3edcdd0c"
+      "reviewCount": 85,
+      "sha256": "64e5e6daefd93ed43a87a351b16ce13620757fc400f02afa3d6b264cca2be9d4"
     },
     {
       "choseong": "ㄲ",
@@ -38,8 +38,8 @@
     {
       "choseong": "ㄹ",
       "file": "ㄹ.json",
-      "reviewCount": 60,
-      "sha256": "9e42ce800c9e46b39e4ccab8ef940475074c4fdfb32ab8b95a78a8bab4087e11"
+      "reviewCount": 61,
+      "sha256": "0a2727bd61e2d7a9ff822b7fcc31ee9754e28ff9c31093166752f7fb891a199d"
     },
     {
       "choseong": "ㅁ",
@@ -62,26 +62,26 @@
     {
       "choseong": "ㅅ",
       "file": "ㅅ.json",
-      "reviewCount": 71,
-      "sha256": "fde90c155390079a139efa25d18e6d88d7501fe46009d04eccbbf833257fb206"
+      "reviewCount": 73,
+      "sha256": "b905f21aed3443a7a216c012f52a62a6097bbd347825aa3e264c1b3fa44eed95"
     },
     {
       "choseong": "ㅆ",
       "file": "ㅆ.json",
-      "reviewCount": 24,
-      "sha256": "01dce09b9c3e94780887b547965faf6013888839bee437e12b35f3bf526fa220"
+      "reviewCount": 25,
+      "sha256": "784d6d26089e813adc99b870aac3cc8fc7c7b573dbb18a7572d2cb7083e04388"
     },
     {
       "choseong": "ㅇ",
       "file": "ㅇ.json",
-      "reviewCount": 107,
-      "sha256": "d63688c2f1e643d1aedf47dd4d91e80cc7660e3abcd993cf0073984fde8cba1b"
+      "reviewCount": 109,
+      "sha256": "40d947b6fc5b58119d2e5b6d56c3c9465a671b094887a643e30edd33e29c80e2"
     },
     {
       "choseong": "ㅈ",
       "file": "ㅈ.json",
-      "reviewCount": 60,
-      "sha256": "2446e58343ebc006d622fd2014cbf3e5ca696348feaa85814e40604fd46b7cb6"
+      "reviewCount": 63,
+      "sha256": "6ee6d537b1ca20ddd465fafe57b3861161e9d2f956b01a751d4d4ddcff514472"
     },
     {
       "choseong": "ㅉ",
@@ -116,8 +116,8 @@
     {
       "choseong": "ㅎ",
       "file": "ㅎ.json",
-      "reviewCount": 62,
-      "sha256": "a7091b98ebe9522b4fa59c0bfbcbcdbe6fb0481fce5da948a8de2eb183ff7b93"
+      "reviewCount": 63,
+      "sha256": "8cbc27df48007c8de68464d273e78104b175591654012cc97e459dd90fc2c9fe"
     }
   ]
 }

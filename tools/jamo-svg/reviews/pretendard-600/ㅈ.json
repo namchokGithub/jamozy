@@ -1981,6 +1981,50 @@
         "validationHash": "8322db49181a7b839b4a6bf903f2ecdf3f6a64fc432e5e10472cd2b3cb11a599"
       }
     },
+    "죠": {
+      "reviewSchemaVersion": 2,
+      "syllable": "죠",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "7742783019621d9351b529a8b9e0ed5a2578a11ad328da7ebb38ed44ee410087"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅈ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅛ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-02T10:38:21.830Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "601475e252fb9845c95f36c1b64b55cdd6962a74f8ff048c3af1259b221db689"
+      }
+    },
     "주": {
       "reviewSchemaVersion": 2,
       "syllable": "주",
@@ -2560,6 +2604,124 @@
         "reviewer": "local-reviewer",
         "validatorVersion": 1,
         "validationHash": "b86c1be04fabad9546279ff620657533fcc0cf14ca5c7eba04e2282d7d219c74"
+      }
+    },
+    "줘": {
+      "reviewSchemaVersion": 2,
+      "syllable": "줘",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "a0b1c7e66964c661e7946d520ee53fd23d47d9bfdc92f0e08c0b5cd14f183976"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅈ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅜ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅓ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-02T10:38:22.749Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "7ac4f384981f424835c7775118000566b3d176d1120e31b65c03074458d43f4d"
+      }
+    },
+    "줬": {
+      "reviewSchemaVersion": 2,
+      "syllable": "줬",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "6ad1134e6fe24e58fdf0fc3365bf55c4705bcb7a4b668a22395f5680dc9fbde4"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅈ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅜ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅓ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "jamo": "ㅆ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 3
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-02T10:38:23.857Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "3fc913fd12f93fe2ba4220ed3b3e4e5a266e3f1e2face0411e8cc4d28878a7c7"
       }
     },
     "쥐": {

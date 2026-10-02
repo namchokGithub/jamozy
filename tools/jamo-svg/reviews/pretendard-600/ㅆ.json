@@ -541,6 +541,60 @@
         "validationHash": "7988060052fe4c4da33e53c5f4741dcf29512d46fa320df2f1b94b945f21261c"
       }
     },
+    "썼": {
+      "reviewSchemaVersion": 2,
+      "syllable": "썼",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "1d352dc9804d13fa8602f23d26f8ad42141133120b376b26c5e16e4ce9603afa"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅆ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅓ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅆ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-02T10:38:20.900Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "b8f28eed84af444c29511dd05f56eeb6feb722ef404445e7496ecca87ac6b051"
+      }
+    },
     "쎄": {
       "reviewSchemaVersion": 2,
       "syllable": "쎄",

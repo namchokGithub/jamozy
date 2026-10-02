@@ -263,6 +263,25 @@
       "nearestApprovedSyllables": []
     },
     {
+      "syllable": "를",
+      "priority": 5,
+      "reasons": [
+        "inflection-sample"
+      ],
+      "sourceRank": 4,
+      "queueKey": {
+        "medialLayout": "horizontal",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": [
+        "틀"
+      ]
+    },
+    {
       "syllable": "나",
       "priority": 5,
       "reasons": [
@@ -280,6 +299,25 @@
       "nearestApprovedSyllables": []
     },
     {
+      "syllable": "았",
+      "priority": 5,
+      "reasons": [
+        "inflection-sample"
+      ],
+      "sourceRank": 5,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": [
+        "맞"
+      ]
+    },
+    {
       "syllable": "없",
       "priority": 5,
       "reasons": [
@@ -292,6 +330,23 @@
         "compoundMedial": null,
         "compoundFinal": "ㅄ",
         "physicalStepCount": 4,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "었",
+      "priority": 5,
+      "reasons": [
+        "inflection-sample"
+      ],
+      "sourceRank": 6,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
       "nearestApprovedSyllables": []
@@ -331,6 +386,25 @@
       "nearestApprovedSyllables": []
     },
     {
+      "syllable": "였",
+      "priority": 5,
+      "reasons": [
+        "inflection-sample"
+      ],
+      "sourceRank": 7,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": [
+        "열"
+      ]
+    },
+    {
       "syllable": "리",
       "priority": 5,
       "reasons": [
@@ -361,6 +435,42 @@
         "compoundFinal": null,
         "physicalStepCount": 2,
         "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "했",
+      "priority": 5,
+      "reasons": [
+        "inflection-sample"
+      ],
+      "sourceRank": 8,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": [
+        "햇"
+      ]
+    },
+    {
+      "syllable": "겠",
+      "priority": 5,
+      "reasons": [
+        "inflection-sample"
+      ],
+      "sourceRank": 9,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
       },
       "nearestApprovedSyllables": []
     },
@@ -416,6 +526,23 @@
       "nearestApprovedSyllables": []
     },
     {
+      "syllable": "됐",
+      "priority": 5,
+      "reasons": [
+        "inflection-sample"
+      ],
+      "sourceRank": 10,
+      "queueKey": {
+        "medialLayout": "compound-horizontal-leading",
+        "hasFinal": true,
+        "compoundMedial": "ㅙ",
+        "compoundFinal": null,
+        "physicalStepCount": 4,
+        "contourRelation": "deficit"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
       "syllable": "대",
       "priority": 5,
       "reasons": [
@@ -433,6 +560,23 @@
       "nearestApprovedSyllables": []
     },
     {
+      "syllable": "됩",
+      "priority": 5,
+      "reasons": [
+        "inflection-sample"
+      ],
+      "sourceRank": 11,
+      "queueKey": {
+        "medialLayout": "compound-horizontal-leading",
+        "hasFinal": true,
+        "compoundMedial": "ㅚ",
+        "compoundFinal": null,
+        "physicalStepCount": 4,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
       "syllable": "년",
       "priority": 5,
       "reasons": [
@@ -443,6 +587,23 @@
         "medialLayout": "vertical",
         "hasFinal": true,
         "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "봐",
+      "priority": 5,
+      "reasons": [
+        "inflection-sample"
+      ],
+      "sourceRank": 12,
+      "queueKey": {
+        "medialLayout": "compound-horizontal-leading",
+        "hasFinal": false,
+        "compoundMedial": "ㅘ",
         "compoundFinal": null,
         "physicalStepCount": 3,
         "contourRelation": "aligned"
@@ -484,6 +645,23 @@
       "nearestApprovedSyllables": []
     },
     {
+      "syllable": "봤",
+      "priority": 5,
+      "reasons": [
+        "inflection-sample"
+      ],
+      "sourceRank": 13,
+      "queueKey": {
+        "medialLayout": "compound-horizontal-leading",
+        "hasFinal": true,
+        "compoundMedial": "ㅘ",
+        "compoundFinal": null,
+        "physicalStepCount": 4,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
       "syllable": "말",
       "priority": 5,
       "reasons": [
@@ -499,6 +677,44 @@
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "샀",
+      "priority": 5,
+      "reasons": [
+        "inflection-sample"
+      ],
+      "sourceRank": 14,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": [
+        "잦"
+      ]
+    },
+    {
+      "syllable": "셨",
+      "priority": 5,
+      "reasons": [
+        "inflection-sample"
+      ],
+      "sourceRank": 15,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": [
+        "녁"
+      ]
     },
     {
       "syllable": "위",
@@ -552,6 +768,25 @@
       "nearestApprovedSyllables": []
     },
     {
+      "syllable": "썼",
+      "priority": 5,
+      "reasons": [
+        "inflection-sample"
+      ],
+      "sourceRank": 16,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": [
+        "젖"
+      ]
+    },
+    {
       "syllable": "알",
       "priority": 5,
       "reasons": [
@@ -565,6 +800,23 @@
         "compoundFinal": null,
         "physicalStepCount": 3,
         "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "왔",
+      "priority": 5,
+      "reasons": [
+        "inflection-sample"
+      ],
+      "sourceRank": 17,
+      "queueKey": {
+        "medialLayout": "compound-horizontal-leading",
+        "hasFinal": true,
+        "compoundMedial": "ㅘ",
+        "compoundFinal": null,
+        "physicalStepCount": 4,
+        "contourRelation": "aligned"
       },
       "nearestApprovedSyllables": []
     },
@@ -586,6 +838,25 @@
       "nearestApprovedSyllables": []
     },
     {
+      "syllable": "죠",
+      "priority": 5,
+      "reasons": [
+        "inflection-sample"
+      ],
+      "sourceRank": 18,
+      "queueKey": {
+        "medialLayout": "horizontal",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 2,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": [
+        "쇼"
+      ]
+    },
+    {
       "syllable": "또",
       "priority": 5,
       "reasons": [
@@ -599,6 +870,42 @@
         "compoundFinal": null,
         "physicalStepCount": 2,
         "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "줘",
+      "priority": 5,
+      "reasons": [
+        "inflection-sample"
+      ],
+      "sourceRank": 19,
+      "queueKey": {
+        "medialLayout": "compound-vertical-leading",
+        "hasFinal": false,
+        "compoundMedial": "ㅝ",
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": [
+        "뤄"
+      ]
+    },
+    {
+      "syllable": "줬",
+      "priority": 5,
+      "reasons": [
+        "inflection-sample"
+      ],
+      "sourceRank": 20,
+      "queueKey": {
+        "medialLayout": "compound-vertical-leading",
+        "hasFinal": true,
+        "compoundMedial": "ㅝ",
+        "compoundFinal": null,
+        "physicalStepCount": 4,
+        "contourRelation": "aligned"
       },
       "nearestApprovedSyllables": []
     },
@@ -618,6 +925,25 @@
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "갔",
+      "priority": 5,
+      "reasons": [
+        "inflection-sample"
+      ],
+      "sourceRank": 21,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": [
+        "갖"
+      ]
     },
     {
       "syllable": "많",

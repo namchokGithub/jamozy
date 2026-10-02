@@ -3369,6 +3369,60 @@
         "validationHash": "b017cf495af8e66bb0f87c8958b3adef864841d136138ad6f8b5f81a1fb46ddc"
       }
     },
+    "를": {
+      "reviewSchemaVersion": 2,
+      "syllable": "를",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "4b23cbf529b00629beb0a6fe3018f76b48a00b13cb3f4f9a92236600d5a934d1"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄹ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅡ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㄹ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-02T10:38:11.602Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "37ff53111cc70b3638f10ad65fa296f58f6c391338a3ec2aa714a5a6e0446776"
+      }
+    },
     "름": {
       "reviewSchemaVersion": 2,
       "syllable": "름",
