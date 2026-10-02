@@ -921,10 +921,6 @@
           "jamo": "ㅕ",
           "geometry": [
             {
-              "kind": "contour",
-              "contourId": 2
-            },
-            {
               "kind": "split-piece",
               "recipeId": "split-0-1",
               "pieceId": "piece-2"
@@ -951,6 +947,21 @@
                   "kind": "source-range",
                   "fromCommand": 5,
                   "toCommand": 15
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 2,
+                    "commandIndex": 3,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 4,
+                  "toCommand": 5,
+                  "contourId": 2
                 }
               ]
             },
@@ -961,6 +972,21 @@
                   "kind": "source-range",
                   "fromCommand": 0,
                   "toCommand": 4
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 2,
+                    "commandIndex": 0,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 1,
+                  "toCommand": 3,
+                  "contourId": 2
                 },
                 {
                   "kind": "line-to-anchor",
@@ -978,14 +1004,20 @@
                 }
               ]
             }
+          ],
+          "counterContours": [
+            {
+              "contourId": 2,
+              "contourHash": "6803544db927ab8e6d88a6a7d76268247f65176fa5992ae1ef726d8247347bcb"
+            }
           ]
         }
       ],
       "approved": {
-        "at": "2026-10-01T15:34:53.269Z",
+        "at": "2026-10-02T07:53:09.851Z",
         "reviewer": "local-reviewer",
         "validatorVersion": 1,
-        "validationHash": "f72b56e3c8d8e89e68cfc3240a390d0c30982e5e5d20124dd8ce76758c0fff5f"
+        "validationHash": "d7a553332412000469c9049f9b57724e623a839762aef30f5c7cbd3d9a4e1717"
       }
     },
     "꼬": {

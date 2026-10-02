@@ -862,11 +862,8 @@ export default function JamoSvgTaggerPage() {
   )
   const selected = filteredQueue[index]
   const queueLength = filteredQueue.length
-  // Busy until the queue and the selected glyph have loaded (or failed).
-  const loading =
-    !error &&
-    (queueLoading ||
-      Boolean(selected && state?.source.syllable !== selected.syllable))
+  // Busy only while the queue itself loads (or until it fails).
+  const loading = !error && queueLoading
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (loading) return
@@ -1383,9 +1380,7 @@ export default function JamoSvgTaggerPage() {
               aria-hidden="true"
               className="size-4 animate-spin rounded-full border-2 border-[#d8dce6] border-t-[#a85d4e]"
             />
-            {queueLoading
-              ? 'Loading queue…'
-              : `Loading ${selected?.syllable ?? 'glyph'}…`}
+            Loading queue…
           </div>
         </div>
       )}
