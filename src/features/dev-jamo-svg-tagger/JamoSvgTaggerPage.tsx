@@ -279,7 +279,7 @@ function RadioPills<T extends number | null>({
         return (
           <label
             key={option.value ?? 'none'}
-            className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1 text-sm ${checked ? 'border-[#a85d4e] bg-[#fff1ee] font-semibold text-[#8d4c43]' : 'border-[#d8dce6] text-[#39465b] hover:bg-[#f7f7fa]'}`}
+            className={`flex cursor-pointer select-none items-center gap-1.5 rounded-full border px-3 py-1 text-sm ${checked ? 'border-[#a85d4e] bg-[#fff1ee] font-semibold text-[#8d4c43]' : 'border-[#d8dce6] text-[#39465b] hover:bg-[#f7f7fa]'}`}
           >
             <input
               type="radio"
@@ -1252,8 +1252,7 @@ export default function JamoSvgTaggerPage() {
         ),
       )
       setError(undefined)
-      if (approve) window.scrollTo({ top: 0, behavior: 'smooth' })
-      else setShowSaveSuccess(true)
+      if (!approve) setShowSaveSuccess(true)
     } catch (reason) {
       const message = reason instanceof Error ? reason.message : 'Save failed.'
       setError(message)

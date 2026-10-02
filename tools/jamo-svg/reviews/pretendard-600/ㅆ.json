@@ -103,6 +103,58 @@
         "validationHash": "9c3d0e14cbfa88b2a2dec6c25418682b84b3dbd9f35579949ad114bc74df38b3"
       }
     },
+    "쌍": {
+      "reviewSchemaVersion": 2,
+      "syllable": "쌍",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "9a4e3d5d988de3c78c9a251c882f92ff0d75e647adadd284cbb959c1d25f6083"
+      },
+      "status": "proposed",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅆ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅏ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅇ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            },
+            {
+              "kind": "contour",
+              "contourId": 3
+            }
+          ]
+        }
+      ],
+      "splitRecipes": []
+    },
     "쌓": {
       "reviewSchemaVersion": 2,
       "syllable": "쌓",
@@ -209,6 +261,54 @@
         "validationHash": "b6c7cea6b68deb970722e5399cd189765c25143bbdac7add224dd6ae98a6a0eb"
       }
     },
+    "썩": {
+      "reviewSchemaVersion": 2,
+      "syllable": "썩",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "5f563688eaaf6ab57f4399c28d7eb6bd88a0b338f5369afbe3c60e2d58fb61c2"
+      },
+      "status": "proposed",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅆ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅓ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㄱ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": []
+    },
     "썰": {
       "reviewSchemaVersion": 2,
       "syllable": "썰",
@@ -262,6 +362,58 @@
         "validatorVersion": 1,
         "validationHash": "90c76a085337c891edc3eaf8e2b286ae6eaa34e422e81cec28803fefbc004ee6"
       }
+    },
+    "썹": {
+      "reviewSchemaVersion": 2,
+      "syllable": "썹",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "db813e9b9336b14a054b92a6a369cb88d6d22c641b1d2352482aaad6d62662bb"
+      },
+      "status": "proposed",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅆ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 3
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅓ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅂ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            },
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        }
+      ],
+      "splitRecipes": []
     },
     "쎄": {
       "reviewSchemaVersion": 2,
@@ -408,6 +560,44 @@
         "validatorVersion": 1,
         "validationHash": "8207a49292561184d7d478bd8e803f623a179dc9347d1fc0ff45c2a9f9e3ab8b"
       }
+    },
+    "쑤": {
+      "reviewSchemaVersion": 2,
+      "syllable": "쑤",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "7705ae5d8db4cdda33978552d9842ff97f81a9227ed0c0056a9084be296bd4b5"
+      },
+      "status": "proposed",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅆ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅜ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": []
     },
     "쓰": {
       "reviewSchemaVersion": 2,
@@ -662,6 +852,58 @@
         "validatorVersion": 1,
         "validationHash": "b168451f92cecf26f7a5e48e10643568a00eaa5e01971b01ae3b3ed96a071e4a"
       }
+    },
+    "씹": {
+      "reviewSchemaVersion": 2,
+      "syllable": "씹",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "7e38523d77430a43c9c0da2b47ecadf080b4e36e014cf449815d444531789863"
+      },
+      "status": "proposed",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅆ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 3
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅣ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅂ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            },
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        }
+      ],
+      "splitRecipes": []
     },
     "씻": {
       "reviewSchemaVersion": 2,

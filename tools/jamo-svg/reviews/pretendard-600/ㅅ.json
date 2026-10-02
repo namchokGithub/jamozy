@@ -439,6 +439,54 @@
         "validationHash": "711a6b947d5ae4e59cd8e6ed4ee0b435e227ca3ab0dffb046bbf145bdd421e72"
       }
     },
+    "샌": {
+      "reviewSchemaVersion": 2,
+      "syllable": "샌",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "1a1b6c29803bdaefd1d37b0ba4bb5658b7eafc5836114e604623e756847549fe"
+      },
+      "status": "proposed",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅅ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅐ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㄴ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        }
+      ],
+      "splitRecipes": []
+    },
     "생": {
       "reviewSchemaVersion": 2,
       "syllable": "생",
@@ -1103,6 +1151,58 @@
         "validationHash": "e279dc6d96d5f5c688ed3da31f054afd811d1425690e096f8b2d2e6545dcd7b1"
       }
     },
+    "셋": {
+      "reviewSchemaVersion": 2,
+      "syllable": "셋",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "56613a58c708fe6378d8264ea596683232d4e60773c61bc8b5782898513c9c75"
+      },
+      "status": "proposed",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅅ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 3
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅔ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅅ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        }
+      ],
+      "splitRecipes": []
+    },
     "소": {
       "reviewSchemaVersion": 2,
       "syllable": "소",
@@ -1367,6 +1467,54 @@
         "validationHash": "d6a5464d680e1c544eb2956d896d4e9f63a587d57fe732e5d2f0761ebdc844ff"
       }
     },
+    "솟": {
+      "reviewSchemaVersion": 2,
+      "syllable": "솟",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "f391d5fcb251d4181abc7563f22e2c42a45765512a74c44fdd38a78c9690718c"
+      },
+      "status": "proposed",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅅ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅗ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅅ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": []
+    },
     "송": {
       "reviewSchemaVersion": 2,
       "syllable": "송",
@@ -1478,6 +1626,44 @@
         "validatorVersion": 1,
         "validationHash": "9e6816425bc28aaae017e13e18afa5f4ecdaeac1240438f5d6514a81f84e98e8"
       }
+    },
+    "쇼": {
+      "reviewSchemaVersion": 2,
+      "syllable": "쇼",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "26521f193442f7aca18b6248ec3a33c98ececf93a526a6c563fb4bd51f7da450"
+      },
+      "status": "proposed",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅅ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅛ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": []
     },
     "수": {
       "reviewSchemaVersion": 2,
