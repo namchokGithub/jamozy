@@ -751,6 +751,7 @@ const matchesJamoQuery = (syllable: string, query: string) => {
 }
 /** Shortcuts handled by the page's keydown listener; keep in sync with it. */
 const shortcutRows = [
+  { keys: ['⌘', 'b', 'ิ'], action: 'Focus Queue search' },
   { keys: ['←', 'a', 'ฟ'], action: 'Previous glyph' },
   { keys: ['→', 'd', 'ก'], action: 'Next glyph' },
   { keys: ['s', 'ห'], action: 'Save' },
@@ -875,6 +876,7 @@ export default function JamoSvgTaggerPage() {
   const [overlay, setOverlay] = useState(true)
   const [splitContourId, setSplitContourId] = useState<number>()
   const previewSequence = useRef(0)
+  const queueSearchRef = useRef<HTMLInputElement>(null)
   const filteredQueue = useMemo(
     () =>
       queue.filter(
@@ -899,6 +901,12 @@ export default function JamoSvgTaggerPage() {
   const loading = !error && queueLoading
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey && event.code === 'KeyB') {
+        event.preventDefault()
+        queueSearchRef.current?.focus()
+        queueSearchRef.current?.select()
+        return
+      }
       if (loading) return
       if (
         ![
@@ -1738,6 +1746,7 @@ export default function JamoSvgTaggerPage() {
             <label className="text-sm font-semibold text-[#39465b]">
               Queue search
               <input
+                ref={queueSearchRef}
                 className="mt-2 w-full rounded border p-2"
                 value={query}
                 onChange={(event) => {
