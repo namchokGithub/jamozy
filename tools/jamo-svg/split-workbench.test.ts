@@ -4,6 +4,7 @@ import {
   compileSplitPiecePreview,
   moveSourceRange,
   removeSourceRange,
+  withDefaultSeams,
   replacePrimarySourceRange,
 } from './split-workbench'
 
@@ -248,5 +249,48 @@ describe('moveSourceRange', () => {
       range(4, 10),
       { kind: 'close-to-start', reason: 'interior-closure-seam' },
     ])
+  })
+})
+
+describe('withDefaultSeams', () => {
+  const range = (
+    fromCommand: number,
+    toCommand: number,
+    contourId?: number,
+  ) => ({
+    kind: 'source-range' as const,
+    fromCommand,
+    toCommand,
+    ...(contourId === undefined ? {} : { contourId }),
+  })
+  const seam = (contourId: number, commandIndex: number) => ({
+    kind: 'line-to-anchor' as const,
+    anchor: { contourId, commandIndex, point: 'end' as const },
+    reason: 'interior-closure-seam' as const,
+  })
+
+  test('adds the default seam before a newly appended range', () => {
+    expect(withDefaultSeams([range(0, 4), range(1, 3, 3)], 1)).toEqual([
+      range(0, 4),
+      seam(3, 0),
+      range(1, 3, 3),
+    ])
+  })
+
+  test('replaces a stale seam after a range changed', () => {
+    expect(
+      withDefaultSeams([range(0, 4), seam(1, 9), range(11, 21)], 1),
+    ).toEqual([range(0, 4), seam(1, 10), range(11, 21)])
+  })
+
+  test('leaves pieces with move anchors unchanged', () => {
+    const tokens = [
+      {
+        kind: 'move-to-anchor' as const,
+        anchor: { contourId: 0, commandIndex: 2, point: 'end' as const },
+      },
+      range(3, 5),
+    ]
+    expect(withDefaultSeams(tokens, 0)).toBe(tokens)
   })
 })

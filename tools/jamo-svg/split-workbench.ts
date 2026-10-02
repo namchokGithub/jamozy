@@ -100,19 +100,10 @@ export function removeSourceRange(tokens: RecipeToken[], tokenIndex: number) {
   return tokens.filter((_, index) => index !== tokenIndex)
 }
 
-/**
- * Moves one source range up (-1) or down (+1) among a piece's ranges and
- * rebuilds the seams between them: each range after the first is preceded by
- * a line seam to the end of the command before it, on its own contour, unless
- * it starts at command 0. A trailing close-to-start seam stays last. Pieces
- * with other tokens (move anchors, mid-piece closes) are left unchanged.
- */
-export function moveSourceRange(
-  tokens: RecipeToken[],
-  tokenIndex: number,
-  direction: -1 | 1,
-  sourceContourId: number,
-): RecipeToken[] {
+type SourceRangeToken = Extract<RecipeToken, { kind: 'source-range' }>
+
+/** Splits a piece into its ranges and optional trailing close, if it holds only ranges and line seams. */
+function rangesOf(tokens: RecipeToken[]) {
   const closing =
     tokens.at(-1)?.kind === 'close-to-start' ? tokens.at(-1) : undefined
   const body = closing ? tokens.slice(0, -1) : tokens
@@ -122,17 +113,21 @@ export function moveSourceRange(
         token.kind !== 'source-range' && token.kind !== 'line-to-anchor',
     )
   )
-    return tokens
-  const ranges = body.filter(
-    (token): token is Extract<RecipeToken, { kind: 'source-range' }> =>
-      token.kind === 'source-range',
-  )
-  const position = ranges.indexOf(tokens[tokenIndex] as (typeof ranges)[number])
-  const target = position + direction
-  if (position < 0 || target < 0 || target >= ranges.length) return tokens
-  const moved = [...ranges]
-  ;[moved[position], moved[target]] = [moved[target], moved[position]]
-  const rebuilt = moved.flatMap((range, index): RecipeToken[] =>
+    return undefined
+  return {
+    ranges: body.filter(
+      (token): token is SourceRangeToken => token.kind === 'source-range',
+    ),
+    closing,
+  }
+}
+
+function joinRanges(
+  ranges: SourceRangeToken[],
+  closing: RecipeToken | undefined,
+  sourceContourId: number,
+): RecipeToken[] {
+  const rebuilt = ranges.flatMap((range, index): RecipeToken[] =>
     index === 0 || range.fromCommand === 0
       ? [range]
       : [
@@ -149,6 +144,40 @@ export function moveSourceRange(
         ],
   )
   return closing ? [...rebuilt, closing] : rebuilt
+}
+
+/**
+ * Rebuilds the seams between a piece's ranges: each range after the first is
+ * preceded by a line seam to the end of the command before it, on its own
+ * contour, unless it starts at command 0. A trailing close-to-start seam stays
+ * last. Pieces with other tokens (move anchors, mid-piece closes) are returned
+ * unchanged.
+ */
+export function withDefaultSeams(
+  tokens: RecipeToken[],
+  sourceContourId: number,
+): RecipeToken[] {
+  const parts = rangesOf(tokens)
+  return parts
+    ? joinRanges(parts.ranges, parts.closing, sourceContourId)
+    : tokens
+}
+
+/** Moves one source range up (-1) or down (+1) and rebuilds the seams as `withDefaultSeams` does. */
+export function moveSourceRange(
+  tokens: RecipeToken[],
+  tokenIndex: number,
+  direction: -1 | 1,
+  sourceContourId: number,
+): RecipeToken[] {
+  const parts = rangesOf(tokens)
+  if (!parts) return tokens
+  const position = parts.ranges.indexOf(tokens[tokenIndex] as SourceRangeToken)
+  const target = position + direction
+  if (position < 0 || target < 0 || target >= parts.ranges.length) return tokens
+  const moved = [...parts.ranges]
+  ;[moved[position], moved[target]] = [moved[target], moved[position]]
+  return joinRanges(moved, parts.closing, sourceContourId)
 }
 
 /** Preview-only compiler: it can replay nothing except cached source commands and declared anchors. */

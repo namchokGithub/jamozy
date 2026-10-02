@@ -10,6 +10,7 @@ import {
   commandCoverage as coverageOf,
   moveSourceRange,
   removeSourceRange,
+  withDefaultSeams,
 } from '../../../tools/jamo-svg/split-workbench'
 import type {
   CachedContour,
@@ -164,50 +165,90 @@ function commandSegmentPath(
 function SourceRangeEditor({
   fromCommand,
   toCommand,
+  minCommand,
+  maxCommand,
   onUpdate,
   onRemove,
 }: {
   fromCommand: number
   toCommand: number
+  /** Lowest allowed start: 0 on the source contour, 1 on a counter. */
+  minCommand: number
+  /** Last command index of the range's contour. */
+  maxCommand: number
   onUpdate: (fromCommand: number, toCommand: number) => void
   onRemove: () => void
 }) {
   const [fromDraft, setFromDraft] = useState(String(fromCommand))
   const [toDraft, setToDraft] = useState(String(toCommand))
-  const update = () => {
-    const nextFrom = Number(fromDraft)
-    const nextTo = Number(toDraft)
-    if (!Number.isInteger(nextFrom) || !Number.isInteger(nextTo)) return
-    onUpdate(nextFrom, nextTo)
+  // Adopt range changes made elsewhere (inspector, move up/down) without
+  // discarding an invalid value the reviewer is still typing.
+  const [seen, setSeen] = useState({ fromCommand, toCommand })
+  if (seen.fromCommand !== fromCommand || seen.toCommand !== toCommand) {
+    setSeen({ fromCommand, toCommand })
+    setFromDraft(String(fromCommand))
+    setToDraft(String(toCommand))
   }
+  const parse = (draft: string) =>
+    /^\d+$/.test(draft.trim()) ? Number(draft) : Number.NaN
+  const nextFrom = parse(fromDraft)
+  const nextTo = parse(toDraft)
+  const fromValid =
+    Number.isInteger(nextFrom) &&
+    nextFrom >= minCommand &&
+    nextFrom <= maxCommand
+  const toValid =
+    Number.isInteger(nextTo) &&
+    nextTo <= maxCommand &&
+    nextTo >= (fromValid ? nextFrom : minCommand)
+  const commit = (fromText: string, toText: string) => {
+    const from = parse(fromText)
+    const to = parse(toText)
+    if (
+      Number.isInteger(from) &&
+      Number.isInteger(to) &&
+      from >= minCommand &&
+      to >= from &&
+      to <= maxCommand &&
+      (from !== fromCommand || to !== toCommand)
+    )
+      onUpdate(from, to)
+  }
+  const inputClass = (valid: boolean) =>
+    `mt-1 w-full rounded border p-2 font-normal ${valid ? '' : 'border-[#c0362c] ring-1 ring-[#c0362c]'}`
   return (
     <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
       <label className="text-xs font-semibold">
         Range from
         <input
-          className="mt-1 w-full rounded border p-2 font-normal"
+          className={inputClass(fromValid)}
           type="text"
+          inputMode="numeric"
+          aria-invalid={!fromValid}
+          title={`${minCommand}–${maxCommand}`}
           value={fromDraft}
-          onChange={(event) => setFromDraft(event.target.value)}
+          onChange={(event) => {
+            setFromDraft(event.target.value)
+            commit(event.target.value, toDraft)
+          }}
         />
       </label>
       <label className="text-xs font-semibold">
         Range to
         <input
-          className="mt-1 w-full rounded border p-2 font-normal"
+          className={inputClass(toValid)}
           type="text"
+          inputMode="numeric"
+          aria-invalid={!toValid}
+          title={`up to ${maxCommand}`}
           value={toDraft}
-          onChange={(event) => setToDraft(event.target.value)}
+          onChange={(event) => {
+            setToDraft(event.target.value)
+            commit(fromDraft, event.target.value)
+          }}
         />
       </label>
       <div className="flex flex-col justify-end gap-1">
-        <Button
-          className="rounded px-2 py-1 text-xs"
-          variant="secondary"
-          onClick={update}
-        >
-          Update
-        </Button>
         <Button
           className="rounded px-2 py-1 text-xs"
           variant="secondary"
@@ -219,7 +260,54 @@ function SourceRangeEditor({
     </div>
   )
 }
-/** Step choice as a row of radio buttons; a glyph has at most a handful of steps. */
+/** A row of pill-shaped radio buttons for a short list of choices. */
+function RadioPills<T extends number | null>({
+  name,
+  options,
+  value,
+  onChange,
+}: {
+  name: string
+  options: Array<{ value: T; label: string; color?: string }>
+  value: T
+  onChange: (value: T) => void
+}) {
+  return (
+    <div role="radiogroup" className="mt-2 flex flex-wrap gap-1.5">
+      {options.map((option) => {
+        const checked = value === option.value
+        return (
+          <label
+            key={option.value ?? 'none'}
+            className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1 text-sm ${checked ? 'border-[#a85d4e] bg-[#fff1ee] font-semibold text-[#8d4c43]' : 'border-[#d8dce6] text-[#39465b] hover:bg-[#f7f7fa]'}`}
+          >
+            <input
+              type="radio"
+              className="sr-only"
+              name={name}
+              checked={checked}
+              onChange={(event) => {
+                onChange(option.value)
+                // Drop focus so arrow keys keep moving between glyphs instead
+                // of switching this radio group's choice.
+                event.currentTarget.blur()
+              }}
+            />
+            {option.color && (
+              <span
+                aria-hidden="true"
+                className="inline-block size-2.5 rounded-full"
+                style={{ backgroundColor: option.color }}
+              />
+            )}
+            {option.label}
+          </label>
+        )
+      })}
+    </div>
+  )
+}
+/** Step choice; each step carries its Per-jamo result color. */
 function StepRadioGroup({
   name,
   steps,
@@ -231,46 +319,20 @@ function StepRadioGroup({
   value: number | null
   onChange: (order: number | null) => void
 }) {
-  const options = [
-    { order: null, label: 'Unassigned' },
-    ...steps.map(({ order, jamo }) => ({
-      order,
-      label: `${order + 1}. ${jamo}`,
-    })),
-  ]
   return (
-    <div role="radiogroup" className="mt-2 flex flex-wrap gap-1.5">
-      {options.map(({ order, label }) => {
-        const checked = value === order
-        return (
-          <label
-            key={order ?? 'none'}
-            className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1 text-sm ${checked ? 'border-[#a85d4e] bg-[#fff1ee] font-semibold text-[#8d4c43]' : 'border-[#d8dce6] text-[#39465b] hover:bg-[#f7f7fa]'}`}
-          >
-            <input
-              type="radio"
-              className="sr-only"
-              name={name}
-              checked={checked}
-              onChange={(event) => {
-                onChange(order)
-                // Drop focus so arrow keys keep moving between glyphs instead
-                // of switching this radio group's choice.
-                event.currentTarget.blur()
-              }}
-            />
-            {order !== null && (
-              <span
-                aria-hidden="true"
-                className="inline-block size-2.5 rounded-full"
-                style={{ backgroundColor: colors[order % colors.length] }}
-              />
-            )}
-            {label}
-          </label>
-        )
-      })}
-    </div>
+    <RadioPills<number | null>
+      name={name}
+      value={value}
+      onChange={onChange}
+      options={[
+        { value: null, label: 'Unassigned' },
+        ...steps.map(({ order, jamo }) => ({
+          value: order,
+          label: `${order + 1}. ${jamo}`,
+          color: colors[order % colors.length],
+        })),
+      ]}
+    />
   )
 }
 /**
@@ -1813,32 +1875,23 @@ export default function JamoSvgTaggerPage() {
                 Create only audited source-command partitions. No hand-drawn or
                 replacement SVG geometry is accepted.
               </p>
-              <label className="mt-3 block text-sm font-semibold">
+              <div className="mt-3 text-sm font-semibold">
                 Source contour
-                <select
-                  className="mt-1 w-full rounded border p-2 font-normal"
-                  value={splitContourId ?? ''}
-                  onChange={(event) =>
-                    setSplitContourId(
-                      event.target.value === ''
-                        ? undefined
-                        : Number(event.target.value),
-                    )
+                <RadioPills<number | null>
+                  name="split-source-contour"
+                  value={splitContourId ?? null}
+                  onChange={(contourId) =>
+                    setSplitContourId(contourId ?? undefined)
                   }
-                >
-                  <option value="">Select contour to inspect</option>
-                  {state.source.contours.map((contour) => (
-                    <option key={contour.id} value={contour.id}>
-                      Contour {contour.id + 1}
-                      {state.review.splitRecipes.some(
-                        (recipe) => recipe.sourceContourId === contour.id,
-                      )
-                        ? ' — recipe exists'
-                        : ''}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                  options={[
+                    { value: null, label: 'None' },
+                    ...state.source.contours.map((contour) => ({
+                      value: contour.id,
+                      label: `Contour ${contour.id + 1}${state.review.splitRecipes.some((recipe) => recipe.sourceContourId === contour.id) ? ' · recipe' : ''}`,
+                    })),
+                  ]}
+                />
+              </div>
               {activeContour && (
                 <div className="mt-3 rounded border border-[#d8e3f2] p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -2009,7 +2062,14 @@ export default function JamoSvgTaggerPage() {
                               reason: 'interior-closure-seam',
                             })
                           }
-                          updatePiece(activeRecipe.id, piece.id, tokens)
+                          updatePiece(
+                            activeRecipe.id,
+                            piece.id,
+                            withDefaultSeams(
+                              tokens,
+                              activeRecipe.sourceContourId,
+                            ),
+                          )
                         }
                         return (
                           <article
@@ -2166,34 +2226,38 @@ export default function JamoSvgTaggerPage() {
                                                   updatePiece(
                                                     activeRecipe.id,
                                                     piece.id,
-                                                    piece.tokens.map(
-                                                      (item, index) =>
-                                                        index === tokenIndex &&
-                                                        item.kind ===
-                                                          'source-range'
-                                                          ? {
-                                                              kind: 'source-range',
-                                                              fromCommand:
-                                                                onSource
-                                                                  ? item.fromCommand
-                                                                  : Math.max(
-                                                                      1,
-                                                                      item.fromCommand,
-                                                                    ),
-                                                              toCommand:
-                                                                Math.max(
+                                                    withDefaultSeams(
+                                                      piece.tokens.map(
+                                                        (item, index) =>
+                                                          index ===
+                                                            tokenIndex &&
+                                                          item.kind ===
+                                                            'source-range'
+                                                            ? {
+                                                                kind: 'source-range',
+                                                                fromCommand:
                                                                   onSource
                                                                     ? item.fromCommand
-                                                                    : 1,
-                                                                  item.toCommand,
-                                                                ),
-                                                              ...(onSource
-                                                                ? {}
-                                                                : {
-                                                                    contourId,
-                                                                  }),
-                                                            }
-                                                          : item,
+                                                                    : Math.max(
+                                                                        1,
+                                                                        item.fromCommand,
+                                                                      ),
+                                                                toCommand:
+                                                                  Math.max(
+                                                                    onSource
+                                                                      ? item.fromCommand
+                                                                      : 1,
+                                                                    item.toCommand,
+                                                                  ),
+                                                                ...(onSource
+                                                                  ? {}
+                                                                  : {
+                                                                      contourId,
+                                                                    }),
+                                                              }
+                                                            : item,
+                                                      ),
+                                                      activeRecipe.sourceContourId,
                                                     ),
                                                   )
                                                 }}
@@ -2212,9 +2276,24 @@ export default function JamoSvgTaggerPage() {
                                             </label>
                                           )}
                                           <SourceRangeEditor
-                                            key={`${token.contourId ?? ''}-${token.fromCommand}-${token.toCommand}`}
+                                            key={`${piece.id}-${tokenIndex}-${token.contourId ?? ''}`}
                                             fromCommand={token.fromCommand}
                                             toCommand={token.toCommand}
+                                            minCommand={
+                                              (token.contourId ??
+                                                activeRecipe.sourceContourId) ===
+                                              activeRecipe.sourceContourId
+                                                ? 0
+                                                : 1
+                                            }
+                                            maxCommand={
+                                              (recipeContours.find(
+                                                ({ id }) =>
+                                                  id ===
+                                                  (token.contourId ??
+                                                    activeRecipe.sourceContourId),
+                                              )?.commands.length ?? 1) - 1
+                                            }
                                             onUpdate={(
                                               fromCommand,
                                               toCommand,
@@ -2229,9 +2308,12 @@ export default function JamoSvgTaggerPage() {
                                               updatePiece(
                                                 activeRecipe.id,
                                                 piece.id,
-                                                removeSourceRange(
-                                                  piece.tokens,
-                                                  tokenIndex,
+                                                withDefaultSeams(
+                                                  removeSourceRange(
+                                                    piece.tokens,
+                                                    tokenIndex,
+                                                  ),
+                                                  activeRecipe.sourceContourId,
                                                 ),
                                               )
                                             }
@@ -2410,13 +2492,18 @@ export default function JamoSvgTaggerPage() {
                                   updatePiece(
                                     activeRecipe.id,
                                     piece.id,
-                                    latestSourceRangeIndex === -1
-                                      ? [...piece.tokens, range]
-                                      : piece.tokens.map((token, tokenIndex) =>
-                                          tokenIndex === latestSourceRangeIndex
-                                            ? range
-                                            : token,
-                                        ),
+                                    withDefaultSeams(
+                                      latestSourceRangeIndex === -1
+                                        ? [...piece.tokens, range]
+                                        : piece.tokens.map(
+                                            (token, tokenIndex) =>
+                                              tokenIndex ===
+                                              latestSourceRangeIndex
+                                                ? range
+                                                : token,
+                                          ),
+                                      activeRecipe.sourceContourId,
+                                    ),
                                   )
                                 }}
                                 onAddNewRange={(
@@ -2424,26 +2511,33 @@ export default function JamoSvgTaggerPage() {
                                   toCommand,
                                   contourId,
                                 ) =>
-                                  updatePiece(activeRecipe.id, piece.id, [
-                                    ...piece.tokens,
-                                    {
-                                      kind: 'source-range',
-                                      fromCommand:
-                                        contourId ===
-                                        activeRecipe.sourceContourId
-                                          ? fromCommand
-                                          : Math.max(1, fromCommand),
-                                      toCommand:
-                                        contourId ===
-                                        activeRecipe.sourceContourId
-                                          ? toCommand
-                                          : Math.max(1, toCommand),
-                                      ...(contourId ===
-                                      activeRecipe.sourceContourId
-                                        ? {}
-                                        : { contourId }),
-                                    },
-                                  ])
+                                  updatePiece(
+                                    activeRecipe.id,
+                                    piece.id,
+                                    withDefaultSeams(
+                                      [
+                                        ...piece.tokens,
+                                        {
+                                          kind: 'source-range',
+                                          fromCommand:
+                                            contourId ===
+                                            activeRecipe.sourceContourId
+                                              ? fromCommand
+                                              : Math.max(1, fromCommand),
+                                          toCommand:
+                                            contourId ===
+                                            activeRecipe.sourceContourId
+                                              ? toCommand
+                                              : Math.max(1, toCommand),
+                                          ...(contourId ===
+                                          activeRecipe.sourceContourId
+                                            ? {}
+                                            : { contourId }),
+                                        },
+                                      ],
+                                      activeRecipe.sourceContourId,
+                                    ),
+                                  )
                                 }
                               />
                             </div>
