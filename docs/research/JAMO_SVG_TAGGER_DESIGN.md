@@ -181,6 +181,8 @@ A recipe may also partition counters enclosed by its source contour
 (`counterContours`, DEC-038). `source-range.contourId` and anchor `contourId`
 select the contour; omitted, they mean the recipe's source contour. A
 counter's leading `M` is never consumed.
+A `close-to-start` seam may only be a piece's last token; anything after it
+would open a separate, unintended subpath.
 
 Allowed transitions:
 

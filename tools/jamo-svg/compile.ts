@@ -108,6 +108,15 @@ function recipeIsValid(source: CachedGlyph, recipe: SplitRecipe): boolean {
   const valid = recipe.pieces.every((piece) => {
     if (ids.has(piece.id)) return false
     ids.add(piece.id)
+    // A close-to-start seam ends the piece; any token after it would start a
+    // separate, unintended subpath.
+    if (
+      piece.tokens.some(
+        (token, index) =>
+          token.kind === 'close-to-start' && index !== piece.tokens.length - 1,
+      )
+    )
+      return false
     return piece.tokens.every((token) => {
       if (token.kind === 'source-range') {
         const target = contourOf(token.contourId)

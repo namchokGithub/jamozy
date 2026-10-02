@@ -448,6 +448,20 @@ describe('counter-aware split recipes', () => {
     )
   })
 
+  test('rejects a close-to-start seam before the end of a piece', async () => {
+    // A mid-piece close jumps back to the piece start and silently opens a new subpath.
+    const glyph = await extractGlyph('여')
+    const review = withRecipe(yeoCounterSplit(glyph), (recipe) => {
+      recipe.pieces[1].tokens.splice(1, 0, {
+        kind: 'close-to-start',
+        reason: 'interior-closure-seam',
+      })
+    })
+    expect(validateReview(glyph, review).blockers).toContain(
+      'invalid-split-recipe',
+    )
+  })
+
   test('reports a consumed counter that is also split by a second recipe', async () => {
     const glyph = await extractGlyph('여')
     const review = yeoCounterSplit(glyph)

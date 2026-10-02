@@ -780,6 +780,7 @@ export default function JamoSvgTaggerPage() {
   const [state, setState] = useState<State | null>(null)
   const [revision, setRevision] = useState<string>()
   const [error, setError] = useState<string>()
+  const [queueLoading, setQueueLoading] = useState(true)
   const [zoomOpen, setZoomOpen] = useState(false)
   const [saveFailure, setSaveFailure] = useState<{
     action: 'Save' | 'Approve'
@@ -810,8 +811,14 @@ export default function JamoSvgTaggerPage() {
   )
   const selected = filteredQueue[index]
   const queueLength = filteredQueue.length
+  // Busy until the queue and the selected glyph have loaded (or failed).
+  const loading =
+    !error &&
+    (queueLoading ||
+      Boolean(selected && state?.source.syllable !== selected.syllable))
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (loading) return
       if (
         ![
           'ArrowLeft',
@@ -852,7 +859,7 @@ export default function JamoSvgTaggerPage() {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [queueLength, save])
+  }, [loading, queueLength, save])
   const page = Math.floor(index / QUEUE_PAGE_SIZE)
   const pageCount = Math.max(
     1,
@@ -895,6 +902,7 @@ export default function JamoSvgTaggerPage() {
           reason instanceof Error ? reason.message : 'Could not load queue.',
         ),
       )
+      .finally(() => setQueueLoading(false))
   }, [])
   useEffect(() => {
     if (!selected) return
@@ -1294,6 +1302,23 @@ export default function JamoSvgTaggerPage() {
   )
   return (
     <PageSurface className="overflow-visible!" contentClassName="max-w-7xl">
+      {loading && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed inset-0 z-60 grid cursor-wait place-items-center bg-[#fffaf1]/60 backdrop-blur-[1px]"
+        >
+          <div className="flex items-center gap-3 rounded-full border border-[#eadfd4] bg-white px-5 py-3 text-sm font-semibold text-[#39465b] shadow">
+            <span
+              aria-hidden="true"
+              className="size-4 animate-spin rounded-full border-2 border-[#d8dce6] border-t-[#a85d4e]"
+            />
+            {queueLoading
+              ? 'Loading queue…'
+              : `Loading ${selected?.syllable ?? 'glyph'}…`}
+          </div>
+        </div>
+      )}
       <Modal
         open={Boolean(saveFailure)}
         title={`${saveFailure?.action ?? 'Save'} failed`}
@@ -1791,82 +1816,105 @@ export default function JamoSvgTaggerPage() {
                 {state.source.physicalSteps.map(({ jamo }) => jamo).join(' / ')}
               </h2>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                {state.source.contours.map((contour) => (
-                  <article
-                    className="rounded border border-[#d8e3f2] p-3"
-                    key={contour.id}
-                  >
-                    <div className="flex justify-between">
-                      <strong>Contour {contour.id + 1}</strong>
-                      {state.review.splitRecipes.some(
-                        (recipe) => recipe.sourceContourId === contour.id,
-                      ) && (
-                        <span className="text-xs text-[#9a6424]">
-                          fixed split recipe
-                        </span>
-                      )}
-                    </div>
-                    <GlyphPreview
-                      glyph={state.source}
-                      paths={[{ d: contour.d }]}
-                    />
-                    {state.review.splitRecipes.some(
-                      (recipe) => recipe.sourceContourId === contour.id,
-                    ) ? (
-                      <div className="mt-2 rounded border border-dashed border-[#d8e3f2] p-2">
-                        <p className="text-xs font-semibold text-[#39465b]">
-                          Live split ownership
-                        </p>
-                        <ul className="mt-1 space-y-1 text-xs text-[#667085]">
-                          {state.review.steps.map((step) => {
-                            const pieces = state.review.splitRecipes
-                              .filter(
-                                (recipe) =>
-                                  recipe.sourceContourId === contour.id,
-                              )
-                              .flatMap((recipe) =>
-                                recipe.pieces
-                                  .filter((piece) =>
-                                    step.geometry.some(
-                                      (geometry) =>
-                                        geometry.kind === 'split-piece' &&
-                                        geometry.recipeId === recipe.id &&
-                                        geometry.pieceId === piece.id,
-                                    ),
-                                  )
-                                  .map((piece) => piece.id),
-                              )
-                            return (
-                              <li key={step.order}>
-                                {step.order + 1}. {step.jamo}:{' '}
-                                {pieces.length ? pieces.join(', ') : 'pending'}
-                              </li>
-                            )
-                          })}
-                        </ul>
-                        <p className="mt-2 text-xs text-[#667085]">
-                          Assign or change a piece&apos;s jamo in Split
-                          Workbench below; this preview updates before Save.
-                        </p>
+                {state.source.contours.map((contour) => {
+                  // A counter that a recipe partitions takes its ownership from that recipe's pieces.
+                  const consumingRecipe = state.review.splitRecipes.find(
+                    (recipe) =>
+                      recipe.counterContours?.some(
+                        ({ contourId }) => contourId === contour.id,
+                      ),
+                  )
+                  return (
+                    <article
+                      className="rounded border border-[#d8e3f2] p-3"
+                      key={contour.id}
+                    >
+                      <div className="flex justify-between">
+                        <strong>Contour {contour.id + 1}</strong>
+                        {(consumingRecipe ||
+                          state.review.splitRecipes.some(
+                            (recipe) => recipe.sourceContourId === contour.id,
+                          )) && (
+                          <span className="text-xs text-[#9a6424]">
+                            {consumingRecipe
+                              ? 'used by split recipe'
+                              : 'fixed split recipe'}
+                          </span>
+                        )}
                       </div>
-                    ) : (
-                      <StepRadioGroup
-                        name={`contour-${contour.id}-owner`}
-                        steps={state.source.physicalSteps}
-                        value={
-                          state.review.steps.find((step) =>
-                            step.geometry.some(
-                              (geometry) =>
-                                geometry.kind === 'contour' &&
-                                geometry.contourId === contour.id,
-                            ),
-                          )?.order ?? null
-                        }
-                        onChange={(order) => assign(contour.id, order)}
+                      <GlyphPreview
+                        glyph={state.source}
+                        paths={[{ d: contour.d }]}
                       />
-                    )}
-                  </article>
-                ))}
+                      {consumingRecipe ? (
+                        <p className="mt-2 rounded border border-dashed border-[#d8e3f2] p-2 text-xs text-[#667085]">
+                          Counter of Contour{' '}
+                          {consumingRecipe.sourceContourId + 1}
+                          &apos;s split recipe; its ranges belong to that
+                          recipe&apos;s pieces. Untick &ldquo;Split with Contour{' '}
+                          {contour.id + 1}&rdquo; in Split Workbench to assign
+                          it whole.
+                        </p>
+                      ) : state.review.splitRecipes.some(
+                          (recipe) => recipe.sourceContourId === contour.id,
+                        ) ? (
+                        <div className="mt-2 rounded border border-dashed border-[#d8e3f2] p-2">
+                          <p className="text-xs font-semibold text-[#39465b]">
+                            Live split ownership
+                          </p>
+                          <ul className="mt-1 space-y-1 text-xs text-[#667085]">
+                            {state.review.steps.map((step) => {
+                              const pieces = state.review.splitRecipes
+                                .filter(
+                                  (recipe) =>
+                                    recipe.sourceContourId === contour.id,
+                                )
+                                .flatMap((recipe) =>
+                                  recipe.pieces
+                                    .filter((piece) =>
+                                      step.geometry.some(
+                                        (geometry) =>
+                                          geometry.kind === 'split-piece' &&
+                                          geometry.recipeId === recipe.id &&
+                                          geometry.pieceId === piece.id,
+                                      ),
+                                    )
+                                    .map((piece) => piece.id),
+                                )
+                              return (
+                                <li key={step.order}>
+                                  {step.order + 1}. {step.jamo}:{' '}
+                                  {pieces.length
+                                    ? pieces.join(', ')
+                                    : 'pending'}
+                                </li>
+                              )
+                            })}
+                          </ul>
+                          <p className="mt-2 text-xs text-[#667085]">
+                            Assign or change a piece&apos;s jamo in Split
+                            Workbench below; this preview updates before Save.
+                          </p>
+                        </div>
+                      ) : (
+                        <StepRadioGroup
+                          name={`contour-${contour.id}-owner`}
+                          steps={state.source.physicalSteps}
+                          value={
+                            state.review.steps.find((step) =>
+                              step.geometry.some(
+                                (geometry) =>
+                                  geometry.kind === 'contour' &&
+                                  geometry.contourId === contour.id,
+                              ),
+                            )?.order ?? null
+                          }
+                          onChange={(order) => assign(contour.id, order)}
+                        />
+                      )}
+                    </article>
+                  )
+                })}
               </div>
             </Card>
             <Card className="mt-4">
