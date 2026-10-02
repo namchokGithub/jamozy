@@ -723,6 +723,15 @@ function DraftSegmentationPreview({
   )
 }
 const QUEUE_PAGE_SIZE = 12
+/** One color per review status, shared by the status filter, header, and queue list. */
+const statusColors: Record<string, string> = {
+  unreviewed: '#98a2b3',
+  proposed: '#d97706',
+  reviewing: '#c2620a',
+  approved: '#4c8f8b',
+  stale: '#c0362c',
+}
+const statusColor = (status: string) => statusColors[status] ?? '#98a2b3'
 /** One jamo per typed key, as Tagger steps split them (compound medials and finals expand). */
 const typedJamo = (jamo: string) =>
   COMPOUND_JUNGSEONG_PARTS[jamo] ?? COMPOUND_JONGSEONG_PARTS[jamo] ?? [jamo]
@@ -866,6 +875,16 @@ export default function JamoSvgTaggerPage() {
   const [error, setError] = useState<string>()
   const [queueLoading, setQueueLoading] = useState(true)
   const [zoomOpen, setZoomOpen] = useState(false)
+  // Element id to scroll to once the next render has created it.
+  const pendingScroll = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    const target = pendingScroll.current
+    if (!target) return
+    const element = document.getElementById(target)
+    if (!element) return
+    pendingScroll.current = undefined
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  })
   const [saveFailure, setSaveFailure] = useState<{
     action: 'Save' | 'Approve'
     message: string
@@ -1133,10 +1152,14 @@ export default function JamoSvgTaggerPage() {
       })),
     })
     setSplitContourId(contourId)
+    pendingScroll.current = 'split-contour-section'
     updateDraft(review)
   }
   const addPiece = (recipeId: string) => {
     if (!state) return
+    const recipe = state.review.splitRecipes.find(({ id }) => id === recipeId)
+    if (recipe)
+      pendingScroll.current = `split-piece-${recipeId}-piece-${recipe.pieces.length + 1}`
     const review = beginReview({
       ...state.review,
       splitRecipes: state.review.splitRecipes.map((recipe) =>
@@ -1428,6 +1451,8 @@ export default function JamoSvgTaggerPage() {
     state.validation.blockers.every((blocker) => blocker === 'needs-split'),
   )
   const previewSvgClass = freezePreviews ? 'h-32 w-full' : 'h-48 w-full'
+  // Keep scrolled-to sections clear of the frozen preview bar.
+  const scrollMarginTop = freezePreviews ? 340 : 16
   const hasCompleteCompiledPreview = Boolean(
     state &&
     state.source.physicalSteps.every((step) =>
@@ -1590,7 +1615,13 @@ export default function JamoSvgTaggerPage() {
                 .codePointAt(0)
                 ?.toString(16)
                 .toUpperCase()}{' '}
-              · {state.review.status}
+              ·{' '}
+              <span
+                className="rounded-full px-2 py-0.5 text-xs font-semibold text-white"
+                style={{ backgroundColor: statusColor(state.review.status) }}
+              >
+                {state.review.status}
+              </span>
             </p>
             <div className="flex items-center gap-4 text-xs font-semibold">
               {error && (
@@ -1827,8 +1858,13 @@ export default function JamoSvgTaggerPage() {
                         )
                       }
                     />
-                    <span className="min-w-0 truncate capitalize leading-none">
-                      {status}
+                    <span className="flex min-w-0 items-center gap-1.5 capitalize leading-none">
+                      <span
+                        aria-hidden="true"
+                        className="inline-block size-2.5 shrink-0 rounded-full"
+                        style={{ backgroundColor: statusColor(status) }}
+                      />
+                      <span className="truncate">{status}</span>
                     </span>
                     <span className="shrink-0 rounded-full bg-[#e9eff8] px-1.5 py-0.5 font-semibold text-[#52647d]">
                       {statusCounts.get(status) ?? 0}
@@ -1860,11 +1896,12 @@ export default function JamoSvgTaggerPage() {
                     {item.reviewStatus !== 'approved' && (
                       <>
                         <span
-                          className={
-                            item.reviewStatus === 'reviewing'
-                              ? 'font-semibold text-[#c2620a]'
-                              : undefined
-                          }
+                          className="font-semibold"
+                          style={{
+                            color: statusColor(
+                              item.reviewStatus ?? 'unreviewed',
+                            ),
+                          }}
                         >
                           {item.reviewStatus ?? 'unreviewed'}
                         </span>{' '}
@@ -2120,7 +2157,11 @@ export default function JamoSvgTaggerPage() {
                 />
               </div>
               {activeContour && (
-                <div className="mt-3 rounded border border-[#d8e3f2] p-3">
+                <div
+                  id="split-contour-section"
+                  className="mt-3 rounded border border-[#d8e3f2] p-3"
+                  style={{ scrollMarginTop }}
+                >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <strong>
                       Contour {activeContour.id + 1} ·{' '}
@@ -2300,6 +2341,8 @@ export default function JamoSvgTaggerPage() {
                         }
                         return (
                           <article
+                            id={`split-piece-${activeRecipe.id}-${piece.id}`}
+                            style={{ scrollMarginTop }}
                             className={`rounded border p-3 ${owner ? 'border-[#d8e3f2]' : 'border-[#c0362c] ring-1 ring-[#c0362c]'}`}
                             key={piece.id}
                           >
