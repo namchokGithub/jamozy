@@ -239,3 +239,60 @@ export function compileSplitPiecePreview(
     throw new Error('Add a source range beginning with M or a move-to-anchor.')
   return commands.map(commandToSvg).join(' ')
 }
+
+type PieceRef = { kind: 'split-piece'; recipeId: string; pieceId: string }
+type StepLike = {
+  order: number
+  jamo: string
+  geometry: Array<PieceRef | { kind: 'contour'; contourId: number }>
+}
+
+/**
+ * Gives one split piece to `step` (or to no step when null). For a two-piece
+ * recipe whose other piece is still unassigned, that piece also goes to the
+ * only other step that has no geometry yet (any other step, in a two-step
+ * glyph), so splitting one contour between two jamo takes one choice.
+ */
+export function assignPiece<T extends StepLike>(
+  steps: T[],
+  recipe: { id: string; pieces: Array<{ id: string }> },
+  pieceId: string,
+  step: number | null,
+): T[] {
+  const place = (items: T[], id: string, order: number | null) =>
+    items.map((item) => ({
+      ...item,
+      geometry: [
+        ...item.geometry.filter(
+          (ref) =>
+            ref.kind !== 'split-piece' ||
+            ref.recipeId !== recipe.id ||
+            ref.pieceId !== id,
+        ),
+        ...(item.order === order
+          ? [{ kind: 'split-piece' as const, recipeId: recipe.id, pieceId: id }]
+          : []),
+      ],
+    }))
+  const next = place(steps, pieceId, step)
+  const partner =
+    recipe.pieces.length === 2
+      ? recipe.pieces.find(({ id }) => id !== pieceId)
+      : undefined
+  if (step === null || !partner) return next
+  const owned = next.some((item) =>
+    item.geometry.some(
+      (ref) =>
+        ref.kind === 'split-piece' &&
+        ref.recipeId === recipe.id &&
+        ref.pieceId === partner.id,
+    ),
+  )
+  const candidates = next.filter(
+    (item) =>
+      item.order !== step && (next.length === 2 || item.geometry.length === 0),
+  )
+  return !owned && candidates.length === 1
+    ? place(next, partner.id, candidates[0].order)
+    : next
+}

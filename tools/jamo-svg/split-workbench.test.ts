@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import {
+  assignPiece,
   commandCoverage,
   compileSplitPiecePreview,
   moveSourceRange,
@@ -292,5 +293,30 @@ describe('withDefaultSeams', () => {
       range(3, 5),
     ]
     expect(withDefaultSeams(tokens, 0)).toBe(tokens)
+  })
+})
+
+describe('assignPiece', () => {
+  const piece = (pieceId: string) => ({ kind: 'split-piece' as const, recipeId: 'r', pieceId })
+  const recipe = { id: 'r', pieces: [{ id: 'p1' }, { id: 'p2' }] }
+  const steps = (...geometry: Array<Array<ReturnType<typeof piece> | { kind: 'contour'; contourId: number }>>) =>
+    geometry.map((items, order) => ({ order, jamo: `j${order}`, geometry: items }))
+
+  test('assigns the other piece of a two-piece recipe to the only other step', () => {
+    expect(assignPiece(steps([], []), recipe, 'p1', 0)).toEqual(steps([piece('p1')], [piece('p2')]))
+  })
+
+  test('with more steps, auto-assigns only when exactly one other step is still empty', () => {
+    const glyph = steps([], [], [{ kind: 'contour', contourId: 0 }])
+    expect(assignPiece(glyph, recipe, 'p2', 1)).toEqual(steps([piece('p1')], [piece('p2')], [{ kind: 'contour', contourId: 0 }]))
+    expect(assignPiece(steps([], [], []), recipe, 'p1', 0)).toEqual(steps([piece('p1')], [], []))
+  })
+
+  test('never moves a partner piece that is already assigned', () => {
+    expect(assignPiece(steps([], [piece('p2')]), recipe, 'p1', 1)).toEqual(steps([], [piece('p2'), piece('p1')]))
+  })
+
+  test('unassigning leaves the partner alone', () => {
+    expect(assignPiece(steps([piece('p1')], [piece('p2')]), recipe, 'p1', null)).toEqual(steps([], [piece('p2')]))
   })
 })

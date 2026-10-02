@@ -13,6 +13,7 @@ import { PageSurface } from '../../components/ui/PageSurface'
 import { retainSourceAfterSave } from './tagger-state'
 import { counterContours } from '../../../tools/jamo-svg/compile'
 import {
+  assignPiece,
   commandCoverage as coverageOf,
   moveSourceRange,
   removeSourceRange,
@@ -836,7 +837,9 @@ export default function JamoSvgTaggerPage() {
     blockers: string[]
     issues: string[]
   }>()
-  const [showSaveSuccess, setShowSaveSuccess] = useState(false)
+  const [notice, setNotice] = useState<
+    { message: string; tone: 'saved' | 'approved' } | undefined
+  >()
   const [overlay, setOverlay] = useState(true)
   const [splitContourId, setSplitContourId] = useState<number>()
   const previewSequence = useRef(0)
@@ -973,10 +976,10 @@ export default function JamoSvgTaggerPage() {
       )
   }, [selected])
   useEffect(() => {
-    if (!showSaveSuccess) return
-    const timeout = window.setTimeout(() => setShowSaveSuccess(false), 2000)
+    if (!notice) return
+    const timeout = window.setTimeout(() => setNotice(undefined), 2000)
     return () => window.clearTimeout(timeout)
-  }, [showSaveSuccess])
+  }, [notice])
   const refreshPreview = async (review: Review) => {
     const sequence = ++previewSequence.current
     try {
@@ -1034,25 +1037,14 @@ export default function JamoSvgTaggerPage() {
     step: number | null,
   ) => {
     if (!state) return
-    const review = beginReview({
-      ...state.review,
-      steps: state.review.steps.map((item) => ({
-        ...item,
-        geometry: item.geometry
-          .filter(
-            (geometry) =>
-              geometry.kind !== 'split-piece' ||
-              geometry.recipeId !== recipeId ||
-              geometry.pieceId !== pieceId,
-          )
-          .concat(
-            item.order === step
-              ? [{ kind: 'split-piece', recipeId, pieceId }]
-              : [],
-          ),
-      })),
-    })
-    updateDraft(review)
+    const recipe = state.review.splitRecipes.find(({ id }) => id === recipeId)
+    if (!recipe) return
+    updateDraft(
+      beginReview({
+        ...state.review,
+        steps: assignPiece(state.review.steps, recipe, pieceId, step),
+      }),
+    )
   }
   const startRecipe = (contourId: number) => {
     if (!state) return
@@ -1327,7 +1319,11 @@ export default function JamoSvgTaggerPage() {
         ),
       )
       setError(undefined)
-      if (!approve) setShowSaveSuccess(true)
+      setNotice(
+        approve
+          ? { message: `${result.review.syllable} approved`, tone: 'approved' }
+          : { message: draft ? 'Draft saved' : 'Preview saved', tone: 'saved' },
+      )
     } catch (reason) {
       const message = reason instanceof Error ? reason.message : 'Save failed.'
       setError(message)
@@ -1397,12 +1393,21 @@ export default function JamoSvgTaggerPage() {
         open={Boolean(saveFailure)}
         title={`${saveFailure?.action ?? 'Save'} failed`}
         onClose={() => setSaveFailure(undefined)}
+        sizeClassName="max-w-2xl"
       >
         {saveFailure && (
-          <div className="mt-3 max-h-[60vh] space-y-3 overflow-auto text-sm text-[#39465b]">
-            <p className="rounded bg-[#fff4f2] p-2 font-mono text-xs text-[#9d3b32]">
-              {saveFailure.message}
-            </p>
+          <div className="mt-3 w-full max-w-2xl max-h-[80vh] space-y-3 overflow-auto text-sm text-[#39465b]">
+            <p>{saveFailure.message}</p>
+            {saveFailure.issues.length > 0 && (
+              <div>
+                <p className="font-semibold">Where to look</p>
+                <ul className="mt-1 list-disc space-y-1 pl-4 rounded bg-[#fff4f2] p-2 font-mono text-xs text-[#9d3b32]">
+                  {saveFailure.issues.map((issue) => (
+                    <li key={issue}>{issue}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
             {saveFailure.blockers.length > 0 && (
               <div>
                 <p className="font-semibold">Blockers</p>
@@ -1416,16 +1421,6 @@ export default function JamoSvgTaggerPage() {
                         </span>
                       )}
                     </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {saveFailure.issues.length > 0 && (
-              <div>
-                <p className="font-semibold">Where to look</p>
-                <ul className="mt-1 list-disc space-y-1 pl-4 text-xs">
-                  {saveFailure.issues.map((issue) => (
-                    <li key={issue}>{issue}</li>
                   ))}
                 </ul>
               </div>
@@ -1491,12 +1486,12 @@ export default function JamoSvgTaggerPage() {
           </div>
         )}
       </Modal>
-      {showSaveSuccess && (
+      {notice && (
         <div
           role="status"
-          className="fixed top-4 right-4 z-50 rounded-lg bg-[#39465b] px-4 py-3 text-sm font-semibold text-white shadow-lg"
+          className={`fixed top-4 right-4 z-50 rounded-lg px-4 py-3 text-sm font-semibold text-white shadow-lg ${notice.tone === 'approved' ? 'bg-[#4C8F8B]' : 'bg-[#39465b]'}`}
         >
-          Preview saved
+          {notice.message}
         </div>
       )}
       <header className="flex items-end justify-between gap-4">
@@ -1555,15 +1550,18 @@ export default function JamoSvgTaggerPage() {
             </div>
           </div>
           <section className="grid gap-3 md:grid-cols-4">
-            <Card className="p-4">
+            {/* Preview cards stretch to the tallest card in the row; center the glyph in the spare height. */}
+            <Card className="flex flex-col p-4">
               <h2 className="font-bold text-[#39465b]">Source glyph</h2>
-              <GlyphPreview
-                svgClassName={previewSvgClass}
-                glyph={state.source}
-                paths={[{ d: state.source.sourcePath }]}
-              />
+              <div className="flex flex-1 items-center">
+                <GlyphPreview
+                  svgClassName={previewSvgClass}
+                  glyph={state.source}
+                  paths={[{ d: state.source.sourcePath }]}
+                />
+              </div>
             </Card>
-            <Card className="p-4">
+            <Card className="flex flex-col p-4">
               <h2 className="font-bold text-[#39465b]">
                 Per-jamo result{' '}
                 {state.source.physicalSteps.map(({ jamo }) => jamo).join(' / ')}
@@ -1577,7 +1575,7 @@ export default function JamoSvgTaggerPage() {
               </p>
               <button
                 type="button"
-                className="block w-full cursor-zoom-in rounded"
+                className="flex w-full flex-1 cursor-zoom-in items-center rounded"
                 title="Enlarge (arrows or a/d move, f approves, Esc closes)"
                 onClick={() => setZoomOpen(true)}
               >
@@ -1603,7 +1601,7 @@ export default function JamoSvgTaggerPage() {
                 </p>
               )}
             </Card>
-            <Card className="p-4">
+            <Card className="flex flex-col p-4">
               <div className="flex justify-between">
                 <h2 className="font-bold text-[#39465b]">Reconstruction</h2>
                 <label className="text-xs">
@@ -1615,12 +1613,14 @@ export default function JamoSvgTaggerPage() {
                   Overlay source
                 </label>
               </div>
-              <GlyphPreview
-                svgClassName={previewSvgClass}
-                glyph={state.source}
-                overlay={overlay}
-                paths={state.compiled.paths}
-              />
+              <div className="flex flex-1 items-center">
+                <GlyphPreview
+                  svgClassName={previewSvgClass}
+                  glyph={state.source}
+                  overlay={overlay}
+                  paths={state.compiled.paths}
+                />
+              </div>
             </Card>
             <Card className="p-4">
               <h2 className="font-bold text-[#39465b]">
@@ -2236,7 +2236,7 @@ export default function JamoSvgTaggerPage() {
                         }
                         return (
                           <article
-                            className="rounded border border-[#d8e3f2] p-3"
+                            className={`rounded border p-3 ${owner ? 'border-[#d8e3f2]' : 'border-[#c0362c] ring-1 ring-[#c0362c]'}`}
                             key={piece.id}
                           >
                             <div className="flex items-center justify-between gap-2">
