@@ -8,6 +8,7 @@ import {
   type ReviewBlocker,
   type SplitRecipe,
 } from './types'
+import { pathContains } from './geometry'
 import { compileSplitPiecePreview } from './split-workbench'
 
 export * from './types'
@@ -293,11 +294,39 @@ export function validateReview(
     )
   )
     blockers.add('counter-owner-mismatch')
+  let paths: CompiledGlyph['paths'] | undefined
   try {
-    if (compileReview(source, review).paths.some(({ d }) => !d.startsWith('M')))
+    paths = compileReview(source, review).paths
+    if (paths.some(({ d }) => !d.startsWith('M')))
       blockers.add('reconstruction-mismatch')
   } catch {
     blockers.add('invalid-split-recipe')
+  }
+  // A split outline has no whole owner, so a whole-owned counter inside it is
+  // checked against the compiled ink just outside its four sides instead.
+  if (paths && !blockers.has('invalid-split-recipe')) {
+    const compiled = paths
+    for (const { counterId, outerId } of counterContours(source)) {
+      if (!replaced.has(outerId) || replaced.has(counterId)) continue
+      const owner = ownerOf.get(counterId)
+      if (owner === undefined) continue
+      const { x1, y1, x2, y2 } = source.contours.find(
+        ({ id }) => id === counterId,
+      )!.bounds
+      const margin = 25
+      const holders = [
+        [(x1 + x2) / 2, y1 - margin],
+        [(x1 + x2) / 2, y2 + margin],
+        [x1 - margin, (y1 + y2) / 2],
+        [x2 + margin, (y1 + y2) / 2],
+      ].map(([x, y]) => compiled.findIndex(({ d }) => pathContains(d, x, y)))
+      const inked = holders.filter((order) => order >= 0)
+      if (
+        inked.length &&
+        inked.filter((order) => order === owner).length * 2 < inked.length
+      )
+        blockers.add('counter-owner-mismatch')
+    }
   }
   return { blockers: [...blockers] }
 }

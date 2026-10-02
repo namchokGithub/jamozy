@@ -176,6 +176,9 @@ type ReviewBlocker =
 enclosing it belong to different physical steps. That assignment passes
 coverage checks but paints the hole as a solid shape; it means the enclosing
 outline is a union of two jamo and needs a split.
+When the enclosing outline is itself split, it has no whole owner; the counter
+is then checked against the compiled ink just outside its four sides, and
+most of that ink must belong to the counter's step.
 
 A recipe may also partition counters enclosed by its source contour
 (`counterContours`, DEC-038). `source-range.contourId` and anchor `contourId`

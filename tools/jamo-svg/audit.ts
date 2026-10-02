@@ -1,9 +1,10 @@
-import { compileReview, counterContours, validateReview } from './compile'
+import { compileReview, validateReview } from './compile'
+import { pathContains } from './geometry'
 import { proposeReview, type ApprovedTemplate } from './propose'
 import type { Bounds, GlyphReview } from './types'
 
 export type AuditCheck =
-  'validation' | 'position' | 'tiny-step' | 'similar-glyph' | 'counter-ink'
+  'validation' | 'position' | 'tiny-step' | 'similar-glyph'
 export type AuditFinding = {
   syllable: string
   check: AuditCheck
@@ -16,29 +17,6 @@ const TINY_STEP_AREA = 20_000
 const SIMILAR_MAX_COST = 250
 const VERTICAL_MEDIALS = new Set('ㅏㅐㅑㅒㅓㅔㅕㅖㅣ')
 const HORIZONTAL_MEDIALS = new Set('ㅗㅛㅜㅠㅡ')
-
-const onCurvePoints = (subpath: string) =>
-  subpath.split(/(?=[LQCZ])/).flatMap((part) => {
-    const values = (part.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number)
-    return values.length >= 2 ? [[values.at(-2)!, values.at(-1)!] as const] : []
-  })
-
-/** Even-odd containment over each subpath's on-curve points; enough for ownership probes. */
-export function pathContains(d: string, x: number, y: number) {
-  return d
-    .split('M')
-    .filter(Boolean)
-    .reduce((inside, subpath) => {
-      const points = onCurvePoints(subpath)
-      let crossings = 0
-      points.forEach(([px, py], index) => {
-        const [qx, qy] = points[(index + points.length - 1) % points.length]
-        if (py > y !== qy > y && x < ((qx - px) * (y - py)) / (qy - py) + px)
-          crossings += 1
-      })
-      return crossings % 2 === 1 ? !inside : inside
-    }, false)
-}
 
 const pathBounds = (d: string): Bounds => {
   const values = (d.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number)
@@ -70,9 +48,11 @@ const ownership = (review: GlyphReview) =>
 /**
  * Audits approved reviews for mistakes validation cannot see: blockers that
  * appeared later, jamo on the wrong side of the initial, sliver steps,
- * disagreement with a similar approved glyph, and counters inside a split
- * outline owned by a different step than the ink around them.
+ * and disagreement with a similar approved glyph. Counters inside a split
+ * outline are checked by validation (`counter-owner-mismatch`).
  */
+export { pathContains }
+
 export function auditReviews(reviews: ApprovedTemplate[]): AuditFinding[] {
   const findings: AuditFinding[] = []
   for (const item of reviews) {
@@ -130,39 +110,6 @@ export function auditReviews(reviews: ApprovedTemplate[]): AuditFinding[] {
         report(
           'similar-glyph',
           `${ownership(review)} differs from ${twin.templateSyllable}'s pattern ${ownership(twin.review)}`,
-        )
-    }
-    const split = new Set(
-      review.splitRecipes.map(({ sourceContourId }) => sourceContourId),
-    )
-    for (const { counterId, outerId } of counterContours(glyph)) {
-      if (!split.has(outerId)) continue
-      const owner = review.steps.find((step) =>
-        step.geometry.some(
-          (ref) => ref.kind === 'contour' && ref.contourId === counterId,
-        ),
-      )
-      if (!owner) continue
-      // Ink just outside the counter on four sides should mostly belong to its owner.
-      const { x1, y1, x2, y2 } = glyph.contours[counterId].bounds
-      const margin = 25
-      const probes = [
-        [(x1 + x2) / 2, y1 - margin],
-        [(x1 + x2) / 2, y2 + margin],
-        [x1 - margin, (y1 + y2) / 2],
-        [x2 + margin, (y1 + y2) / 2],
-      ]
-      const holders = probes.map(([x, y]) =>
-        paths.findIndex((path) => pathContains(path.d, x, y)),
-      )
-      const inked = holders.filter((order) => order >= 0)
-      if (
-        inked.length &&
-        inked.filter((order) => order === owner.order).length * 2 < inked.length
-      )
-        report(
-          'counter-ink',
-          `Contour ${counterId + 1} belongs to ${owner.jamo}, but the ink around it is ${holders.map((order) => (order < 0 ? '·' : paths[order].jamo)).join('')}`,
         )
     }
   }

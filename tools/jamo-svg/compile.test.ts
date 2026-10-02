@@ -462,6 +462,20 @@ describe('counter-aware split recipes', () => {
     )
   })
 
+  test('blocks a counter inside a split outline owned by a different step than its surrounding ink', async () => {
+    // 여's c1 is ㅇ's own counter; c0 is split, so ownership must come from the ink around c1.
+    const glyph = await extractGlyph('여')
+    const review = yeoCounterSplit(glyph)
+    review.steps[0].geometry = review.steps[0].geometry.filter(
+      (ref) => ref.kind !== 'contour',
+    )
+    review.steps[1].geometry.push({ kind: 'contour', contourId: 1 })
+    expect(validateReview(glyph, review).blockers).toContain(
+      'counter-owner-mismatch',
+    )
+    expect(validateReview(glyph, yeoCounterSplit(glyph)).blockers).toEqual([])
+  })
+
   test('reports a consumed counter that is also split by a second recipe', async () => {
     const glyph = await extractGlyph('여')
     const review = yeoCounterSplit(glyph)
