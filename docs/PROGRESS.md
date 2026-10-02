@@ -2,7 +2,7 @@
 
 Mirrors the MVP checklist in `README.md`. Update both when status changes. Statuses: `Not started`, `In progress`, `Blocked`, `Done`.
 
-Last updated: 2026-09-29 (one-page Learning Path player)
+Last updated: 2026-10-02 (Jamo SVG Tagger: 686 syllables approved)
 
 ## MVP
 
@@ -20,6 +20,17 @@ Last updated: 2026-09-29 (one-page Learning Path player)
 | Authenticated Firestore learner persistence        | Done        | Authenticated sessions use Firebase learner repositories. Lesson/Review session history, exactly-once checkpoint effects, and Guest migration are verified.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | Settings                                           | Done        | `/settings` (`SettingsPage.tsx`) reads/writes `UserProfile.settings` via `get-settings.ts`/`update-settings.ts` (read-modify-write, never touches `exp`/`stats`/`createdAt`). All five learner-facing display preferences now have consumers: meaning/romanization in Lesson and Review previews; keyboard visibility, English labels, and opacity in both typing sessions. Save outcomes use accessible snackbars; a structured failed save preserves the form rather than revalidating into RouteError. New profiles default to 0.7 keyboard opacity. Sound and theme remain persist-only.   |
 | One-page Learning Path player                      | In progress | Home now hosts a course-confined, up-to-ten-exercise player above Hero with local IndexedDB checkpoint plumbing and a finger-placement guide ([[DEC-035]]). Verification remains user-owned for this implementation round.                                                                                                                                                                                                                                                                                                                                                                     |
+
+## Dev Tooling: Jamo SVG
+
+Development-only data pipeline; it does not affect the learner renderer yet. Design: `docs/research/JAMO_SVG_TAGGER_DESIGN.md`.
+
+| Item                                      | Status      | Notes                                                                                                                                                                           |
+| ----------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Jamo SVG Tagger (`/dev/jamo-svg-tagger`)  | Done        | Review per-step ownership of Pretendard 600 outlines, split recipes including enclosed counters ([[DEC-038]]), one step per typed key ([[DEC-037]]).                            |
+| Review queue and data                     | In progress | Queue holds every syllable of the first 2,000 words of the Korean 5800 list plus a few reference glyphs: 686 syllables, all approved. `pnpm jamo-svg:audit` reports 0 findings. |
+| Remaining word-list syllables             | Not started | About 280 more syllables cover all 5,467 words; inflected and particle syllables (e.g. `를 했 았`) are not in the list.                                                         |
+| Runtime SVG dataset and per-step renderer | Not started | Compile approved reviews into the minimal runtime dataset; render step by step with the Canvas renderer as fallback. Needs its own design and decision.                         |
 
 ## Planned Learning Modes
 

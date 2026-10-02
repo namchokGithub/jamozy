@@ -725,3 +725,16 @@ Chronological log of completed units of work. One entry per meaningful change (n
   support it; existing recipes are unchanged.
   `pnpm jamo-svg:propose --replace-reviewing` can re-propose unapproved
   `reviewing` drafts; approved reviews are never touched.
+
+### 2026-10-02 — Jamo SVG review audit and status docs
+
+- Added `pnpm jamo-svg:audit` (`tools/jamo-svg/audit.ts`), a read-only check
+  of approved reviews for what validation cannot see: blockers, jamo on the
+  wrong side of the initial, sliver steps, disagreement with a similar
+  approved glyph, and counters inside a split outline owned against the ink
+  around them. It exits 1 on any finding.
+- All 686 queued syllables (first 2,000 words of the Korean 5800 list plus a
+  few reference glyphs) are
+  approved; the audit reports 0 findings.
+- AGENTS.md now lists real lint/format commands and the Jamo SVG tooling;
+  PROGRESS.md and README track the Tagger and the next runtime step.

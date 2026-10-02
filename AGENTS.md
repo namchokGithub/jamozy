@@ -19,11 +19,37 @@ Firebase Anonymous Auth is legacy implementation context. The target account mod
 ```bash
 pnpm install
 pnpm dev
-pnpm build
+pnpm build      # tsc -b && vite build
 pnpm test
+pnpm lint
+pnpm format
 ```
 
-(Lint/format/typecheck scripts will be added once tooling is scaffolded — check `package.json` before assuming a script name.)
+Check `package.json` before assuming any other script name.
+
+### Jamo SVG tooling (development only)
+
+The Jamo SVG Tagger (`/dev/jamo-svg-tagger`, served by `pnpm dev`) reviews
+Pretendard 600 outlines into per-typed-key SVG paths. Review data lives in
+`tools/jamo-svg/reviews/pretendard-600/`; the queue in
+`tools/jamo-svg/queue/pretendard-600/queue.json`; the extraction cache in
+`tools/jamo-svg/cache/` (gitignored, rebuilt by `jamo-svg:enqueue`).
+
+```bash
+pnpm jamo-svg:enqueue --top 2000      # add word-list syllables to the queue
+pnpm jamo-svg:propose --dry-run       # propose reviews from approved templates
+pnpm jamo-svg:propose --rank          # which unreviewed syllables unlock others
+pnpm jamo-svg:audit                   # read-only audit of approved reviews
+```
+
+- Commit review data before running a script that writes it
+  (`enqueue`, `propose`, migrations). Use `--dry-run` first.
+- `propose` never changes approved reviews; `--replace-reviewing` also
+  overwrites unapproved `reviewing` drafts.
+- Do not run `pnpm jamo-svg:seed` on existing data: it re-initializes the
+  review manifest.
+- After changing review logic, `tools/jamo-svg/approved-reviews.test.ts` and
+  `pnpm jamo-svg:audit` must stay clean.
 
 ## Architecture Rules
 
@@ -86,6 +112,10 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 - `docs/REQUIREMENT-V1.md` — source requirements for the original MVP; a later accepted decision takes precedence if they conflict.
 - `docs/CREDITS.md` — content-source registry and attribution requirements.
 - `docs/COMPLETE-LOG.md` — chronological record of meaningful completed work.
+- `docs/research/JAMO_SVG_TAGGER_DESIGN.md` — Jamo SVG Tagger design: review records, split recipes, blockers, runtime-data boundary.
+- `docs/research/HANGUL_SVG_ANALYSIS.md` — glyph-outline measurements behind the Tagger.
+- `docs/informations/5800_korean_words.md` — Korean 5800 frequency list that feeds the Tagger queue.
+- `docs/superpowers/plans/` — implementation plans for completed and in-flight work.
 - `CLAUDE.md` — Claude Code-specific workflow additions.
 
 ## Data Fetching
