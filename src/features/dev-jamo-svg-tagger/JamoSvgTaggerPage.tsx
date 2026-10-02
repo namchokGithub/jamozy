@@ -18,6 +18,7 @@ import {
 } from '../../domain/korean/hangul'
 import { counterContours } from '../../../tools/jamo-svg/compile'
 import {
+  assignContour,
   assignPiece,
   commandCoverage as coverageOf,
   moveSourceRange,
@@ -1062,17 +1063,21 @@ export default function JamoSvgTaggerPage() {
   })
   const assign = (contourId: number, step: number | null) => {
     if (!state) return
+    // Counters already partitioned by a split recipe keep their recipe ownership.
+    const consumed = new Set(
+      state.review.splitRecipes.flatMap(({ counterContours = [] }) =>
+        counterContours.map(({ contourId: id }) => id),
+      ),
+    )
     const review = beginReview({
       ...state.review,
-      steps: state.review.steps.map((item) => ({
-        ...item,
-        geometry: item.geometry
-          .filter(
-            (geometry) =>
-              geometry.kind !== 'contour' || geometry.contourId !== contourId,
-          )
-          .concat(item.order === step ? [{ kind: 'contour', contourId }] : []),
-      })),
+      steps: assignContour(
+        state.review.steps,
+        contourId,
+        step,
+        counterContours(state.source as unknown as CachedGlyph),
+        consumed,
+      ),
     })
     updateDraft(review)
   }
@@ -2305,6 +2310,7 @@ export default function JamoSvgTaggerPage() {
                                 onClick={() =>
                                   deletePiece(activeRecipe.id, piece.id)
                                 }
+                                className="text-xs text-white hover:bg-[#ff8787]! hover:text-red-600! bg-red-600!"
                               >
                                 Delete piece
                               </Button>

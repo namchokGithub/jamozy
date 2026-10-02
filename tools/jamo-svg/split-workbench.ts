@@ -296,3 +296,48 @@ export function assignPiece<T extends StepLike>(
     ? place(next, partner.id, candidates[0].order)
     : next
 }
+
+/**
+ * Gives a whole contour to `step` (or to no step when null). Counters inside it
+ * follow: each counter that was unassigned or shared the contour's previous
+ * step moves with it, so a hole always belongs to the letter around it. A
+ * counter the reviewer gave another step, or one consumed by a split recipe
+ * (`consumed`), is left alone.
+ */
+export function assignContour<T extends StepLike>(
+  steps: T[],
+  contourId: number,
+  step: number | null,
+  counters: Array<{ counterId: number; outerId: number }>,
+  consumed: ReadonlySet<number> = new Set(),
+): T[] {
+  const ownerOf = (id: number) =>
+    steps.find((item) =>
+      item.geometry.some(
+        (ref) => ref.kind === 'contour' && ref.contourId === id,
+      ),
+    )?.order
+  const previous = ownerOf(contourId)
+  const followers = counters
+    .filter(
+      ({ outerId, counterId }) =>
+        outerId === contourId && !consumed.has(counterId),
+    )
+    .map(({ counterId }) => counterId)
+    .filter((counterId) => {
+      const owner = ownerOf(counterId)
+      return owner === undefined || owner === previous
+    })
+  const moving = new Set([contourId, ...followers])
+  return steps.map((item) => ({
+    ...item,
+    geometry: [
+      ...item.geometry.filter(
+        (ref) => ref.kind !== 'contour' || !moving.has(ref.contourId),
+      ),
+      ...(item.order === step
+        ? [...moving].map((id) => ({ kind: 'contour' as const, contourId: id }))
+        : []),
+    ],
+  }))
+}

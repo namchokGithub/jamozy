@@ -399,6 +399,68 @@
         "validationHash": "6ce17bf09da3c48e8578adcc2afcf765d4933f71f98f7a0826f10e3c4e5b2ee2"
       }
     },
+    "땜": {
+      "reviewSchemaVersion": 2,
+      "syllable": "땜",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "f4b33b0568fad9fcbdf504401c4929a4f3c751a7f0d029ee2412b42fa78191c2"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄸ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅐ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅁ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 3
+            },
+            {
+              "kind": "contour",
+              "contourId": 4
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-02T10:24:26.321Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "564372bd367ef5b4fe9cb64e58ae5949fb3b5befb4e7f8765484c306a6300294"
+      }
+    },
     "떠": {
       "reviewSchemaVersion": 2,
       "syllable": "떠",
@@ -931,7 +993,7 @@
         },
         "sourceGlyphHash": "b7d145c617fbd19fa204dd6a6e85116db6885885c975bfd05c3e26d251a35e2e"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -959,7 +1021,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-02T10:22:59.373Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "f569276e55078acbe86a531cbf97c10d3783d8c5ccadaa08610e2fbe4d3a7e25"
+      }
     },
     "뚫": {
       "reviewSchemaVersion": 2,

@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import {
+  assignContour,
   assignPiece,
   commandCoverage,
   compileSplitPiecePreview,
@@ -318,5 +319,30 @@ describe('assignPiece', () => {
 
   test('unassigning leaves the partner alone', () => {
     expect(assignPiece(steps([piece('p1')], [piece('p2')]), recipe, 'p1', null)).toEqual(steps([], [piece('p2')]))
+  })
+})
+
+describe('assignContour', () => {
+  const contour = (contourId: number) => ({ kind: 'contour' as const, contourId })
+  const steps = (...geometry: Array<Array<ReturnType<typeof contour>>>) => geometry.map((items, order) => ({ order, jamo: `j${order}`, geometry: items }))
+  // Contour 1 is the ㅇ outline; contour 3 is its counter.
+  const counters = [{ counterId: 3, outerId: 1 }]
+
+  test('gives an unassigned counter the same step as its outline', () => {
+    expect(assignContour(steps([], []), 1, 0, counters)).toEqual(steps([contour(1), contour(3)], []))
+  })
+
+  test('moves a counter that followed its outline, and unassigns it with the outline', () => {
+    const before = steps([contour(1), contour(3)], [])
+    expect(assignContour(before, 1, 1, counters)).toEqual(steps([], [contour(1), contour(3)]))
+    expect(assignContour(before, 1, null, counters)).toEqual(steps([], []))
+  })
+
+  test('leaves a counter the reviewer gave a different step', () => {
+    expect(assignContour(steps([], [contour(3)]), 1, 0, counters)).toEqual(steps([contour(1)], [contour(3)]))
+  })
+
+  test('never assigns a counter consumed by a split recipe', () => {
+    expect(assignContour(steps([], []), 1, 0, counters, new Set([3]))).toEqual(steps([contour(1)], []))
   })
 })

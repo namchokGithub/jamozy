@@ -2091,6 +2091,114 @@
         "validationHash": "b62959afeec140f36f19205b789f682721f0e33312aeeac667357a7947766934"
       }
     },
+    "겹": {
+      "reviewSchemaVersion": 2,
+      "syllable": "겹",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "d9e71916a52b4853a0eecf7627074dd22091a31db6a62e46735210834b8d84a1"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄱ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅕ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅂ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [
+        {
+          "id": "split-0-1",
+          "sourceContourId": 0,
+          "sourceContourHash": "56717f7c441fd15f3f564dc1b82bb1fc8182833d54f7633f034c0a02f80d0bf7",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "56717f7c441fd15f3f564dc1b82bb1fc8182833d54f7633f034c0a02f80d0bf7"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 2
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 13,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 14,
+                  "toCommand": 23
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 3,
+                  "toCommand": 13
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "approved": {
+        "at": "2026-10-02T10:23:11.134Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "05d33d7cf6f42adfa1e2aab06f43654e3530d3fd43c5797bba18a248c4b75b27"
+      }
+    },
     "경": {
       "reviewSchemaVersion": 2,
       "syllable": "경",
@@ -5037,6 +5145,120 @@
         "validationHash": "f1093bf8cda5fdff089d5f6a436b6d01357422892f50fc4c888240c0222f5dbc"
       }
     },
+    "귓": {
+      "reviewSchemaVersion": 2,
+      "syllable": "귓",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "6d778509fc51fe9f6a11a31756750245953a69464c5fdd621f9c7b26abca88b5"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄱ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-1-1",
+              "pieceId": "piece-1"
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅜ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-1-1",
+              "pieceId": "piece-2"
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅣ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "jamo": "ㅅ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [
+        {
+          "id": "split-1-1",
+          "sourceContourId": 1,
+          "sourceContourHash": "e50a55c01d389cdb97bb7ebbc52207612ec41477bcd1517f5797da7f076fefff",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "e50a55c01d389cdb97bb7ebbc52207612ec41477bcd1517f5797da7f076fefff"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 4,
+                  "toCommand": 12
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 3
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 1,
+                    "commandIndex": 12,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 13,
+                  "toCommand": 26
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "approved": {
+        "at": "2026-10-02T10:23:44.060Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "5e989c308b8d7c46540b1ac653f4f8ef7f37d96070a7f0135e4e11291df1b9b1"
+      }
+    },
     "규": {
       "reviewSchemaVersion": 2,
       "syllable": "규",
@@ -5777,7 +5999,7 @@
         },
         "sourceGlyphHash": "dfb55395f252141ba0ba8cedffff9f4961130cecb8eb254ec9816168b3c7f6b6"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -5871,7 +6093,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-02T10:23:04.762Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "8f6f3d030141eef363ec3b3e92742d83b9bc1d1327fe379d1e5dcc55100ae9fe"
+      }
     },
     "금": {
       "reviewSchemaVersion": 2,
