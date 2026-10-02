@@ -567,7 +567,7 @@
         },
         "sourceGlyphHash": "e2bea57d447eb52b99c8e5d81cec00b1759d047b1d9f7f798cf5aa7c1f971541"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -609,7 +609,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-02T09:24:01.063Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "82db2b9845f59ca5c35653d8c1d7a6cc63307c46e6ae5c933a85d81f641c9b0c"
+      }
     },
     "햄": {
       "reviewSchemaVersion": 2,
@@ -623,7 +629,7 @@
         },
         "sourceGlyphHash": "3e7d34824b82922b551a8c89307d76d0f6768613edac0ee7cf638322fcd33636"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -669,7 +675,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-02T09:24:01.750Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "6df2c8a9910e6cbabc9de4d1024795f94035281af98bb42304ab533199e27f85"
+      }
     },
     "햇": {
       "reviewSchemaVersion": 2,
@@ -1841,7 +1853,7 @@
         },
         "sourceGlyphHash": "17f51797e66c12a79527d4600161d26bda2406c58bd1bc33ea59f33672b83e8b"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -1937,7 +1949,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-02T09:24:16.483Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "a437a0ab05ff296e649bf47d6b8220dba4d856df025731c7be0e28923960191e"
+      }
     },
     "홉": {
       "reviewSchemaVersion": 2,
@@ -1951,7 +1969,7 @@
         },
         "sourceGlyphHash": "6a54e43f3262927e4949cbcd28a07db7993ce7bb7a3814283a1bcf16efdef297"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -2047,7 +2065,13 @@
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-02T09:24:37.455Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "5b4ac57b51ed255248ec0606b607b9653d97e3c4187c2b5b6ac6bb1d2616f3b5"
+      }
     },
     "홍": {
       "reviewSchemaVersion": 2,

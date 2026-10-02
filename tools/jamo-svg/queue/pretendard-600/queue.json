@@ -16291,7 +16291,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "뱀"
+      ]
     },
     {
       "syllable": "딩",
@@ -16602,7 +16604,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "쾌"
+      ]
     },
     {
       "syllable": "깅",
@@ -17604,7 +17608,9 @@
         "physicalStepCount": 4,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "뒷"
+      ]
     },
     {
       "syllable": "덟",

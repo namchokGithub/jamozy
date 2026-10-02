@@ -73,7 +73,7 @@
         },
         "sourceGlyphHash": "59c3e838d7adf1d542a20f41af40ab7b1c1732439cd4dc578fe6d4da5f83ac2d"
       },
-      "status": "proposed",
+      "status": "approved",
       "blockers": [],
       "steps": [
         {
@@ -119,7 +119,13 @@
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-02T09:24:28.293Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "8cb24ac64690a9e54d8a582588ed13fe982ddb9f3cf08e26e0f34a72fb498871"
+      }
     },
     "빨": {
       "reviewSchemaVersion": 2,
