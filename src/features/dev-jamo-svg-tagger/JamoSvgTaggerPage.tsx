@@ -1016,7 +1016,9 @@ export default function JamoSvgTaggerPage() {
             ? ['unreviewed']
             : has('reviewing')
               ? ['reviewing']
-              : [],
+              : has('proposed')
+                ? ['proposed']
+                : [],
         )
       })
       .catch((reason: unknown) =>

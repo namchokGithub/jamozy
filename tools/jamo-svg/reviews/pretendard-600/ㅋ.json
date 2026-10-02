@@ -1261,6 +1261,50 @@
         "validationHash": "6e9aa11b716dc7b374b0e70e3d94f8418c1a9c8ad8c1c5c060e30c33a7de2046"
       }
     },
+    "쿄": {
+      "reviewSchemaVersion": 2,
+      "syllable": "쿄",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "8072d549ef0ddc2ded2b944c30364af698629815f62133609ca2cef5789edcf2"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅋ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅛ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-02T11:38:40.782Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "66f5627afdeb3479adece0af38740d860c8f8957902dc80ed591e96953c4726e"
+      }
+    },
     "쿠": {
       "reviewSchemaVersion": 2,
       "syllable": "쿠",

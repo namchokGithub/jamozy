@@ -17992,6 +17992,112 @@
         "contourRelation": "surplus"
       },
       "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "걔",
+      "priority": 5,
+      "reasons": [
+        "frequency-list:korean-5800"
+      ],
+      "sourceRank": 5468,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 2,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "껌",
+      "priority": 5,
+      "reasons": [
+        "frequency-list:korean-5800"
+      ],
+      "sourceRank": 5472,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "쟤",
+      "priority": 5,
+      "reasons": [
+        "frequency-list:korean-5800"
+      ],
+      "sourceRank": 5473,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 2,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "귤",
+      "priority": 5,
+      "reasons": [
+        "frequency-list:korean-5800"
+      ],
+      "sourceRank": 5475,
+      "queueKey": {
+        "medialLayout": "horizontal",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "deficit"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "깍",
+      "priority": 5,
+      "reasons": [
+        "frequency-list:korean-5800"
+      ],
+      "sourceRank": 5489,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": [
+        "깥"
+      ]
+    },
+    {
+      "syllable": "쿄",
+      "priority": 5,
+      "reasons": [
+        "frequency-list:korean-5800"
+      ],
+      "sourceRank": 5500,
+      "queueKey": {
+        "medialLayout": "horizontal",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 2,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": [
+        "죠"
+      ]
     }
   ]
 }
