@@ -1,6 +1,12 @@
 import { describe, expect, test } from 'vitest'
+import { compileReview } from './compile'
 import { extractGlyph } from './extract'
-import { matchContours, proposeReview, rankTemplateCandidates, type ApprovedTemplate } from './propose'
+import {
+  matchContours,
+  proposeReview,
+  rankTemplateCandidates,
+  type ApprovedTemplate,
+} from './propose'
 import { seedReview } from './seed'
 import { yeoCounterSplit } from './counter-split.fixture'
 import type { CachedGlyph, GlyphReview } from './types'
@@ -160,7 +166,56 @@ describe('approved-template proposals', () => {
       ])
       expect(proposal?.review.blockers).toEqual([])
       // An identical target keeps every range and anchor on its original contour.
-      expect(proposal?.review.splitRecipes[0].pieces).toEqual((await yeoTemplate()).review.splitRecipes[0].pieces)
+      expect(proposal?.review.splitRecipes[0].pieces).toEqual(
+        (await yeoTemplate()).review.splitRecipes[0].pieces,
+      )
+    })
+
+    test('re-targets every range and anchor when the target numbers its contours differently', async () => {
+      // Same 여 geometry with contours reordered: old c2 (counter) → 0, old c0 (outline) → 1, old c1 (ㅇ counter) → 2.
+      const target = await renamedYeo((glyph) => {
+        glyph.contours = [2, 0, 1].map((oldId, newId) => ({
+          ...glyph.contours[oldId],
+          id: newId,
+        }))
+      })
+      const template = await yeoTemplate()
+      const proposal = proposeReview(target, [template], 250)
+      expect(proposal?.review.blockers).toEqual([])
+      const recipe = proposal!.review.splitRecipes[0]
+      expect(recipe).toMatchObject({
+        sourceContourId: 1,
+        counterContours: [
+          { contourId: 0, contourHash: target.contours[0].commandHash },
+        ],
+      })
+      const contourIds = recipe.pieces.flatMap(({ tokens }) =>
+        tokens.flatMap((token) =>
+          token.kind === 'source-range'
+            ? [token.contourId ?? recipe.sourceContourId]
+            : token.kind === 'close-to-start'
+              ? []
+              : [token.anchor.contourId],
+        ),
+      )
+      expect(new Set(contourIds)).toEqual(new Set([0, 1]))
+      // ㅇ's own counter keeps whole ownership under its new number.
+      expect(proposal!.review.steps[0].geometry).toContainEqual({
+        kind: 'contour',
+        contourId: 2,
+      })
+      // Identical geometry, so each step must compile to the same subpaths (order aside).
+      const subpaths = (paths: Array<{ jamo: string; d: string }>) =>
+        paths.map(({ jamo, d }) => ({
+          jamo,
+          subpaths: d
+            .split(/(?=M)/)
+            .map((part) => part.trim())
+            .sort(),
+        }))
+      expect(subpaths(compileReview(target, proposal!.review).paths)).toEqual(
+        subpaths(compileReview(template.glyph, template.review).paths),
+      )
     })
 
     test('rejects a counter recipe when the counter has a different command shape', async () => {
@@ -174,15 +229,23 @@ describe('approved-template proposals', () => {
 
 describe('rankTemplateCandidates', () => {
   test('groups each unreviewed glyph under the one whose approval would propose the most others', async () => {
-    const glyphs = await Promise.all(['가', '카', '나', '거'].map((syllable) => extractGlyph(syllable)))
+    const glyphs = await Promise.all(
+      ['가', '카', '나', '거'].map((syllable) => extractGlyph(syllable)),
+    )
     const groups = rankTemplateCandidates(glyphs, 10_000)
     // Only 가/카/나 share a vowel and step count; 거 has a different vowel.
     expect(groups).toHaveLength(1)
-    expect([groups[0].template, ...groups[0].proposes].sort()).toEqual(['가', '나', '카'])
+    expect([groups[0].template, ...groups[0].proposes].sort()).toEqual([
+      '가',
+      '나',
+      '카',
+    ])
   })
 
   test('returns no group when nothing is within the cost limit', async () => {
-    const glyphs = await Promise.all(['가', '나'].map((syllable) => extractGlyph(syllable)))
+    const glyphs = await Promise.all(
+      ['가', '나'].map((syllable) => extractGlyph(syllable)),
+    )
     expect(rankTemplateCandidates(glyphs, 1)).toEqual([])
   })
 })
