@@ -919,6 +919,48 @@
         "validationHash": "4e191c61d401543b5cff03536e5c1bf49a9ce6ba6cee9c09c933d60a7bdbaabf"
       }
     },
+    "뚜": {
+      "reviewSchemaVersion": 2,
+      "syllable": "뚜",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "b7d145c617fbd19fa204dd6a6e85116db6885885c975bfd05c3e26d251a35e2e"
+      },
+      "status": "proposed",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄸ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            },
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅜ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": []
+    },
     "뚫": {
       "reviewSchemaVersion": 2,
       "syllable": "뚫",

@@ -1051,6 +1051,66 @@
         "validationHash": "3cbc460ca5e89e40e4bb37dd129dbad944614fd22ebb289574d8935bfed69d53"
       }
     },
+    "헬": {
+      "reviewSchemaVersion": 2,
+      "syllable": "헬",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "2ac2ee11460d83245c5a842a7c6d3899af276645f90b684792f13dd47fafd3ef"
+      },
+      "status": "proposed",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅎ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 3
+            },
+            {
+              "kind": "contour",
+              "contourId": 4
+            },
+            {
+              "kind": "contour",
+              "contourId": 5
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅔ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㄹ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        }
+      ],
+      "splitRecipes": []
+    },
     "혀": {
       "reviewSchemaVersion": 2,
       "syllable": "혀",
@@ -1164,6 +1224,62 @@
         "validatorVersion": 1,
         "validationHash": "44f6a5435ac8fa5b015120179a0fd86f1865c787ecc6f6cc3cdd2bb691198dd3"
       }
+    },
+    "혈": {
+      "reviewSchemaVersion": 2,
+      "syllable": "혈",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "3247fe4fbd78a125ab1b3c33020c4a94938ba554f7fa103ed1a8c31769b6a986"
+      },
+      "status": "proposed",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅎ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            },
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅕ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 3
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㄹ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 4
+            }
+          ]
+        }
+      ],
+      "splitRecipes": []
     },
     "협": {
       "reviewSchemaVersion": 2,

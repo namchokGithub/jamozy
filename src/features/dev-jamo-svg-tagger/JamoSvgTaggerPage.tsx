@@ -756,6 +756,7 @@ const shortcutRows = [
   { keys: ['→', 'd', 'ก'], action: 'Next glyph' },
   { keys: ['s', 'ห'], action: 'Save' },
   { keys: ['f', 'ด'], action: 'Approve' },
+  { keys: ['v', 'อ'], action: 'Mark proposed (recheck later)' },
   { keys: ['Esc'], action: 'Close dialog' },
 ]
 const reviewStatuses = [
@@ -921,6 +922,8 @@ export default function JamoSvgTaggerPage() {
           'ก',
           'ห',
           'ด',
+          'v',
+          'อ',
           'พ',
         ].includes(event.key)
       )
@@ -940,6 +943,10 @@ export default function JamoSvgTaggerPage() {
       }
       if (event.key === 'f' || event.key === 'ด') {
         void save(true)
+        return
+      }
+      if (event.key === 'v' || event.key === 'อ') {
+        void save(false, false, true)
         return
       }
       if (event.key === 'r' || event.key === 'พ') {
@@ -1305,8 +1312,13 @@ export default function JamoSvgTaggerPage() {
   }
   /** `draft` keeps unfinished work: it marks the review needs-split so any in-progress blocker can be saved. */
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  async function save(approve = false, draft = false) {
+  async function save(approve = false, draft = false, markProposed = false) {
     if (!state) return
+    // `markProposed` parks a finished, unapproved review as `proposed` for a recheck before approval.
+    if (markProposed && state.review.status === 'approved') {
+      setError(`${state.source.syllable} is already approved.`)
+      return
+    }
     previewSequence.current += 1
     // Once needs-split is the only blocker left, the split is finished: a plain
     // Save or Approve clears the flag instead of keeping the review a draft.
@@ -1330,7 +1342,9 @@ export default function JamoSvgTaggerPage() {
             status: 'reviewing',
             blockers: [...new Set([...state.review.blockers, 'needs-split'])],
           }
-        : current
+        : markProposed
+          ? { ...current, status: 'proposed' }
+          : current
     try {
       const result = await api<SaveResponse>(approve ? '/approve' : '/save', {
         method: 'POST',
@@ -1360,7 +1374,14 @@ export default function JamoSvgTaggerPage() {
       setNotice(
         approve
           ? { message: `${result.review.syllable} approved`, tone: 'approved' }
-          : { message: draft ? 'Draft saved' : 'Preview saved', tone: 'saved' },
+          : {
+              message: markProposed
+                ? `${result.review.syllable} marked proposed for recheck`
+                : draft
+                  ? 'Draft saved'
+                  : 'Preview saved',
+              tone: 'saved',
+            },
       )
     } catch (reason) {
       const message = reason instanceof Error ? reason.message : 'Save failed.'
@@ -1409,7 +1430,7 @@ export default function JamoSvgTaggerPage() {
     ),
   )
   return (
-    <PageSurface className="overflow-visible!" contentClassName="max-w-7xl">
+    <PageSurface className="overflow-clip!" contentClassName="max-w-7xl">
       {loading && (
         <div
           role="status"
@@ -1430,6 +1451,7 @@ export default function JamoSvgTaggerPage() {
         title={`${saveFailure?.action ?? 'Save'} failed`}
         onClose={() => setSaveFailure(undefined)}
         sizeClassName="max-w-2xl"
+        closeLabel="X"
       >
         {saveFailure && (
           <div className="mt-3 w-full max-w-2xl max-h-[80vh] space-y-3 overflow-auto text-sm text-[#39465b]">

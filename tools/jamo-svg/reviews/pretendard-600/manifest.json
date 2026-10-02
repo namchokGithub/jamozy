@@ -8,14 +8,14 @@
     {
       "choseong": "ㄱ",
       "file": "ㄱ.json",
-      "reviewCount": 81,
-      "sha256": "7ab9dc87bc0a294f9ba72d2041ff12bdcf4a4f67f48da670276578f42a19a5b9"
+      "reviewCount": 82,
+      "sha256": "649e5f8912c4453694e984181d42718f621c035c10561018c6fb59b289bf5803"
     },
     {
       "choseong": "ㄲ",
       "file": "ㄲ.json",
-      "reviewCount": 36,
-      "sha256": "9f367d3a2bc5a68aed6a37da5acc4344ceec96a2f7f39b5d9625edaf58f9e7f7"
+      "reviewCount": 38,
+      "sha256": "726c18f65e1643f2f6a19ab29319d85d96fb92420b25791602a7d11e89494e95"
     },
     {
       "choseong": "ㄴ",
@@ -32,8 +32,8 @@
     {
       "choseong": "ㄸ",
       "file": "ㄸ.json",
-      "reviewCount": 24,
-      "sha256": "3c3d7ab6bc8149b319b30109510940174c451937081383e9f90c1b5c1d9b24b7"
+      "reviewCount": 25,
+      "sha256": "10c078d8f1d4018f5cab020659a0aa9c0172757727507b11484b8c6cb5fea4fe"
     },
     {
       "choseong": "ㄹ",
@@ -50,8 +50,8 @@
     {
       "choseong": "ㅂ",
       "file": "ㅂ.json",
-      "reviewCount": 57,
-      "sha256": "f8a2308677314867331a34148e839547c78e672131782d486e902d4ec989ab3e"
+      "reviewCount": 59,
+      "sha256": "d63ab177b96fb3cc2cca58a19c04e0db87141ae5f48522687544b841fc65fe0b"
     },
     {
       "choseong": "ㅃ",
@@ -74,8 +74,8 @@
     {
       "choseong": "ㅇ",
       "file": "ㅇ.json",
-      "reviewCount": 102,
-      "sha256": "bcda6d621f4a4ba3c045f4c1028c079665e956b88c8a738ed300fba1d7118925"
+      "reviewCount": 103,
+      "sha256": "d29987f90c30307bdab13092eba3eac7f8c307b408d74fbfad163b6208b220a9"
     },
     {
       "choseong": "ㅈ",
@@ -110,14 +110,14 @@
     {
       "choseong": "ㅍ",
       "file": "ㅍ.json",
-      "reviewCount": 32,
-      "sha256": "dbb0d472fd13345a00a178e776f1767c4bea6892ede4cccee2a54b00177860e5"
+      "reviewCount": 33,
+      "sha256": "6e81bf14bebca4ef01e113de7ff9a913e8382eb2e43523587944264c9438db75"
     },
     {
       "choseong": "ㅎ",
       "file": "ㅎ.json",
-      "reviewCount": 57,
-      "sha256": "0e56fb0f491452a68972b83a5f2ad1c3016e309619f3e8a83ce6b9adc71cacb2"
+      "reviewCount": 59,
+      "sha256": "c2b7d4ab97bb4d5fbcb5188d493a53c8529323708d4e0b0023140895718ab2ac"
     }
   ]
 }

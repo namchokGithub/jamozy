@@ -505,6 +505,58 @@
         "validationHash": "66e11cf84f91dbe95ee3850f5874e1202a5d60a514c22e77d98ee9a5f85b8e15"
       }
     },
+    "퍽": {
+      "reviewSchemaVersion": 2,
+      "syllable": "퍽",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "ffaf4bab8a6ea9c370b4a2d93eded62e5ac25354be67919b9b9aec6e13e793f9"
+      },
+      "status": "proposed",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅍ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            },
+            {
+              "kind": "contour",
+              "contourId": 3
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅓ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㄱ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": []
+    },
     "페": {
       "reviewSchemaVersion": 2,
       "syllable": "페",
