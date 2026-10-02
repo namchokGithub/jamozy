@@ -37,6 +37,7 @@ Pretendard 600 outlines into per-typed-key SVG paths. Review data lives in
 
 ```bash
 pnpm jamo-svg:enqueue --top 2000      # add word-list syllables to the queue
+pnpm jamo-svg:enqueue --words docs/informations/korean-inflection-sample.md --reason inflection-sample
 pnpm jamo-svg:propose --dry-run       # propose reviews from approved templates
 pnpm jamo-svg:propose --rank          # which unreviewed syllables unlock others
 pnpm jamo-svg:audit                   # read-only audit of approved reviews
@@ -115,6 +116,7 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 - `docs/research/JAMO_SVG_TAGGER_DESIGN.md` — Jamo SVG Tagger design: review records, split recipes, blockers, runtime-data boundary.
 - `docs/research/HANGUL_SVG_ANALYSIS.md` — glyph-outline measurements behind the Tagger.
 - `docs/informations/5800_korean_words.md` — Korean 5800 frequency list that feeds the Tagger queue.
+- `docs/informations/korean-inflection-sample.md` — inflection/particle syllables the dictionary-form list lacks.
 - `docs/superpowers/plans/` — implementation plans for completed and in-flight work.
 - `CLAUDE.md` — Claude Code-specific workflow additions.
 

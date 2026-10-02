@@ -2,7 +2,7 @@
 
 Mirrors the MVP checklist in `README.md`. Update both when status changes. Statuses: `Not started`, `In progress`, `Blocked`, `Done`.
 
-Last updated: 2026-10-02 (Jamo SVG Tagger: 686 syllables approved)
+Last updated: 2026-10-02 (Jamo SVG Tagger: 989 syllables approved)
 
 ## MVP
 
@@ -25,12 +25,12 @@ Last updated: 2026-10-02 (Jamo SVG Tagger: 686 syllables approved)
 
 Development-only data pipeline; it does not affect the learner renderer yet. Design: `docs/research/JAMO_SVG_TAGGER_DESIGN.md`.
 
-| Item                                      | Status      | Notes                                                                                                                                                                           |
-| ----------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Jamo SVG Tagger (`/dev/jamo-svg-tagger`)  | Done        | Review per-step ownership of Pretendard 600 outlines, split recipes including enclosed counters ([[DEC-038]]), one step per typed key ([[DEC-037]]).                            |
-| Review queue and data                     | In progress | Queue holds every syllable of the first 2,000 words of the Korean 5800 list plus a few reference glyphs: 686 syllables, all approved. `pnpm jamo-svg:audit` reports 0 findings. |
-| Remaining word-list syllables             | Not started | About 280 more syllables cover all 5,467 words; inflected and particle syllables (e.g. `를 했 았`) are not in the list.                                                         |
-| Runtime SVG dataset and per-step renderer | Not started | Compile approved reviews into the minimal runtime dataset; render step by step with the Canvas renderer as fallback. Needs its own design and decision.                         |
+| Item                                      | Status      | Notes                                                                                                                                                                                                                                             |
+| ----------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Jamo SVG Tagger (`/dev/jamo-svg-tagger`)  | Done        | Review per-step ownership of Pretendard 600 outlines, split recipes including enclosed counters ([[DEC-038]]), one step per typed key ([[DEC-037]]).                                                                                              |
+| Review queue and data                     | Done        | 989 syllables, all approved: all 966 syllables of the 5,467-word Korean 5800 list, an 18-syllable inflection/particle sample (`docs/informations/korean-inflection-sample.md`), and 5 reference glyphs. `pnpm jamo-svg:audit` reports 0 findings. |
+| Inflected and particle syllables          | In progress | The 18-syllable sample (`를 았 었 했 …`) is approved; a fuller list of endings and contracted verb forms is not yet enqueued. Syllables never used in real text are deliberately not reviewed; they keep the Canvas renderer.                     |
+| Runtime SVG dataset and per-step renderer | Not started | Compile approved reviews into the minimal runtime dataset; render step by step with the Canvas renderer as fallback. Needs its own design and decision.                                                                                           |
 
 ## Planned Learning Modes
 

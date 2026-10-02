@@ -203,6 +203,10 @@ recipe, empty steps) so unfinished work can resume later. Stale source
 geometry (`fingerprint-mismatch`) and step mismatches still refuse to save.
 The Tagger's “Save draft” adds `needs-split` and saves.
 
+In practice `proposed` marks a finished, unapproved review for a recheck: the
+proposer writes it, and the Tagger's `p` shortcut sets it on a blocker-free
+review. It still needs an explicit approval.
+
 `approved` requires zero blocking validation errors and an explicit human
 approval action. Any source fingerprint/hash mismatch automatically changes an
 approved record to `stale`; it cannot be exported. Editing an approved record

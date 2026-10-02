@@ -738,3 +738,23 @@ Chronological log of completed units of work. One entry per meaningful change (n
   approved; the audit reports 0 findings.
 - AGENTS.md now lists real lint/format commands and the Jamo SVG tooling;
   PROGRESS.md and README track the Tagger and the next runtime step.
+
+### 2026-10-02 — Jamo SVG: full word list approved and Tagger workflow polish
+
+- 989 syllables are approved: every syllable of the 5,467-word Korean 5800
+  list (966), an 18-syllable inflection/particle sample enqueued from
+  `docs/informations/korean-inflection-sample.md`, and 5 reference glyphs.
+  `pnpm jamo-svg:audit` reports 0 findings.
+- Validation now rejects a `close-to-start` seam before a piece's end, and
+  checks counters inside a split outline against the surrounding ink
+  (`counter-owner-mismatch`); the audit's separate counter check was removed.
+- `needs-split` drafts may also hold `invalid-split-recipe` and
+  `duplicate-ownership`, so unfinished splits can be saved and resumed;
+  a plain Save or Approve clears `needs-split` once it is the only blocker.
+- Tagger: Save draft, `p` to mark a finished review `proposed` for recheck,
+  counters following their outline's owner, auto-assigned partner piece,
+  seams rebuilt on every range edit, move up/down for ranges, jamo search
+  (`ㄲ`, `ㄲㅕ`), a shortcuts panel, status colors, an enlargeable per-jamo
+  preview, and easier command selection.
+- `/queue` reads review shards once instead of once per syllable (about 3 s
+  to 9 ms for 989 syllables) with identical output.
