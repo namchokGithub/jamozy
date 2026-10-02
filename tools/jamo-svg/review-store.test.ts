@@ -47,4 +47,19 @@ describe('sharded review store', () => {
     await store.save({ ...unfinished, blockers: ['needs-split'] })
     expect(await store.get('여')).toMatchObject({ status: 'reviewing', blockers: expect.arrayContaining(['needs-split', 'invalid-split-recipe', 'duplicate-ownership']) })
   })
+
+  test('reads every review status in one pass, matching per-syllable reads', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'jamo-svg-')); roots.push(root)
+    const syllables = ['가', '하', '여']
+    const source = await extractGlyph('가'); const cache = join(root, 'cache', source.extraction.fontSha256)
+    await generateCache(cache, syllables); const reviewsRoot = join(root, 'reviews'); await initializeReviewManifest(reviewsRoot, source.extraction.fontSha256)
+    const store = new ReviewStore(reviewsRoot, cache)
+    await store.save(await seedReview('가')); await store.save(await seedReview('하'))
+    const index = await store.statusIndex()
+    for (const syllable of syllables) {
+      const review = await store.get(syllable)
+      expect(index.get(syllable)).toEqual(review ? { status: review.status, blockers: review.blockers } : undefined)
+    }
+    expect([...index.keys()].sort()).toEqual(['가', '하'])
+  })
 })

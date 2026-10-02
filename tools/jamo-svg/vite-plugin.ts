@@ -33,10 +33,12 @@ export function jamoSvgTaggerPlugin(): Plugin {
           const cacheRoot = join(ROOT, 'tools/jamo-svg/cache', manifest.activeFontFingerprint)
           const reviews = new ReviewStore(reviewsRoot, cacheRoot); const queue = new QueueStore(queueFile, manifest.activeFontFingerprint)
           if (request.method === 'GET' && url.pathname === '/queue') {
-            const entries = await Promise.all((await queue.list()).map(async (entry) => {
-              const review = await reviews.get(entry.syllable)
+            // One pass over the review shards instead of a cache + shard read per syllable.
+            const statuses = await reviews.statusIndex()
+            const entries = (await queue.list()).map((entry) => {
+              const review = statuses.get(entry.syllable)
               return { ...entry, reviewStatus: review?.status ?? 'unreviewed', blockers: review?.blockers ?? [] }
-            }))
+            })
             return json(response, 200, { entries, manifest: await reviews.getManifest() })
           }
           const syllable = url.searchParams.get('syllable')

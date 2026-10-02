@@ -26,6 +26,17 @@ export class ReviewStore {
     const shard = JSON.parse(text) as ReviewShard; if (shard.shardSchemaVersion !== 2 || shard.splitRecipeSchemaVersion !== 2) throw new Error(`Unsupported review shard schema in ${item.file}.`); return { review: shard.reviews[syllable], revision: checksum(stable(shard)) }
   }
   async getManifest() { return this.manifest() }
+  /** Status and blockers of every stored review, read from each shard once (for the queue list). */
+  async statusIndex(): Promise<Map<string, { status: GlyphReview['status']; blockers: GlyphReview['blockers'] }>> {
+    const manifest = await this.manifest()
+    const index = new Map<string, { status: GlyphReview['status']; blockers: GlyphReview['blockers'] }>()
+    for (const { file } of manifest.shards) {
+      const shard = JSON.parse(await readFile(join(this.reviewsRoot, file), 'utf8')) as ReviewShard
+      if (shard.shardSchemaVersion !== 2 || shard.splitRecipeSchemaVersion !== 2) throw new Error(`Unsupported review shard schema in ${file}.`)
+      for (const [syllable, review] of Object.entries(shard.reviews)) index.set(syllable, { status: review.status, blockers: review.blockers })
+    }
+    return index
+  }
   async save(review: GlyphReview, expectedRevision?: string) {
     const source = await loadCacheGlyph(this.cacheRoot, review.syllable); const validation = validateReview(source, review)
     // A needs-split draft may hold any in-progress ownership or split problem;
