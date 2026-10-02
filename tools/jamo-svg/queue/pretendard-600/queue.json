@@ -14157,7 +14157,9 @@
         "physicalStepCount": 3,
         "contourRelation": "surplus"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "뻗"
+      ]
     },
     {
       "syllable": "쭉",

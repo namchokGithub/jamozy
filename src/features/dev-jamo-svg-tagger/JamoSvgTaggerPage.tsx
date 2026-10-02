@@ -676,6 +676,14 @@ function DraftSegmentationPreview({
   )
 }
 const QUEUE_PAGE_SIZE = 12
+/** Shortcuts handled by the page's keydown listener; keep in sync with it. */
+const shortcutRows = [
+  { keys: ['←', 'a', 'ฟ'], action: 'Previous glyph' },
+  { keys: ['→', 'd', 'ก'], action: 'Next glyph' },
+  { keys: ['s', 'ห'], action: 'Save' },
+  { keys: ['f', 'ด'], action: 'Approve' },
+  { keys: ['Esc'], action: 'Close dialog' },
+]
 const reviewStatuses = [
   'unreviewed',
   'proposed',
@@ -1657,155 +1665,187 @@ export default function JamoSvgTaggerPage() {
         </Card>
       )}
       <section className="mt-6 grid gap-6 lg:grid-cols-[17rem_minmax(0,1fr)]">
-        <Card className="h-fit">
-          <label className="text-sm font-semibold text-[#39465b]">
-            Queue search
-            <input
-              className="mt-2 w-full rounded border p-2"
-              value={query}
-              onChange={(event) => {
-                setQuery(event.target.value)
-                setIndex(0)
-              }}
-              placeholder="syllable or U+"
-            />
-          </label>
-          <label className="mt-3 text-xs font-semibold text-[#39465b] hidden">
-            Filter
-            <select
-              className="mt-1 w-full rounded border p-2"
-              value={filter}
-              onChange={(event) => {
-                setFilter(event.target.value as 'all' | 'needs-split')
-                setIndex(0)
-              }}
-            >
-              <option value="all">All queue items</option>
-              <option value="needs-split">Needs split</option>
-            </select>
-          </label>
-          <fieldset className="mt-4 rounded-xl border border-[#d8e3f2] bg-[#f9fbff] p-3 text-xs text-[#39465b]">
-            <legend className="sr-only">Status filters</legend>
-            <div className="flex items-center justify-between gap-2">
-              <span className="font-bold">Status</span>
-              <button
-                type="button"
-                className="rounded-full px-2 py-0.5 font-semibold text-[#8d4c43] transition hover:bg-[#fff0eb]"
-                onClick={() => applyStatusFilter([])}
+        <div className="h-fit space-y-4">
+          <Card>
+            <label className="text-sm font-semibold text-[#39465b]">
+              Queue search
+              <input
+                className="mt-2 w-full rounded border p-2"
+                value={query}
+                onChange={(event) => {
+                  setQuery(event.target.value)
+                  setIndex(0)
+                }}
+                placeholder="syllable or U+"
+              />
+            </label>
+            <label className="mt-3 text-xs font-semibold text-[#39465b] hidden">
+              Filter
+              <select
+                className="mt-1 w-full rounded border p-2"
+                value={filter}
+                onChange={(event) => {
+                  setFilter(event.target.value as 'all' | 'needs-split')
+                  setIndex(0)
+                }}
               >
-                {statusFilter.length === 0 ? 'All shown' : 'Show all'}
-              </button>
-            </div>
-            <div className="mt-2 grid gap-1.5">
-              {reviewStatuses.map((status) => (
-                <label
-                  key={status}
-                  className={`grid min-w-0 cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-lg border px-2.5 py-2 transition ${statusFilter.includes(status) ? 'border-[#7ca0df] bg-[#edf3ff] shadow-sm' : 'border-[#d8e3f2] bg-white hover:border-[#b7cbe8] hover:bg-[#f4f8ff]'}`}
+                <option value="all">All queue items</option>
+                <option value="needs-split">Needs split</option>
+              </select>
+            </label>
+            <fieldset className="mt-4 rounded-xl border border-[#d8e3f2] bg-[#f9fbff] p-3 text-xs text-[#39465b]">
+              <legend className="sr-only">Status filters</legend>
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-bold">Status</span>
+                <button
+                  type="button"
+                  className="rounded-full px-2 py-0.5 font-semibold text-[#8d4c43] transition hover:bg-[#fff0eb]"
+                  onClick={() => applyStatusFilter([])}
                 >
-                  <input
-                    type="checkbox"
-                    className="accent-[#4c7fca]"
-                    checked={statusFilter.includes(status)}
-                    onChange={() =>
-                      applyStatusFilter(
-                        statusFilter.includes(status)
-                          ? statusFilter.filter((item) => item !== status)
-                          : [...statusFilter, status],
-                      )
-                    }
-                  />
-                  <span className="min-w-0 truncate capitalize leading-none">
-                    {status}
+                  {statusFilter.length === 0 ? 'All shown' : 'Show all'}
+                </button>
+              </div>
+              <div className="mt-2 grid gap-1.5">
+                {reviewStatuses.map((status) => (
+                  <label
+                    key={status}
+                    className={`grid min-w-0 cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-lg border px-2.5 py-2 transition ${statusFilter.includes(status) ? 'border-[#7ca0df] bg-[#edf3ff] shadow-sm' : 'border-[#d8e3f2] bg-white hover:border-[#b7cbe8] hover:bg-[#f4f8ff]'}`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="accent-[#4c7fca]"
+                      checked={statusFilter.includes(status)}
+                      onChange={() =>
+                        applyStatusFilter(
+                          statusFilter.includes(status)
+                            ? statusFilter.filter((item) => item !== status)
+                            : [...statusFilter, status],
+                        )
+                      }
+                    />
+                    <span className="min-w-0 truncate capitalize leading-none">
+                      {status}
+                    </span>
+                    <span className="shrink-0 rounded-full bg-[#e9eff8] px-1.5 py-0.5 font-semibold text-[#52647d]">
+                      {statusCounts.get(status) ?? 0}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <p className="mt-3 text-xs text-[#667085]">
+              {selected ? `${index + 1} / ${filteredQueue.length}` : '0'} shown
+              · {state?.review.status ?? 'loading'}
+            </p>
+            <div className="mt-3 space-y-1">
+              {pageItems.map((item, itemIndex) => (
+                <button
+                  key={item.syllable}
+                  onClick={() => setIndex(page * QUEUE_PAGE_SIZE + itemIndex)}
+                  className={`w-full rounded p-2 text-left text-sm ${selected?.syllable === item.syllable ? 'bg-[#e9efff] font-bold' : 'hover:bg-[#f7f7fa]'}`}
+                >
+                  {item.syllable}{' '}
+                  {item.blockers?.includes('needs-split') && (
+                    <span className="rounded bg-[#fff0d8] px-1 text-xs text-[#9a6424]">
+                      needs split
+                    </span>
+                  )}
+                  <span className="block text-xs text-[#667085]">
+                    U+{item.syllable.codePointAt(0)?.toString(16).toUpperCase()}{' '}
+                    ·{' '}
+                    {item.reviewStatus !== 'approved' && (
+                      <>
+                        <span
+                          className={
+                            item.reviewStatus === 'reviewing'
+                              ? 'font-semibold text-[#c2620a]'
+                              : undefined
+                          }
+                        >
+                          {item.reviewStatus ?? 'unreviewed'}
+                        </span>{' '}
+                        ·{' '}
+                      </>
+                    )}
+                    P{item.priority}
                   </span>
-                  <span className="shrink-0 rounded-full bg-[#e9eff8] px-1.5 py-0.5 font-semibold text-[#52647d]">
-                    {statusCounts.get(status) ?? 0}
-                  </span>
-                </label>
+                </button>
               ))}
             </div>
-          </fieldset>
-          <p className="mt-3 text-xs text-[#667085]">
-            {selected ? `${index + 1} / ${filteredQueue.length}` : '0'} shown ·{' '}
-            {state?.review.status ?? 'loading'}
-          </p>
-          <div className="mt-3 space-y-1">
-            {pageItems.map((item, itemIndex) => (
+            <div className="mt-3 flex items-center justify-between gap-2 text-xs text-[#667085]">
               <button
-                key={item.syllable}
-                onClick={() => setIndex(page * QUEUE_PAGE_SIZE + itemIndex)}
-                className={`w-full rounded p-2 text-left text-sm ${selected?.syllable === item.syllable ? 'bg-[#e9efff] font-bold' : 'hover:bg-[#f7f7fa]'}`}
+                className="rounded border px-2 py-1 font-semibold text-[#39465b] disabled:opacity-40"
+                disabled={page === 0}
+                onClick={() => setIndex((page - 1) * QUEUE_PAGE_SIZE)}
               >
-                {item.syllable}{' '}
-                {item.blockers?.includes('needs-split') && (
-                  <span className="rounded bg-[#fff0d8] px-1 text-xs text-[#9a6424]">
-                    needs split
-                  </span>
-                )}
-                <span className="block text-xs text-[#667085]">
-                  U+{item.syllable.codePointAt(0)?.toString(16).toUpperCase()} ·{' '}
-                  {item.reviewStatus !== 'approved' && (
-                    <>
-                      <span
-                        className={
-                          item.reviewStatus === 'reviewing'
-                            ? 'font-semibold text-[#c2620a]'
-                            : undefined
-                        }
-                      >
-                        {item.reviewStatus ?? 'unreviewed'}
-                      </span>{' '}
-                      ·{' '}
-                    </>
-                  )}
-                  P{item.priority}
-                </span>
+                ‹ Page
               </button>
-            ))}
-          </div>
-          <div className="mt-3 flex items-center justify-between gap-2 text-xs text-[#667085]">
+              <span>
+                Page {page + 1} / {pageCount}
+              </span>
+              <button
+                className="rounded border px-2 py-1 font-semibold text-[#39465b] disabled:opacity-40"
+                disabled={page >= pageCount - 1}
+                onClick={() => setIndex((page + 1) * QUEUE_PAGE_SIZE)}
+              >
+                Page ›
+              </button>
+            </div>
             <button
-              className="rounded border px-2 py-1 font-semibold text-[#39465b] disabled:opacity-40"
-              disabled={page === 0}
-              onClick={() => setIndex((page - 1) * QUEUE_PAGE_SIZE)}
+              className="mt-2 text-xs font-semibold text-[#8d4c43] hover:underline"
+              onClick={() => applyStatusFilter(statusFilter)}
             >
-              ‹ Page
+              Refresh status filter
             </button>
-            <span>
-              Page {page + 1} / {pageCount}
-            </span>
-            <button
-              className="rounded border px-2 py-1 font-semibold text-[#39465b] disabled:opacity-40"
-              disabled={page >= pageCount - 1}
-              onClick={() => setIndex((page + 1) * QUEUE_PAGE_SIZE)}
-            >
-              Page ›
-            </button>
-          </div>
-          <button
-            className="mt-2 text-xs font-semibold text-[#8d4c43] hover:underline"
-            onClick={() => applyStatusFilter(statusFilter)}
-          >
-            Refresh status filter
-          </button>
-          <div className="mt-4 flex gap-2">
-            <Button
-              variant="secondary"
-              onClick={() => setIndex(Math.max(0, index - 1))}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() =>
-                setIndex(
-                  Math.min(Math.max(0, filteredQueue.length - 1), index + 1),
-                )
-              }
-            >
-              Next
-            </Button>
-          </div>
-        </Card>
+            <div className="mt-4 flex gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => setIndex(Math.max(0, index - 1))}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  setIndex(
+                    Math.min(Math.max(0, filteredQueue.length - 1), index + 1),
+                  )
+                }
+              >
+                Next
+              </Button>
+            </div>
+          </Card>
+          <Card>
+            <h2 className="text-sm font-semibold text-[#39465b]">
+              Keyboard shortcuts
+            </h2>
+            <p className="mt-1 text-xs text-[#667085]">
+              Inactive while typing in a field or while loading. Thai keys work
+              too.
+            </p>
+            <dl className="mt-3 space-y-1.5 text-xs text-[#39465b]">
+              {shortcutRows.map(({ keys, action }) => (
+                <div
+                  key={action}
+                  className="flex items-center justify-between gap-2"
+                >
+                  <dt className="flex gap-1">
+                    {keys.map((key) => (
+                      <kbd
+                        key={key}
+                        className="rounded border border-b-2 border-[#d8dce6] bg-white px-1.5 py-0.5 font-mono text-[11px]"
+                      >
+                        {key}
+                      </kbd>
+                    ))}
+                  </dt>
+                  <dd className="text-right text-[#667085]">{action}</dd>
+                </div>
+              ))}
+            </dl>
+          </Card>
+        </div>
         {state && (
           <main className="min-w-0">
             <Card className="mt-4">
