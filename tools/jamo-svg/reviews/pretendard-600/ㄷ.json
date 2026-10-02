@@ -4198,6 +4198,60 @@
         "validationHash": "0bb4eec202e65698fb9d24fbf7445b1b80267d5a5c2cfa5d1567086e3612ca92"
       }
     },
+    "딧": {
+      "reviewSchemaVersion": 2,
+      "syllable": "딧",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "91f5eb53a48b5c7e1fda4211ec29a7f721288ddc452ff79631f76de988de58f5"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄷ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅣ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅅ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-02T16:57:30.497Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "75c994144dc5913f1e763c642be384cf1f757000c0c5c889cdc52d42e1710a7d"
+      }
+    },
     "딩": {
       "reviewSchemaVersion": 2,
       "syllable": "딩",

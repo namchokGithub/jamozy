@@ -18098,6 +18098,228 @@
       "nearestApprovedSyllables": [
         "죠"
       ]
+    },
+    {
+      "syllable": "갤",
+      "priority": 5,
+      "reasons": [
+        "frequency-list:korean-5800"
+      ],
+      "sourceRank": 5544,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": [
+        "탤"
+      ]
+    },
+    {
+      "syllable": "갱",
+      "priority": 5,
+      "reasons": [
+        "frequency-list:korean-5800"
+      ],
+      "sourceRank": 5545,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": [
+        "캠"
+      ]
+    },
+    {
+      "syllable": "갸",
+      "priority": 5,
+      "reasons": [
+        "frequency-list:korean-5800"
+      ],
+      "sourceRank": 5546,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 2,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": [
+        "냐"
+      ]
+    },
+    {
+      "syllable": "겐",
+      "priority": 5,
+      "reasons": [
+        "frequency-list:korean-5800"
+      ],
+      "sourceRank": 5547,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "곽",
+      "priority": 5,
+      "reasons": [
+        "frequency-list:korean-5800"
+      ],
+      "sourceRank": 5549,
+      "queueKey": {
+        "medialLayout": "compound-horizontal-leading",
+        "hasFinal": true,
+        "compoundMedial": "ㅘ",
+        "compoundFinal": null,
+        "physicalStepCount": 4,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": [
+        "촬"
+      ]
+    },
+    {
+      "syllable": "괄",
+      "priority": 5,
+      "reasons": [
+        "frequency-list:korean-5800"
+      ],
+      "sourceRank": 5550,
+      "queueKey": {
+        "medialLayout": "compound-horizontal-leading",
+        "hasFinal": true,
+        "compoundMedial": "ㅘ",
+        "compoundFinal": null,
+        "physicalStepCount": 4,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": [
+        "촬"
+      ]
+    },
+    {
+      "syllable": "굿",
+      "priority": 5,
+      "reasons": [
+        "frequency-list:korean-5800"
+      ],
+      "sourceRank": 5551,
+      "queueKey": {
+        "medialLayout": "horizontal",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "deficit"
+      },
+      "nearestApprovedSyllables": [
+        "군"
+      ]
+    },
+    {
+      "syllable": "궤",
+      "priority": 5,
+      "reasons": [
+        "frequency-list:korean-5800"
+      ],
+      "sourceRank": 5552,
+      "queueKey": {
+        "medialLayout": "compound-vertical-leading",
+        "hasFinal": false,
+        "compoundMedial": "ㅞ",
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "팽",
+      "priority": 5,
+      "reasons": [
+        "frequency-list:korean-5800"
+      ],
+      "sourceRank": 5555,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": [
+        "맵"
+      ]
+    },
+    {
+      "syllable": "뇽",
+      "priority": 5,
+      "reasons": [
+        "frequency-list:korean-5800"
+      ],
+      "sourceRank": 5556,
+      "queueKey": {
+        "medialLayout": "horizontal",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "롱",
+      "priority": 5,
+      "reasons": [
+        "frequency-list:korean-5800"
+      ],
+      "sourceRank": 5556,
+      "queueKey": {
+        "medialLayout": "horizontal",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": [
+        "롬"
+      ]
+    },
+    {
+      "syllable": "딧",
+      "priority": 5,
+      "reasons": [
+        "frequency-list:korean-5800"
+      ],
+      "sourceRank": 5562,
+      "queueKey": {
+        "medialLayout": "vertical",
+        "hasFinal": true,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 3,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": [
+        "릿"
+      ]
     }
   ]
 }

@@ -12,11 +12,13 @@ import { QueueStore, type ReviewManifest } from '../tools/jamo-svg/review-store'
 
 // Adds syllables from a word list to the Jamo SVG Tagger queue. Unlike
 // `jamo-svg:seed`, this never touches review records or the review manifest.
+// `--dry-run` lists the syllables it would add and writes nothing.
 const { values } = parseArgs({
   options: {
     words: { type: 'string', default: 'docs/informations/korean_words.md' },
     top: { type: 'string' },
     reason: { type: 'string', default: 'frequency-list:korean-5800' },
+    'dry-run': { type: 'boolean', default: false },
   },
 })
 const root = process.cwd()
@@ -53,6 +55,19 @@ if (
 const queue = new QueueStore(queueFile, manifest.activeFontFingerprint)
 const existing = await queue.list()
 const merged = mergeQueueEntries(existing, glyphs, values.reason)
+const added = merged.slice(existing.length)
+if (added.length)
+  console.log(
+    added
+      .map(({ syllable, sourceRank }) => `  ${syllable}  word ${sourceRank}`)
+      .join('\n'),
+  )
+if (values['dry-run']) {
+  console.log(
+    `${words.length} words → ${wanted.length} syllables; would add ${added.length}, queue would be ${merged.length}. Nothing written.`,
+  )
+  process.exit(0)
+}
 await addToCache(
   join(root, 'tools/jamo-svg/cache', manifest.activeFontFingerprint),
   merged.map(({ syllable }) => syllable),
