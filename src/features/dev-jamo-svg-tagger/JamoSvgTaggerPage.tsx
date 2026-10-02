@@ -11,6 +11,11 @@ import { Card } from '../../components/ui/Card'
 import { Modal } from '../../components/ui/Modal'
 import { PageSurface } from '../../components/ui/PageSurface'
 import { retainSourceAfterSave } from './tagger-state'
+import {
+  COMPOUND_JONGSEONG_PARTS,
+  COMPOUND_JUNGSEONG_PARTS,
+  decomposeSyllable,
+} from '../../domain/korean/hangul'
 import { counterContours } from '../../../tools/jamo-svg/compile'
 import {
   assignPiece,
@@ -717,6 +722,33 @@ function DraftSegmentationPreview({
   )
 }
 const QUEUE_PAGE_SIZE = 12
+/** One jamo per typed key, as Tagger steps split them (compound medials and finals expand). */
+const typedJamo = (jamo: string) =>
+  COMPOUND_JUNGSEONG_PARTS[jamo] ?? COMPOUND_JONGSEONG_PARTS[jamo] ?? [jamo]
+const stepJamo = (syllable: string) => {
+  const parts = decomposeSyllable(syllable)
+  return parts
+    ? [parts.choseong, parts.jungseong, parts.jongseong]
+        .filter(Boolean)
+        .flatMap(typedJamo)
+    : []
+}
+/**
+ * A query made only of jamo (e.g. `ㄲ`, `ㄲㅕ`, `ㅇㅇ`) matches syllables whose
+ * steps contain every one of them, in any position, counting repeats.
+ */
+const matchesJamoQuery = (syllable: string, query: string) => {
+  const wanted = [...query.replace(/\s/g, '')]
+  if (!wanted.length || !wanted.every((char) => char >= 'ㄱ' && char <= 'ㅣ'))
+    return false
+  const available = stepJamo(syllable)
+  return wanted.flatMap(typedJamo).every((jamo) => {
+    const at = available.indexOf(jamo)
+    if (at < 0) return false
+    available.splice(at, 1)
+    return true
+  })
+}
 /** Shortcuts handled by the page's keydown listener; keep in sync with it. */
 const shortcutRows = [
   { keys: ['←', 'a', 'ฟ'], action: 'Previous glyph' },
@@ -853,6 +885,7 @@ export default function JamoSvgTaggerPage() {
               statusSnapshot.get(item.syllable) ?? 'unreviewed',
             )) &&
           (!query ||
+            matchesJamoQuery(item.syllable, query) ||
             item.syllable.includes(query) ||
             `U+${item.syllable.codePointAt(0)?.toString(16).toUpperCase()}`.includes(
               query.toUpperCase(),
@@ -1711,7 +1744,7 @@ export default function JamoSvgTaggerPage() {
                   setQuery(event.target.value)
                   setIndex(0)
                 }}
-                placeholder="syllable or U+"
+                placeholder="syllable, jamo (ㄲ, ㄲㅕ) or U+"
               />
             </label>
             <label className="mt-3 text-xs font-semibold text-[#39465b] hidden">
