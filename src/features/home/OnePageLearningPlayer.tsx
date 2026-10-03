@@ -154,7 +154,7 @@ export default function OnePageLearningPlayer({
           <p className="text-sm font-semibold text-[#a85d4e]">
             {active.lesson.title}
           </p>
-          <div className="mt-2 rounded-3xl border border-[#eadfd4] bg-white p-4 text-center">
+          <div className="mt-2 rounded-3xl bg-[#fffaf6] p-4 text-center shadow-[0_0_30px_-20px_rgba(87,65,45,0.35)]">
             <div className="flex h-5 justify-end gap-1.5">
               <span className="rounded-lg border border-[#eadfd4] bg-[#fffdf9] px-2 py-0.5 text-[10px] font-semibold text-[#98a2b3]">
                 WPM <strong className="ml-0.5 text-[#667085]">{wpm}</strong>

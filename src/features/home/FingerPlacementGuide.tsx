@@ -129,7 +129,7 @@ export default function FingerPlacementGuide({
 }: FingerPlacementGuideProps) {
   return (
     <section
-      className="relative mt-4 rounded-2xl border border-[#eadfd4] bg-white/70 p-3"
+      className="relative mt-4 rounded-2xl bg-[#fffaf6] p-3 shadow-[0_0_24px_-16px_rgba(87,65,45,0.3)]"
       aria-label="Finger placement guide"
     >
       <div className="flex items-start justify-center gap-12 sm:gap-24">

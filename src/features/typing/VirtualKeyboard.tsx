@@ -84,7 +84,7 @@ export default function VirtualKeyboard({
   }
 
   return (
-    <div className="mt-6 rounded-2xl border border-[#d8e3f2] bg-[#f8fafc]/75 p-4 shadow-sm select-none sm:p-5" aria-label="Virtual Korean keyboard" style={{ opacity }}>
+    <div className="mt-6 rounded-2xl bg-[#f5f9ff] p-4 shadow-[0_0_24px_-16px_rgba(54,78,112,0.4)] select-none sm:p-5" aria-label="Virtual Korean keyboard" style={{ opacity }}>
       <div className="mb-3 flex justify-end">
         <span className={`flex items-center gap-1.5 text-xs font-semibold ${nextKey?.shift ? 'text-[#8b6035]' : 'text-[#667085]'}`}>
           <span className={`h-2.5 w-2.5 rounded-sm ${nextKey?.shift ? 'bg-[#e4a455]' : 'bg-[#f08022]'}`} />
