@@ -1,6 +1,8 @@
-import { readFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readdir, readFile, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, test } from 'vitest'
+import { shardFileName } from '../../src/domain/korean/hangul'
 import { extractGlyph } from './extract'
 import type { ReviewManifest, ReviewShard } from './review-store'
 import {
@@ -8,6 +10,7 @@ import {
   roundPathNumbers,
   serializeRuntimeShard,
   type ApprovedEntry,
+  writeRuntimeShards,
 } from './runtime-dataset'
 import type { GlyphReview } from './types'
 
@@ -97,5 +100,36 @@ describe('runtime dataset compiler', () => {
     expect(serializeRuntimeShard(forward[5])).toBe(
       '{\n  "datasetSchemaVersion": 1,\n  "fontSha256": "f",\n  "unitsPerEm": 2048,\n  "glyphs": {}\n}\n',
     )
+  })
+})
+
+describe('writeRuntimeShards', () => {
+  const texts = Array.from({ length: 19 }, (_, index) => `new ${index}\n`)
+
+  test('replaces every shard file', async () => {
+    const outDir = await mkdtemp(join(tmpdir(), 'jamo-runtime-'))
+    await writeRuntimeShards(outDir, texts)
+    expect(await readFile(join(outDir, '00.json'), 'utf8')).toBe('new 0\n')
+    expect(await readFile(join(outDir, '18.json'), 'utf8')).toBe('new 18\n')
+    expect((await readdir(outDir)).sort()).toHaveLength(19)
+  })
+
+  test('leaves the old set untouched when any write fails', async () => {
+    const outDir = await mkdtemp(join(tmpdir(), 'jamo-runtime-'))
+    await Promise.all(
+      texts.map((_, index) =>
+        writeFile(join(outDir, shardFileName(index)), `old ${index}\n`),
+      ),
+    )
+    // A directory where shard 05's staging file goes makes that write fail.
+    await mkdir(join(outDir, '05.json.tmp'))
+    await expect(writeRuntimeShards(outDir, texts)).rejects.toThrow()
+    for (const index of [0, 4, 6, 18])
+      expect(await readFile(join(outDir, shardFileName(index)), 'utf8')).toBe(
+        `old ${index}\n`,
+      )
+    expect(
+      (await readdir(outDir)).filter((name) => name.endsWith('.tmp')),
+    ).toEqual(['05.json.tmp'])
   })
 })

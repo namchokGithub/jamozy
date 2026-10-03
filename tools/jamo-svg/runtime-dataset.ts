@@ -1,8 +1,9 @@
-import { readFile } from 'node:fs/promises'
+import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import {
   CHOSEONG_SHARD_COUNT,
   getChoseongShardIndex,
+  shardFileName,
 } from '../../src/domain/korean/hangul'
 import type { RuntimeJamoSvgShard } from '../../src/domain/korean/jamo-svg-runtime'
 import { compileReview, validateReview } from './compile'
@@ -100,4 +101,24 @@ export async function compileRuntimeShards(reviewsRoot: string) {
     fontSha256: manifest.activeFontFingerprint,
     unitsPerEm: await fontUnitsPerEm(),
   }).map(serializeRuntimeShard)
+}
+
+/**
+ * Writes every shard to a staging file first and renames them into place only
+ * after all writes succeed, so a failed run leaves the previous set intact.
+ */
+export async function writeRuntimeShards(outDir: string, texts: string[]) {
+  await mkdir(outDir, { recursive: true })
+  const files = texts.map((_, index) => join(outDir, shardFileName(index)))
+  const staged: string[] = []
+  try {
+    for (const [index, file] of files.entries()) {
+      await writeFile(`${file}.tmp`, texts[index])
+      staged.push(`${file}.tmp`)
+    }
+  } catch (error) {
+    await Promise.all(staged.map((temp) => rm(temp, { force: true })))
+    throw error
+  }
+  for (const file of files) await rename(`${file}.tmp`, file)
 }
