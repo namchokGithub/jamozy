@@ -410,8 +410,10 @@ implementation status and the post-MVP roadmap.
 - Dedicated Lesson Result visual redesign
 - History, summaries, and analytics
 - Learning Modes: VocabularyProgress, JamoStats, Practice, and Daily Quest
-- Per-step Jamo SVG rendering from the reviewed Tagger data (1,858 syllables
-  approved; see [Progress Tracker](docs/PROGRESS.md#dev-tooling-jamo-svg))
+- Per-step Jamo SVG rendering from the reviewed Tagger data: built behind the
+  `VITE_JAMO_SVG_RENDERER` flag with 1,858 approved syllables (DEC-039);
+  turning it on for learners waits on coverage (see
+  [Progress Tracker](docs/PROGRESS.md#dev-tooling-jamo-svg))
 - Account linking between authentication providers
 - Achievements, daily streaks, pronunciation audio, and additional curriculum
 

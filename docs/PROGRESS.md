@@ -23,14 +23,14 @@ Last updated: 2026-10-03 (Jamo SVG Tagger: 1,858 syllables approved)
 
 ## Dev Tooling: Jamo SVG
 
-Development-only data pipeline; it does not affect the learner renderer yet. Design: `docs/research/JAMO_SVG_TAGGER_DESIGN.md`.
+Development-only data pipeline; the learner SVG renderer is behind a flag (off by default). Design: `docs/research/JAMO_SVG_TAGGER_DESIGN.md`.
 
 | Item                                      | Status      | Notes                                                                                                                                                                                                                                             |
 | ----------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Jamo SVG Tagger (`/dev/jamo-svg-tagger`)  | Done        | Review per-step ownership of Pretendard 600 outlines, split recipes including enclosed counters ([[DEC-038]]), one step per typed key ([[DEC-037]]).                                                                                              |
 | Review queue and data                     | In progress | 1,858 committed reviews are all approved; 2,011 entries are queued. Coverage includes every syllable of the 5,467-word Korean 5800 list, the 18-syllable inflection/particle sample (`docs/informations/korean-inflection-sample.md`), and reference glyphs. `pnpm jamo-svg:audit` reports 0 findings for the approved set. |
 | Inflected and particle syllables          | In progress | The 18-syllable sample (`를 았 었 했 …`) is approved; a fuller list of endings and contracted verb forms is not yet enqueued. Syllables never used in real text are deliberately not reviewed; they keep the Canvas renderer.                     |
-| Runtime SVG dataset and per-step renderer | Not started | Compile approved reviews into the minimal runtime dataset; render step by step with the Canvas renderer as fallback. Needs its own design and decision.                                                                                           |
+| Runtime SVG dataset and per-step renderer | Done (flagged) | `pnpm jamo-svg:compile-runtime` writes 19 committed choseong shards (1,858 glyphs); `HangulTarget` renders per-step SVG when every syllable has approved data, else Canvas for the whole target ([[DEC-039]]). Off unless `VITE_JAMO_SVG_RENDERER=1`. |
 
 ## Planned Learning Modes
 

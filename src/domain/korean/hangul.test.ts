@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
+  CHOSEONG_SHARD_COUNT,
   COMPOUND_JONGSEONG_PARTS,
   COMPOUND_JUNGSEONG_PARTS,
   composeSyllable,
   decomposeSyllable,
+  getChoseongShardIndex,
+  shardFileName,
 } from './hangul'
 
 describe('decomposeSyllable / composeSyllable round trips', () => {
@@ -53,5 +56,25 @@ describe('compound part tables', () => {
     expect(Object.keys(COMPOUND_JONGSEONG_PARTS)).toHaveLength(11)
     expect(COMPOUND_JONGSEONG_PARTS['ㅄ']).toEqual(['ㅂ', 'ㅅ'])
     expect(COMPOUND_JONGSEONG_PARTS['ㄺ']).toEqual(['ㄹ', 'ㄱ'])
+  })
+})
+
+describe('getChoseongShardIndex', () => {
+  it('derives the choseong index of a precomposed syllable', () => {
+    expect(getChoseongShardIndex('가')).toBe(0)
+    expect(getChoseongShardIndex('까')).toBe(1)
+    expect(getChoseongShardIndex('꿱')).toBe(1)
+    expect(getChoseongShardIndex('나')).toBe(2)
+    expect(getChoseongShardIndex('힣')).toBe(18)
+  })
+
+  it('returns undefined for anything that is not one precomposed syllable', () => {
+    for (const value of ['ㄱ', 'A', ' ', '', '가나']) expect(getChoseongShardIndex(value)).toBeUndefined()
+  })
+
+  it('formats two-digit shard file names', () => {
+    expect(CHOSEONG_SHARD_COUNT).toBe(19)
+    expect(shardFileName(0)).toBe('00.json')
+    expect(shardFileName(18)).toBe('18.json')
   })
 })

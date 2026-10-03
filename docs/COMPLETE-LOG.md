@@ -767,3 +767,14 @@ Chronological log of completed units of work. One entry per meaningful change (n
 - Updated the README, Progress Tracker, and Tagger design status so they no
   longer describe the completed tool as the original six-reference future
   implementation.
+
+### 2026-10-03 — Jamo SVG: runtime dataset and flagged SVG target renderer
+
+- `pnpm jamo-svg:compile-runtime` compiles approved reviews into 19 committed
+  choseong shards under `public/jamo-svg/pretendard-600/` (1,858 glyphs,
+  1.2 MB); a test fails when they drift from the reviews.
+- `loadJamoSvgGlyphs` fetches only the needed shards with in-memory caching.
+- `HangulTarget` replaces `DecomposedHangulTarget` in Lesson, Review, and the
+  one-page player; it renders per-step SVG when every syllable has approved
+  data, otherwise Canvas for the whole target. Off unless
+  `VITE_JAMO_SVG_RENDERER=1` (DEC-039).

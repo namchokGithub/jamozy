@@ -1,7 +1,7 @@
 {
   "name": "jamozy",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "BROWSER='Google Chrome' vite --open",
@@ -19,7 +19,8 @@
     "jamo-svg:migrate-step-algorithm": "tsx scripts/migrate-jamo-svg-step-algorithm.ts",
     "jamo-svg:enqueue": "tsx scripts/enqueue-jamo-svg.ts",
     "jamo-svg:propose": "tsx scripts/propose-jamo-svg-reviews.ts",
-    "jamo-svg:audit": "tsx scripts/audit-jamo-svg-reviews.ts"
+    "jamo-svg:audit": "tsx scripts/audit-jamo-svg-reviews.ts",
+    "jamo-svg:compile-runtime": "tsx scripts/compile-jamo-svg-runtime.ts"
   },
   "dependencies": {
     "@fontsource/noto-sans-kr": "^5.3.0",

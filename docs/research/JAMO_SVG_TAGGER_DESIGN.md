@@ -584,8 +584,8 @@ type RuntimeJamoSvgDataset = Record<string, RuntimeJamoSvgGlyph>
 
 It contains no source commands, contours, cache metadata, review state,
 reviewer notes, split rationale, queue information, or validation artifacts.
-The runtime renderer remains unchanged until this derived dataset and its
-integration are separately designed and approved.
+The derived dataset and its integration are designed in DEC-039 and
+`docs/superpowers/specs/2026-10-03-jamo-svg-runtime-design.md`.
 
 ## 10. Durability audit and intentionally deferred decisions
 
@@ -608,9 +608,8 @@ review data rather than a larger storage shape:
 - Reviewer identity/authorship policy. The existing approval label is adequate
   for a development repository; adding identities later does not alter shard
   ownership or geometry schemas.
-- Runtime dataset file partitioning and delivery strategy. It stays a separate
-  compiler concern because runtime data must remain the minimal derived shape,
-  not a copy of review storage.
+- Runtime dataset partitioning and delivery: decided in DEC-039 (19 committed
+  choseong shards, loaded on demand).
 
 ## 11. Implementation history
 

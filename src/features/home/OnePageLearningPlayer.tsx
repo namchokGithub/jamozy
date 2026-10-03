@@ -4,7 +4,7 @@ import type { OnePageLearningPath } from '../../application/get-one-page-learnin
 import { KEY_TO_JAMO } from '../../domain/korean/keymap'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
-import DecomposedHangulTarget from '../typing/DecomposedHangulTarget'
+import HangulTarget from '../typing/HangulTarget'
 import FingerPlacementGuide from './FingerPlacementGuide'
 
 interface OnePageLearningPlayerProps {
@@ -163,7 +163,7 @@ export default function OnePageLearningPlayer({
             </span>
           </div>
           <div className="mt-3 rounded-3xl border border-[#eadfd4] bg-white p-6 text-center">
-            <DecomposedHangulTarget
+            <HangulTarget
               session={session.currentSession}
               className="text-4xl font-bold tracking-wide sm:text-5xl"
             />

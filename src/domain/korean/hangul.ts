@@ -54,6 +54,21 @@ export function composeSyllable(choseong: string, jungseong: string, jongseong =
   return String.fromCodePoint(HANGUL_BASE + offset)
 }
 
+/** Number of runtime Jamo SVG shards: one per choseong (DEC-039). */
+export const CHOSEONG_SHARD_COUNT = CHOSEONG_LIST.length
+
+/** Choseong index 0–18 of one precomposed syllable 가–힣; undefined otherwise. */
+export function getChoseongShardIndex(syllable: string): number | undefined {
+  if (Array.from(syllable).length !== 1) return undefined
+  const offset = (syllable.codePointAt(0) ?? 0) - HANGUL_BASE
+  if (offset < 0 || offset >= SYLLABLE_COUNT) return undefined
+  return Math.floor(offset / (JUNGSEONG_COUNT * JONGSEONG_COUNT))
+}
+
+export function shardFileName(index: number): string {
+  return `${String(index).padStart(2, '0')}.json`
+}
+
 export const COMPOUND_JUNGSEONG_PARTS: Record<string, [string, string]> = {
   ㅘ: ['ㅗ', 'ㅏ'],
   ㅙ: ['ㅗ', 'ㅐ'],

@@ -141,6 +141,9 @@ function loadFont(fontPath: string) {
 export async function fontFingerprint(fontPath = FONT_PATH) {
   return (await loadFont(fontPath)).sha256
 }
+export async function fontUnitsPerEm(fontPath = FONT_PATH) {
+  return (await loadFont(fontPath)).font.unitsPerEm
+}
 export async function extractGlyph(
   syllable: string,
   fontPath = FONT_PATH,

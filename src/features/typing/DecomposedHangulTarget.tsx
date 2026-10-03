@@ -66,7 +66,11 @@ export function waitForHangulFont(text: string) {
   if (typeof document === 'undefined' || !document.fonts) return Promise.resolve()
   return document.fonts
     .load(`700 ${TILE_SIZE}px ${HANGUL_FONT}`, text)
-    .then(() => undefined)
+    .then(
+      () => undefined,
+      // Offline or blocked font: draw with the fallback font instead of nothing.
+      () => undefined,
+    )
 }
 
 function fitGlyph(

@@ -41,6 +41,7 @@ pnpm jamo-svg:enqueue --words docs/informations/korean-inflection-sample.md --re
 pnpm jamo-svg:propose --dry-run       # propose reviews from approved templates
 pnpm jamo-svg:propose --rank          # which unreviewed syllables unlock others
 pnpm jamo-svg:audit                   # read-only audit of approved reviews
+pnpm jamo-svg:compile-runtime         # approved reviews → public/jamo-svg runtime shards
 ```
 
 - Commit review data before running a script that writes it
@@ -51,6 +52,9 @@ pnpm jamo-svg:audit                   # read-only audit of approved reviews
   review manifest.
 - After changing review logic, `tools/jamo-svg/approved-reviews.test.ts` and
   `pnpm jamo-svg:audit` must stay clean.
+- After approving reviews, run `pnpm jamo-svg:compile-runtime` and commit the
+  shards with the reviews; `runtime-dataset-committed.test.ts` fails otherwise.
+  `VITE_JAMO_SVG_RENDERER=1` turns on the SVG target renderer (DEC-039).
 
 ## Architecture Rules
 

@@ -4,7 +4,7 @@ import { useLessonSessionStore } from '../typing/lesson-session-store'
 import { getLessonProgress, getLessonResult } from '../../domain/korean/lesson-session'
 import { KEY_TO_JAMO } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
-import DecomposedHangulTarget from '../typing/DecomposedHangulTarget'
+import HangulTarget from '../typing/HangulTarget'
 import type { ReviewItem } from '../../domain/models/review-item'
 import type { SubmitReviewSessionOutcome } from '../../application/submit-review-session'
 import type { UserSettings } from '../../domain/models/user-profile'
@@ -101,7 +101,7 @@ export default function ReviewTypingSession({
         {progress.current} / {progress.total}
       </p>
 
-      <DecomposedHangulTarget
+      <HangulTarget
         session={session.currentSession}
         className="mt-4 text-3xl"
       />

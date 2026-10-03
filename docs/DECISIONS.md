@@ -806,3 +806,38 @@ painted as the vowel.
 **Consequences:** Geometry is still only replayed font commands plus declared
 straight seams. Proposals transfer counter recipes under the same command-
 shape and point-distance guards as other recipes.
+
+---
+
+## DEC-039 — Jamo SVG runtime: committed choseong shards behind a flag
+
+**Date:** 2026-10-03
+**Status:** Accepted
+
+**Decision:** `pnpm jamo-svg:compile-runtime` compiles approved reviews into
+19 shards, `public/jamo-svg/pretendard-600/00.json`–`18.json`, indexed by
+choseong through `getChoseongShardIndex`. Each glyph keeps the minimal
+`{ width, paths[{ jamo, d }] }` shape; each shard adds `datasetSchemaVersion`,
+`fontSha256`, and `unitsPerEm`. The shards are committed, and a test fails
+when they drift from the approved reviews. The app loads only the shards a
+target needs, caches them in memory, and shares concurrent requests.
+`HangulTarget` renders SVG only when every syllable of the target has
+approved data whose steps match the expected keys; otherwise the legacy
+Canvas renders the whole target. Blank tiles show while shards load, and
+Canvas renders after 1,500 ms. The renderer is off unless
+`VITE_JAMO_SVG_RENDERER=1`; development builds also accept the
+`localStorage` override `jamozy:jamo-svg-renderer` (`'1'`/`'0'`).
+
+**Why:** Prove compiler → dataset → typing state → per-step coloring with
+real data before more review work. Never mixing Pretendard SVG and Noto
+Canvas in one target keeps font differences from looking like renderer
+bugs, and the flag keeps Canvas available for direct comparison. Committed
+shards keep build and deploy independent of the font and review tooling.
+Shards are static content, not learner state, so the loader lives in
+`src/infrastructure/jamo-svg/` without a repository interface.
+
+**Consequences:** After approving reviews, run the compiler and commit the
+shards with the reviews. Targets with a space or any non-syllable character
+render Canvas. Per-syllable fallback, or retiring Canvas, is decided later
+when coverage is high enough. Spec:
+`docs/superpowers/specs/2026-10-03-jamo-svg-runtime-design.md`.
