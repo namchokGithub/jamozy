@@ -199,7 +199,12 @@ export default function OnePageLearningPlayer({
             )}
             {/* <p className="mt-4 text-xs text-[#98a2b3]">Typed: {getComposedText(session.currentSession)}</p> */}
           </div>
-          <VirtualKeyboard nextKey={nextKey} showEnglishKeys opacity={1} />
+          <VirtualKeyboard
+            nextKey={nextKey}
+            showEnglishKeys
+            opacity={1}
+            onKeyPress={pressKey}
+          />
           <FingerPlacementGuide nextKey={nextKey} />
           {fetcher.state !== 'idle' && (
             <p className="mt-3 text-center text-sm text-[#667085]">

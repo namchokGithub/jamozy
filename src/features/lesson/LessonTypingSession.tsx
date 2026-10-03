@@ -137,6 +137,7 @@ export default function LessonTypingSession({
           nextKey={nextKey}
           showEnglishKeys={keyboardSettings.showEnglishKeys}
           opacity={keyboardSettings.keyboardOpacity}
+          onKeyPress={pressKey}
         />
       )}
     </div>

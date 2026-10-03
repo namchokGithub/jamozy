@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 import VirtualKeyboard from './VirtualKeyboard'
 
 describe('VirtualKeyboard', () => {
@@ -33,5 +33,36 @@ describe('VirtualKeyboard', () => {
     render(<VirtualKeyboard showEnglishKeys opacity={0} />)
 
     expect(screen.getByLabelText('Virtual Korean keyboard')).toHaveStyle({ opacity: '0' })
+  })
+
+  it('sends a touched jamo key through the supplied physical-key callback', () => {
+    const onKeyPress = vi.fn()
+    render(
+      <VirtualKeyboard
+        showEnglishKeys
+        opacity={1}
+        onKeyPress={onKeyPress}
+      />,
+    )
+
+    fireEvent.click(screen.getByLabelText('r'))
+
+    expect(onKeyPress).toHaveBeenCalledWith('KeyR', false)
+  })
+
+  it('sends Shift with the next touched jamo key', () => {
+    const onKeyPress = vi.fn()
+    render(
+      <VirtualKeyboard
+        showEnglishKeys
+        opacity={1}
+        onKeyPress={onKeyPress}
+      />,
+    )
+
+    fireEvent.click(screen.getAllByLabelText('Shift ⇧')[0])
+    fireEvent.click(screen.getByLabelText('q'))
+
+    expect(onKeyPress).toHaveBeenCalledWith('KeyQ', true)
   })
 })
