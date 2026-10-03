@@ -10,6 +10,8 @@
 
 **Spec:** `docs/superpowers/specs/2026-10-03-jamo-svg-runtime-design.md`
 
+**Status:** Complete (2026-10-03, commit `95e93e8`). Deviations: compiler tests use committed approved reviews instead of `seedReview` (it supports only six syllables); the final review added a `glyphs` shape check in the loader, a rejected-loader path in `HangulTarget`, and `fillRule="evenodd"` on SVG paths.
+
 ## Global Constraints
 
 - Never run `git commit` (AGENTS.md). Each task ends with a suggested commit message only.
@@ -45,7 +47,7 @@
 **Interfaces:**
 - Produces: `getChoseongShardIndex(syllable: string): number | undefined`, `shardFileName(index: number): string`, `CHOSEONG_SHARD_COUNT: number` (19), types `RuntimeJamoSvgGlyph`, `RuntimeJamoSvgDataset`, `RuntimeJamoSvgShard`.
 
-- [ ] **Step 1: Write the failing test** — append to `src/domain/korean/hangul.test.ts` (add the new names to its existing import from `./hangul`):
+- [x] **Step 1: Write the failing test** — append to `src/domain/korean/hangul.test.ts` (add the new names to its existing import from `./hangul`):
 
 ```ts
 describe('getChoseongShardIndex', () => {
@@ -72,12 +74,12 @@ describe('getChoseongShardIndex', () => {
 
 If `hangul.test.ts` does not import `describe`/`test`/`expect`, rely on Vitest globals (`globals: true` in `vite.config.ts`).
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm vitest run src/domain/korean/hangul.test.ts`
 Expected: FAIL — `getChoseongShardIndex` is not exported.
 
-- [ ] **Step 3: Implement** — append to `src/domain/korean/hangul.ts`:
+- [x] **Step 3: Implement** — append to `src/domain/korean/hangul.ts`:
 
 ```ts
 /** Number of runtime Jamo SVG shards: one per choseong. */
@@ -117,12 +119,12 @@ export type RuntimeJamoSvgShard = {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm vitest run src/domain/korean/hangul.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Suggest commit message**
+- [x] **Step 5: Suggest commit message**
 
 `feat(jamo-svg): add choseong shard index helper and runtime dataset types`
 
@@ -145,7 +147,7 @@ Expected: PASS.
   - `serializeRuntimeShard(shard: RuntimeJamoSvgShard): string`
   - `compileRuntimeShards(reviewsRoot: string): Promise<string[]>` (19 serialized shards, index = shard index)
 
-- [ ] **Step 1: Write the failing test** — create `tools/jamo-svg/runtime-dataset.test.ts`:
+- [x] **Step 1: Write the failing test** — create `tools/jamo-svg/runtime-dataset.test.ts`:
 
 ```ts
 import { describe, expect, test } from 'vitest'
@@ -232,12 +234,12 @@ describe('runtime dataset compiler', () => {
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm vitest run tools/jamo-svg/runtime-dataset.test.ts`
 Expected: FAIL — cannot resolve `./runtime-dataset`.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Add to `tools/jamo-svg/extract.ts` directly after `fontFingerprint`:
 
@@ -355,12 +357,12 @@ export async function compileRuntimeShards(reviewsRoot: string) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm vitest run tools/jamo-svg/runtime-dataset.test.ts`
 Expected: PASS. If `seedReview('거')` does not validate (seed ownership is a heuristic), replace `'거'` with another ㄱ-initial simple syllable whose seed validates (for example `'고'`) in both tests and the expected key list.
 
-- [ ] **Step 5: Suggest commit message**
+- [x] **Step 5: Suggest commit message**
 
 `feat(jamo-svg): compile approved reviews into deterministic runtime shards`
 
@@ -379,7 +381,7 @@ Expected: PASS. If `seedReview('거')` does not validate (seed ownership is a he
 - Consumes: `compileRuntimeShards` (Task 2), `shardFileName` (Task 1).
 - Produces: `pnpm jamo-svg:compile-runtime`; committed shard files read by Task 4 at runtime.
 
-- [ ] **Step 1: Write the failing test** — create `tools/jamo-svg/runtime-dataset-committed.test.ts`:
+- [x] **Step 1: Write the failing test** — create `tools/jamo-svg/runtime-dataset-committed.test.ts`:
 
 ```ts
 import { readFile } from 'node:fs/promises'
@@ -407,12 +409,12 @@ test('committed runtime shards match the approved reviews', async () => {
 }, 180_000)
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm vitest run tools/jamo-svg/runtime-dataset-committed.test.ts`
 Expected: FAIL — `stale` lists all 19 files.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `scripts/compile-jamo-svg-runtime.ts`:
 
@@ -461,12 +463,12 @@ Generate the shards:
 Run: `pnpm jamo-svg:compile-runtime`
 Expected: `Wrote 19 shards with <N> glyphs …` where N equals the current approved count (1,858 at spec time).
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `pnpm vitest run tools/jamo-svg/runtime-dataset-committed.test.ts && npx prettier --check .prettierignore public/jamo-svg`
 Expected: test PASS; prettier reports the JSON files as ignored (no warnings).
 
-- [ ] **Step 5: Suggest commit message**
+- [x] **Step 5: Suggest commit message**
 
 `feat(jamo-svg): add compile-runtime script and generated runtime shards`
 
@@ -485,7 +487,7 @@ Expected: test PASS; prettier reports the JSON files as ignored (no warnings).
   - `loadJamoSvgGlyphs(syllables: string[]): Promise<LoadedJamoSvgGlyphs | undefined>`
   - `resetJamoSvgDatasetCacheForTests(): void`
 
-- [ ] **Step 1: Write the failing test** — create `src/infrastructure/jamo-svg/jamo-svg-dataset.test.ts`:
+- [x] **Step 1: Write the failing test** — create `src/infrastructure/jamo-svg/jamo-svg-dataset.test.ts`:
 
 ```ts
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
@@ -586,12 +588,12 @@ test('returns undefined without fetching for non-syllables', async () => {
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm vitest run src/infrastructure/jamo-svg/jamo-svg-dataset.test.ts`
 Expected: FAIL — cannot resolve `./jamo-svg-dataset`.
 
-- [ ] **Step 3: Implement** — create `src/infrastructure/jamo-svg/jamo-svg-dataset.ts`:
+- [x] **Step 3: Implement** — create `src/infrastructure/jamo-svg/jamo-svg-dataset.ts`:
 
 ```ts
 import {
@@ -681,12 +683,12 @@ export function resetJamoSvgDatasetCacheForTests() {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm vitest run src/infrastructure/jamo-svg/jamo-svg-dataset.test.ts`
 Expected: PASS (7 tests).
 
-- [ ] **Step 5: Suggest commit message**
+- [x] **Step 5: Suggest commit message**
 
 `feat(jamo-svg): load runtime shards on demand with in-memory caching`
 
@@ -702,7 +704,7 @@ Expected: PASS (7 tests).
 **Interfaces:**
 - Produces: `isJamoSvgRendererEnabled(): boolean`, `JAMO_SVG_RENDERER_STORAGE_KEY = 'jamozy:jamo-svg-renderer'`.
 
-- [ ] **Step 1: Write the failing test** — create `src/features/typing/jamo-svg-flag.test.ts`:
+- [x] **Step 1: Write the failing test** — create `src/features/typing/jamo-svg-flag.test.ts`:
 
 ```ts
 import { afterEach, expect, test, vi } from 'vitest'
@@ -748,12 +750,12 @@ test('unavailable storage means no override', () => {
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm vitest run src/features/typing/jamo-svg-flag.test.ts`
 Expected: FAIL — cannot resolve `./jamo-svg-flag`.
 
-- [ ] **Step 3: Implement** — create `src/features/typing/jamo-svg-flag.ts`:
+- [x] **Step 3: Implement** — create `src/features/typing/jamo-svg-flag.ts`:
 
 ```ts
 export const JAMO_SVG_RENDERER_STORAGE_KEY = 'jamozy:jamo-svg-renderer'
@@ -786,12 +788,12 @@ Append to `.env.example`:
 VITE_JAMO_SVG_RENDERER=
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm vitest run src/features/typing/jamo-svg-flag.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Suggest commit message**
+- [x] **Step 5: Suggest commit message**
 
 `feat(jamo-svg): add Jamo SVG renderer feature flag`
 
@@ -815,7 +817,7 @@ Expected: PASS.
   - `JAMO_SVG_LOAD_TIMEOUT_MS = 1500`
   - default export `HangulTarget({ session, className? })`
 
-- [ ] **Step 1: Write the failing test** — create `src/features/typing/HangulTarget.test.tsx`:
+- [x] **Step 1: Write the failing test** — create `src/features/typing/HangulTarget.test.tsx`:
 
 ```tsx
 import { act, render, screen } from '@testing-library/react'
@@ -948,12 +950,12 @@ test('a target change discards the stale result', async () => {
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm vitest run src/features/typing/HangulTarget.test.tsx`
 Expected: FAIL — cannot resolve `./HangulTarget`.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `src/features/typing/hangul-target-selection.ts`:
 
@@ -1228,12 +1230,12 @@ export default function HangulTarget({
 }
 ```
 
-- [ ] **Step 4: Run tests and static checks**
+- [x] **Step 4: Run tests and static checks**
 
 Run: `pnpm vitest run src/features/typing/HangulTarget.test.tsx && npx tsc -b && npx eslint src/features/typing src/infrastructure/jamo-svg`
 Expected: 9 tests PASS; no type or lint errors. If `react-hooks` flags `setDecision` inside the effect, it is only called from async callbacks (`setTimeout`, promise), which the rule allows; do not restructure unless the rule actually reports.
 
-- [ ] **Step 5: Suggest commit message**
+- [x] **Step 5: Suggest commit message**
 
 `feat(jamo-svg): render typing targets with per-step SVG behind a flag`
 
@@ -1249,7 +1251,7 @@ Expected: 9 tests PASS; no type or lint errors. If `react-hooks` flags `setDecis
 **Interfaces:**
 - Consumes: default export `HangulTarget` (Task 6) with props `{ session, className? }`.
 
-- [ ] **Step 1: Replace imports and elements** in each file:
+- [x] **Step 1: Replace imports and elements** in each file:
 
 ```tsx
 // before
@@ -1260,16 +1262,16 @@ import HangulTarget from '../typing/HangulTarget'
 
 and rename the JSX element `<DecomposedHangulTarget` to `<HangulTarget`, keeping every prop unchanged.
 
-- [ ] **Step 2: Run the full suite and checks**
+- [x] **Step 2: Run the full suite and checks**
 
 Run: `pnpm test --run && pnpm lint && pnpm build`
 Expected: all tests PASS (flag is off in tests, so existing Lesson/Review tests still see Canvas); lint clean; build succeeds and `dist/jamo-svg/pretendard-600/` contains 19 JSON files.
 
-- [ ] **Step 3: Manual check (user)**
+- [x] **Step 3: Manual check (user)**
 
 Set `localStorage.setItem('jamozy:jamo-svg-renderer', '1')` in the dev app, reload, open a lesson whose target is approved syllables only, and type. Then set `'0'` and reload to compare with Canvas.
 
-- [ ] **Step 4: Suggest commit message**
+- [x] **Step 4: Suggest commit message**
 
 `feat(jamo-svg): route lesson, review, and home targets through HangulTarget`
 
@@ -1283,7 +1285,7 @@ Set `localStorage.setItem('jamozy:jamo-svg-renderer', '1')` in the dev app, relo
 - Modify: `AGENTS.md` (Jamo SVG tooling block)
 - Modify: `docs/PROGRESS.md`, `README.md`, `docs/COMPLETE-LOG.md`
 
-- [ ] **Step 1: Append DEC-039** to `docs/DECISIONS.md`, matching the existing `## DEC-038 — …` heading style:
+- [x] **Step 1: Append DEC-039** to `docs/DECISIONS.md`, matching the existing `## DEC-038 — …` heading style:
 
 ```markdown
 ## DEC-039 — Jamo SVG runtime: committed choseong shards behind a flag
@@ -1313,11 +1315,11 @@ Per-syllable fallback or retiring Canvas is decided later, when coverage is
 high enough.
 ```
 
-- [ ] **Step 2: Update the design doc** — in `docs/research/JAMO_SVG_TAGGER_DESIGN.md`:
+- [x] **Step 2: Update the design doc** — in `docs/research/JAMO_SVG_TAGGER_DESIGN.md`:
   - Replace "The runtime renderer remains unchanged until this derived dataset and its integration are separately designed and approved." with "The derived dataset and its integration are designed in DEC-039 and `docs/superpowers/specs/2026-10-03-jamo-svg-runtime-design.md`."
   - Replace the §10 bullet "Runtime dataset file partitioning and delivery strategy. …" with "Runtime dataset partitioning and delivery: decided in DEC-039 (19 choseong shards, committed, loaded on demand)."
 
-- [ ] **Step 3: Update AGENTS.md** — add to the Jamo SVG tooling command block:
+- [x] **Step 3: Update AGENTS.md** — add to the Jamo SVG tooling command block:
 
 ```bash
 pnpm jamo-svg:compile-runtime         # approved reviews → public/jamo-svg runtime shards
@@ -1325,13 +1327,13 @@ pnpm jamo-svg:compile-runtime         # approved reviews → public/jamo-svg run
 
 and add a bullet: "After approving reviews, run `pnpm jamo-svg:compile-runtime` and commit the shards with the reviews; `VITE_JAMO_SVG_RENDERER=1` turns on the SVG target renderer (DEC-039)."
 
-- [ ] **Step 4: Update status docs** — `docs/PROGRESS.md` Dev Tooling: Jamo SVG table: add a row "Runtime dataset + SVG target renderer (flagged)"; `README.md` Next/Post-MVP line: mention the flagged SVG renderer; append a `docs/COMPLETE-LOG.md` entry dated 2026-10-03 listing the compiler, shards, loader, flag, and `HangulTarget`.
+- [x] **Step 4: Update status docs** — `docs/PROGRESS.md` Dev Tooling: Jamo SVG table: add a row "Runtime dataset + SVG target renderer (flagged)"; `README.md` Next/Post-MVP line: mention the flagged SVG renderer; append a `docs/COMPLETE-LOG.md` entry dated 2026-10-03 listing the compiler, shards, loader, flag, and `HangulTarget`.
 
-- [ ] **Step 5: Run checks**
+- [x] **Step 5: Run checks**
 
 Run: `npx prettier --check AGENTS.md docs/DECISIONS.md docs/PROGRESS.md docs/COMPLETE-LOG.md README.md`
 Expected: clean, or only files that were already not prettier-clean at HEAD (leave those as they were).
 
-- [ ] **Step 6: Suggest commit message**
+- [x] **Step 6: Suggest commit message**
 
 `docs(jamo-svg): record DEC-039 runtime dataset and renderer decisions`

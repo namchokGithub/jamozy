@@ -103,7 +103,7 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 - Track detailed implementation status in `docs/PROGRESS.md`. `README.md`
   carries the high-level MVP/post-MVP overview; keep its summary and roadmap
   aligned with material status changes.
-- Log completed units of work in `docs/COMPLETE-LOG.md`.
+- Log completed units of work by appending a short entry to the current month's file, `docs/log/YYYY-MM.md` (rules in `docs/COMPLETE-LOG.md`). Do not read earlier months to add an entry.
 
 ## Document Map
 
@@ -113,10 +113,10 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 - `docs/LEARNING-MODES.md` — boundaries and shared-state rules for Learning Path, Review, Practice, and Daily Quest.
 - `docs/AUTH-AND-PERSISTENCE.md` — Guest/authenticated session model, adapter selection, retention, and Guest-to-account merge policy.
 - `docs/SESSION-AND-HISTORY.md` — `LearningSession` semantics, history versus learner state, retry identity, and aggregation boundary.
-- `docs/DECISIONS.md` — accepted, superseded, and rejected architectural/product decisions; check this before reopening a settled choice.
+- `docs/DECISIONS.md` — accepted, superseded, and rejected architectural/product decisions; check this before reopening a settled choice. Read its index first and open only the entries you need.
 - `docs/REQUIREMENT-V1.md` — source requirements for the original MVP; a later accepted decision takes precedence if they conflict.
 - `docs/CREDITS.md` — content-source registry and attribution requirements.
-- `docs/COMPLETE-LOG.md` — chronological record of meaningful completed work.
+- `docs/COMPLETE-LOG.md` — index of the monthly completion logs in `docs/log/`.
 - `docs/research/JAMO_SVG_TAGGER_DESIGN.md` — Jamo SVG Tagger design: review records, split recipes, blockers, runtime-data boundary.
 - `docs/research/HANGUL_SVG_ANALYSIS.md` — glyph-outline measurements behind the Tagger.
 - `docs/informations/korean_words.txt` — Korean 5800 frequency list that feeds the Tagger queue.

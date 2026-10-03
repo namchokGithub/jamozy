@@ -13,7 +13,7 @@ Claude Code specific guidance for the Jamozy repository. Shared agent rules (arc
    - Learning Path, Review, Practice, or Daily Quest boundaries → `docs/LEARNING-MODES.md`
    - original MVP requirement wording → `docs/REQUIREMENT-V1.md`
    - content attribution → `docs/CREDITS.md`
-4. Check `docs/DECISIONS.md` before revisiting a choice that may already be settled. An accepted decision takes precedence over older plans or requirements where they conflict.
+4. Check `docs/DECISIONS.md` before revisiting a choice that may already be settled: read its index, then open only the relevant entries (`## DEC-0NN`). An accepted decision takes precedence over older plans or requirements where they conflict.
 
 ## Project State
 
@@ -24,8 +24,8 @@ Pre-MVP, with core lesson, review, profile, and settings flows already present. 
 When you complete a meaningful unit of work in this repo:
 
 - Tick the relevant box(es) in `README.md`'s MVP checklist and mirror the change in `docs/PROGRESS.md`.
-- Append an entry to `docs/COMPLETE-LOG.md` (date, what shipped, relevant commit).
-- If the work involved a non-obvious tradeoff (library choice, data-model shape, layering exception), add an entry to `docs/DECISIONS.md`.
+- Append a 3–5 bullet entry (date, what shipped, commit, link to plan/spec/DEC) to the current month's `docs/log/YYYY-MM.md`; see `docs/COMPLETE-LOG.md`. Append without reading the whole file (for example, read only its last lines).
+- If the work involved a non-obvious tradeoff (library choice, data-model shape, layering exception), add an entry to `docs/DECISIONS.md` and a row to its index.
 - Keep the owning topic document aligned with an accepted decision: schema in `DOMAIN-MODEL`, persistence/migration in `AUTH-AND-PERSISTENCE`, learning-mode behavior in `LEARNING-MODES`, and historical-session semantics in `SESSION-AND-HISTORY`.
 
 Keep status docs terse. Put durable rules in their topic document and rationale/trade-offs in `DECISIONS.md`; do not create competing copies of a schema or policy.

@@ -1,8 +1,8 @@
 # Jamo SVG Runtime — Design
 
 Date: 2026-10-03
-Status: Draft for review
-Related: `docs/research/JAMO_SVG_TAGGER_DESIGN.md` §9–§10, DEC-037, DEC-038, DEC-039 (to be added)
+Status: Accepted; implemented 2026-10-03 (flag off by default)
+Related: `docs/research/JAMO_SVG_TAGGER_DESIGN.md` §9–§10, DEC-037, DEC-038, DEC-039
 
 ## 1. Goal
 

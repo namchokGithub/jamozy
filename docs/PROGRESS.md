@@ -2,7 +2,7 @@
 
 Mirrors the MVP checklist in `README.md`. Update both when status changes. Statuses: `Not started`, `In progress`, `Blocked`, `Done`.
 
-Last updated: 2026-10-03 (Jamo SVG Tagger: 1,858 syllables approved)
+Last updated: 2026-10-04 (Jamo SVG runtime renderer built behind a flag; rollout follow-ups listed)
 
 ## MVP
 
@@ -31,6 +31,7 @@ Development-only data pipeline; the learner SVG renderer is behind a flag (off b
 | Review queue and data                     | In progress | 1,858 committed reviews are all approved; 2,011 entries are queued. Coverage includes every syllable of the 5,467-word Korean 5800 list, the 18-syllable inflection/particle sample (`docs/informations/korean-inflection-sample.md`), and reference glyphs. `pnpm jamo-svg:audit` reports 0 findings for the approved set. |
 | Inflected and particle syllables          | In progress | The 18-syllable sample (`를 았 었 했 …`) is approved; a fuller list of endings and contracted verb forms is not yet enqueued. Syllables never used in real text are deliberately not reviewed; they keep the Canvas renderer.                     |
 | Runtime SVG dataset and per-step renderer | Done (flagged) | `pnpm jamo-svg:compile-runtime` writes 19 committed choseong shards (1,858 glyphs); `HangulTarget` renders per-step SVG when every syllable has approved data, else Canvas for the whole target ([[DEC-039]]). Off unless `VITE_JAMO_SVG_RENDERER=1`. |
+| Runtime SVG rollout | Not started | Before enabling for learners: remove the blank-tile flash when shards are cached, add a fetch timeout (`AbortSignal.timeout`), try it on a Preview deploy (including mobile), decide whether targets with spaces may use SVG, and raise coverage of lesson vocabulary. Smaller follow-ups: one source of expected keys in `HangulTarget`, move `LoadedJamoSvgGlyphs` to the domain types, atomic shard writes, exponent-safe `roundPathNumbers`. |
 
 ## Planned Learning Modes
 

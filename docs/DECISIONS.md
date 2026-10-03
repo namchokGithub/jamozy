@@ -4,6 +4,57 @@ Architecture and product decisions for Jamozy, in chronological order. Each entr
 
 Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 
+## How to use this file
+
+- Read this index first. Open only the entries you need by searching for
+  their heading (`## DEC-0NN`); do not read the whole file.
+- When adding a decision, append the entry at the bottom and add its row
+  here. When a decision is superseded, update its status in both places.
+
+## Index
+
+| DEC | Decision | Status | Date |
+| --- | -------- | ------ | ---- |
+| DEC-001 | Firebase Anonymous Auth for identity, no traditional sign-up | Superseded by DEC-027 | 2026-09-23 |
+| DEC-002 | Layered architecture: domain / application / infrastructure / features | Accepted | 2026-09-23 |
+| DEC-003 | Keystroke-level state stays client-side; Firestore writes only at checkpoints | Accepted | 2026-09-23 |
+| DEC-004 | MVP excludes multiplayer, leaderboards, and social/competitive features | Accepted | 2026-09-23 |
+| DEC-005 | Pin `@vitejs/plugin-react` to 5.2.0, not latest | Accepted | 2026-09-23 |
+| DEC-006 | Level is derived from EXP, never stored | Accepted | 2026-09-23 |
+| DEC-007 | Settings live as a field on the user doc | Accepted | 2026-09-23 |
+| DEC-008 | Spaced repetition (Leitner boxes) for review scheduling | Accepted | 2026-09-23 |
+| DEC-009 | Sequential unlock: previous lesson completed unlocks the next | Accepted (creation/ordering details superseded by DEC-023; Progress-state shape superseded by DEC-025) | 2026-09-23 |
+| DEC-010 | `LessonExercise` gains `difficulty` and split Thai/English `meaning` | Accepted (meaning nullability superseded by DEC-025) | 2026-09-23 |
+| DEC-011 | `UserStats` added as an embedded entity on `UserProfile` | Accepted (field shape superseded by DEC-022) | 2026-09-23 |
+| DEC-012 | `ReviewItem.reason` field added | Accepted | 2026-09-23 |
+| DEC-013 | `UserSettings` expanded to the full requirement.md list | Accepted (field shape superseded in part by DEC-027) | 2026-09-23 |
+| DEC-014 | Application-layer additions found necessary while building the use cases | Accepted | 2026-09-23 |
+| DEC-015 | Firestore content-write security boundary | Superseded — client content writes locked before launch | 2026-09-23 |
+| DEC-016 | Composite Firestore indexes, and `ensureUser` injected into loaders (not imported) | Accepted | 2026-09-23 |
+| DEC-017 | Korean typing engine: own 2-beolsik composition, not the OS IME; jamo-level blocking; progressive partial-compound display | Accepted | 2026-09-24 |
+| DEC-018 | Lesson typing session: accuracy scale boundary, deterministic `ReviewItem` id, and a store `generation` counter to survive React StrictMode | Accepted | 2026-09-24 |
+| DEC-019 | Review system: unbounded due-count default, strict per-item correctness, no same-session requeue, and reusing the `generation` counter for a second store consumer | Accepted | 2026-09-24 |
+| DEC-020 | Settings UI: shared `defaultUserProfile`, and two fetcher/equality pitfalls that only manual browser testing caught | Accepted | 2026-09-24 |
+| DEC-021 | Profile Dashboard: display-only rounding of running-average stats | Accepted | 2026-09-25 |
+| DEC-022 | Vocabulary-backed review identity and raw aggregate typing counters | Accepted | 2026-09-27 |
+| DEC-023 | Lazy Progress creation, canonical progression ordering, and profile update timestamp | Accepted | 2026-09-27 |
+| DEC-024 | ID conventions, bounded lessons, deterministic review reasons, and deferred level balancing | Accepted | 2026-09-27 |
+| DEC-025 | Vocabulary import identity and nullable meanings; simplify persisted Progress states | Accepted | 2026-09-27 |
+| DEC-026 | Learning Modes, shared learner state, and contiguous progression frontier | Accepted | 2026-09-27 |
+| DEC-027 | Guest local persistence and migration to authenticated accounts | Accepted | 2026-09-27 |
+| DEC-028 | Shared learner-state checkpoints and Daily Quest completion | Accepted | 2026-09-27 |
+| DEC-029 | Session history separated from learner state and lifetime aggregates | Accepted | 2026-09-28 |
+| DEC-030 | Guest-to-account migration merge policy | Accepted | 2026-09-28 |
+| DEC-031 | Preserve pre-session learner values as a compatibility baseline | Accepted | 2026-09-28 |
+| DEC-032 | Lesson Result review action opens the due Review queue | Accepted | 2026-09-28 |
+| DEC-033 | Intentional Learning Path replays grant 15 EXP | Accepted | 2026-09-29 |
+| DEC-034 | Admin content is claim-authorized and status-gated | Accepted | 2026-09-29 |
+| DEC-035 | Home one-page player uses browser-local exercise checkpoints | Accepted | 2026-09-29 |
+| DEC-036 | Jamo SVG steps follow visual jamo for compound medials | Superseded by DEC-037 | 2026-10-01 |
+| DEC-037 | Jamo SVG steps follow typed keys, including compound medials | Accepted | 2026-10-01 |
+| DEC-038 | Split recipes may partition an enclosed counter with its outline | Accepted | 2026-10-01 |
+| DEC-039 | Jamo SVG runtime: committed choseong shards behind a flag | Accepted | 2026-10-03 |
+
 ---
 
 ## DEC-001 — Firebase Anonymous Auth for identity, no traditional sign-up
