@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { buildExpectedKeys } from '../../domain/korean/target-sequence'
 import type { TypingSessionState } from '../../domain/korean/typing-session'
-import { loadJamoSvgGlyphs } from '../../infrastructure/jamo-svg/jamo-svg-dataset'
+import {
+  loadJamoSvgGlyphs,
+  peekJamoSvgGlyphs,
+} from '../../infrastructure/jamo-svg/jamo-svg-dataset'
 import DecomposedHangulTarget from './DecomposedHangulTarget'
 import JamoSvgHangulTarget, { PendingHangulTiles } from './JamoSvgHangulTarget'
 import {
@@ -34,6 +37,12 @@ export default function HangulTarget({
     () => svgTargetSyllables(targetText, buildExpectedKeys(targetText)),
     [targetText],
   )
+  // Shards already in memory decide at once, so a new target never flashes blank tiles.
+  const cachedChoice = useMemo(() => {
+    if (!enabled || !groups) return undefined
+    const cached = peekJamoSvgGlyphs(groups.map(({ syllable }) => syllable))
+    return cached && chooseRenderer(groups, cached)
+  }, [enabled, groups])
   const [decision, setDecision] = useState<{
     targetText: string
     choice: RendererChoice
@@ -43,6 +52,10 @@ export default function HangulTarget({
     if (!enabled) return
     if (!groups) {
       warn('the target has characters other than Hangul syllables')
+      return
+    }
+    if (cachedChoice) {
+      if (cachedChoice.kind === 'canvas') warn(cachedChoice.reason)
       return
     }
     let active = true
@@ -69,12 +82,13 @@ export default function HangulTarget({
       active = false
       clearTimeout(timer)
     }
-  }, [enabled, groups, targetText])
+  }, [cachedChoice, enabled, groups, targetText])
 
   if (!enabled || !groups)
     return <DecomposedHangulTarget session={session} className={className} />
   const choice =
-    decision?.targetText === targetText ? decision.choice : undefined
+    cachedChoice ??
+    (decision?.targetText === targetText ? decision.choice : undefined)
   if (!choice)
     return (
       <PendingHangulTiles

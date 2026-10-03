@@ -14,6 +14,8 @@ export type LoadedJamoSvgGlyphs = {
 
 // Static, read-only content; not learner state (DEC-039).
 const shardCache = new Map<number, Promise<RuntimeJamoSvgShard>>()
+// Shards that finished loading, readable synchronously by peekJamoSvgGlyphs.
+const loadedShards = new Map<number, RuntimeJamoSvgShard>()
 
 function warn(message: string) {
   if (import.meta.env.DEV) console.warn(`[jamo-svg] ${message}`)
@@ -40,28 +42,30 @@ function loadShard(index: number) {
     const request = fetchShard(index)
     pending = request
     shardCache.set(index, request)
-    request.catch(() => {
-      if (shardCache.get(index) === request) shardCache.delete(index)
-    })
+    request.then(
+      (shard) => loadedShards.set(index, shard),
+      () => {
+        if (shardCache.get(index) === request) shardCache.delete(index)
+      },
+    )
   }
   return pending
 }
 
-/** Loads the shards the syllables need; undefined when any shard fails. */
-export async function loadJamoSvgGlyphs(
-  syllables: string[],
-): Promise<LoadedJamoSvgGlyphs | undefined> {
+/** Shard indexes the syllables need, or undefined for any non-syllable. */
+function shardIndexesOf(syllables: string[]) {
   const indexes = syllables.map(getChoseongShardIndex)
   if (!indexes.length || indexes.some((index) => index === undefined))
     return undefined
-  const unique = [...new Set(indexes as number[])]
-  let shards: RuntimeJamoSvgShard[]
-  try {
-    shards = await Promise.all(unique.map(loadShard))
-  } catch (error) {
-    warn(error instanceof Error ? error.message : String(error))
-    return undefined
-  }
+  return indexes as number[]
+}
+
+function pickGlyphs(
+  syllables: string[],
+  indexes: number[],
+  shardAt: (index: number) => RuntimeJamoSvgShard,
+): LoadedJamoSvgGlyphs | undefined {
+  const shards = [...new Set(indexes)].map(shardAt)
   const [first] = shards
   if (
     shards.some(
@@ -75,13 +79,49 @@ export async function loadJamoSvgGlyphs(
   }
   const glyphs = new Map<string, RuntimeJamoSvgGlyph>()
   syllables.forEach((syllable, position) => {
-    const shard = shards[unique.indexOf(indexes[position] as number)]
+    const shard = shardAt(indexes[position])
     if (Object.hasOwn(shard.glyphs, syllable))
       glyphs.set(syllable, shard.glyphs[syllable])
   })
   return { unitsPerEm: first.unitsPerEm, glyphs }
 }
 
+/** Loads the shards the syllables need; undefined when any shard fails. */
+export async function loadJamoSvgGlyphs(
+  syllables: string[],
+): Promise<LoadedJamoSvgGlyphs | undefined> {
+  const indexes = shardIndexesOf(syllables)
+  if (!indexes) return undefined
+  const unique = [...new Set(indexes)]
+  let shards: RuntimeJamoSvgShard[]
+  try {
+    shards = await Promise.all(unique.map(loadShard))
+  } catch (error) {
+    warn(error instanceof Error ? error.message : String(error))
+    return undefined
+  }
+  return pickGlyphs(
+    syllables,
+    indexes,
+    (index) => shards[unique.indexOf(index)],
+  )
+}
+
+/** Same result as loadJamoSvgGlyphs, but only when every needed shard has already loaded. */
+export function peekJamoSvgGlyphs(
+  syllables: string[],
+): LoadedJamoSvgGlyphs | undefined {
+  const indexes = shardIndexesOf(syllables)
+  if (!indexes || indexes.some((index) => !loadedShards.has(index)))
+    return undefined
+  return pickGlyphs(syllables, indexes, (index) => {
+    const shard = loadedShards.get(index)
+    if (!shard) throw new Error(`shard ${index} is not loaded`)
+    return shard
+  })
+}
+
 export function resetJamoSvgDatasetCacheForTests() {
   shardCache.clear()
+  loadedShards.clear()
 }

@@ -4,13 +4,17 @@ import {
   pressKey,
   startTypingSession,
 } from '../../domain/korean/typing-session'
-import { loadJamoSvgGlyphs } from '../../infrastructure/jamo-svg/jamo-svg-dataset'
+import {
+  loadJamoSvgGlyphs,
+  peekJamoSvgGlyphs,
+} from '../../infrastructure/jamo-svg/jamo-svg-dataset'
 import HangulTarget, { JAMO_SVG_LOAD_TIMEOUT_MS } from './HangulTarget'
 import { isJamoSvgRendererEnabled } from './jamo-svg-flag'
 
 vi.mock('./jamo-svg-flag', () => ({ isJamoSvgRendererEnabled: vi.fn() }))
 vi.mock('../../infrastructure/jamo-svg/jamo-svg-dataset', () => ({
   loadJamoSvgGlyphs: vi.fn(),
+  peekJamoSvgGlyphs: vi.fn(),
 }))
 vi.mock('./DecomposedHangulTarget', () => ({
   default: () => <div data-testid="canvas-target" />,
@@ -36,6 +40,7 @@ const fills = (container: HTMLElement) =>
 
 beforeEach(() => {
   vi.mocked(isJamoSvgRendererEnabled).mockReturnValue(true)
+  vi.mocked(peekJamoSvgGlyphs).mockReturnValue(undefined)
   vi.spyOn(console, 'warn').mockImplementation(() => {})
 })
 afterEach(() => {
@@ -161,4 +166,26 @@ test('SVG paths fill with even-odd, matching the Tagger', async () => {
     path.getAttribute('fill-rule'),
   )
   expect(rules).toEqual(['evenodd', 'evenodd'])
+})
+
+test('cached shards render SVG at once, without blank tiles or a fetch', () => {
+  vi.mocked(peekJamoSvgGlyphs).mockReturnValue(
+    loaded({ 가: glyph('ㄱ', 'ㅏ') }),
+  )
+  const { container } = render(
+    <HangulTarget session={startTypingSession('가')} />,
+  )
+  expect(screen.queryByTestId('pending-hangul-tile')).toBeNull()
+  expect(container.querySelectorAll('svg')).toHaveLength(1)
+  expect(loadJamoSvgGlyphs).not.toHaveBeenCalled()
+})
+
+test('cached shards without a needed glyph render Canvas at once', () => {
+  vi.mocked(peekJamoSvgGlyphs).mockReturnValue(
+    loaded({ 가: glyph('ㄱ', 'ㅏ') }),
+  )
+  render(<HangulTarget session={startTypingSession('가나')} />)
+  expect(screen.queryByTestId('pending-hangul-tile')).toBeNull()
+  expect(screen.getByTestId('canvas-target')).toBeInTheDocument()
+  expect(loadJamoSvgGlyphs).not.toHaveBeenCalled()
 })

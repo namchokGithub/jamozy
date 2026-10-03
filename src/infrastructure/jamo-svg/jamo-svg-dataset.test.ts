@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import {
   loadJamoSvgGlyphs,
+  peekJamoSvgGlyphs,
   resetJamoSvgDatasetCacheForTests,
 } from './jamo-svg-dataset'
 
@@ -107,4 +108,19 @@ test('rejects a shard whose glyphs are missing', async () => {
     vi.fn(() => respond({ ...shard({}), glyphs: null })),
   )
   expect(await loadJamoSvgGlyphs(['가'])).toBeUndefined()
+})
+
+test('peeks synchronously only once every needed shard has loaded', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(() => respond(shard({ 가: glyph }))),
+  )
+  expect(peekJamoSvgGlyphs(['가'])).toBeUndefined()
+  const pending = loadJamoSvgGlyphs(['가'])
+  expect(peekJamoSvgGlyphs(['가'])).toBeUndefined()
+  await pending
+  const peeked = peekJamoSvgGlyphs(['가', '거'])
+  expect(peeked?.unitsPerEm).toBe(2048)
+  expect([...(peeked?.glyphs.keys() ?? [])]).toEqual(['가'])
+  expect(peekJamoSvgGlyphs(['가', '나'])).toBeUndefined()
 })
