@@ -111,7 +111,8 @@ export default function OnePageLearningPlayer({
   const wpm = Math.round(acceptedKeystrokes / 5 / (elapsedSeconds / 60))
   const completedSteps = session?.currentSession.keyIndex ?? 0
   const totalSteps = session?.currentSession.expectedKeys.length ?? 0
-  const progressPercent = totalSteps === 0 ? 0 : (completedSteps / totalSteps) * 100
+  const progressPercent =
+    totalSteps === 0 ? 0 : (completedSteps / totalSteps) * 100
 
   return (
     <section
@@ -159,7 +160,8 @@ export default function OnePageLearningPlayer({
                 WPM <strong className="ml-0.5 text-[#667085]">{wpm}</strong>
               </span>
               <span className="rounded-lg border border-[#eadfd4] bg-[#fffdf9] px-2 py-0.5 text-[10px] font-semibold text-[#98a2b3]">
-                ACC <strong className="ml-0.5 text-[#667085]">{accuracy}%</strong>
+                ACC{' '}
+                <strong className="ml-0.5 text-[#667085]">{accuracy}%</strong>
               </span>
             </div>
             <HangulTarget
