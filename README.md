@@ -371,49 +371,35 @@ Current sources:
 
 ## Project Status
 
-Jamozy is currently in early development.
-
-## Next Implementation Focus
-
-> [!NOTE]
-> The target data model is defined in `docs/DOMAIN-MODEL.md`,
-> [Authentication and Persistence](docs/AUTH-AND-PERSISTENCE.md), and DEC-022 through DEC-031.
-> The current implementation and persisted Firestore data are still being migrated to match it.
-
-Current work focuses on:
-
-- vocabulary import with source/license attribution and deduplication rules;
-- simplified lesson-progress persistence (`missing` = locked);
-- one-page Learning Path resume checkpoints in local IndexedDB;
-- raw typing-stat counters with derived accuracy and WPM;
-- updated `ReviewItem` identity and Leitner lifecycle.
-- Learning Modes shared-state architecture, including contiguous Learning Path
-  progression, VocabularyProgress, JamoStats, Topics, and Daily Quest.
-- Guest-local persistence, authenticated accounts, and safe automatic
-  Guest-to-account migration. Cleanup remains deferred.
-- Shared LearningSession history and its exactly-once submission boundary for
-  Lesson and Review; history read/UI and other modes remain deferred.
+The core MVP is functionally complete: Learning Path, lessons, results,
+review, guest and authenticated persistence, settings, profile, and Admin BO
+are implemented. The Home one-page Learning Path player is awaiting its final
+manual verification pass. See the [Progress Tracker](docs/PROGRESS.md) for
+the detailed current status.
 
 ### MVP
 
-MVP is complete. See [Progress Tracker](docs/PROGRESS.md) for
-implementation status and the post-MVP roadmap.
+MVP is complete apart from final user-owned verification of the Home one-page
+Learning Path player. See [Progress Tracker](docs/PROGRESS.md) for the
+verification checklist and post-MVP roadmap.
 
 ### Next / Post-MVP
 
-- Add and execute Firestore Rules Emulator coverage for the deployed `/admin`
-  authorization policy. See the
-  [implementation plan](docs/superpowers/plans/2026-09-29-admin-content-management.md).
+- Complete the Home one-page Learning Path player's manual verification.
+- Set up a Cloudflare Pages deployment pipeline and use Preview deployments
+  for release checks.
 - Decide whether sound feedback ships or is deferred, then implement the
   selected behavior
 - Dark-mode CSS
 - Dedicated Lesson Result visual redesign
 - History, summaries, and analytics
 - Learning Modes: VocabularyProgress, JamoStats, Practice, and Daily Quest
-- Per-step Jamo SVG rendering from the reviewed Tagger data: built behind the
-  `VITE_JAMO_SVG_RENDERER` flag with 1,858 approved syllables (DEC-039);
-  turning it on for learners waits on coverage (see
-  [Progress Tracker](docs/PROGRESS.md#dev-tooling-jamo-svg))
+- Roll out per-step Jamo SVG rendering: it is built behind the
+  `VITE_JAMO_SVG_RENDERER` flag with 1,858 approved syllables (DEC-039).
+  First validate it in a Preview deployment, including mobile, resolve the
+  space-target policy, and raise lesson-vocabulary coverage before enabling it
+  for learners. See the
+  [Progress Tracker](docs/PROGRESS.md#dev-tooling-jamo-svg).
 - Account linking between authentication providers
 - Achievements, daily streaks, pronunciation audio, and additional curriculum
 
