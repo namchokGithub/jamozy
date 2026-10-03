@@ -10,6 +10,7 @@ import {
   chooseRenderer,
   svgTargetSyllables,
   type RendererChoice,
+  type SyllableGroup,
 } from './hangul-target-selection'
 import { isJamoSvgRendererEnabled } from './jamo-svg-flag'
 
@@ -32,10 +33,14 @@ export default function HangulTarget({
 }: HangulTargetProps) {
   const [enabled] = useState(isJamoSvgRendererEnabled)
   const { targetText, expectedKeys } = session
-  // pressKey keeps the same expectedKeys array, so this runs once per target.
+  // Keyed by content: a new session for the same target (the next exercise)
+  // keeps the same groups, so the renderer is not chosen again.
+  const groupsKey = JSON.stringify(
+    svgTargetSyllables(targetText, expectedKeys) ?? null,
+  )
   const groups = useMemo(
-    () => svgTargetSyllables(targetText, expectedKeys),
-    [targetText, expectedKeys],
+    () => JSON.parse(groupsKey) as SyllableGroup[] | null,
+    [groupsKey],
   )
   // Shards already in memory decide at once, so a new target never flashes blank tiles.
   const cachedChoice = useMemo(() => {

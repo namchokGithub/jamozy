@@ -205,3 +205,23 @@ test('selection checks steps against the session’s own expected keys', async (
   await act(async () => {})
   expect(container.querySelectorAll('svg')).toHaveLength(1)
 })
+
+test('the same target in the next exercise keeps SVG without blank tiles', async () => {
+  vi.mocked(loadJamoSvgGlyphs).mockResolvedValue(
+    loaded({ 가: glyph('ㄱ', 'ㅏ') }),
+  )
+  const finished = pressKey(
+    pressKey(startTypingSession('가'), 'KeyR', false),
+    'KeyK',
+    false,
+  )
+  const { container, rerender } = render(<HangulTarget session={finished} />)
+  await act(async () => {})
+  expect(fills(container)).toEqual(['#20b981', '#20b981'])
+  rerender(<HangulTarget session={startTypingSession('가')} />)
+  expect(screen.queryByTestId('pending-hangul-tile')).toBeNull()
+  expect(fills(container)).toEqual(['#e990b6', '#c7c3bc'])
+  await act(async () => {})
+  expect(container.querySelectorAll('svg')).toHaveLength(1)
+  expect(loadJamoSvgGlyphs).toHaveBeenCalledTimes(1)
+})
