@@ -569,12 +569,12 @@ function CommandRangePainter({
                         y={command.y - 50 * scale}
                         fontSize={84 * scale}
                         fontWeight={700}
-                        fill={palette.selected}
+                        fill="currentColor"
                         stroke="#ffffff"
                         strokeWidth={18 * scale}
                         paintOrder="stroke"
                         pointerEvents="none"
-                        className="select-none"
+                        className="select-none text-purple-600!"
                       >
                         {label(item.id)}cmd {index}
                       </text>
@@ -767,6 +767,7 @@ const shortcutRows = [
   { keys: ['s', 'ห'], action: 'Save' },
   { keys: ['f', 'ด'], action: 'Approve' },
   { keys: ['v', 'อ'], action: 'Mark proposed (recheck later)' },
+  { keys: ['g', 'เ'], action: 'Zoom' },
   { keys: ['Esc'], action: 'Close dialog' },
 ]
 const reviewStatuses = [
@@ -956,6 +957,8 @@ export default function JamoSvgTaggerPage() {
           'v',
           'อ',
           'พ',
+          'g',
+          'เ',
         ].includes(event.key)
       )
         return
@@ -982,6 +985,10 @@ export default function JamoSvgTaggerPage() {
       }
       if (event.key === 'r' || event.key === 'พ') {
         void save(false, true)
+        return
+      }
+      if (event.key === 'g' || event.key === 'เ') {
+        void setZoomOpen(true)
         return
       }
       setIndex((current) =>
