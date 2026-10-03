@@ -587,6 +587,54 @@ reviewer notes, split rationale, queue information, or validation artifacts.
 The derived dataset and its integration are designed in DEC-039 and
 `docs/superpowers/specs/2026-10-03-jamo-svg-runtime-design.md`.
 
+### Maintaining the runtime dataset
+
+**Content updates** (new approvals, a corrected approved glyph, a review
+returned to draft) never change the format and need no version change:
+
+1. Review and approve in the Tagger; run `pnpm jamo-svg:audit`.
+2. Run `pnpm jamo-svg:compile-runtime`. Unchanged shards stay byte-identical.
+3. Run `pnpm test`; `runtime-dataset-committed.test.ts` fails if step 2 was
+   skipped.
+4. Commit the reviews and the shards together, then deploy. Learners get the
+   new data on their next page load; no code or env change is needed.
+
+Shard file names carry no content hash (`00.json`), so the host must
+revalidate them (Cloudflare Pages serves unhashed assets with
+`max-age=0, must-revalidate`). Do not add long-lived cache headers for
+`/jamo-svg/` without versioned paths.
+
+**Format changes.** The shard format is the JSON shape in
+`src/domain/korean/jamo-svg-runtime.ts`.
+
+- *Additive, no version change:* a new optional field that the renderer can
+  ignore (for example `slot` per path or `bounds` per glyph). Older clients
+  skip unknown fields.
+- *Breaking, version change required:* anything an older client would
+  misread or render incompletely, such as:
+  - a new coordinate system (another em size, flipped axis, moved origin);
+  - renamed or restructured fields (`paths` → `steps`, `d` as an array);
+  - encoded or compressed `d`;
+  - one path no longer equal to one typed key (DEC-037);
+  - data the renderer needs to draw correctly, such as stroke centerlines.
+
+A breaking change updates, in one change: the type
+(`datasetSchemaVersion`), `buildRuntimeShards` and `serializeRuntimeShard`
+in `tools/jamo-svg/runtime-dataset.ts`, the version check in
+`fetchShard` (`src/infrastructure/jamo-svg/jamo-svg-dataset.ts`), the
+renderer and selection code if `paths` changed, the compiler and loader
+tests, the regenerated shards, and a new DEC.
+
+Prefer a versioned path (`public/jamo-svg/pretendard-600/v2/`) for a breaking
+change and keep the old path until clients have reloaded. With the same path,
+an open tab with old code rejects new shards, and new code rejects a cached
+old shard; both fall back to Canvas until reload. Nothing breaks, but some
+learners see Canvas for a while.
+
+A font change is not a format change: migrate reviews first; the compiler
+refuses to run when the font or step-algorithm fingerprint differs from the
+review manifest.
+
 ## 10. Durability audit and intentionally deferred decisions
 
 The extraction cache was already structurally durable for full-block work: it

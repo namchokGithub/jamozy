@@ -55,6 +55,8 @@ pnpm jamo-svg:compile-runtime         # approved reviews → public/jamo-svg run
 - After approving reviews, run `pnpm jamo-svg:compile-runtime` and commit the
   shards with the reviews; `runtime-dataset-committed.test.ts` fails otherwise.
   `VITE_JAMO_SVG_RENDERER=1` turns on the SVG target renderer (DEC-039).
+  Before changing the runtime shard format, read "Maintaining the runtime
+  dataset" in `docs/research/JAMO_SVG_TAGGER_DESIGN.md`.
 
 ## Architecture Rules
 
