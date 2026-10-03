@@ -3,7 +3,7 @@ import type { TypingSessionState } from '../../domain/korean/typing-session'
 
 const COLORS = {
   correct: '#20b981',
-  current: '#e990b6',
+  current: '#c84f82',
   pending: '#c7c3bc',
 }
 const TILE_CLASS = 'h-26 w-26 rounded-md border border-[#bfd7fb] bg-[#fafcff]'

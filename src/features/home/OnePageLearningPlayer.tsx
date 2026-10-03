@@ -165,16 +165,16 @@ export default function OnePageLearningPlayer({
           <div className="mt-3 rounded-3xl border border-[#eadfd4] bg-white p-6 text-center">
             <HangulTarget
               session={session.currentSession}
-              className="text-4xl font-bold tracking-wide sm:text-5xl"
+              className="origin-center scale-120 text-4xl font-bold tracking-wide sm:text-5xl"
             />
-            <p className="mt-4 text-sm text-[#667085]">
+            <p className="mt-5 text-xs text-[#98a2b3]">
               {active.exercise.meaningTh} : {active.exercise.meaningEn}
             </p>
             {/* <p className="mt-1 text-sm text-[#667085]">
               {active.exercise.meaningEn}
             </p> */}
             {active.exercise.romanization && (
-              <p className="mt-2 text-sm italic text-[#7863a8]">
+              <p className="mt-1 text-xs italic text-[#a293bd]">
                 {active.exercise.romanization}
               </p>
             )}

@@ -105,7 +105,7 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 - Track detailed implementation status in `docs/PROGRESS.md`. `README.md`
   carries the high-level MVP/post-MVP overview; keep its summary and roadmap
   aligned with material status changes.
-- Log completed units of work by appending a short entry to the current month's file, `docs/log/YYYY-MM.md` (rules in `docs/COMPLETE-LOG.md`). Do not read earlier months to add an entry.
+- Log completed non-UI units of work by appending a short entry to the current month's file, `docs/log/YYYY-MM.md` (rules in `docs/COMPLETE-LOG.md`). Do not update the completion log for UI-only visual, layout, or presentation changes. Do not read earlier months to add an entry.
 
 ## Document Map
 

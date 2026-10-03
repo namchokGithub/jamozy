@@ -41,12 +41,12 @@ const TILE_SIZE = 104
 const HORIZONTAL_VOWELS = new Set(['ㅗ', 'ㅛ', 'ㅜ', 'ㅠ', 'ㅡ'])
 const COLORS = {
   correct: '#20b981',
-  current: '#e990b6',
+  current: '#c84f82',
   pending: '#c7c3bc',
 }
 const COLOR_CHANNELS = {
   correct: [32, 185, 129],
-  current: [233, 144, 182],
+  current: [200, 79, 130],
   pending: [199, 195, 188],
 }
 
