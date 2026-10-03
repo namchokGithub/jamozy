@@ -74,6 +74,10 @@ describe('runtime dataset compiler', () => {
     )
   })
 
+  test('rounds leading-dot and exponent numbers as whole numbers', () => {
+    expect(roundPathNumbers('M.56 1e-7 L-.04 2.5E2')).toBe('M0.6 0 L0 250')
+  })
+
   test('stops when an approved review fails validation', async () => {
     const broken = await entry('가')
     broken.review.steps[1].geometry = []

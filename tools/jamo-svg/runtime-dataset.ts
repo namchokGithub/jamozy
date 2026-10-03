@@ -14,7 +14,8 @@ import type { CachedGlyph, GlyphReview } from './types'
 export type ApprovedEntry = { glyph: CachedGlyph; review: GlyphReview }
 
 export function roundPathNumbers(d: string) {
-  return d.replace(/-?\d+(?:\.\d+)?/g, (value) =>
+  // Whole SVG numbers, including leading-dot (.5) and exponent (1e-7) forms.
+  return d.replace(/-?(?:\d+(?:\.\d*)?|\.\d+)(?:e[-+]?\d+)?/gi, (value) =>
     String(Math.round(Number(value) * 10) / 10 || 0),
   )
 }
