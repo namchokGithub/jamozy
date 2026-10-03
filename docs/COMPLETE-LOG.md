@@ -758,3 +758,12 @@ Chronological log of completed units of work. One entry per meaningful change (n
   preview, and easier command selection.
 - `/queue` reads review shards once instead of once per syllable (about 3 s
   to 9 ms for 989 syllables) with identical output.
+
+### 2026-10-03 — Jamo SVG: expanded approved review coverage
+
+- Approved the additional queued Tagger reviews. The committed review shards
+  now contain 1,858 approved syllables; the queue contains 2,011 entries.
+- `pnpm jamo-svg:audit` validates all 1,858 approved reviews with 0 findings.
+- Updated the README, Progress Tracker, and Tagger design status so they no
+  longer describe the completed tool as the original six-reference future
+  implementation.

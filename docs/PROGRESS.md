@@ -2,7 +2,7 @@
 
 Mirrors the MVP checklist in `README.md`. Update both when status changes. Statuses: `Not started`, `In progress`, `Blocked`, `Done`.
 
-Last updated: 2026-10-02 (Jamo SVG Tagger: 989 syllables approved)
+Last updated: 2026-10-03 (Jamo SVG Tagger: 1,858 syllables approved)
 
 ## MVP
 
@@ -28,7 +28,7 @@ Development-only data pipeline; it does not affect the learner renderer yet. Des
 | Item                                      | Status      | Notes                                                                                                                                                                                                                                             |
 | ----------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Jamo SVG Tagger (`/dev/jamo-svg-tagger`)  | Done        | Review per-step ownership of Pretendard 600 outlines, split recipes including enclosed counters ([[DEC-038]]), one step per typed key ([[DEC-037]]).                                                                                              |
-| Review queue and data                     | Done        | 989 syllables, all approved: all 966 syllables of the 5,467-word Korean 5800 list, an 18-syllable inflection/particle sample (`docs/informations/korean-inflection-sample.md`), and 5 reference glyphs. `pnpm jamo-svg:audit` reports 0 findings. |
+| Review queue and data                     | In progress | 1,858 committed reviews are all approved; 2,011 entries are queued. Coverage includes every syllable of the 5,467-word Korean 5800 list, the 18-syllable inflection/particle sample (`docs/informations/korean-inflection-sample.md`), and reference glyphs. `pnpm jamo-svg:audit` reports 0 findings for the approved set. |
 | Inflected and particle syllables          | In progress | The 18-syllable sample (`를 았 었 했 …`) is approved; a fuller list of endings and contracted verb forms is not yet enqueued. Syllables never used in real text are deliberately not reviewed; they keep the Canvas renderer.                     |
 | Runtime SVG dataset and per-step renderer | Not started | Compile approved reviews into the minimal runtime dataset; render step by step with the Canvas renderer as fallback. Needs its own design and decision.                                                                                           |
 

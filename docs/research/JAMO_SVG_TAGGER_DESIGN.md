@@ -1,21 +1,23 @@
-# Jamo SVG Tagger v1 design
+# Jamo SVG Tagger design
 
-Status: approved development-only Tagger v1 design, with a proposed Split
-Workbench v2 design, 2026-09-30. It specifies the review tool and its
+Status: implemented development-only Tagger, including Split Workbench v2 and
+counter-aware recipes (2026-10-03). It specifies the review tool and its
 implementation boundary; it does not authorize production SVG generation or
 any change to the existing Canvas renderer.
 
 Read [the structural analysis](HANGUL_SVG_ANALYSIS.md) first. It is the source
 of truth for font choice, physical-jamo rules, measured full-block results,
-PoC findings, and project constraints. This document designs the next tool
-needed to act on those findings.
+PoC findings, and project constraints. This document records the implemented
+tool and the design decisions behind it.
 
 ### Implementation note
 
-The development implementation uses `pnpm jamo-svg:seed` to generate the
-ignored cache and create/update the bounded committed review and queue seeds.
 Vite serves the development-only Tagger API under `/__jamo-svg`; it is enabled
 only for `serve`, while `/dev/jamo-svg-tagger` remains a development route.
+The committed reviews and queue are already initialized. On a fresh checkout,
+use `pnpm jamo-svg:enqueue` to rebuild the ignored extraction cache. Do not
+run `pnpm jamo-svg:seed` on existing data: it re-initializes the review
+manifest and bounded seed data.
 
 ## Goal and non-goals
 
@@ -610,25 +612,23 @@ review data rather than a larger storage shape:
   compiler concern because runtime data must remain the minimal derived shape,
   not a copy of review storage.
 
-## 11. Implementation phases (future work)
+## 11. Implementation history
 
-1. Generate sharded cache and manifest from the fixed font; add stale-cache
-   diagnostics.
-2. Add committed choseong-sharded review records, manifest, and separate queue
-   schema plus dev-only `ReviewStore`/`QueueStore` adapters with safe writes,
-   checksum conflict detection, and stale-data diagnostics.
-3. Build a read-only queue/source inspector with the six reference records.
-4. Add whole-contour ownership editing, validation, draft recovery, and save.
-5. Add constrained source-command split recipes and reconstruction validation.
-6. Review the bounded queue; only then measure reviewed-family reuse before
-   considering broader propagation or a dataset compiler.
+Phases 1–5 are implemented: the cache, sharded stores, queue/source inspector,
+ownership editing, draft recovery, validation, constrained split recipes, and
+the Split Workbench are all available in the development-only Tagger. The
+review queue has grown beyond the original PoC scope; current coverage and
+audit status are tracked in `docs/PROGRESS.md` rather than here.
 
-## Smallest useful Tagger v1 scope
+The remaining separate work is a production runtime dataset compiler and
+per-step renderer. It still requires its own design and decision.
 
-Implement phases 1–4 plus the minimum constrained split recipe support needed
-to express the already verified `값` case. Begin directly with the sharded
-manifest-backed persistence described above, even for the six seed records.
-Seed only the six PoC references and a small, explicit queue drawn from the
+## Historical smallest useful Tagger v1 scope
+
+The original v1 implementation began with phases 1–4 plus the minimum
+constrained split recipe support needed to express the already verified `값`
+case. It began directly with the sharded manifest-backed persistence, seeded
+six PoC references, and used a small, explicit queue drawn from the
 `ㅄ`, one-contour multi-step, and contour-surplus slices. This proves durable
 review, multi-contour ownership, counter handling, one-color validation, and
 one auditable split before any attempt to scale or generate a production
@@ -690,7 +690,7 @@ type ReviewedStepV2 = {
 }
 
 type RecipeTokenV2 =
-  | { kind: 'source-range'; fromCommand: number; toCommand: number }
+  | { kind: 'source-range'; fromCommand: number; toCommand: number; contourId?: number }
   | { kind: 'move-to-anchor'; anchor: SourceAnchor }
   | { kind: 'line-to-anchor'; anchor: SourceAnchor; reason: 'interior-closure-seam' }
   | { kind: 'close-to-start'; reason: 'interior-closure-seam' }
@@ -705,6 +705,7 @@ type SplitRecipeV2 = {
   id: string
   sourceContourId: number
   sourceContourHash: string
+  counterContours?: number[]
   method: 'source-command-partition'
   pieces: SplitPieceV2[]
   rationale: string
@@ -734,7 +735,7 @@ type ReviewShardV2 = {
   shardSchemaVersion: 2
   choseong: string
   fontFingerprint: string
-  physicalStepAlgorithmVersion: 1
+  physicalStepAlgorithmVersion: 3
   splitRecipeSchemaVersion: 2
   reviews: Record<string, GlyphReviewV2>
 }
@@ -744,7 +745,7 @@ type ReviewManifestV2 = {
   reviewRecordSchemaVersion: 2
   splitRecipeSchemaVersion: 2
   activeFontFingerprint: string
-  physicalStepAlgorithmVersion: 1
+  physicalStepAlgorithmVersion: 3
   shards: Array<{ choseong: string; file: string; reviewCount: number; sha256: string }>
 }
 ```
@@ -789,22 +790,18 @@ approve until the known migration completes. Font/extraction fingerprint or
 physical-step-algorithm mismatches are separately stale-source conditions,
 not schema migrations.
 
-### Current review-state inconsistency
+### Historical review-state inconsistency
 
-The reviewed records currently contain two explicit states:
+During the initial Split Workbench rollout, `굵`, `굸`, `귟`, and `귌` were
+`reviewing` with `needs-split`, while `낪` and `닶` had notes that described a
+needed split without the corresponding blocker. Those records have since been
+resolved and approved.
 
-- `굵`, `굸`, `귟`, and `귌` are `reviewing` with the persisted
-  `needs-split` blocker.
-- `낪` and `닶` have reviewer notes stating that `ㅂ + ㅅ` must split, but
-  their persisted blocker arrays are currently empty.
-
-V2 must not parse note prose as geometry or silently mutate either state. When
-a saved review has a note but no `needs-split`, the workbench presents a
-prominent **review-state consistency warning**: “This note may describe
-unresolved split work; confirm its blocker state.” The reviewer explicitly
-chooses either **Mark needs split** or **Keep note without a split blocker**.
-Both are intentional review actions; neither happens on load or as a side
-effect of recipe validation.
+The workbench keeps a **review-state consistency warning** for future draft or
+legacy records whose notes may describe unresolved split work without a
+`needs-split` blocker. It never parses note prose as geometry or silently
+changes review state: the reviewer explicitly chooses either **Mark needs
+split** or **Keep note without a split blocker**.
 
 `needs-split` remains a review blocker, not a second ownership model and not a
 lifecycle status. A structurally valid recipe does **not** remove it. The

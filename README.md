@@ -410,8 +410,8 @@ implementation status and the post-MVP roadmap.
 - Dedicated Lesson Result visual redesign
 - History, summaries, and analytics
 - Learning Modes: VocabularyProgress, JamoStats, Practice, and Daily Quest
-- Per-step Jamo SVG rendering from the reviewed Tagger data (989 syllables
-  approved, covering the Korean 5800 word list; see [Progress Tracker](docs/PROGRESS.md#dev-tooling-jamo-svg))
+- Per-step Jamo SVG rendering from the reviewed Tagger data (1,858 syllables
+  approved; see [Progress Tracker](docs/PROGRESS.md#dev-tooling-jamo-svg))
 - Account linking between authentication providers
 - Achievements, daily streaks, pronunciation audio, and additional curriculum
 
