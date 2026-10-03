@@ -928,6 +928,17 @@ export default function JamoSvgTaggerPage() {
         queueSearchRef.current?.select()
         return
       }
+      if (event.key === 'Control' && !event.repeat) {
+        const target = event.target as HTMLElement | null
+        if (
+          !target?.isContentEditable &&
+          !['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName ?? '')
+        ) {
+          event.preventDefault()
+          window.scrollTo({ top: 0, behavior: 'auto' })
+        }
+        return
+      }
       if (loading) return
       if (
         ![
@@ -1157,26 +1168,36 @@ export default function JamoSvgTaggerPage() {
     pendingScroll.current = 'split-contour-section'
     updateDraft(review)
   }
-  const addPiece = (recipeId: string) => {
+  const addPiece = (recipeId: string, count = 1) => {
     if (!state) return
-    const recipe = state.review.splitRecipes.find(({ id }) => id === recipeId)
-    if (recipe)
-      pendingScroll.current = `split-piece-${recipeId}-piece-${recipe.pieces.length + 1}`
-    const review = beginReview({
-      ...state.review,
-      splitRecipes: state.review.splitRecipes.map((recipe) =>
-        recipe.id === recipeId
-          ? {
-              ...recipe,
-              pieces: [
-                ...recipe.pieces,
-                { id: `piece-${recipe.pieces.length + 1}`, tokens: [] },
-              ],
-            }
-          : recipe,
-      ),
-    })
-    updateDraft(review)
+
+    const recipe = state.review.splitRecipes.find(
+      (item) => item.id === recipeId,
+    )
+    if (!recipe) return
+
+    const nextPieceNumber = recipe.pieces.length + 1
+    pendingScroll.current = `split-piece-${recipeId}-piece-${nextPieceNumber}`
+
+    updateDraft(
+      beginReview({
+        ...state.review,
+        splitRecipes: state.review.splitRecipes.map((item) =>
+          item.id === recipeId
+            ? {
+                ...item,
+                pieces: [
+                  ...item.pieces,
+                  ...Array.from({ length: count }, (_, index) => ({
+                    id: `piece-${nextPieceNumber + index}`,
+                    tokens: [],
+                  })),
+                ],
+              }
+            : item,
+        ),
+      }),
+    )
   }
   const updatePiece = (
     recipeId: string,
@@ -1604,11 +1625,12 @@ export default function JamoSvgTaggerPage() {
       </header>
       {state && (
         <div
-          className={
-            freezePreviews
-              ? 'sticky top-0 z-30 -mx-4 mt-4 bg-[#fffaf1]/95 px-4 py-3 shadow-[0_12px_20px_-18px_rgba(54,41,31,0.7)] backdrop-blur sm:-mx-6 sm:px-6'
-              : 'mt-4'
-          }
+          className="mt-4 flex flex-col gap-3"
+          // className={
+          //   freezePreviews
+          //     ? 'sticky top-0 z-30 -mx-4 mt-4 bg-[#fffaf1]/95 px-4 py-3 shadow-[0_12px_20px_-18px_rgba(54,41,31,0.7)] backdrop-blur sm:-mx-6 sm:px-6'
+          //     : 'mt-4'
+          // }
         >
           <div className="mb-2 flex items-center justify-between gap-3 text-sm">
             <p className="font-semibold text-[#39465b]">
@@ -1801,7 +1823,9 @@ export default function JamoSvgTaggerPage() {
         </Card>
       )}
       <section className="mt-6 grid gap-6 lg:grid-cols-[17rem_minmax(0,1fr)]">
-        <div className="h-fit space-y-4">
+        <div
+          className={`sticky ${freezePreviews ? 'top-85' : 'top-4'} z-20 max-h-512 overflow-y-auto space-y-4`}
+        >
           <Card>
             <label className="text-sm font-semibold text-[#39465b]">
               Queue search
@@ -1988,6 +2012,41 @@ export default function JamoSvgTaggerPage() {
               ))}
             </dl>
           </Card>
+          {state && (
+            <Card>
+              <h2 className="font-bold text-[#39465b]">
+                Per-jamo result{' '}
+                {state.source.physicalSteps.map(({ jamo }) => jamo).join(' / ')}
+              </h2>
+              <button
+                type="button"
+                className="flex w-full flex-1 cursor-zoom-in items-center rounded"
+                title="Enlarge (arrows or a/d move, f approves, Esc closes)"
+                onClick={() => setZoomOpen(true)}
+              >
+                {hasCompleteCompiledPreview ? (
+                  <GlyphPreview
+                    svgClassName={previewSvgClass}
+                    glyph={state.source}
+                    colored
+                    paths={state.compiled.paths}
+                  />
+                ) : (
+                  <DraftSegmentationPreview
+                    svgClassName={previewSvgClass}
+                    glyph={state.source}
+                    review={state.review}
+                  />
+                )}
+              </button>
+              {!hasCompleteCompiledPreview && (
+                <p className="text-xs font-semibold text-[#9a6424]">
+                  Draft only — resolve coverage, seams, and all blockers to
+                  inspect exportable filled paths.
+                </p>
+              )}
+            </Card>
+          )}
         </div>
         {state && (
           <main className="min-w-0">
@@ -2202,9 +2261,20 @@ export default function JamoSvgTaggerPage() {
                     <div className="mt-3 space-y-3">
                       <div className="flex items-center justify-between">
                         <strong>Pieces and coverage</strong>
-                        <Button onClick={() => addPiece(activeRecipe.id)}>
-                          Add piece
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button onClick={() => addPiece(activeRecipe.id)}>
+                            +1
+                          </Button>
+                          <Button onClick={() => addPiece(activeRecipe.id, 2)}>
+                            +2
+                          </Button>
+                          <Button onClick={() => addPiece(activeRecipe.id, 3)}>
+                            +3
+                          </Button>
+                          <Button onClick={() => addPiece(activeRecipe.id, 4)}>
+                            +4
+                          </Button>
+                        </div>
                       </div>
                       {coverageLines.map(
                         (
@@ -2814,21 +2884,41 @@ export default function JamoSvgTaggerPage() {
                                 }
                               />
                             </div>
-                            <div className="mt-2 flex-wrap gap-2 hidden">
-                              <Button
-                                variant="secondary"
-                                onClick={() =>
-                                  updatePiece(activeRecipe.id, piece.id, [
-                                    ...piece.tokens,
-                                    {
-                                      kind: 'close-to-start',
-                                      reason: 'interior-closure-seam',
-                                    },
-                                  ])
-                                }
-                              >
-                                Add close-to-start seam
-                              </Button>
+                            <div className="mt-2 flex-wrap gap-2">
+                              {piece.tokens.some(
+                                (token) => token.kind === 'close-to-start',
+                              ) ? (
+                                <Button
+                                  variant="secondary"
+                                  onClick={() =>
+                                    updatePiece(
+                                      activeRecipe.id,
+                                      piece.id,
+                                      piece.tokens.filter(
+                                        (token) =>
+                                          token.kind !== 'close-to-start',
+                                      ),
+                                    )
+                                  }
+                                >
+                                  Remove close-to-start seam
+                                </Button>
+                              ) : (
+                                <Button
+                                  variant="secondary"
+                                  onClick={() =>
+                                    updatePiece(activeRecipe.id, piece.id, [
+                                      ...piece.tokens,
+                                      {
+                                        kind: 'close-to-start',
+                                        reason: 'interior-closure-seam',
+                                      },
+                                    ])
+                                  }
+                                >
+                                  Add close-to-start seam
+                                </Button>
+                              )}
                             </div>
                             <p className="mt-2 text-xs text-[#667085]">
                               Tokens:{' '}
