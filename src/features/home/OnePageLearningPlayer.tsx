@@ -146,26 +146,22 @@ export default function OnePageLearningPlayer({
       </nav>
 
       {active && session ? (
-        <div className="mt-6">
+        <div className="mt-4">
           <p className="text-sm font-semibold text-[#a85d4e]">
             {active.lesson.title}
           </p>
-          <div className="mt-3 flex justify-center gap-2">
-            <span className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 text-center text-xs font-semibold text-[#667085]">
-              WPM{' '}
-              <strong className="ml-1 text-base text-[#253247]">{wpm}</strong>
-            </span>
-            <span className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 text-center text-xs font-semibold text-[#667085]">
-              ACC{' '}
-              <strong className="ml-1 text-base text-[#253247]">
-                {accuracy}%
-              </strong>
-            </span>
-          </div>
-          <div className="mt-3 rounded-3xl border border-[#eadfd4] bg-white p-6 text-center">
+          <div className="mt-2 rounded-3xl border border-[#eadfd4] bg-white p-4 text-center">
+            <div className="flex h-5 justify-end gap-1.5">
+              <span className="rounded-lg border border-[#eadfd4] bg-[#fffdf9] px-2 py-0.5 text-[10px] font-semibold text-[#98a2b3]">
+                WPM <strong className="ml-0.5 text-[#667085]">{wpm}</strong>
+              </span>
+              <span className="rounded-lg border border-[#eadfd4] bg-[#fffdf9] px-2 py-0.5 text-[10px] font-semibold text-[#98a2b3]">
+                ACC <strong className="ml-0.5 text-[#667085]">{accuracy}%</strong>
+              </span>
+            </div>
             <HangulTarget
               session={session.currentSession}
-              className="origin-center scale-120 text-4xl font-bold tracking-wide sm:text-5xl"
+              className="mt-1 origin-center scale-120 text-4xl font-bold tracking-wide sm:text-5xl"
             />
             <p className="mt-5 text-xs text-[#98a2b3]">
               {active.exercise.meaningTh} : {active.exercise.meaningEn}
