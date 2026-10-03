@@ -63,11 +63,16 @@ export default function VirtualKeyboard({
     return (
       <div
         key={code}
-        className={`flex h-12 ${keyWidth(wide)} flex-col items-center justify-center rounded-lg border px-1 text-sm sm:h-13 ${isNext || isActiveShift ? 'border-[#e4bd79] bg-[#fff0d8] text-[#8b6035]' : 'border-[#cfe0fb] bg-white/75 text-[#39465b]'}`}
+        className={`relative flex h-12 ${keyWidth(wide)} flex-col items-center justify-center rounded-lg border px-1 text-sm sm:h-13 ${isNext || isActiveShift ? 'border-[#e4bd79] bg-[#fff0d8] text-[#8b6035]' : 'border-[#cfe0fb] bg-white/75 text-[#39465b]'}`}
         aria-label={displayLabel}
       >
         {jamo ? (
           <>
+            {jamo.shift && (
+              <span className="absolute top-1 right-1 text-[10px] leading-none text-[#a85d4e]">
+                {jamo.shift}
+              </span>
+            )}
             <span className="text-base leading-4">{jamo.base}</span>
             {showEnglishKeys && <span className="mt-0.5 text-[10px] leading-3 text-slate-400">{englishLabel(code)}</span>}
           </>

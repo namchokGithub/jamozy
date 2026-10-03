@@ -51,10 +51,11 @@ export function Modal({
         ref={dialogRef}
         tabIndex={-1}
         role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className={`w-full ${sizeClassName} rounded-3xl border border-[#eadfd4] bg-[#fffdf9] p-6 shadow-[0_24px_60px_-30px_rgba(54,41,31,0.5)]`}
-      >
+      aria-modal="true"
+      aria-labelledby={titleId}
+      className={`w-full ${sizeClassName} rounded-3xl border border-[#eadfd4] bg-[#fffdf9] p-6 shadow-[0_24px_60px_-30px_rgba(54,41,31,0.5)]`}
+      onClick={(event) => event.stopPropagation()}
+    >
         <div className="flex items-start justify-between gap-4">
           <h2
             id={titleId}

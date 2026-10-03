@@ -66,9 +66,9 @@ test('shows blank tiles, then SVG whose step fills follow keyIndex', async () =>
     request.resolve(loaded({ 가: glyph('ㄱ', 'ㅏ'), 나: glyph('ㄴ', 'ㅏ') })),
   )
   expect(container.querySelectorAll('svg')).toHaveLength(2)
-  expect(fills(container)).toEqual(['#e990b6', '#c7c3bc', '#c7c3bc', '#c7c3bc'])
+  expect(fills(container)).toEqual(['#c84f82', '#c7c3bc', '#c7c3bc', '#c7c3bc'])
   rerender(<HangulTarget session={pressKey(session, 'KeyR', false)} />)
-  expect(fills(container)).toEqual(['#20b981', '#e990b6', '#c7c3bc', '#c7c3bc'])
+  expect(fills(container)).toEqual(['#20b981', '#c84f82', '#c7c3bc', '#c7c3bc'])
   expect(loadJamoSvgGlyphs).toHaveBeenCalledTimes(1)
 })
 
@@ -220,7 +220,7 @@ test('the same target in the next exercise keeps SVG without blank tiles', async
   expect(fills(container)).toEqual(['#20b981', '#20b981'])
   rerender(<HangulTarget session={startTypingSession('가')} />)
   expect(screen.queryByTestId('pending-hangul-tile')).toBeNull()
-  expect(fills(container)).toEqual(['#e990b6', '#c7c3bc'])
+  expect(fills(container)).toEqual(['#c84f82', '#c7c3bc'])
   await act(async () => {})
   expect(container.querySelectorAll('svg')).toHaveLength(1)
   expect(loadJamoSvgGlyphs).toHaveBeenCalledTimes(1)

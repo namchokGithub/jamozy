@@ -109,6 +109,9 @@ export default function OnePageLearningPlayer({
             100,
         )
   const wpm = Math.round(acceptedKeystrokes / 5 / (elapsedSeconds / 60))
+  const completedSteps = session?.currentSession.keyIndex ?? 0
+  const totalSteps = session?.currentSession.expectedKeys.length ?? 0
+  const progressPercent = totalSteps === 0 ? 0 : (completedSteps / totalSteps) * 100
 
   return (
     <section
@@ -163,6 +166,24 @@ export default function OnePageLearningPlayer({
               session={session.currentSession}
               className="mt-1 origin-center scale-120 text-4xl font-bold tracking-wide sm:text-5xl"
             />
+            <div className="mx-auto mt-3 max-w-44">
+              <p className="text-[10px] font-semibold text-[#98a2b3]">
+                {completedSteps} / {totalSteps} steps
+              </p>
+              <div
+                className="mt-1 h-1 overflow-hidden rounded-full bg-[#f2edf9]"
+                role="progressbar"
+                aria-label="Typing progress"
+                aria-valuemin={0}
+                aria-valuemax={totalSteps}
+                aria-valuenow={completedSteps}
+              >
+                <div
+                  className="h-full rounded-full bg-[#c84f82] transition-[width] duration-150"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            </div>
             <p className="mt-5 text-xs text-[#98a2b3]">
               {active.exercise.meaningTh} : {active.exercise.meaningEn}
             </p>
