@@ -4046,10 +4046,8 @@
         },
         "sourceGlyphHash": "0b8458c4ec209bc5b68abd66d41603de75ea471ae8eddf595bd6b407250a9283"
       },
-      "status": "reviewing",
-      "blockers": [
-        "needs-split"
-      ],
+      "status": "approved",
+      "blockers": [],
       "steps": [
         {
           "order": 0,
@@ -4101,22 +4099,8 @@
               "tokens": [
                 {
                   "kind": "source-range",
-                  "fromCommand": 0,
-                  "toCommand": 2
-                },
-                {
-                  "kind": "line-to-anchor",
-                  "anchor": {
-                    "contourId": 0,
-                    "commandIndex": 9,
-                    "point": "end"
-                  },
-                  "reason": "interior-closure-seam"
-                },
-                {
-                  "kind": "source-range",
-                  "fromCommand": 10,
-                  "toCommand": 16
+                  "fromCommand": 6,
+                  "toCommand": 14
                 }
               ]
             },
@@ -4125,8 +4109,22 @@
               "tokens": [
                 {
                   "kind": "source-range",
-                  "fromCommand": 3,
-                  "toCommand": 9
+                  "fromCommand": 0,
+                  "toCommand": 5
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 14,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 15,
+                  "toCommand": 16
                 }
               ]
             }
@@ -4134,10 +4132,10 @@
         }
       ],
       "approved": {
-        "at": "2026-10-02T20:42:15.709Z",
+        "at": "2026-10-03T10:50:18.407Z",
         "reviewer": "local-reviewer",
         "validatorVersion": 1,
-        "validationHash": "5214ec4f003cefd466b16b2b1cdf556d093a86fc47982a72d095677704f04fbb"
+        "validationHash": "6259df197c106f7f8e8fa34273b25af990d202b109d9221d8dc151a431332605"
       }
     },
     "돝": {
@@ -4152,10 +4150,8 @@
         },
         "sourceGlyphHash": "61b95b9dab98ffc50cbefb917f82059d7410c5e7a06dada4547c9dede359ab66"
       },
-      "status": "reviewing",
-      "blockers": [
-        "needs-split"
-      ],
+      "status": "approved",
+      "blockers": [],
       "steps": [
         {
           "order": 0,
@@ -4207,22 +4203,8 @@
               "tokens": [
                 {
                   "kind": "source-range",
-                  "fromCommand": 0,
-                  "toCommand": 2
-                },
-                {
-                  "kind": "line-to-anchor",
-                  "anchor": {
-                    "contourId": 1,
-                    "commandIndex": 9,
-                    "point": "end"
-                  },
-                  "reason": "interior-closure-seam"
-                },
-                {
-                  "kind": "source-range",
-                  "fromCommand": 10,
-                  "toCommand": 16
+                  "fromCommand": 6,
+                  "toCommand": 14
                 }
               ]
             },
@@ -4231,14 +4213,34 @@
               "tokens": [
                 {
                   "kind": "source-range",
-                  "fromCommand": 3,
-                  "toCommand": 9
+                  "fromCommand": 0,
+                  "toCommand": 5
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 1,
+                    "commandIndex": 14,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 15,
+                  "toCommand": 16
                 }
               ]
             }
           ]
         }
-      ]
+      ],
+      "approved": {
+        "at": "2026-10-03T10:50:44.656Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "27684cae141902e8f9e3744fdc3832121f77afdd9996171b3dac75fde78d573f"
+      }
     },
     "돼": {
       "reviewSchemaVersion": 2,

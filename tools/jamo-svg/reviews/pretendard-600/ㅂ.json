@@ -2539,10 +2539,8 @@
         },
         "sourceGlyphHash": "5fcb49f2bbad5dabd956a6cc4d4ed3760dd46e64fbf00553767b04f36b8102cf"
       },
-      "status": "reviewing",
-      "blockers": [
-        "needs-split"
-      ],
+      "status": "approved",
+      "blockers": [],
       "steps": [
         {
           "order": 0,
@@ -2550,11 +2548,12 @@
           "geometry": [
             {
               "kind": "contour",
-              "contourId": 0
+              "contourId": 1
             },
             {
-              "kind": "contour",
-              "contourId": 1
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-1"
             }
           ]
         },
@@ -2563,8 +2562,9 @@
           "jamo": "ㅓ",
           "geometry": [
             {
-              "kind": "contour",
-              "contourId": 2
+              "kind": "split-piece",
+              "recipeId": "split-0-1",
+              "pieceId": "piece-2"
             }
           ]
         },
@@ -2579,11 +2579,69 @@
             {
               "kind": "contour",
               "contourId": 4
+            },
+            {
+              "kind": "contour",
+              "contourId": 2
             }
           ]
         }
       ],
-      "splitRecipes": []
+      "splitRecipes": [
+        {
+          "id": "split-0-1",
+          "sourceContourId": 0,
+          "sourceContourHash": "30e0f9fc9291d82d2664b6ebd2b474cc63863244600ce039a93c2849ac142f4a",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "30e0f9fc9291d82d2664b6ebd2b474cc63863244600ce039a93c2849ac142f4a"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 5
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 12,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 13,
+                  "toCommand": 16
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 6,
+                  "toCommand": 12
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "approved": {
+        "at": "2026-10-03T15:24:36.714Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "eb91fb8cd21b0d6b0803fc78b13726c83a1164b12a53436e5f537273aaeb9066"
+      }
     },
     "베": {
       "reviewSchemaVersion": 2,

@@ -6205,10 +6205,8 @@
         },
         "sourceGlyphHash": "4b0d18a1bb954a60b19d3dbced0271c6bc1128a0fe9dea14fde22438069a3d3f"
       },
-      "status": "reviewing",
-      "blockers": [
-        "needs-split"
-      ],
+      "status": "approved",
+      "blockers": [],
       "steps": [
         {
           "order": 0,
@@ -6217,10 +6215,6 @@
             {
               "kind": "contour",
               "contourId": 0
-            },
-            {
-              "kind": "contour",
-              "contourId": 1
             }
           ]
         },
@@ -6230,7 +6224,7 @@
           "geometry": [
             {
               "kind": "contour",
-              "contourId": 2
+              "contourId": 1
             }
           ]
         },
@@ -6245,16 +6239,20 @@
             {
               "kind": "contour",
               "contourId": 4
+            },
+            {
+              "kind": "contour",
+              "contourId": 2
             }
           ]
         }
       ],
       "splitRecipes": [],
       "approved": {
-        "at": "2026-10-02T20:44:28.065Z",
+        "at": "2026-10-03T15:22:53.528Z",
         "reviewer": "local-reviewer",
         "validatorVersion": 1,
-        "validationHash": "6ff68c5f09a89d6029af7593d5d1763240052f8c5a6f9416ac3427fa698b7a01"
+        "validationHash": "f5f84eba66486cca164cc3d110a0c19daf2aed3c527aeb032b91b328cced33f8"
       }
     },
     "리": {

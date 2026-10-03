@@ -5727,10 +5727,8 @@
         },
         "sourceGlyphHash": "57f682749d9130f4d9ed798498c4fe4cf83f25d10247a1ab1a14510d87c648c9"
       },
-      "status": "reviewing",
-      "blockers": [
-        "needs-split"
-      ],
+      "status": "approved",
+      "blockers": [],
       "steps": [
         {
           "order": 0,
@@ -5782,22 +5780,8 @@
               "tokens": [
                 {
                   "kind": "source-range",
-                  "fromCommand": 0,
-                  "toCommand": 3
-                },
-                {
-                  "kind": "line-to-anchor",
-                  "anchor": {
-                    "contourId": 0,
-                    "commandIndex": 16,
-                    "point": "end"
-                  },
-                  "reason": "interior-closure-seam"
-                },
-                {
-                  "kind": "source-range",
-                  "fromCommand": 17,
-                  "toCommand": 20
+                  "fromCommand": 13,
+                  "toCommand": 19
                 }
               ]
             },
@@ -5806,8 +5790,22 @@
               "tokens": [
                 {
                   "kind": "source-range",
-                  "fromCommand": 4,
-                  "toCommand": 16
+                  "fromCommand": 0,
+                  "toCommand": 12
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 0,
+                    "commandIndex": 19,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 20,
+                  "toCommand": 20
                 }
               ]
             }
@@ -5815,10 +5813,10 @@
         }
       ],
       "approved": {
-        "at": "2026-10-02T20:46:48.544Z",
+        "at": "2026-10-03T10:49:36.787Z",
         "reviewer": "local-reviewer",
         "validatorVersion": 1,
-        "validationHash": "45a8da1b6c86972d9916439aaceb8a19f1e728f32995045c1d2d3d43c90f6600"
+        "validationHash": "d6054bc3d7347b3cd519b39454fea050a1d54de356f6cdc351ecb5473b40c1e6"
       }
     },
     "숲": {

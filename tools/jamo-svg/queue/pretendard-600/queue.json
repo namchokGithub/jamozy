@@ -31454,7 +31454,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "쨈"
+      ]
     },
     {
       "syllable": "쨔",

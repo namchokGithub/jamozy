@@ -8,14 +8,14 @@
     {
       "choseong": "ㄱ",
       "file": "ㄱ.json",
-      "reviewCount": 153,
-      "sha256": "de7d2c15a8bcec31775395c758fc014fafb762267151c631523e749ed2e1a2c6"
+      "reviewCount": 155,
+      "sha256": "2ed11f58c862f50895b5128e3395d9787d19ae6cdc68152bdd605fc779e8e304"
     },
     {
       "choseong": "ㄲ",
       "file": "ㄲ.json",
       "reviewCount": 88,
-      "sha256": "1b707d595e1cc217192e7ac8981ec55b15d1157b3d8471d6ee27d84bc6b03613"
+      "sha256": "c54b41e685e17670ffe0af3d639f62f35128802a2b3c3dcd80049abc65c8d8ce"
     },
     {
       "choseong": "ㄴ",
@@ -27,31 +27,31 @@
       "choseong": "ㄷ",
       "file": "ㄷ.json",
       "reviewCount": 114,
-      "sha256": "31d41aedb089b7f19cbc664859073cb9c5e9e383b3fbbd0d58654a05514e564c"
+      "sha256": "013532456ef796712e7ee89c64922164cfda086a5e33cc5e053549383c073854"
     },
     {
       "choseong": "ㄸ",
       "file": "ㄸ.json",
       "reviewCount": 70,
-      "sha256": "b1f7723ad9b549f41805911d527a11022778bccab5b9e71e94dcdecc458b687d"
+      "sha256": "09d04e70d3d178516fb454683151ca714abb18170a72b0ac92cb3c34badf9393"
     },
     {
       "choseong": "ㄹ",
       "file": "ㄹ.json",
       "reviewCount": 103,
-      "sha256": "c1f64740ee0842a89e8393ed4e78546722544da5e93b5bf77895986ff9810ecf"
+      "sha256": "85cff9e01d141dec9f384f087b5b29c88c2c4f25af0ea72aa826c9343e508141"
     },
     {
       "choseong": "ㅁ",
       "file": "ㅁ.json",
       "reviewCount": 109,
-      "sha256": "e51cac6378e06dc1ce2fde8dfdbcac5d3039666b764b28ceba0fe9189d5c2f69"
+      "sha256": "8104dc47fc205de1efc1e6ebb8efcaeb41866ffd1547e009fbd7fa609c373cda"
     },
     {
       "choseong": "ㅂ",
       "file": "ㅂ.json",
       "reviewCount": 95,
-      "sha256": "4fb9d1be905871476977164281de91220f6534d6a7d2277cb7895a041ac50c92"
+      "sha256": "dee1f579a74ab6d2c90427f77f116976da2d78cb26b86fa6346eb2f9eba9194c"
     },
     {
       "choseong": "ㅃ",
@@ -63,7 +63,7 @@
       "choseong": "ㅅ",
       "file": "ㅅ.json",
       "reviewCount": 134,
-      "sha256": "86369118d9aa34033aa194a4241154f8778087597aece62d0be03fa90e72cd58"
+      "sha256": "09ee4a975c122ee84b92bf65a3188ff8e3dab1e8dbdd18f8c99dee1467672b21"
     },
     {
       "choseong": "ㅆ",
@@ -86,8 +86,8 @@
     {
       "choseong": "ㅉ",
       "file": "ㅉ.json",
-      "reviewCount": 67,
-      "sha256": "d833421ca9706a57de43134a08eff563ea3ac47911c5b50f226427232f72b733"
+      "reviewCount": 69,
+      "sha256": "db8233606395b3a42e2b8537b1c6db5433787ec8c7e97a90a556dc37187963e9"
     },
     {
       "choseong": "ㅊ",
@@ -110,8 +110,8 @@
     {
       "choseong": "ㅍ",
       "file": "ㅍ.json",
-      "reviewCount": 71,
-      "sha256": "1ff4f578a5dd3be3a72c8d35cb1eb7fd86243627dcb0419cdea020e7b3714aa9"
+      "reviewCount": 72,
+      "sha256": "da35f32ecf2aafa936505877898c991a2fd7512f03e864cece590ced6243727c"
     },
     {
       "choseong": "ㅎ",
