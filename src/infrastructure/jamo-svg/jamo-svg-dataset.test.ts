@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import {
+  JAMO_SVG_SHARD_FETCH_TIMEOUT_MS,
   loadJamoSvgGlyphs,
   peekJamoSvgGlyphs,
   resetJamoSvgDatasetCacheForTests,
@@ -40,7 +41,10 @@ test('fetches one shard for syllables that share a choseong', async () => {
   vi.stubGlobal('fetch', fetchMock)
   const loaded = await loadJamoSvgGlyphs(['가', '거', '가'])
   expect(fetchMock).toHaveBeenCalledTimes(1)
-  expect(fetchMock).toHaveBeenCalledWith('/jamo-svg/pretendard-600/00.json')
+  expect(fetchMock).toHaveBeenCalledWith(
+    '/jamo-svg/pretendard-600/00.json',
+    expect.objectContaining({ signal: expect.any(AbortSignal) }),
+  )
   expect(loaded?.unitsPerEm).toBe(2048)
   expect([...(loaded?.glyphs.keys() ?? [])]).toEqual(['가', '거'])
 })
@@ -123,4 +127,32 @@ test('peeks synchronously only once every needed shard has loaded', async () => 
   expect(peeked?.unitsPerEm).toBe(2048)
   expect([...(peeked?.glyphs.keys() ?? [])]).toEqual(['가'])
   expect(peekJamoSvgGlyphs(['가', '나'])).toBeUndefined()
+})
+
+test('aborts a shard request that never answers, so a later call retries', async () => {
+  vi.useFakeTimers()
+  try {
+    const fetchMock = vi
+      .fn()
+      .mockImplementationOnce(
+        (_url: string, init: { signal: AbortSignal }) =>
+          new Promise((_resolve, reject) =>
+            init.signal.addEventListener('abort', () =>
+              reject(new DOMException('aborted', 'AbortError')),
+            ),
+          ),
+      )
+      .mockImplementation(() => respond(shard({ 가: glyph })))
+    vi.stubGlobal('fetch', fetchMock)
+    let settled = false
+    const stalled = loadJamoSvgGlyphs(['가']).finally(() => (settled = true))
+    await vi.advanceTimersByTimeAsync(JAMO_SVG_SHARD_FETCH_TIMEOUT_MS - 1)
+    expect(settled).toBe(false)
+    await vi.advanceTimersByTimeAsync(1)
+    expect(await stalled).toBeUndefined()
+    expect((await loadJamoSvgGlyphs(['가']))?.glyphs.has('가')).toBe(true)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  } finally {
+    vi.useRealTimers()
+  }
 })

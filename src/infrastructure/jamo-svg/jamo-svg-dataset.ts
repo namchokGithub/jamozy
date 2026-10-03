@@ -21,14 +21,28 @@ function warn(message: string) {
   if (import.meta.env.DEV) console.warn(`[jamo-svg] ${message}`)
 }
 
+/** A shard request that has not finished by then is aborted, so a later target can retry. */
+export const JAMO_SVG_SHARD_FETCH_TIMEOUT_MS = 10_000
+
 async function fetchShard(index: number): Promise<RuntimeJamoSvgShard> {
   const file = shardFileName(index)
-  const response = await fetch(
-    `${import.meta.env.BASE_URL}jamo-svg/pretendard-600/${file}`,
+  const controller = new AbortController()
+  const timer = setTimeout(
+    () => controller.abort(),
+    JAMO_SVG_SHARD_FETCH_TIMEOUT_MS,
   )
-  if (!response.ok)
-    throw new Error(`shard ${file} returned HTTP ${response.status}`)
-  const shard = (await response.json()) as RuntimeJamoSvgShard
+  let shard: RuntimeJamoSvgShard
+  try {
+    const response = await fetch(
+      `${import.meta.env.BASE_URL}jamo-svg/pretendard-600/${file}`,
+      { signal: controller.signal },
+    )
+    if (!response.ok)
+      throw new Error(`shard ${file} returned HTTP ${response.status}`)
+    shard = (await response.json()) as RuntimeJamoSvgShard
+  } finally {
+    clearTimeout(timer)
+  }
   if (shard.datasetSchemaVersion !== 1)
     throw new Error(`shard ${file} has an unsupported schema version`)
   if (typeof shard.glyphs !== 'object' || shard.glyphs === null)
