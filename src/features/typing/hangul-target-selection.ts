@@ -1,7 +1,9 @@
 import { getChoseongShardIndex } from '../../domain/korean/hangul'
-import type { RuntimeJamoSvgGlyph } from '../../domain/korean/jamo-svg-runtime'
+import type {
+  LoadedJamoSvgGlyphs,
+  RuntimeJamoSvgGlyph,
+} from '../../domain/korean/jamo-svg-runtime'
 import type { ExpectedKey } from '../../domain/korean/target-sequence'
-import type { LoadedJamoSvgGlyphs } from '../../infrastructure/jamo-svg/jamo-svg-dataset'
 
 export type SyllableGroup = { syllable: string; jamo: string[] }
 

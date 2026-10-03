@@ -19,3 +19,9 @@ export type RuntimeJamoSvgShard = {
   unitsPerEm: number
   glyphs: RuntimeJamoSvgDataset
 }
+
+/** Glyphs a target needs, taken from loaded shards that share one em size. */
+export type LoadedJamoSvgGlyphs = {
+  unitsPerEm: number
+  glyphs: Map<string, RuntimeJamoSvgGlyph>
+}

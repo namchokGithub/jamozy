@@ -3,14 +3,10 @@ import {
   shardFileName,
 } from '../../domain/korean/hangul'
 import type {
+  LoadedJamoSvgGlyphs,
   RuntimeJamoSvgGlyph,
   RuntimeJamoSvgShard,
 } from '../../domain/korean/jamo-svg-runtime'
-
-export type LoadedJamoSvgGlyphs = {
-  unitsPerEm: number
-  glyphs: Map<string, RuntimeJamoSvgGlyph>
-}
 
 // Static, read-only content; not learner state (DEC-039).
 const shardCache = new Map<number, Promise<RuntimeJamoSvgShard>>()
