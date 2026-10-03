@@ -189,3 +189,19 @@ test('cached shards without a needed glyph render Canvas at once', () => {
   expect(screen.getByTestId('canvas-target')).toBeInTheDocument()
   expect(loadJamoSvgGlyphs).not.toHaveBeenCalled()
 })
+
+test('selection checks steps against the session’s own expected keys', async () => {
+  const base = startTypingSession('가')
+  const session = {
+    ...base,
+    expectedKeys: base.expectedKeys.map((key) =>
+      key.jamo === 'ㅏ' ? { ...key, jamo: 'ㅓ' } : key,
+    ),
+  }
+  vi.mocked(loadJamoSvgGlyphs).mockResolvedValue(
+    loaded({ 가: glyph('ㄱ', 'ㅓ') }),
+  )
+  const { container } = render(<HangulTarget session={session} />)
+  await act(async () => {})
+  expect(container.querySelectorAll('svg')).toHaveLength(1)
+})

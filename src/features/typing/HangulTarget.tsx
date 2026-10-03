@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { buildExpectedKeys } from '../../domain/korean/target-sequence'
 import type { TypingSessionState } from '../../domain/korean/typing-session'
 import {
   loadJamoSvgGlyphs,
@@ -32,10 +31,11 @@ export default function HangulTarget({
   className = '',
 }: HangulTargetProps) {
   const [enabled] = useState(isJamoSvgRendererEnabled)
-  const { targetText } = session
+  const { targetText, expectedKeys } = session
+  // pressKey keeps the same expectedKeys array, so this runs once per target.
   const groups = useMemo(
-    () => svgTargetSyllables(targetText, buildExpectedKeys(targetText)),
-    [targetText],
+    () => svgTargetSyllables(targetText, expectedKeys),
+    [targetText, expectedKeys],
   )
   // Shards already in memory decide at once, so a new target never flashes blank tiles.
   const cachedChoice = useMemo(() => {
