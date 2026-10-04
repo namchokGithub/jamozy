@@ -12,7 +12,7 @@ export function AdminBreadcrumb({ items }: { items: AdminBreadcrumbItem[] }) {
   return (
     <nav
       aria-label={t('breadcrumb.label')}
-      className="flex flex-wrap items-center gap-1.5 text-sm"
+      className="flex select-none flex-wrap items-center gap-1.5 text-sm"
     >
       {items.map((item, index) => (
         <span

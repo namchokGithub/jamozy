@@ -159,10 +159,14 @@ export default function LessonEditorPage() {
       {editingDetails ? (
         <Card className="mt-6 grid gap-4">
           <label className="grid gap-1 text-sm font-semibold">
-            {t('field.title')}
+            {t('field.title')}{' '}
+            <span aria-hidden="true" className="text-[#a85d4e]">
+              *
+            </span>
             <input
               value={title}
               aria-invalid={Boolean(titleError)}
+              aria-required="true"
               onChange={(event) => {
                 setTitle(event.target.value)
                 setTitleError(null)
@@ -300,10 +304,14 @@ export default function LessonEditorPage() {
               {editingExerciseId === exercise.id ? (
                 <>
                   <label className="grid gap-1 text-sm font-semibold">
-                    {t('field.targetText')}
+                    {t('field.targetText')}{' '}
+                    <span aria-hidden="true" className="text-[#a85d4e]">
+                      *
+                    </span>
                     <input
                       value={exercise.targetText}
                       aria-invalid={Boolean(exerciseErrors[exercise.id])}
+                      aria-required="true"
                       onChange={(event) => {
                         update(index, 'targetText', event.target.value)
                         setExerciseErrors((errors) => {

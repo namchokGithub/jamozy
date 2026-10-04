@@ -52,7 +52,10 @@ export default function CourseEditorPage() {
           <input type="hidden" name="id" value={course.id} />
           <Card className="grid gap-4">
             <label className="grid gap-1 text-sm font-semibold">
-              {t('field.title')}
+              {t('field.title')}{' '}
+              <span aria-hidden="true" className="text-[#a85d4e]">
+                *
+              </span>
               <input
                 name="title"
                 defaultValue={course.title}
@@ -62,7 +65,10 @@ export default function CourseEditorPage() {
               />
             </label>
             <label className="grid gap-1 text-sm font-semibold">
-              {t('field.description')}
+              {t('field.description')}{' '}
+              <span aria-hidden="true" className="text-[#a85d4e]">
+                *
+              </span>
               <textarea
                 name="description"
                 defaultValue={course.description}

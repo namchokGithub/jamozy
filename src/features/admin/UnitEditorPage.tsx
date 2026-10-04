@@ -57,7 +57,10 @@ export default function UnitEditorPage() {
           <input type="hidden" name="id" value={unit.id} />
           <Card className="grid gap-4">
             <label className="grid gap-1 text-sm font-semibold">
-              {t('field.title')}
+              {t('field.title')}{' '}
+              <span aria-hidden="true" className="text-[#a85d4e]">
+                *
+              </span>
               <input
                 name="title"
                 defaultValue={unit.title}
@@ -67,7 +70,10 @@ export default function UnitEditorPage() {
               />
             </label>
             <label className="grid gap-1 text-sm font-semibold">
-              {t('field.description')}
+              {t('field.description')}{' '}
+              <span aria-hidden="true" className="text-[#a85d4e]">
+                *
+              </span>
               <textarea
                 name="description"
                 defaultValue={unit.description}

@@ -1,5 +1,6 @@
 import {
   createContext,
+  useEffect,
   useContext,
   useMemo,
   useState,
@@ -28,6 +29,11 @@ const SnackbarContext = createContext<SnackbarContextValue>(fallbackSnackbar)
 
 export function SnackbarProvider({ children }: PropsWithChildren) {
   const [message, setMessage] = useState<SnackbarMessage | null>(null)
+  useEffect(() => {
+    if (!message) return
+    const timer = window.setTimeout(() => setMessage(null), 5000)
+    return () => window.clearTimeout(timer)
+  }, [message])
   const value = useMemo<SnackbarContextValue>(
     () => ({
       showSuccess: (text) => setMessage({ kind: 'success', text }),
