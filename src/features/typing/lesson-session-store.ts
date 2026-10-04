@@ -25,7 +25,11 @@ export const useLessonSessionStore = create<LessonSessionStore>((set, get) => ({
   generation: 0,
   start: (exercises) => {
     const generation = get().generation + 1
-    set({ session: startLessonSession(exercises), submissionId: crypto.randomUUID(), generation })
+    set({
+      session: startLessonSession(exercises),
+      submissionId: crypto.randomUUID(),
+      generation,
+    })
     return generation
   },
   pressKey: (code, shiftKey) => {

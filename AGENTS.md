@@ -19,11 +19,44 @@ Firebase Anonymous Auth is legacy implementation context. The target account mod
 ```bash
 pnpm install
 pnpm dev
-pnpm build
+pnpm build      # tsc -b && vite build
 pnpm test
+pnpm lint
+pnpm format
 ```
 
-(Lint/format/typecheck scripts will be added once tooling is scaffolded — check `package.json` before assuming a script name.)
+Check `package.json` before assuming any other script name.
+
+### Jamo SVG tooling (development only)
+
+The Jamo SVG Tagger (`/dev/jamo-svg-tagger`, served by `pnpm dev`) reviews
+Pretendard 600 outlines into per-typed-key SVG paths. Review data lives in
+`tools/jamo-svg/reviews/pretendard-600/`; the queue in
+`tools/jamo-svg/queue/pretendard-600/queue.json`; the extraction cache in
+`tools/jamo-svg/cache/` (gitignored, rebuilt by `jamo-svg:enqueue`).
+
+```bash
+pnpm jamo-svg:enqueue --top 2000      # add word-list syllables to the queue
+pnpm jamo-svg:enqueue --words docs/informations/korean-inflection-sample.md --reason inflection-sample
+pnpm jamo-svg:propose --dry-run       # propose reviews from approved templates
+pnpm jamo-svg:propose --rank          # which unreviewed syllables unlock others
+pnpm jamo-svg:audit                   # read-only audit of approved reviews
+pnpm jamo-svg:compile-runtime         # approved reviews → public/jamo-svg runtime shards
+```
+
+- Commit review data before running a script that writes it
+  (`enqueue`, `propose`, migrations). Use `--dry-run` first.
+- `propose` never changes approved reviews; `--replace-reviewing` also
+  overwrites unapproved `reviewing` drafts.
+- Do not run `pnpm jamo-svg:seed` on existing data: it re-initializes the
+  review manifest.
+- After changing review logic, `tools/jamo-svg/approved-reviews.test.ts` and
+  `pnpm jamo-svg:audit` must stay clean.
+- After approving reviews, run `pnpm jamo-svg:compile-runtime` and commit the
+  shards with the reviews; `runtime-dataset-committed.test.ts` fails otherwise.
+  `VITE_JAMO_SVG_RENDERER=1` turns on the SVG target renderer (DEC-039).
+  Before changing the runtime shard format, read "Maintaining the runtime
+  dataset" in `docs/research/JAMO_SVG_TAGGER_DESIGN.md`.
 
 ## Architecture Rules
 
@@ -64,6 +97,10 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 
 ## Working Conventions
 
+- **Agent collaboration and approval:** Think independently to understand the task, identify risks, and prepare a recommendation, but present that recommendation and wait for explicit approval before making changes, executing a plan, or taking an external action. Do not decide and act beyond the user's explicit scope.
+- If work cannot be completed safely or clearly—because requirements, authority, access, consequences, or a technical constraint are unclear—ask first. Do not force a workaround that changes scope or assumptions.
+- Ask for help, request clarification, or use available collaboration when it would improve confidence; do not carry uncertainty alone.
+- State the relevant fact and ask the next useful question rather than repeatedly apologizing. Confirmation is more useful than an apology.
 - Don't add features, refactors, or abstractions beyond what's asked. This project favors small, focused, calm implementations (see README "Development Principles").
 - When adding a new domain concept, add the model to `domain/models`, the interface to `domain/repositories`, the required persistence adapter(s), and an `application/` use case — don't skip layers. Target learner-state behavior must work through either Guest-local or authenticated-Firebase adapters.
 - **Testing policy:** Do not create or update automated tests for UI-only work (visual styling, layout, presentation components, or page appearance); the user performs that verification manually. Add automated tests for domain, application, repository, persistence, security-rule, migration, and other non-visual logic. Only change a UI test when the user explicitly asks for it or a UI change also changes non-visual behavior.
@@ -72,7 +109,7 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 - Track detailed implementation status in `docs/PROGRESS.md`. `README.md`
   carries the high-level MVP/post-MVP overview; keep its summary and roadmap
   aligned with material status changes.
-- Log completed units of work in `docs/COMPLETE-LOG.md`.
+- Log completed non-UI units of work by appending a short entry to the current month's file, `docs/log/YYYY-MM.md` (rules in `docs/COMPLETE-LOG.md`). Do not update the completion log for UI-only visual, layout, or presentation changes. Do not read earlier months to add an entry.
 
 ## Document Map
 
@@ -82,10 +119,15 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 - `docs/LEARNING-MODES.md` — boundaries and shared-state rules for Learning Path, Review, Practice, and Daily Quest.
 - `docs/AUTH-AND-PERSISTENCE.md` — Guest/authenticated session model, adapter selection, retention, and Guest-to-account merge policy.
 - `docs/SESSION-AND-HISTORY.md` — `LearningSession` semantics, history versus learner state, retry identity, and aggregation boundary.
-- `docs/DECISIONS.md` — accepted, superseded, and rejected architectural/product decisions; check this before reopening a settled choice.
+- `docs/DECISIONS.md` — accepted, superseded, and rejected architectural/product decisions; check this before reopening a settled choice. Read its index first and open only the entries you need.
 - `docs/REQUIREMENT-V1.md` — source requirements for the original MVP; a later accepted decision takes precedence if they conflict.
 - `docs/CREDITS.md` — content-source registry and attribution requirements.
-- `docs/COMPLETE-LOG.md` — chronological record of meaningful completed work.
+- `docs/COMPLETE-LOG.md` — index of the monthly completion logs in `docs/log/`.
+- `docs/research/JAMO_SVG_TAGGER_DESIGN.md` — Jamo SVG Tagger design: review records, split recipes, blockers, runtime-data boundary.
+- `docs/research/HANGUL_SVG_ANALYSIS.md` — glyph-outline measurements behind the Tagger.
+- `docs/informations/korean_words.txt` — Korean 5800 frequency list that feeds the Tagger queue.
+- `docs/informations/korean-inflection-sample.md` — inflection/particle syllables the dictionary-form list lacks.
+- `docs/superpowers/plans/` — implementation plans for completed and in-flight work.
 - `CLAUDE.md` — Claude Code-specific workflow additions.
 
 ## Data Fetching
@@ -98,9 +140,8 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 
 ## Git Commit Message
 
-- For clear, small, low-risk changes within the current workspace, implement immediately.
-- Do not ask for confirmation for cosmetic UI, copy, or styling changes when the requested scope is explicit.
-- Ask first only when scope is ambiguous, an action is destructive or irreversible, adds dependencies, changes external services, or affects data outside the workspace.
+- Before making any change, present the proposed scope and wait for explicit user approval. This applies even to clear, small, low-risk, or cosmetic changes.
+- Ask before proceeding whenever scope is ambiguous, an action is destructive or irreversible, adds dependencies, changes external services, affects data outside the workspace, or cannot be completed as requested.
 - After completing code changes:
   - Summarize what changed.
   - List important files changed.

@@ -153,3 +153,6 @@ vite.config.ts.timestamp-*
 
 # Local git worktrees
 .worktrees/
+
+# Reproducible Jamo SVG Tagger extraction cache
+tools/jamo-svg/cache/

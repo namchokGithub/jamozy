@@ -1,4 +1,4 @@
-export type LessonProgressStatus = 'locked' | 'unlocked' | 'completed'
+export type LessonProgressStatus = 'unlocked' | 'completed'
 
 export interface Progress {
   lessonId: string

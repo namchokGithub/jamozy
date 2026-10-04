@@ -4,6 +4,59 @@ Architecture and product decisions for Jamozy, in chronological order. Each entr
 
 Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 
+## How to use this file
+
+- Read this index first. Open only the entries you need by searching for
+  their heading (`## DEC-0NN`); do not read the whole file.
+- When adding a decision, append the entry at the bottom and add its row
+  here. When a decision is superseded, update its status in both places.
+
+## Index
+
+| DEC | Decision | Status | Date |
+| --- | -------- | ------ | ---- |
+| DEC-001 | Firebase Anonymous Auth for identity, no traditional sign-up | Superseded by DEC-027 | 2026-09-23 |
+| DEC-002 | Layered architecture: domain / application / infrastructure / features | Accepted | 2026-09-23 |
+| DEC-003 | Keystroke-level state stays client-side; Firestore writes only at checkpoints | Accepted | 2026-09-23 |
+| DEC-004 | MVP excludes multiplayer, leaderboards, and social/competitive features | Accepted | 2026-09-23 |
+| DEC-005 | Pin `@vitejs/plugin-react` to 5.2.0, not latest | Accepted | 2026-09-23 |
+| DEC-006 | Level is derived from EXP, never stored | Accepted | 2026-09-23 |
+| DEC-007 | Settings live as a field on the user doc | Accepted | 2026-09-23 |
+| DEC-008 | Spaced repetition (Leitner boxes) for review scheduling | Accepted | 2026-09-23 |
+| DEC-009 | Sequential unlock: previous lesson completed unlocks the next | Accepted (creation/ordering details superseded by DEC-023; Progress-state shape superseded by DEC-025) | 2026-09-23 |
+| DEC-010 | `LessonExercise` gains `difficulty` and split Thai/English `meaning` | Accepted (meaning nullability superseded by DEC-025) | 2026-09-23 |
+| DEC-011 | `UserStats` added as an embedded entity on `UserProfile` | Accepted (field shape superseded by DEC-022) | 2026-09-23 |
+| DEC-012 | `ReviewItem.reason` field added | Accepted | 2026-09-23 |
+| DEC-013 | `UserSettings` expanded to the full requirement.md list | Accepted (field shape superseded in part by DEC-027) | 2026-09-23 |
+| DEC-014 | Application-layer additions found necessary while building the use cases | Accepted | 2026-09-23 |
+| DEC-015 | Firestore content-write security boundary | Superseded — client content writes locked before launch | 2026-09-23 |
+| DEC-016 | Composite Firestore indexes, and `ensureUser` injected into loaders (not imported) | Accepted | 2026-09-23 |
+| DEC-017 | Korean typing engine: own 2-beolsik composition, not the OS IME; jamo-level blocking; progressive partial-compound display | Accepted | 2026-09-24 |
+| DEC-018 | Lesson typing session: accuracy scale boundary, deterministic `ReviewItem` id, and a store `generation` counter to survive React StrictMode | Accepted | 2026-09-24 |
+| DEC-019 | Review system: unbounded due-count default, strict per-item correctness, no same-session requeue, and reusing the `generation` counter for a second store consumer | Accepted | 2026-09-24 |
+| DEC-020 | Settings UI: shared `defaultUserProfile`, and two fetcher/equality pitfalls that only manual browser testing caught | Accepted | 2026-09-24 |
+| DEC-021 | Profile Dashboard: display-only rounding of running-average stats | Accepted | 2026-09-25 |
+| DEC-022 | Vocabulary-backed review identity and raw aggregate typing counters | Accepted | 2026-09-27 |
+| DEC-023 | Lazy Progress creation, canonical progression ordering, and profile update timestamp | Accepted | 2026-09-27 |
+| DEC-024 | ID conventions, bounded lessons, deterministic review reasons, and deferred level balancing | Accepted | 2026-09-27 |
+| DEC-025 | Vocabulary import identity and nullable meanings; simplify persisted Progress states | Accepted | 2026-09-27 |
+| DEC-026 | Learning Modes, shared learner state, and contiguous progression frontier | Accepted | 2026-09-27 |
+| DEC-027 | Guest local persistence and migration to authenticated accounts | Accepted | 2026-09-27 |
+| DEC-028 | Shared learner-state checkpoints and Daily Quest completion | Accepted | 2026-09-27 |
+| DEC-029 | Session history separated from learner state and lifetime aggregates | Accepted | 2026-09-28 |
+| DEC-030 | Guest-to-account migration merge policy | Accepted | 2026-09-28 |
+| DEC-031 | Preserve pre-session learner values as a compatibility baseline | Accepted | 2026-09-28 |
+| DEC-032 | Lesson Result review action opens the due Review queue | Accepted | 2026-09-28 |
+| DEC-033 | Intentional Learning Path replays grant 15 EXP | Accepted | 2026-09-29 |
+| DEC-034 | Admin content is claim-authorized and status-gated | Accepted | 2026-09-29 |
+| DEC-035 | Home one-page player uses browser-local exercise checkpoints | Accepted | 2026-09-29 |
+| DEC-036 | Jamo SVG steps follow visual jamo for compound medials | Superseded by DEC-037 | 2026-10-01 |
+| DEC-037 | Jamo SVG steps follow typed keys, including compound medials | Accepted | 2026-10-01 |
+| DEC-038 | Split recipes may partition an enclosed counter with its outline | Accepted | 2026-10-01 |
+| DEC-039 | Jamo SVG runtime: committed choseong shards behind a flag | Accepted | 2026-10-03 |
+| DEC-040 | Spaces between words keep the Jamo SVG target renderer | Accepted | 2026-10-04 |
+| DEC-041 | AI agents propose and receive approval before acting | Accepted | 2026-10-04 |
+
 ---
 
 ## DEC-001 — Firebase Anonymous Auth for identity, no traditional sign-up
@@ -707,3 +760,189 @@ content Published before restrictive Rules deploy. The owner receives the claim
 only through the local Admin SDK script and must refresh their sign-in token.
 Exercises remain embedded and stable: authors may add, edit, and reorder them,
 but retire them by archiving their Lesson instead of hard deletion.
+
+---
+
+## DEC-035 — Home one-page player uses browser-local exercise checkpoints
+
+**Date:** 2026-09-29
+**Status:** Accepted
+
+**Decision:** Home is the primary Learning Path player. It offers the first
+three incomplete courses, but a ten-exercise queue is always confined to one
+selected course. Hero and explicit Course/ Lesson navigation remain available.
+
+Completed exercise boundaries and partial raw lesson totals persist in an
+IndexedDB record keyed by `(userId, courseId)`. This record stores a stable
+submission ID per incomplete lesson, but never individual keystrokes. It is
+browser-local for Guests and authenticated users alike; it is not a Firebase
+record, migration entity, Progress record, or LearningSession history entry.
+
+**Why:** Learners can refresh and continue the next prompt without writing
+per keystroke or treating abandoned work as submitted activity. Keeping it
+local meets the one-device-resume scope without expanding account migration.
+
+**Consequences:** Completing a lesson’s final exercise submits exactly one
+normal LearningSession through the existing receipt boundary, then removes
+that lesson’s checkpoint. A failed completion retains its local submission ID
+for retry. The player uses missing Progress as locked and only writes
+`unlocked`/`completed`; legacy persisted `locked` entries are read as absent
+without destructive cleanup. When no incomplete course remains, Home falls
+back to its first three courses and replays their exercises; the existing
+15-EXP replay policy ([[DEC-033]]) applies.
+
+## DEC-036 — Jamo SVG steps follow visual jamo for compound medials
+
+**Date:** 2026-10-01
+**Status:** Superseded by DEC-037
+
+**Decision:** The Jamo SVG Tagger's physical-step algorithm v2 keeps each
+compound medial (`ㅘ ㅙ ㅚ ㅝ ㅞ ㅟ ㅢ`) as one SVG step, following the
+visual letter rather than the two keys used to type it. Compound finals stay
+one step per key (`값` remains `ㄱ / ㅏ / ㅂ / ㅅ`). The typing engine,
+`hangul.ts`, and Lesson/Review keystroke sequences are unchanged.
+
+**Why:** A compound medial reads as one visual vowel, and splitting it into
+typed parts forced glyph-specific splits (for example `귌`) that do not match
+how the letter is seen.
+
+**Consequences:** This supersedes the "one SVG path per physical key" invariant
+for medials only. A future runtime renderer must map the two medial keystrokes
+onto one path. The version bump changes every extraction fingerprint;
+`pnpm jamo-svg:migrate-step-algorithm` keeps reviews whose step sequence is
+unchanged (including approval) and merges compound-medial steps' geometry for
+the rest, returning them to `reviewing` for human re-approval. The measured
+step-count tables in `HANGUL_SVG_ANALYSIS.md` describe algorithm v1.
+
+---
+
+## DEC-037 — Jamo SVG steps follow typed keys, including compound medials
+
+**Date:** 2026-10-01
+**Status:** Accepted
+
+**Decision:** Physical-step algorithm v3 gives every typed key its own SVG
+step. A compound medial contributes both keys, as compound finals already do:
+`황` is `ㅎ / ㅗ / ㅏ / ㅇ`, `값` stays `ㄱ / ㅏ / ㅂ / ㅅ`. SVG steps therefore
+match the typing engine's keystroke sequence (`hangul.ts`,
+`target-sequence.ts`), which is unchanged.
+
+**Why:** Jamozy shows typing progress one keystroke at a time. With one merged
+medial step (DEC-036), typing ㅗ in `황` could only reveal the whole ㅘ.
+
+**Consequences:** Supersedes DEC-036. The v2→v3 migration
+(`pnpm jamo-svg:migrate-step-algorithm`) keeps approval for unchanged step
+sequences. It divides each compound medial's geometry by shape: the widest
+piece is the horizontal first key (ㅗ ㅜ ㅡ) and the rest is the second key;
+those 21 reviews returned to `reviewing` for re-approval. A medial that cannot
+be divided this way is marked `needs-split`.
+
+---
+
+## DEC-038 — Split recipes may partition an enclosed counter with its outline
+
+**Date:** 2026-10-01
+**Status:** Accepted
+
+**Decision:** A split recipe may declare `counterContours`: counters that
+`counterContours(source)` pairs with the recipe's source contour. Its pieces
+may then consume source ranges and use anchors on those counters. Every
+source-contour command and every counter command except the counter's leading
+`M` must be consumed exactly once; a consumed counter cannot also be owned
+whole. Recipes without counters are unchanged.
+
+**Why:** Where a rounded initial touches a two-bar vowel (`여 요 효 륭`), the
+counter between them is bounded by the initial's curve. A seam restricted to
+the outline's own points can only be straight, so part of the initial was
+painted as the vowel.
+
+**Consequences:** Geometry is still only replayed font commands plus declared
+straight seams. Proposals transfer counter recipes under the same command-
+shape and point-distance guards as other recipes.
+
+---
+
+## DEC-039 — Jamo SVG runtime: committed choseong shards behind a flag
+
+**Date:** 2026-10-03
+**Status:** Accepted
+
+**Decision:** `pnpm jamo-svg:compile-runtime` compiles approved reviews into
+19 shards, `public/jamo-svg/pretendard-600/00.json`–`18.json`, indexed by
+choseong through `getChoseongShardIndex`. Each glyph keeps the minimal
+`{ width, paths[{ jamo, d }] }` shape; each shard adds `datasetSchemaVersion`,
+`fontSha256`, and `unitsPerEm`. The shards are committed, and a test fails
+when they drift from the approved reviews. The app loads only the shards a
+target needs, caches them in memory, and shares concurrent requests.
+`HangulTarget` renders SVG only when every syllable of the target has
+approved data whose steps match the expected keys; otherwise the legacy
+Canvas renders the whole target. Blank tiles show while shards load, and
+Canvas renders after 1,500 ms. The renderer is off unless
+`VITE_JAMO_SVG_RENDERER=1`; development builds also accept the
+`localStorage` override `jamozy:jamo-svg-renderer` (`'1'`/`'0'`).
+
+**Why:** Prove compiler → dataset → typing state → per-step coloring with
+real data before more review work. Never mixing Pretendard SVG and Noto
+Canvas in one target keeps font differences from looking like renderer
+bugs, and the flag keeps Canvas available for direct comparison. Committed
+shards keep build and deploy independent of the font and review tooling.
+Shards are static content, not learner state, so the loader lives in
+`src/infrastructure/jamo-svg/` without a repository interface.
+
+**Consequences:** After approving reviews, run the compiler and commit the
+shards with the reviews. Targets with a space or any non-syllable character
+render Canvas. Per-syllable fallback, or retiring Canvas, is decided later
+when coverage is high enough. Spec:
+`docs/superpowers/specs/2026-10-03-jamo-svg-runtime-design.md`.
+
+---
+
+## DEC-040 — Spaces between words keep the Jamo SVG target renderer
+
+**Date:** 2026-10-04
+**Status:** Accepted
+
+**Decision:** Amends DEC-039's fallback rule. A space in the target no longer
+sends the whole target to Canvas. `HangulTarget` uses SVG when the target has
+at least one syllable, every syllable has approved data with matching steps,
+and every other character is a space. Each space renders as a narrow gap with
+a bar colored by its `Space` key state (correct, current, pending). Any other
+non-syllable character (punctuation, standalone jamo) still renders Canvas for
+the whole target, and a target of only spaces renders Canvas.
+
+**Why:** Multi-word targets were always Canvas only because of the space, the
+most common reason a fully approved target fell back. A space has no glyph, so
+it cannot mix fonts; the colored bar also shows learners when to press Space.
+
+**Consequences:** Shards, the compiler, the loader, and the Canvas renderer are
+unchanged. Targets without spaces render exactly as before.
+
+---
+
+## DEC-041 — AI agents propose and receive approval before acting
+
+**Date:** 2026-10-04
+**Status:** Accepted
+
+**Decision:** AI agents may independently analyze a request, identify risks,
+and prepare a recommendation, but must present the proposed scope and wait for
+explicit user approval before changing files, executing a plan, or taking an
+external action. This applies even to small, low-risk, cosmetic, or otherwise
+clear changes.
+
+When a request cannot be completed safely or clearly because of missing
+requirements, authority, access, consequences, or a technical constraint, the
+agent must ask before proceeding. It must not force a workaround, silently
+expand the scope, or make the missing decision itself. Agents should request
+clarification, help, or collaboration when that improves confidence. They
+should state the relevant fact and ask the next useful question rather than
+repeatedly apologizing.
+
+**Why:** Correctness and shared understanding are more valuable than
+unannounced autonomy. Explicit approval keeps responsibility for meaningful
+decisions with the user while still allowing agents to contribute analysis and
+recommendations.
+
+**Consequences:** `AGENTS.md` and `CLAUDE.md` require approval before any
+change or external action. The prior convention allowing clear, small,
+low-risk, or cosmetic changes to be implemented immediately is replaced.

@@ -33,10 +33,15 @@ export const KEY_TO_JAMO: Record<string, { base: string; shift?: string }> = {
   Space: { base: ' ' },
 }
 
-export const JAMO_TO_KEY: Record<string, { code: string; shift: boolean }> = Object.entries(
-  KEY_TO_JAMO,
-).reduce<Record<string, { code: string; shift: boolean }>>((acc, [code, { base, shift }]) => {
-  acc[base] = { code, shift: false }
-  if (shift) acc[shift] = { code, shift: true }
-  return acc
-}, {})
+export function isKoreanJamoKey(code: string): boolean {
+  return code.startsWith('Key') && code in KEY_TO_JAMO
+}
+
+export const JAMO_TO_KEY: Record<string, { code: string; shift: boolean }> =
+  Object.entries(KEY_TO_JAMO).reduce<
+    Record<string, { code: string; shift: boolean }>
+  >((acc, [code, { base, shift }]) => {
+    acc[base] = { code, shift: false }
+    if (shift) acc[shift] = { code, shift: true }
+    return acc
+  }, {})

@@ -14,11 +14,28 @@ export interface ExerciseResult {
   mistakes: MistakeEvent[]
 }
 
+export const exerciseResultSchema = z.object({
+  exerciseId: z.string().min(1),
+  targetText: z.string(),
+  correctKeyCount: z.number().int().nonnegative(),
+  mistakes: z.array(
+    z.object({
+      syllableIndex: z.number().int().nonnegative(),
+      expectedCode: z.string(),
+      expectedShift: z.boolean(),
+      expectedJamo: z.string(),
+      pressedCode: z.string(),
+      pressedShift: z.boolean(),
+    }),
+  ),
+})
+
 export interface LessonSessionState {
   exercises: Array<Pick<LessonExercise, 'id' | 'targetText'>>
   currentIndex: number
   currentSession: TypingSessionState
   completedResults: ExerciseResult[]
+  lastCompletedExercise: ExerciseResult | null
   startedAt: Date
   status: 'typing' | 'completed'
 }
@@ -32,6 +49,7 @@ export function startLessonSession(
     currentIndex: 0,
     currentSession: startTypingSession(exercises[0]?.targetText ?? ''),
     completedResults: [],
+    lastCompletedExercise: null,
     startedAt: now,
     status: exercises.length === 0 ? 'completed' : 'typing',
   }
@@ -44,7 +62,7 @@ export function pressKey(state: LessonSessionState, code: string, shiftKey: bool
 
   const nextSession = typingSessionPressKey(state.currentSession, code, shiftKey)
   if (nextSession.status !== 'completed') {
-    return { ...state, currentSession: nextSession }
+    return { ...state, currentSession: nextSession, lastCompletedExercise: null }
   }
 
   const exercise = state.exercises[state.currentIndex]
@@ -58,7 +76,7 @@ export function pressKey(state: LessonSessionState, code: string, shiftKey: bool
   const nextIndex = state.currentIndex + 1
 
   if (nextIndex >= state.exercises.length) {
-    return { ...state, currentSession: nextSession, completedResults, status: 'completed' }
+    return { ...state, currentSession: nextSession, completedResults, lastCompletedExercise: result, status: 'completed' }
   }
 
   return {
@@ -66,6 +84,7 @@ export function pressKey(state: LessonSessionState, code: string, shiftKey: bool
     currentIndex: nextIndex,
     currentSession: startTypingSession(state.exercises[nextIndex].targetText),
     completedResults,
+    lastCompletedExercise: result,
   }
 }
 

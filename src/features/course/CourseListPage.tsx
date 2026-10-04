@@ -8,12 +8,14 @@ import {
   Sparkles,
   UserRound,
   Pencil,
+  ChevronDown,
 } from 'lucide-react'
 import type { CourseListLoaderData } from './CourseListPage.loader'
 import mascot from '../../assets/jamozy-mascot.png'
 import { AuthModal } from '../auth/AuthModal'
 import { Button } from '../../components/ui/Button'
 import { useSnackbar } from '../../components/ui/SnackbarProvider'
+import OnePageLearningPlayer from '../home/OnePageLearningPlayer'
 
 type CourseListActionData = {
   displayName?: string
@@ -22,7 +24,7 @@ type CourseListActionData = {
 }
 
 export default function CourseListPage() {
-  const { courses, dueReviewCount, displayName, isAuthenticated } =
+  const { courses, dueReviewCount, displayName, isAuthenticated, onePageLearningPath } =
     useLoaderData() as CourseListLoaderData
   const fetcher = useFetcher<CourseListActionData>()
   const { showError, showSuccess } = useSnackbar()
@@ -30,6 +32,7 @@ export default function CourseListPage() {
   const [editingName, setEditingName] = useState(false)
   const [draftName, setDraftName] = useState(name)
   const [showAuth, setShowAuth] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const signOutPending = useRef(false)
 
   useEffect(() => {
@@ -112,32 +115,72 @@ export default function CourseListPage() {
               </Button>
             )}
             {isAuthenticated && (
-              <span className="rounded-full border px-3 py-2 text-sm">
-                {name}
-              </span>
-            )}
-            {isAuthenticated && (
-              <Button
-                type="button"
-                onClick={() => {
-                  signOutPending.current = true
-                  fetcher.submit(
-                    { intent: 'sign-out' },
-                    { method: 'post', encType: 'application/json' },
-                  )
+              <div
+                className="relative"
+                onBlur={(event) => {
+                  if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                    setUserMenuOpen(false)
+                  }
                 }}
-                variant="secondary"
               >
-                Sign out
-              </Button>
+                <button
+                  type="button"
+                  aria-haspopup="menu"
+                  aria-expanded={userMenuOpen}
+                  onClick={() => setUserMenuOpen((open) => !open)}
+                  className="flex items-center gap-2 rounded-full border border-[#eadfd4] bg-white/80 px-3 py-2 text-sm font-medium text-[#39465b] shadow-sm transition hover:border-[#d8b3a9] hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bc6c5d]"
+                >
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#f2edf9] text-[#7863a8]">
+                    <UserRound aria-hidden="true" size={13} />
+                  </span>
+                  <span className="max-w-32 truncate">{name}</span>
+                  <ChevronDown
+                    aria-hidden="true"
+                    size={15}
+                    className={`transition ${userMenuOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {userMenuOpen && (
+                  <div
+                    role="menu"
+                    className="absolute right-0 top-full z-20 mt-2 w-36 rounded-2xl border border-[#eadfd4] bg-[#fffdf9] p-1.5 shadow-[0_14px_28px_-16px_rgba(54,41,31,0.45)]"
+                  >
+                    <Link
+                      to="/profile"
+                      role="menuitem"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex rounded-xl px-3 py-2 text-sm font-medium text-[#39465b] transition hover:bg-[#f7f0e8] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#bc6c5d]"
+                    >
+                      Profile
+                    </Link>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setUserMenuOpen(false)
+                        signOutPending.current = true
+                        fetcher.submit(
+                          { intent: 'sign-out' },
+                          { method: 'post', encType: 'application/json' },
+                        )
+                      }}
+                      className="flex w-full rounded-xl px-3 py-2 text-left text-sm text-[#8b6b62] transition hover:bg-[#fff1e8] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#bc6c5d]"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
-            <Link
-              to="/profile"
-              aria-label="Profile"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#eadfd4] bg-white/80 text-[#596579] shadow-sm transition hover:-translate-y-0.5 hover:border-[#d8b3a9] hover:text-[#8d4c43] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bc6c5d]"
-            >
-              <UserRound aria-hidden="true" size={18} />
-            </Link>
+            {!isAuthenticated && (
+              <Link
+                to="/profile"
+                aria-label="Profile"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-[#eadfd4] bg-white/80 text-[#596579] shadow-sm transition hover:-translate-y-0.5 hover:border-[#d8b3a9] hover:text-[#8d4c43] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bc6c5d]"
+              >
+                <UserRound aria-hidden="true" size={18} />
+              </Link>
+            )}
             <Link
               to="/settings"
               aria-label="Settings"
@@ -147,6 +190,13 @@ export default function CourseListPage() {
             </Link>
           </nav>
         </header>
+
+        {onePageLearningPath && (
+          <OnePageLearningPlayer
+            key={onePageLearningPath.selectedCourseId}
+            learningPath={onePageLearningPath}
+          />
+        )}
 
         <section className="relative mt-8 overflow-hidden rounded-4xl border border-[#f0dfd1] bg-[#fffdf9] px-6 py-8 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:px-10 sm:py-11">
           <div

@@ -21,4 +21,6 @@ export interface AdminContentRepository {
   saveLesson(lesson: Lesson): Promise<void>
   moveUnit(unitId: string, direction: 'up' | 'down'): Promise<void>
   moveLesson(lessonId: string, direction: 'up' | 'down'): Promise<void>
+  moveUnitToIndex(unitId: string, index: number): Promise<void>
+  moveLessonToIndex(lessonId: string, index: number): Promise<void>
 }

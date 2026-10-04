@@ -2,8 +2,8 @@ import { addSessionAggregate, emptySessionAggregate, type SessionAggregate } fro
 import type { UserProfile } from '../../domain/models/user-profile'
 
 const DB_NAME = 'jamozy-guest'
-const VERSION = 3
-const stores = ['guestSessions', 'profiles', 'progress', 'reviewItems', 'learningSessions', 'sessionOutcomes', 'migrationCheckpoints'] as const
+const VERSION = 4
+const stores = ['guestSessions', 'profiles', 'progress', 'reviewItems', 'learningSessions', 'sessionOutcomes', 'migrationCheckpoints', 'onePageLearningCheckpoints'] as const
 type StoreName = (typeof stores)[number]
 
 export class GuestDatabase {
@@ -50,6 +50,15 @@ export class GuestDatabase {
     const db = await this.open()
     return new Promise((resolve, reject) => {
       const request = db.transaction(store, 'readwrite').objectStore(store).put(value, key)
+      request.onsuccess = () => resolve()
+      request.onerror = () => reject(request.error)
+    })
+  }
+
+  async delete(store: StoreName, key: string): Promise<void> {
+    const db = await this.open()
+    return new Promise((resolve, reject) => {
+      const request = db.transaction(store, 'readwrite').objectStore(store).delete(key)
       request.onsuccess = () => resolve()
       request.onerror = () => reject(request.error)
     })

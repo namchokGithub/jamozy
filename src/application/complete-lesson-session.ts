@@ -9,6 +9,7 @@ import type { Progress } from '../domain/models/progress'
 import { nextReviewDate, type ReviewItem } from '../domain/models/review-item'
 import { defaultUserProfile, levelFromExp } from '../domain/models/user-profile'
 import type { CompleteLessonOutcome } from './complete-lesson'
+import { findContiguousFrontier, getOrderedLearningPath } from './learning-path-order'
 
 export interface CompleteLessonSessionDeps {
   courseRepo: CourseRepository
@@ -21,17 +22,6 @@ export interface CompleteLessonSessionDeps {
 
 function expForAccuracy(accuracy: number): number {
   return 100 + (accuracy > 90 ? 20 : 0) + (accuracy === 100 ? 50 : 0)
-}
-
-async function nextLessonId(deps: CompleteLessonSessionDeps, unitId: string, lessonId: string): Promise<string | null> {
-  const inUnit = await deps.lessonRepo.getLessonsByUnitId(unitId)
-  const nextInUnit = inUnit[inUnit.findIndex((lesson) => lesson.id === lessonId) + 1]
-  if (nextInUnit) return nextInUnit.id
-  const unit = await deps.courseRepo.getUnitById(unitId)
-  if (!unit) return null
-  const units = await deps.courseRepo.getUnitsByCourseId(unit.courseId)
-  const nextUnit = units[units.findIndex((candidate) => candidate.id === unitId) + 1]
-  return nextUnit ? (await deps.lessonRepo.getLessonsByUnitId(nextUnit.id))[0]?.id ?? null : null
 }
 
 async function reviewEffects(repo: ReviewRepository, userId: string, lessonId: string, result: LessonResult, now: Date): Promise<ReviewItem[]> {
@@ -66,13 +56,21 @@ export async function completeLessonSession(
   const completed: Progress = wasAlreadyCompleted
     ? attempted
     : { ...attempted, status: 'completed', completedAt: now }
-  const lesson = await deps.lessonRepo.getLessonById(lessonId)
-  const unlockedNextLessonId = wasAlreadyCompleted || !lesson ? null : await nextLessonId(deps, lesson.unitId, lessonId)
+  const allProgress = await deps.progressRepo.getAllProgress(userId)
+  const updatedProgress = new Map(allProgress.map((entry) => [entry.lessonId, entry]))
+  updatedProgress.set(lessonId, completed)
+  const frontier = wasAlreadyCompleted
+    ? null
+    : findContiguousFrontier(
+        await getOrderedLearningPath(deps.courseRepo, deps.lessonRepo),
+        updatedProgress.values(),
+      )
+  const unlockedNextLessonId = frontier?.lesson.id ?? null
   const progress = [completed]
   if (unlockedNextLessonId) {
     const next = await deps.progressRepo.getProgress(userId, unlockedNextLessonId)
-    if (!next || next.status === 'locked') {
-      progress.push({ lessonId: unlockedNextLessonId, status: 'unlocked', bestAccuracy: next?.bestAccuracy ?? 0, bestSpeedWpm: next?.bestSpeedWpm ?? 0, attempts: next?.attempts ?? 0, lastAttemptAt: next?.lastAttemptAt ?? null, completedAt: null })
+    if (!next) {
+      progress.push({ lessonId: unlockedNextLessonId, status: 'unlocked', bestAccuracy: 0, bestSpeedWpm: 0, attempts: 0, lastAttemptAt: null, completedAt: null })
     }
   }
   const expGained = wasAlreadyCompleted ? 15 : expForAccuracy(result.accuracy)
@@ -89,6 +87,5 @@ export async function completeLessonSession(
     expGained,
   }, { progress, reviewItems: wasAlreadyCompleted ? [] : await reviewEffects(deps.reviewRepo, userId, lessonId, result, now) })
   const persistedProgress = submission.effects.progress.find((candidate) => candidate.lessonId === lessonId) ?? completed
-  const persistedNextLessonId = submission.effects.progress.find((candidate) => candidate.lessonId !== lessonId)?.lessonId ?? null
-  return { progress: persistedProgress, expGained: submission.session.expGained, level: levelFromExp(profile.exp + submission.session.expGained), unlockedNextLessonId: persistedNextLessonId }
+  return { progress: persistedProgress, expGained: submission.session.expGained, level: levelFromExp(profile.exp + submission.session.expGained), unlockedNextLessonId }
 }

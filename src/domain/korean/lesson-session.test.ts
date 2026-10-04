@@ -82,6 +82,7 @@ describe('getLessonResult', () => {
         { exerciseId: 'e1', targetText: '가', correctKeyCount: 9, mistakes: [] },
         { exerciseId: 'e2', targetText: '나', correctKeyCount: 0, mistakes: [makeMistake()] },
       ],
+      lastCompletedExercise: null,
       startedAt: new Date('2026-01-01T00:00:00.000Z'),
       status: 'completed',
     }
@@ -98,6 +99,7 @@ describe('getLessonResult', () => {
       currentIndex: 0,
       currentSession: startTypingSession(''),
       completedResults: [{ exerciseId: 'e1', targetText: '값', correctKeyCount: 10, mistakes: [] }],
+      lastCompletedExercise: null,
       startedAt: new Date('2026-01-01T00:00:00.000Z'),
       status: 'completed',
     }

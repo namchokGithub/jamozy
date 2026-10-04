@@ -2,10 +2,11 @@ import type { DocumentData } from 'firebase/firestore'
 import { Timestamp } from 'firebase/firestore'
 import type { Progress } from '../../../domain/models/progress'
 
-export function toProgress(lessonId: string, data: DocumentData): Progress {
+export function toProgress(lessonId: string, data: DocumentData): Progress | null {
+  if (data.status === 'locked') return null
   return {
     lessonId,
-    status: data.status,
+    status: data.status as Progress['status'],
     bestAccuracy: data.bestAccuracy,
     bestSpeedWpm: data.bestSpeedWpm,
     attempts: data.attempts,

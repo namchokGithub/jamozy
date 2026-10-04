@@ -1,14 +1,30 @@
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { jamoSvgTaggerPlugin } from './tools/jamo-svg/vite-plugin'
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), jamoSvgTaggerPlugin()],
+  server: {
+    watch: {
+      // Jamo SVG Tagger data is written by its dev API on every save; watching
+      // it makes Vite reload the page. Its tools/*.ts sources stay watched.
+      ignored: [
+        '**/tools/jamo-svg/reviews/**',
+        '**/tools/jamo-svg/queue/**',
+        '**/tools/jamo-svg/cache/**',
+      ],
+    },
+  },
   build: {
+    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('/node_modules/@firebase/') || id.includes('/node_modules/firebase/')) {
+          if (
+            id.includes('/node_modules/@firebase/') ||
+            id.includes('/node_modules/firebase/')
+          ) {
             return 'firebase'
           }
           if (

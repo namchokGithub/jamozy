@@ -1,0 +1,65 @@
+import { createHash } from 'node:crypto'
+import { mkdir, readFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import { loadCacheGlyph, atomicWrite } from './cache'
+import { validateReview } from './compile'
+import { PHYSICAL_STEP_ALGORITHM_VERSION, type GlyphReview } from './types'
+
+export type ReviewShard = { shardSchemaVersion: 2; choseong: string; fontFingerprint: string; physicalStepAlgorithmVersion: typeof PHYSICAL_STEP_ALGORITHM_VERSION; splitRecipeSchemaVersion: 2; reviews: Record<string, GlyphReview> }
+export type ReviewManifest = { manifestSchemaVersion: 2; reviewRecordSchemaVersion: 2; splitRecipeSchemaVersion: 2; activeFontFingerprint: string; physicalStepAlgorithmVersion: typeof PHYSICAL_STEP_ALGORITHM_VERSION; shards: Array<{ choseong: string; file: string; reviewCount: number; sha256: string }> }
+export type QueueEntry = { syllable: string; priority: number; reasons: string[]; sourceRank?: number; queueKey: { medialLayout: string; hasFinal: boolean; compoundMedial: string | null; compoundFinal: string | null; physicalStepCount: number; contourRelation: 'deficit' | 'aligned' | 'surplus' }; nearestApprovedSyllables: string[] }
+export type QueueDocument = { queueSchemaVersion: 1; fontFingerprint: string; entries: QueueEntry[] }
+const stable = (value: unknown) => JSON.stringify(value, null, 2) + '\n'
+const checksum = (text: string) => createHash('sha256').update(text).digest('hex')
+export class ConflictError extends Error { constructor() { super('Review shard changed; reload before saving.'); } }
+export class ReviewStore {
+  constructor(private readonly reviewsRoot: string, private readonly cacheRoot: string) {}
+  private async manifest(): Promise<ReviewManifest> { const manifest = JSON.parse(await readFile(join(this.reviewsRoot, 'manifest.json'), 'utf8')) as ReviewManifest; if (manifest.manifestSchemaVersion !== 2 || manifest.reviewRecordSchemaVersion !== 2 || manifest.splitRecipeSchemaVersion !== 2) throw new Error('Unsupported review schema; run the explicit migration.'); return manifest }
+  async get(syllable: string) { const source = await loadCacheGlyph(this.cacheRoot, syllable); const manifest = await this.manifest(); const item = manifest.shards.find((shard) => shard.choseong === source.hangul.choseong); if (!item) return undefined; const shard = JSON.parse(await readFile(join(this.reviewsRoot, item.file), 'utf8')) as ReviewShard; if (shard.shardSchemaVersion !== 2 || shard.splitRecipeSchemaVersion !== 2) throw new Error(`Unsupported review shard schema in ${item.file}.`); return shard.reviews[syllable] }
+  async getWithRevision(syllable: string) {
+    const source = await loadCacheGlyph(this.cacheRoot, syllable)
+    const manifest = await this.manifest()
+    const item = manifest.shards.find((shard) => shard.choseong === source.hangul.choseong)
+    if (!item) return { review: undefined, revision: undefined }
+    const text = await readFile(join(this.reviewsRoot, item.file), 'utf8')
+    if (checksum(text) !== item.sha256) throw new Error(`Review shard checksum mismatch for ${item.file}.`)
+    const shard = JSON.parse(text) as ReviewShard; if (shard.shardSchemaVersion !== 2 || shard.splitRecipeSchemaVersion !== 2) throw new Error(`Unsupported review shard schema in ${item.file}.`); return { review: shard.reviews[syllable], revision: checksum(stable(shard)) }
+  }
+  async getManifest() { return this.manifest() }
+  /** Status and blockers of every stored review, read from each shard once (for the queue list). */
+  async statusIndex(): Promise<Map<string, { status: GlyphReview['status']; blockers: GlyphReview['blockers'] }>> {
+    const manifest = await this.manifest()
+    const index = new Map<string, { status: GlyphReview['status']; blockers: GlyphReview['blockers'] }>()
+    for (const { file } of manifest.shards) {
+      const shard = JSON.parse(await readFile(join(this.reviewsRoot, file), 'utf8')) as ReviewShard
+      if (shard.shardSchemaVersion !== 2 || shard.splitRecipeSchemaVersion !== 2) throw new Error(`Unsupported review shard schema in ${file}.`)
+      for (const [syllable, review] of Object.entries(shard.reviews)) index.set(syllable, { status: review.status, blockers: review.blockers })
+    }
+    return index
+  }
+  async save(review: GlyphReview, expectedRevision?: string) {
+    const source = await loadCacheGlyph(this.cacheRoot, review.syllable); const validation = validateReview(source, review)
+    // A needs-split draft may hold any in-progress ownership or split problem;
+    // stale source geometry and step mismatches still refuse to save.
+    const unresolvedBlockers = new Set(['needs-split', 'unassigned-source-geometry', 'empty-physical-step', 'reconstruction-mismatch', 'counter-owner-mismatch', 'invalid-split-recipe', 'duplicate-ownership'])
+    const isSaveableUnresolved = review.status === 'reviewing' && validation.blockers.includes('needs-split') && validation.blockers.every((blocker) => unresolvedBlockers.has(blocker))
+    if (validation.blockers.length && !isSaveableUnresolved) throw new Error(`Review validation failed: ${validation.blockers.join(', ')}`)
+    review.blockers = validation.blockers
+    const manifest = await this.manifest(); if (manifest.activeFontFingerprint !== source.extraction.fontSha256 || manifest.physicalStepAlgorithmVersion !== source.extraction.physicalStepAlgorithm) throw new Error('Stale review manifest fingerprint.')
+    const choseong = source.hangul.choseong; const file = `${choseong}.json`; const existing = manifest.shards.find((item) => item.choseong === choseong)
+    const shard: ReviewShard = existing ? JSON.parse(await readFile(join(this.reviewsRoot, existing.file), 'utf8')) : { shardSchemaVersion: 2, choseong, fontFingerprint: source.extraction.fontSha256, physicalStepAlgorithmVersion: PHYSICAL_STEP_ALGORITHM_VERSION, splitRecipeSchemaVersion: 2, reviews: {} }
+    if (shard.shardSchemaVersion !== 2 || shard.splitRecipeSchemaVersion !== 2) throw new Error(`Unsupported review shard schema in ${existing?.file ?? file}.`)
+    const currentRevision = checksum(stable(shard)); if (expectedRevision && expectedRevision !== currentRevision) throw new ConflictError()
+    if (review.status === 'approved' && (!review.approved || validation.blockers.length)) throw new Error('Approval requires a valid explicit approval record.')
+    shard.reviews[review.syllable] = review; const shardText = stable({ ...shard, reviews: Object.fromEntries(Object.entries(shard.reviews).sort(([a], [b]) => a.localeCompare(b))) })
+    await mkdir(this.reviewsRoot, { recursive: true }); await atomicWrite(join(this.reviewsRoot, file), shardText)
+    const nextItems = manifest.shards.filter((item) => item.choseong !== choseong); nextItems.push({ choseong, file, reviewCount: Object.keys(shard.reviews).length, sha256: checksum(shardText) }); nextItems.sort((a, b) => a.choseong.localeCompare(b.choseong))
+    await atomicWrite(join(this.reviewsRoot, 'manifest.json'), stable({ ...manifest, shards: nextItems })); return { revision: checksum(shardText) }
+  }
+}
+export class QueueStore {
+  constructor(private readonly file: string, private readonly fontFingerprint: string) {}
+  async list(): Promise<QueueEntry[]> { try { const queue = JSON.parse(await readFile(this.file, 'utf8')) as QueueDocument; if (queue.queueSchemaVersion !== 1 || queue.fontFingerprint !== this.fontFingerprint) throw new Error('Stale queue fingerprint.'); return queue.entries } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []; throw error } }
+  async save(entries: QueueEntry[]) { await atomicWrite(this.file, stable({ queueSchemaVersion: 1, fontFingerprint: this.fontFingerprint, entries: [...entries].sort((a, b) => a.priority - b.priority || (a.sourceRank ?? 0) - (b.sourceRank ?? 0) || a.syllable.localeCompare(b.syllable)) })) }
+}
+export async function initializeReviewManifest(reviewsRoot: string, fontFingerprint: string) { await atomicWrite(join(reviewsRoot, 'manifest.json'), stable({ manifestSchemaVersion: 2, reviewRecordSchemaVersion: 2, splitRecipeSchemaVersion: 2, activeFontFingerprint: fontFingerprint, physicalStepAlgorithmVersion: PHYSICAL_STEP_ALGORITHM_VERSION, shards: [] } satisfies ReviewManifest)) }

@@ -5,6 +5,7 @@ import type { UserProfileRepository } from '../domain/repositories/user-profile-
 import type { Progress } from '../domain/models/progress'
 import { defaultUserProfile, levelFromExp, type UserProfile } from '../domain/models/user-profile'
 import { updateProgress, type AttemptResult } from './update-progress'
+import { findContiguousFrontier, getOrderedLearningPath } from './learning-path-order'
 
 export interface CompleteLessonDeps {
   courseRepo: CourseRepository
@@ -31,47 +32,21 @@ function calculateExpGained(accuracy: number): number {
   return exp
 }
 
-async function findNextLessonId(
-  deps: CompleteLessonDeps,
-  unitId: string,
-  lessonId: string,
-): Promise<string | null> {
-  const lessonsInUnit = await deps.lessonRepo.getLessonsByUnitId(unitId)
-  const indexInUnit = lessonsInUnit.findIndex((l) => l.id === lessonId)
-  const nextInUnit = lessonsInUnit[indexInUnit + 1]
-  if (nextInUnit) return nextInUnit.id
-
-  const currentUnit = await deps.courseRepo.getUnitById(unitId)
-  if (!currentUnit) return null
-
-  const unitsInCourse = await deps.courseRepo.getUnitsByCourseId(
-    currentUnit.courseId,
-  )
-  const indexInCourse = unitsInCourse.findIndex((u) => u.id === unitId)
-  const nextUnit = unitsInCourse[indexInCourse + 1]
-  if (!nextUnit) return null
-
-  const lessonsInNextUnit = await deps.lessonRepo.getLessonsByUnitId(
-    nextUnit.id,
-  )
-  return lessonsInNextUnit[0]?.id ?? null
-}
-
 async function unlockLesson(
   deps: CompleteLessonDeps,
   userId: string,
   lessonId: string,
 ): Promise<void> {
   const existing = await deps.progressRepo.getProgress(userId, lessonId)
-  if (existing && existing.status !== 'locked') return
+  if (existing) return
 
   await deps.progressRepo.saveProgress(userId, {
     lessonId,
     status: 'unlocked',
-    bestAccuracy: existing?.bestAccuracy ?? 0,
-    bestSpeedWpm: existing?.bestSpeedWpm ?? 0,
-    attempts: existing?.attempts ?? 0,
-    lastAttemptAt: existing?.lastAttemptAt ?? null,
+    bestAccuracy: 0,
+    bestSpeedWpm: 0,
+    attempts: 0,
+    lastAttemptAt: null,
     completedAt: null,
   })
 }
@@ -109,9 +84,13 @@ export async function completeLesson(
   await deps.progressRepo.saveProgress(userId, completedProgress)
 
   const lesson = await deps.lessonRepo.getLessonById(lessonId)
-  const nextLessonId = lesson
-    ? await findNextLessonId(deps, lesson.unitId, lessonId)
-    : null
+  const allProgress = await deps.progressRepo.getAllProgress(userId)
+  const updatedProgress = new Map(allProgress.map((entry) => [entry.lessonId, entry]))
+  updatedProgress.set(lessonId, completedProgress)
+  const nextLessonId = findContiguousFrontier(
+    await getOrderedLearningPath(deps.courseRepo, deps.lessonRepo),
+    updatedProgress.values(),
+  )?.lesson.id ?? null
   if (nextLessonId) {
     await unlockLesson(deps, userId, nextLessonId)
   }

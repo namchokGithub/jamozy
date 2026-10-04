@@ -15,6 +15,7 @@ import {
 import { LocalSessionSubmissionRepository } from '../infrastructure/local/local-session-submission-repository'
 import { FirebaseSessionSubmissionRepository } from '../infrastructure/firebase/repositories/firebase-session-submission-repository'
 import { LocalGuestMigrationRepository } from '../infrastructure/local/local-guest-migration-repository'
+import { LocalOnePageLearningCheckpointRepository } from '../infrastructure/local/local-one-page-learning-checkpoint-repository'
 import { FirebaseAccountMigrationRepository } from '../infrastructure/firebase/repositories/firebase-account-migration-repository'
 import { createLearnerRepositories } from './learner-repositories'
 import { FirebaseAuthRepository } from '../infrastructure/firebase/firebase-auth-repository'
@@ -55,6 +56,7 @@ import { createUnitEditorLoader } from '../features/admin/UnitEditorPage.loader'
 import LessonEditorPage from '../features/admin/LessonEditorPage'
 import { createLessonEditorLoader } from '../features/admin/LessonEditorPage.loader'
 import { createAdminAction } from '../features/admin/admin-action'
+import HangulGuideTunerPage from '../features/typing/HangulGuideTunerPage'
 
 const localUserProfileRepo = new LocalUserProfileRepository()
 const guestSessions = new GuestSessionRepository(
@@ -68,6 +70,7 @@ const adminContentRepo = new FirebaseAdminContentRepository()
 const sessionManager = new SessionManager(firebaseAuthRepo, guestSessions)
 const guestMigrationRepo = new LocalGuestMigrationRepository()
 const accountMigrationRepo = new FirebaseAccountMigrationRepository()
+const onePageCheckpointRepo = new LocalOnePageLearningCheckpointRepository()
 const migrateGuestData = async (
   guestId: string,
   accountId: string,
@@ -101,6 +104,27 @@ const {
   sessionSubmissionRepo,
   getActiveUser,
 } = learners
+const developmentRoutes = import.meta.env.DEV
+  ? [
+      { path: '/dev/hangul-guides', Component: HangulGuideTunerPage },
+      {
+        path: '/dev/jamo-svg',
+        lazy: async () => {
+          const { default: Component } =
+            await import('../features/dev-jamo-svg/HangulSvgInspectorPage')
+          return { Component }
+        },
+      },
+      {
+        path: '/dev/jamo-svg-tagger',
+        lazy: async () => {
+          const { default: Component } =
+            await import('../features/dev-jamo-svg-tagger/JamoSvgTaggerPage')
+          return { Component }
+        },
+      },
+    ]
+  : []
 export const router = createBrowserRouter([
   {
     path: '/admin',
@@ -165,6 +189,9 @@ export const router = createBrowserRouter([
       courseRepo,
       reviewRepo,
       userProfileRepo,
+      lessonRepo,
+      progressRepo,
+      checkpointRepo: onePageCheckpointRepo,
       ensureUser: getActiveUser,
       getSession: () => sessionManager.getActiveSession(),
     }),
@@ -174,6 +201,14 @@ export const router = createBrowserRouter([
       auth: firebaseAuthRepo,
       getActiveSession: () => sessionManager.getActiveSession(),
       migrateGuestData,
+      onePage: {
+        courseRepo,
+        lessonRepo,
+        progressRepo,
+        reviewRepo,
+        sessionSubmissionRepo,
+        checkpointRepo: onePageCheckpointRepo,
+      },
     }),
     ErrorBoundary: RouteError,
   },
@@ -253,6 +288,7 @@ export const router = createBrowserRouter([
     }),
     ErrorBoundary: RouteError,
   },
+  ...developmentRoutes,
   {
     path: '*',
     Component: NotFoundPage,

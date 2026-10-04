@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-3.959 -0.464 280 128" role="img" aria-labelledby="title desc">
+  <title id="title">Finger placement guide</title>
+  <desc id="desc">Left and right hands with individually highlightable fingers.</desc>
+  <style>
+    .palm,
+    .finger { fill: #dce4f1; }
+    .finger.active { fill: url(#active-finger); }
+    .finger { transition: fill 160ms ease; }
+  </style>
+  <g id="left-hand" class="hand left-hand" transform="translate(4 4)">
+    <path class="palm" d="M17 67 H76 L79 82 L90 64 C94 57 100 55 105 59 C110 63 110 69 106 74 L81 106 C77 112 72 114 65 114 H43 C29 114 19 105 17 91 Z"/>
+    <g id="left-thumb" class="finger thumb">
+      <path d="M73 82 L90 61 C95 55 101 54 106 59 C111 63 110 69 106 74 L82 104 C79 108 73 107 70 102 L66 94 Z"/>
+    </g>
+    <g id="left-pinky" class="finger pinky">
+      <path d="M15 41 C15 36 18 33 22 33 C26 33 29 36 29 41 L31 79 L17 82 Z"/>
+    </g>
+    <g id="left-ring" class="finger ring">
+      <path d="M30 27 C30 22 33 19 37 19 C41 19 44 22 44 27 L45 79 H31 Z"/>
+    </g>
+    <g id="left-middle" class="finger middle">
+      <path d="M45 19 C45 14 48 11 52 11 C56 11 59 14 59 19 L60 79 H45 Z"/>
+    </g>
+    <g id="left-index" class="finger index active">
+      <path d="M61 19 C61 14 64 11 68 11 C72 11 75 14 75 19 L76 79 H61 Z" style="fill: rgb(220, 228, 241);"/>
+    </g>
+  </g>
+  <g id="right-hand" class="hand right-hand" transform="translate(276 4) scale(-1 1)">
+    <path class="palm" d="M17 67 H76 L79 82 L90 64 C94 57 100 55 105 59 C110 63 110 69 106 74 L81 106 C77 112 72 114 65 114 H43 C29 114 19 105 17 91 Z"/>
+    <g id="right-thumb" class="finger thumb">
+      <path d="M73 82 L90 61 C95 55 101 54 106 59 C111 63 110 69 106 74 L82 104 C79 108 73 107 70 102 L66 94 Z"/>
+    </g>
+    <g id="right-pinky" class="finger pinky">
+      <path d="M15 41 C15 36 18 33 22 33 C26 33 29 36 29 41 L31 79 L17 82 Z"/>
+    </g>
+    <g id="right-ring" class="finger ring">
+      <path d="M30 27 C30 22 33 19 37 19 C41 19 44 22 44 27 L45 79 H31 Z"/>
+    </g>
+    <g id="right-middle" class="finger middle">
+      <path d="M45 19 C45 14 48 11 52 11 C56 11 59 14 59 19 L60 79 H45 Z"/>
+    </g>
+    <g id="right-index" class="finger index active">
+      <path d="M61 19 C61 14 64 11 68 11 C72 11 75 14 75 19 L76 79 H61 Z" style="fill: rgb(220, 228, 241);"/>
+    </g>
+  </g>
+</svg>

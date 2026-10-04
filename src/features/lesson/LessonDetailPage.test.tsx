@@ -57,6 +57,10 @@ function renderPage(lesson: Lesson, settings: UserSettings = makeSettings()) {
   return render(<RouterProvider router={router} />)
 }
 
+function waitForTypingTarget(target: string) {
+  return screen.findByRole('img', { name: target })
+}
+
 const fakeOutcome: CompleteLessonOutcome = {
   progress: {
     lessonId: 'l1',
@@ -168,7 +172,7 @@ describe('LessonDetailPage', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
 
-    expect(await screen.findByText('가')).toBeInTheDocument()
+    expect(await waitForTypingTarget('가')).toBeInTheDocument()
   })
 
   it('passes keyboard settings into the typing session', async () => {
@@ -191,7 +195,7 @@ describe('LessonDetailPage', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
 
-    expect(await screen.findByText('가')).toBeInTheDocument()
+    expect(await waitForTypingTarget('가')).toBeInTheDocument()
     expect(screen.queryByText('ㅂ')).not.toBeInTheDocument()
   })
 
@@ -214,7 +218,7 @@ describe('LessonDetailPage', () => {
     render(<RouterProvider router={router} />)
 
     fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
 
@@ -248,7 +252,7 @@ describe('LessonDetailPage', () => {
     render(<RouterProvider router={router} />)
 
     fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
     fireEvent.keyDown(window, { code: 'KeyQ', shiftKey: false })
     fireEvent.keyDown(window, { code: 'KeyW', shiftKey: false })
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
@@ -288,7 +292,7 @@ describe('LessonDetailPage', () => {
     render(<RouterProvider router={router} />)
 
     fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
     fireEvent.keyDown(window, { code: 'KeyQ', shiftKey: false })
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
@@ -320,13 +324,13 @@ describe('LessonDetailPage', () => {
     render(<RouterProvider router={router} />)
 
     fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
     await screen.findByText('Lesson complete!')
 
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
-    expect(await screen.findByText('가')).toBeInTheDocument()
+    expect(await waitForTypingTarget('가')).toBeInTheDocument()
 
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
@@ -353,7 +357,7 @@ describe('LessonDetailPage', () => {
     render(<RouterProvider router={router} />)
 
     fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
     await screen.findByText('Lesson complete!')
@@ -385,7 +389,7 @@ describe('LessonDetailPage', () => {
     render(<RouterProvider router={router} />)
 
     fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
     fireEvent.click(await screen.findByRole('button', { name: 'Next Lesson' }))
@@ -414,7 +418,7 @@ describe('LessonDetailPage', () => {
     render(<RouterProvider router={router} />)
 
     fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
-    await screen.findByText('가')
+    await waitForTypingTarget('가')
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
     fireEvent.click(await screen.findByRole('button', { name: 'Course Map' }))

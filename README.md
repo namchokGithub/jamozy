@@ -3,8 +3,8 @@
   <img
     src="public/templates/jamozy-64x64.ico"
     alt="Jamozy Logo"
-    width="48"
-    height="48"
+    width="64"
+    height="64"
     align="center"
   />
 </h1>
@@ -24,8 +24,10 @@ and sentences while improving typing accuracy and speed.
 ## Core Features
 
 - Progressive Unit → Lesson learning structure
+- One-page Home learning player with up to 10 exercises per selected course
 - Korean typing exercises
 - Virtual Korean keyboard guide
+- Finger-placement reference for Korean keyboard practice
 - Correct / incorrect typing feedback
 - Accuracy and typing speed tracking
 - Lesson results
@@ -39,6 +41,25 @@ and sentences while improving typing accuracy and speed.
 ## Learning Flow
 
 Learn → Type → Review → Improve → Unlock
+
+### Home One-page Learning Path
+
+Home is the fast path into practice. It presents up to the first three courses
+that are not finished; the learner chooses one course, then types a queue of
+up to ten exercises in `Unit → Lesson → Exercise` order. A queue never fills
+its remaining slots from another course.
+
+The active exercise shows Korean, Thai/English meanings, romanization, live
+WPM/accuracy, the virtual keyboard, and a finger-placement guide. Completing
+an exercise saves a browser-local IndexedDB checkpoint, so a refresh resumes
+at the next exercise. The checkpoint is local even for signed-in users and is
+not cloud-synced or migrated. Only the final exercise of a lesson creates the
+normal submitted lesson result, progress, EXP, and review effects.
+
+The Hero and the standard learning-path cards remain below the player. Learners
+can still open a Course and choose a specific Lesson through the existing flow.
+When every available course is complete, Home falls back to replaying the first
+three courses; completed lessons retain the existing lower replay EXP reward.
 
 ## Learning Modes
 
@@ -330,7 +351,7 @@ users/{userId}/dailyQuestProgress/{dateKey}
 
 > Learning content and user progress are stored separately.
 
-Progress documents are created lazily: a missing `lessonProgress` document means a lesson is locked. Learning order is `Course.order → Unit.order → Lesson.order`; document IDs do not determine which lesson unlocks next. Guest learner state has the same domain shape but is stored in IndexedDB, not in Firestore.
+Progress documents are created lazily: a missing `lessonProgress` document means a lesson is locked. Persisted states are `unlocked` and `completed`. Learning order is `Course.order → Unit.order → Lesson.order`; document IDs do not determine which lesson unlocks next. Guest learner state has the same domain shape but is stored in IndexedDB, not in Firestore.
 
 For document-backed domain entities, the domain `id` is the Firestore document ID and is not duplicated in document data. Embedded exercise IDs and Progress's `lessonId` follow the exceptions documented in `docs/DOMAIN-MODEL.md`.
 
@@ -338,49 +359,47 @@ For document-backed domain entities, the domain `id` is the Firestore document I
 
 Vocabulary sources, attribution, and licenses are recorded in [docs/CREDITS.md](docs/CREDITS.md) before their data is imported.
 
+Current sources:
+
+- Korean-English Learners' Dictionary vocabulary list (5,800 words),
+  National Institute of Korean Language (국립국어원) —
+  <https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=71&pageIndex=1>
+- 현대 국어 사용 빈도 조사 2, National Institute of Korean Language (국립국어원)
+
 > Lesson content is treated as shared application data, while progress, review
 > history, EXP, levels, and statistics belong to individual users.
 
 ## Project Status
 
-Jamozy is currently in early development.
-
-## Next Implementation Focus
-
-> [!NOTE]
-> The target data model is defined in `docs/DOMAIN-MODEL.md`,
-> [Authentication and Persistence](docs/AUTH-AND-PERSISTENCE.md), and DEC-022 through DEC-031.
-> The current implementation and persisted Firestore data are still being migrated to match it.
-
-Current work focuses on:
-
-- vocabulary import with source/license attribution and deduplication rules;
-- simplified lesson-progress persistence (`missing` = locked);
-- raw typing-stat counters with derived accuracy and WPM;
-- updated `ReviewItem` identity and Leitner lifecycle.
-- Learning Modes shared-state architecture, including contiguous Learning Path
-  progression, VocabularyProgress, JamoStats, Topics, and Daily Quest.
-- Guest-local persistence, authenticated accounts, and safe automatic
-  Guest-to-account migration. Cleanup remains deferred.
-- Shared LearningSession history and its exactly-once submission boundary for
-  Lesson and Review; history read/UI and other modes remain deferred.
+The core MVP is functionally complete: Learning Path, lessons, results,
+review, guest and authenticated persistence, settings, profile, and Admin BO
+are implemented. The Home one-page Learning Path player is awaiting its final
+manual verification pass. See the [Progress Tracker](docs/PROGRESS.md) for
+the detailed current status.
 
 ### MVP
 
-MVP is complete. See [Progress Tracker](docs/PROGRESS.md) for
-implementation status and the post-MVP roadmap.
+MVP is complete apart from final user-owned verification of the Home one-page
+Learning Path player. See [Progress Tracker](docs/PROGRESS.md) for the
+verification checklist and post-MVP roadmap.
 
 ### Next / Post-MVP
 
-- Add and execute Firestore Rules Emulator coverage for the deployed `/admin`
-  authorization policy. See the
-  [implementation plan](docs/superpowers/plans/2026-09-29-admin-content-management.md).
+- Complete the Home one-page Learning Path player's manual verification.
+- Set up a Cloudflare Pages deployment pipeline and use Preview deployments
+  for release checks.
 - Decide whether sound feedback ships or is deferred, then implement the
   selected behavior
 - Dark-mode CSS
 - Dedicated Lesson Result visual redesign
 - History, summaries, and analytics
 - Learning Modes: VocabularyProgress, JamoStats, Practice, and Daily Quest
+- Roll out per-step Jamo SVG rendering: it is built behind the
+  `VITE_JAMO_SVG_RENDERER` flag with 1,858 approved syllables (DEC-039).
+  First validate it in a Preview deployment, including mobile, resolve the
+  space-target policy, and raise lesson-vocabulary coverage before enabling it
+  for learners. See the
+  [Progress Tracker](docs/PROGRESS.md#dev-tooling-jamo-svg).
 - Account linking between authentication providers
 - Achievements, daily streaks, pronunciation audio, and additional curriculum
 

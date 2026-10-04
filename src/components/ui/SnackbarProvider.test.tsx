@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { act, fireEvent, render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 import { SnackbarProvider, useSnackbar } from './SnackbarProvider'
 
 function SnackbarControls() {
@@ -10,7 +10,10 @@ function SnackbarControls() {
       <button type="button" onClick={() => showSuccess('Settings saved')}>
         Show success
       </button>
-      <button type="button" onClick={() => showError('Could not save settings')}>
+      <button
+        type="button"
+        onClick={() => showError('Could not save settings')}
+      >
         Show error
       </button>
     </div>
@@ -29,7 +32,9 @@ describe('SnackbarProvider', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('Settings saved')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Dismiss notification' }))
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Dismiss notification' }),
+    )
 
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
@@ -44,7 +49,27 @@ describe('SnackbarProvider', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Show success' }))
     fireEvent.click(screen.getByRole('button', { name: 'Show error' }))
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Could not save settings')
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Could not save settings',
+    )
     expect(screen.queryByText('Settings saved')).not.toBeInTheDocument()
+  })
+
+  it('dismisses a notification after five seconds', () => {
+    vi.useFakeTimers()
+    try {
+      render(
+        <SnackbarProvider>
+          <SnackbarControls />
+        </SnackbarProvider>,
+      )
+
+      fireEvent.click(screen.getByRole('button', { name: 'Show success' }))
+      act(() => vi.advanceTimersByTime(5000))
+
+      expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })

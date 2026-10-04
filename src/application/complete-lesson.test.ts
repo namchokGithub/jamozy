@@ -61,6 +61,22 @@ function makeDeps(): CompleteLessonDeps {
 
 const now = new Date('2026-01-01')
 
+async function markCompleted(
+  deps: CompleteLessonDeps,
+  userId: string,
+  lessonId: string,
+) {
+  await deps.progressRepo.saveProgress(userId, {
+    lessonId,
+    status: 'completed',
+    bestAccuracy: 100,
+    bestSpeedWpm: 30,
+    attempts: 1,
+    lastAttemptAt: now,
+    completedAt: now,
+  })
+}
+
 describe('completeLesson', () => {
   it('completes the lesson, awards base EXP, and unlocks the next lesson in the same unit', async () => {
     const deps = makeDeps()
@@ -96,6 +112,7 @@ describe('completeLesson', () => {
 
   it('unlocks the first lesson of the next unit after the last lesson in a unit', async () => {
     const deps = makeDeps()
+    await markCompleted(deps, 'u1', 'l1')
     const outcome = await completeLesson(
       deps,
       'u1',
@@ -111,6 +128,8 @@ describe('completeLesson', () => {
 
   it('returns null unlockedNextLessonId at the end of the course', async () => {
     const deps = makeDeps()
+    await markCompleted(deps, 'u1', 'l1')
+    await markCompleted(deps, 'u1', 'l2')
     const outcome = await completeLesson(
       deps,
       'u1',

@@ -23,6 +23,7 @@ export type AdminActionData = {
   message?: AdminMessageKey
   error?: AdminMessageKey
   errorDetail?: string
+  createdId?: string
 }
 
 const commandErrorKeys: Record<string, AdminMessageKey> = {
@@ -53,6 +54,18 @@ function text(form: FormData, name: string): string {
   return String(form.get(name) ?? '').trim()
 }
 
+function parseOrder(value: FormDataEntryValue | null): string[] | null {
+  if (typeof value !== 'string') return null
+  try {
+    const order = JSON.parse(value)
+    return Array.isArray(order) && order.every((id) => typeof id === 'string')
+      ? order
+      : null
+  } catch {
+    return null
+  }
+}
+
 export function createAdminAction(repo: AdminContentRepository) {
   return async ({
     request,
@@ -62,27 +75,41 @@ export function createAdminAction(repo: AdminContentRepository) {
     const intent = text(form, 'intent')
     try {
       if (intent === 'create-course') {
-        await repo.createCourse({
+        const created = await repo.createCourse({
           title: 'Untitled Course',
           description: 'Describe this learning path.',
         })
-        return { message: 'feedback.courseCreated' }
+        return { message: 'feedback.courseCreated', createdId: created.id }
       }
       if (intent === 'create-unit' && params.courseId) {
-        await repo.createUnit({
+        const created = await repo.createUnit({
           courseId: params.courseId,
           title: 'Untitled Unit',
           description: 'Describe this Unit.',
         })
-        return { message: 'feedback.unitCreated' }
+        return { message: 'feedback.unitCreated', createdId: created.id }
       }
       if (intent === 'create-lesson' && params.unitId) {
-        await repo.createLesson({
+        const created = await repo.createLesson({
           unitId: params.unitId,
           title: 'Untitled Lesson',
           type: 'word',
         })
-        return { message: 'feedback.lessonCreated' }
+        return { message: 'feedback.lessonCreated', createdId: created.id }
+      }
+      if (intent === 'save-unit-order' && params.courseId) {
+        const order = parseOrder(form.get('order'))
+        if (!order) return { error: 'error.checkForm' }
+        for (const [index, id] of order.entries())
+          await repo.moveUnitToIndex(id, index)
+        return { message: 'feedback.unitReordered' }
+      }
+      if (intent === 'save-lesson-order' && params.unitId) {
+        const order = parseOrder(form.get('order'))
+        if (!order) return { error: 'error.checkForm' }
+        for (const [index, id] of order.entries())
+          await repo.moveLessonToIndex(id, index)
+        return { message: 'feedback.lessonReordered' }
       }
       const id = text(form, 'id')
       const kind = text(form, 'kind')
@@ -114,7 +141,7 @@ async function courseAction(
       title: text(form, 'title'),
       description: text(form, 'description'),
     })
-    return commandResult(result, 'feedback.courseSaved')
+    return commandResult(result, 'feedback.changesSaved')
   }
   if (intent === 'publish') {
     await publishCourse(repo, course)
@@ -145,7 +172,7 @@ async function unitAction(
       title: text(form, 'title'),
       description: text(form, 'description'),
     })
-    return commandResult(result, 'feedback.unitSaved')
+    return commandResult(result, 'feedback.changesSaved')
   }
   if (intent === 'publish') {
     const result = await publishUnit(repo, unit)
@@ -163,16 +190,24 @@ async function unitAction(
     await repo.moveUnit(id, intent === 'move-up' ? 'up' : 'down')
     return { message: 'feedback.unitReordered' }
   }
+  if (intent === 'move') {
+    const targetIndex = text(form, 'targetIndex')
+    const index = Number(targetIndex)
+    if (!targetIndex || !Number.isInteger(index) || index < 0)
+      return { error: 'error.checkForm' }
+    await repo.moveUnitToIndex(id, index)
+    return { message: 'feedback.unitReordered' }
+  }
   return { error: 'error.unknownUnitAction' }
 }
 
-function exercisesFromForm(form: FormData): LessonExercise[] {
+function exercisesFromForm(form: FormData): LessonExercise[] | null {
   const raw = form.get('exercises')
-  if (typeof raw !== 'string') return []
+  if (typeof raw !== 'string') return null
   try {
     return JSON.parse(raw) as LessonExercise[]
   } catch {
-    return []
+    return null
   }
 }
 
@@ -184,20 +219,20 @@ async function lessonAction(
 ): Promise<AdminActionData> {
   const lesson = await repo.getLessonById(id)
   if (!lesson) return { error: 'error.lessonNotFound' }
-  const updated: Lesson = {
-    ...lesson,
-    title: text(form, 'title') || lesson.title,
-    type: (text(form, 'type') || lesson.type) as Lesson['type'],
-    exercises: exercisesFromForm(form).length
-      ? exercisesFromForm(form)
-      : lesson.exercises,
-  }
   if (intent === 'save') {
+    const exercises = exercisesFromForm(form)
+    if (!exercises) return { error: 'error.checkForm' }
+    const updated: Lesson = {
+      ...lesson,
+      title: text(form, 'title'),
+      type: text(form, 'type') as Lesson['type'],
+      exercises,
+    }
     const result = await saveLesson(repo, updated)
-    return commandResult(result, 'feedback.lessonSaved')
+    return commandResult(result, 'feedback.changesSaved')
   }
   if (intent === 'publish') {
-    const result = await publishLesson(repo, updated)
+    const result = await publishLesson(repo, lesson)
     return commandResult(result, 'feedback.lessonPublished')
   }
   if (intent === 'archive') {
@@ -210,6 +245,14 @@ async function lessonAction(
   }
   if (intent === 'move-up' || intent === 'move-down') {
     await repo.moveLesson(id, intent === 'move-up' ? 'up' : 'down')
+    return { message: 'feedback.lessonReordered' }
+  }
+  if (intent === 'move') {
+    const targetIndex = text(form, 'targetIndex')
+    const index = Number(targetIndex)
+    if (!targetIndex || !Number.isInteger(index) || index < 0)
+      return { error: 'error.checkForm' }
+    await repo.moveLessonToIndex(id, index)
     return { message: 'feedback.lessonReordered' }
   }
   return { error: 'error.unknownLessonAction' }

@@ -1,19 +1,22 @@
 import { useEffect, useRef } from 'react'
 import { useFetcher } from 'react-router'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
-import { getCharacterStates, getComposedText } from '../../domain/korean/typing-session'
 import {
   getLessonProgress,
   getLessonResult,
   type LessonResult,
 } from '../../domain/korean/lesson-session'
-import { KEY_TO_JAMO } from '../../domain/korean/keymap'
+import { isKoreanJamoKey } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
+import HangulTarget from '../typing/HangulTarget'
 import type { Lesson } from '../../domain/models/lesson'
 import type { CompleteLessonOutcome } from '../../application/complete-lesson'
 import type { UserSettings } from '../../domain/models/user-profile'
 
-type KeyboardSettings = Pick<UserSettings, 'showKeyboard' | 'showEnglishKeys' | 'keyboardOpacity'>
+type KeyboardSettings = Pick<
+  UserSettings,
+  'showKeyboard' | 'showEnglishKeys' | 'keyboardOpacity'
+>
 
 export interface LessonCompletion {
   outcome: CompleteLessonOutcome
@@ -31,7 +34,8 @@ export default function LessonTypingSession({
   onComplete,
   keyboardSettings,
 }: LessonTypingSessionProps) {
-  const { session, start, pressKey, generation, submissionId } = useLessonSessionStore()
+  const { session, start, pressKey, generation, submissionId } =
+    useLessonSessionStore()
   const fetcher = useFetcher<CompleteLessonOutcome>()
   const hasStarted = useRef(false)
   const hasSubmitted = useRef(false)
@@ -50,16 +54,21 @@ export default function LessonTypingSession({
     if (hasStarted.current) return
     hasStarted.current = true
     myGenerationRef.current = start(
-      lesson.exercises.map((exercise) => ({ id: exercise.id, targetText: exercise.targetText })),
+      lesson.exercises.map((exercise) => ({
+        id: exercise.id,
+        targetText: exercise.targetText,
+      })),
     )
   }, [lesson, start])
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.metaKey || event.ctrlKey || event.altKey) return
-      if (KEY_TO_JAMO[event.code]) {
-        event.preventDefault()
+      if (!isKoreanJamoKey(event.code)) {
+        if (event.code === 'Space') event.preventDefault()
+        return
       }
+      event.preventDefault()
       pressKey(event.code, event.shiftKey)
     }
 
@@ -71,24 +80,31 @@ export default function LessonTypingSession({
     if (generation !== myGenerationRef.current) {
       return
     }
-    if (session?.status === 'completed' && submissionId && !hasSubmitted.current) {
+    if (
+      session?.status === 'completed' &&
+      submissionId &&
+      !hasSubmitted.current
+    ) {
       hasSubmitted.current = true
       const result = getLessonResult(session)
       completedResult.current = result
-      fetcher.submit({
-        submissionId,
-        accuracy: result.accuracy,
-        speedWpm: result.speedWpm,
-        durationSeconds: result.durationSeconds,
-        startedAtMs: result.startedAtMs,
-        exercisesAttempted: result.exercisesAttempted,
-        acceptedKeystrokes: result.acceptedKeystrokes,
-        rejectedKeystrokes: result.rejectedKeystrokes,
-        mistakes: result.mistakes.map((mistake) => ({
-          sourceExerciseId: mistake.sourceExerciseId,
-          targetText: mistake.targetText,
-        })),
-      }, { method: 'post', encType: 'application/json' })
+      fetcher.submit(
+        {
+          submissionId,
+          accuracy: result.accuracy,
+          speedWpm: result.speedWpm,
+          durationSeconds: result.durationSeconds,
+          startedAtMs: result.startedAtMs,
+          exercisesAttempted: result.exercisesAttempted,
+          acceptedKeystrokes: result.acceptedKeystrokes,
+          rejectedKeystrokes: result.rejectedKeystrokes,
+          mistakes: result.mistakes.map((mistake) => ({
+            sourceExerciseId: mistake.sourceExerciseId,
+            targetText: mistake.targetText,
+          })),
+        },
+        { method: 'post', encType: 'application/json' },
+      )
     }
   }, [session, generation, submissionId, fetcher])
 
@@ -103,10 +119,9 @@ export default function LessonTypingSession({
   }
 
   const progress = getLessonProgress(session)
-  const characters = Array.from(session.currentSession.targetText)
-  const characterStates = getCharacterStates(session.currentSession)
-  const composed = getComposedText(session.currentSession)
-  const nextKey = session.currentSession.expectedKeys[session.currentSession.keyIndex]
+  // const composed = getComposedText(session.currentSession)
+  const nextKey =
+    session.currentSession.expectedKeys[session.currentSession.keyIndex]
 
   return (
     <div className="mt-5 rounded-3xl border border-[#eadfd4] bg-[#fffdf9] p-5 shadow-sm">
@@ -114,28 +129,17 @@ export default function LessonTypingSession({
         {progress.current} / {progress.total}
       </p>
 
-      <div className="mt-4 flex gap-1 text-3xl">
-        {characters.map((char, index) => (
-          <span
-            key={index}
-            className={
-              characterStates[index] === 'correct'
-                ? 'text-[#58733f]'
-                : characterStates[index] === 'current'
-                  ? 'text-[#a85d4e] underline'
-                  : 'text-[#c7c3bc]'
-            }
-          >
-            {char}
-          </span>
-        ))}
-      </div>
-      <p className="mt-2 text-sm text-[#667085]">Typed: {composed}</p>
+      <HangulTarget
+        session={session.currentSession}
+        className="mt-4 text-3xl"
+      />
+      {/* <p className="mt-2 text-sm text-[#667085]">Typed: {composed}</p> */}
       {keyboardSettings.showKeyboard && (
         <VirtualKeyboard
           nextKey={nextKey}
           showEnglishKeys={keyboardSettings.showEnglishKeys}
           opacity={keyboardSettings.keyboardOpacity}
+          onKeyPress={pressKey}
         />
       )}
     </div>

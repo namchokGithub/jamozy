@@ -45,6 +45,15 @@ No record is written per keystroke. MVP history contains submitted/completed
 sessions only; abandoned or incomplete sessions are not persisted unless a
 future product decision requires them.
 
+## Local one-page resume state
+
+The Home one-page Learning Path player may retain completed-exercise boundaries
+and partial raw lesson counters in local IndexedDB ([[DEC-035]]). This is
+temporary UI resume state, not a `LearningSession` or learner-history record:
+it is never stored in Firestore, migrated to an account, or written for each
+keystroke. Only completion of a lesson’s final exercise creates the usual
+receipt-gated `LearningSession` and learner-state effects.
+
 ## Identity and retry behavior
 
 Create `sessionId` when the active session starts. Reuse that ID if the same

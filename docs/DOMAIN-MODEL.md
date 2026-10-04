@@ -172,6 +172,15 @@ Not persisted here: in-progress keystroke/session state. Per `AGENTS.md`, that s
 
 The global sequence is the lexicographic order of `(Course.order, Unit.order, Lesson.order)`: courses sort by `Course.order`; units by `Unit.order` within their course; lessons by `Lesson.order` within their unit. The next lesson may therefore cross a Unit and then a Course boundary. Document IDs never determine progression order.
 
+### Local one-page checkpoint
+
+The Home player’s exercise-level resume state is a local IndexedDB-only record,
+keyed by `(userId, courseId)`, not a Firestore domain document. It retains
+completed exercise IDs plus raw partial lesson counters, mistakes, start time,
+and a stable submission ID until that lesson submits. It is not migrated when a
+Guest signs in, and must not be confused with `Progress` or `LearningSession`
+([[DEC-035]]).
+
 ---
 
 ## VocabularyProgress (per-user)
