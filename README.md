@@ -21,6 +21,14 @@ become familiar with Hangul and the Korean keyboard through structured practice.
 Learners progress from basic characters and syllables to words, phrases,
 and sentences while improving typing accuracy and speed.
 
+<img
+    src="public/screenshot/jamozy-0.1.0.png"
+    alt="Jamozy SC-0.1.0"
+    width="1024"
+    height="1024"
+    align="center"
+  />
+
 ## Core Features
 
 - Progressive Unit → Lesson learning structure
@@ -363,7 +371,7 @@ Current sources:
 
 - Korean-English Learners' Dictionary vocabulary list (5,800 words),
   National Institute of Korean Language (국립국어원) —
-  <https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=71&pageIndex=1>
+  [https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=71&amp;pageIndex=1](https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=71&pageIndex=1)
 - 현대 국어 사용 빈도 조사 2, National Institute of Korean Language (국립국어원)
 
 > Lesson content is treated as shared application data, while progress, review
