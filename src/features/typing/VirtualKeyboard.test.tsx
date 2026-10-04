@@ -4,12 +4,24 @@ import VirtualKeyboard from './VirtualKeyboard'
 
 describe('VirtualKeyboard', () => {
   it('highlights the key matching nextKey.code', () => {
-    render(<VirtualKeyboard nextKey={{ code: 'KeyR', shift: false }} showEnglishKeys opacity={1} />)
+    render(
+      <VirtualKeyboard
+        nextKey={{ code: 'KeyR', shift: false }}
+        showEnglishKeys
+        opacity={1}
+      />,
+    )
     expect(screen.getByLabelText('r')).toHaveClass('bg-[#fff0d8]')
   })
 
   it('highlights Shift when nextKey.shift is true', () => {
-    render(<VirtualKeyboard nextKey={{ code: 'KeyQ', shift: true }} showEnglishKeys opacity={1} />)
+    render(
+      <VirtualKeyboard
+        nextKey={{ code: 'KeyQ', shift: true }}
+        showEnglishKeys
+        opacity={1}
+      />,
+    )
     screen
       .getAllByLabelText('Shift ⇧')
       .forEach((key) => expect(key).toHaveClass('bg-[#fff0d8]'))
@@ -32,17 +44,15 @@ describe('VirtualKeyboard', () => {
   it('applies an opacity of zero to the keyboard guide', () => {
     render(<VirtualKeyboard showEnglishKeys opacity={0} />)
 
-    expect(screen.getByLabelText('Virtual Korean keyboard')).toHaveStyle({ opacity: '0' })
+    expect(screen.getByLabelText('Virtual Korean keyboard')).toHaveStyle({
+      opacity: '0',
+    })
   })
 
   it('sends a touched jamo key through the supplied physical-key callback', () => {
     const onKeyPress = vi.fn()
     render(
-      <VirtualKeyboard
-        showEnglishKeys
-        opacity={1}
-        onKeyPress={onKeyPress}
-      />,
+      <VirtualKeyboard showEnglishKeys opacity={1} onKeyPress={onKeyPress} />,
     )
 
     fireEvent.click(screen.getByLabelText('r'))
@@ -53,16 +63,23 @@ describe('VirtualKeyboard', () => {
   it('sends Shift with the next touched jamo key', () => {
     const onKeyPress = vi.fn()
     render(
-      <VirtualKeyboard
-        showEnglishKeys
-        opacity={1}
-        onKeyPress={onKeyPress}
-      />,
+      <VirtualKeyboard showEnglishKeys opacity={1} onKeyPress={onKeyPress} />,
     )
 
     fireEvent.click(screen.getAllByLabelText('Shift ⇧')[0])
     fireEvent.click(screen.getByLabelText('q'))
 
     expect(onKeyPress).toHaveBeenCalledWith('KeyQ', true)
+  })
+
+  it('does not submit a punctuation key as typing input', () => {
+    const onKeyPress = vi.fn()
+    render(
+      <VirtualKeyboard showEnglishKeys opacity={1} onKeyPress={onKeyPress} />,
+    )
+
+    fireEvent.click(screen.getByLabelText(','))
+
+    expect(onKeyPress).not.toHaveBeenCalled()
   })
 })

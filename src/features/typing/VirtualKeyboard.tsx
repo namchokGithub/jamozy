@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { KEY_TO_JAMO } from '../../domain/korean/keymap'
+import { isKoreanJamoKey, KEY_TO_JAMO } from '../../domain/korean/keymap'
 
 type KeyboardKey = {
   code: string
@@ -97,7 +97,8 @@ export default function VirtualKeyboard({
     const isShiftKey = code === 'ShiftLeft' || code === 'ShiftRight'
     const isActiveShift = isShiftKey && (nextKey?.shift || virtualShiftActive)
     const displayLabel = label ?? englishLabel(code)
-    const canPress = Boolean(onKeyPress && (jamo || isShiftKey))
+    const isJamoKey = isKoreanJamoKey(code)
+    const canPress = Boolean(onKeyPress && (isJamoKey || isShiftKey))
 
     const handleClick = () => {
       if (!onKeyPress) return
@@ -105,7 +106,7 @@ export default function VirtualKeyboard({
         setVirtualShiftActive((active) => !active)
         return
       }
-      if (!jamo) return
+      if (!isJamoKey) return
       onKeyPress(code, virtualShiftActive)
       setVirtualShiftActive(false)
     }

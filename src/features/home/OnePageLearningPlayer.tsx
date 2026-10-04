@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
 import type { OnePageLearningPath } from '../../application/get-one-page-learning-path'
-import { KEY_TO_JAMO } from '../../domain/korean/keymap'
+import { isKoreanJamoKey } from '../../domain/korean/keymap'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
@@ -42,7 +42,8 @@ export default function OnePageLearningPlayer({
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return
-      if (KEY_TO_JAMO[event.code]) event.preventDefault()
+      if (!isKoreanJamoKey(event.code)) return
+      event.preventDefault()
       pressKey(event.code, event.shiftKey)
     }
     window.addEventListener('keydown', onKeyDown)

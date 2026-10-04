@@ -6,7 +6,7 @@ import {
   getLessonResult,
   type LessonResult,
 } from '../../domain/korean/lesson-session'
-import { KEY_TO_JAMO } from '../../domain/korean/keymap'
+import { isKoreanJamoKey } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
 import type { Lesson } from '../../domain/models/lesson'
@@ -64,9 +64,8 @@ export default function LessonTypingSession({
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.metaKey || event.ctrlKey || event.altKey) return
-      if (KEY_TO_JAMO[event.code]) {
-        event.preventDefault()
-      }
+      if (!isKoreanJamoKey(event.code)) return
+      event.preventDefault()
       pressKey(event.code, event.shiftKey)
     }
 

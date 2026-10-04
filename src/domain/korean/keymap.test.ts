@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { JAMO_TO_KEY, KEY_TO_JAMO } from './keymap'
+import { isKoreanJamoKey, JAMO_TO_KEY, KEY_TO_JAMO } from './keymap'
 
 describe('KEY_TO_JAMO', () => {
   it('maps a plain consonant key', () => {
@@ -29,4 +29,18 @@ describe('JAMO_TO_KEY', () => {
   it('inverts punctuation with shift: false', () => {
     expect(JAMO_TO_KEY[',']).toEqual({ code: 'Comma', shift: false })
   })
+})
+
+describe('isKoreanJamoKey', () => {
+  it('accepts Korean 2-set letter positions only', () => {
+    expect(isKoreanJamoKey('KeyR')).toBe(true)
+    expect(isKoreanJamoKey('KeyK')).toBe(true)
+  })
+
+  it.each(['Space', 'Enter', 'ArrowLeft', 'Comma', 'Period', 'F1'])(
+    'rejects a non-jamo key: %s',
+    (code) => {
+      expect(isKoreanJamoKey(code)).toBe(false)
+    },
+  )
 })
