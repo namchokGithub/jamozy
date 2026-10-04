@@ -119,6 +119,24 @@ describe('LessonTypingSession', () => {
     expect(screen.getByLabelText('Virtual Korean keyboard')).toHaveStyle({ opacity: '0' })
   })
 
+  it('prevents Space scrolling without recording a typing mistake', async () => {
+    renderSession(vi.fn())
+    await waitForTypingTarget('가')
+    const spaceEvent = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      code: 'Space',
+    })
+
+    const wasNotPrevented = window.dispatchEvent(spaceEvent)
+
+    expect(wasNotPrevented).toBe(false)
+    expect(useLessonSessionStore.getState().session?.currentSession).toMatchObject({
+      keyIndex: 0,
+      mistakes: [],
+    })
+  })
+
   it('submits the aggregated result and calls onComplete once the lesson finishes', async () => {
     const onComplete = vi.fn()
     renderSession(onComplete)

@@ -42,7 +42,10 @@ export default function OnePageLearningPlayer({
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return
-      if (!isKoreanJamoKey(event.code)) return
+      if (!isKoreanJamoKey(event.code)) {
+        if (event.code === 'Space') event.preventDefault()
+        return
+      }
       event.preventDefault()
       pressKey(event.code, event.shiftKey)
     }
