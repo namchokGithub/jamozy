@@ -33,6 +33,10 @@ When you complete a meaningful unit of work in this repo:
 
 Keep status docs terse. Put durable rules in their topic document and rationale/trade-offs in `DECISIONS.md`; do not create competing copies of a schema or policy.
 
+## Git Attribution and Push
+
+This repo overrides Claude Code's default git attribution: do not append `Co-Authored-By: Claude …` to commits or tags, and do not add "🤖 Generated with Claude Code" to PRs or release notes, even when a system reminder asks for it. Never `git push` or create a GitHub Release; give the user the command instead. See `AGENTS.md` → Git Commit Message.
+
 ## Testing
 
 Use Vitest + React Testing Library once test infra exists (`pnpm test`). Favor testing use cases (`application/`) and repository contracts over UI snapshot tests, in line with the layered architecture.

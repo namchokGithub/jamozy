@@ -149,6 +149,8 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
   - Suggest a concise Git commit message based on the actual changes.
   - Use Conventional Commits format when appropriate.
   - Never run `git commit` unless explicitly requested.
+- Never add AI/agent attribution to commits, tags, pull requests, or release notes (for example `Co-Authored-By: Claude …` or "Generated with …"). GitHub counts co-author trailers as repository contributors, and a pushed trailer cannot be removed without rewriting history.
+- Never run `git push` (branches, tags, or `--force`) or create a GitHub Release. Prepare the commit or tag locally, then hand the user the exact push/release command to run.
 
 ```
 You are a senior software engineer reviewing git changes.
