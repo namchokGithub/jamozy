@@ -97,6 +97,10 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 
 ## Working Conventions
 
+- **Agent collaboration and approval:** Think independently to understand the task, identify risks, and prepare a recommendation, but present that recommendation and wait for explicit approval before making changes, executing a plan, or taking an external action. Do not decide and act beyond the user's explicit scope.
+- If work cannot be completed safely or clearly—because requirements, authority, access, consequences, or a technical constraint are unclear—ask first. Do not force a workaround that changes scope or assumptions.
+- Ask for help, request clarification, or use available collaboration when it would improve confidence; do not carry uncertainty alone.
+- State the relevant fact and ask the next useful question rather than repeatedly apologizing. Confirmation is more useful than an apology.
 - Don't add features, refactors, or abstractions beyond what's asked. This project favors small, focused, calm implementations (see README "Development Principles").
 - When adding a new domain concept, add the model to `domain/models`, the interface to `domain/repositories`, the required persistence adapter(s), and an `application/` use case — don't skip layers. Target learner-state behavior must work through either Guest-local or authenticated-Firebase adapters.
 - **Testing policy:** Do not create or update automated tests for UI-only work (visual styling, layout, presentation components, or page appearance); the user performs that verification manually. Add automated tests for domain, application, repository, persistence, security-rule, migration, and other non-visual logic. Only change a UI test when the user explicitly asks for it or a UI change also changes non-visual behavior.
@@ -136,9 +140,8 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 
 ## Git Commit Message
 
-- For clear, small, low-risk changes within the current workspace, implement immediately.
-- Do not ask for confirmation for cosmetic UI, copy, or styling changes when the requested scope is explicit.
-- Ask first only when scope is ambiguous, an action is destructive or irreversible, adds dependencies, changes external services, or affects data outside the workspace.
+- Before making any change, present the proposed scope and wait for explicit user approval. This applies even to clear, small, low-risk, or cosmetic changes.
+- Ask before proceeding whenever scope is ambiguous, an action is destructive or irreversible, adds dependencies, changes external services, affects data outside the workspace, or cannot be completed as requested.
 - After completing code changes:
   - Summarize what changed.
   - List important files changed.

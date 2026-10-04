@@ -23,6 +23,7 @@ export type AdminActionData = {
   message?: AdminMessageKey
   error?: AdminMessageKey
   errorDetail?: string
+  createdId?: string
 }
 
 const commandErrorKeys: Record<string, AdminMessageKey> = {
@@ -74,27 +75,27 @@ export function createAdminAction(repo: AdminContentRepository) {
     const intent = text(form, 'intent')
     try {
       if (intent === 'create-course') {
-        await repo.createCourse({
+        const created = await repo.createCourse({
           title: 'Untitled Course',
           description: 'Describe this learning path.',
         })
-        return { message: 'feedback.courseCreated' }
+        return { message: 'feedback.courseCreated', createdId: created.id }
       }
       if (intent === 'create-unit' && params.courseId) {
-        await repo.createUnit({
+        const created = await repo.createUnit({
           courseId: params.courseId,
           title: 'Untitled Unit',
           description: 'Describe this Unit.',
         })
-        return { message: 'feedback.unitCreated' }
+        return { message: 'feedback.unitCreated', createdId: created.id }
       }
       if (intent === 'create-lesson' && params.unitId) {
-        await repo.createLesson({
+        const created = await repo.createLesson({
           unitId: params.unitId,
           title: 'Untitled Lesson',
           type: 'word',
         })
-        return { message: 'feedback.lessonCreated' }
+        return { message: 'feedback.lessonCreated', createdId: created.id }
       }
       if (intent === 'save-unit-order' && params.courseId) {
         const order = parseOrder(form.get('order'))
@@ -140,7 +141,7 @@ async function courseAction(
       title: text(form, 'title'),
       description: text(form, 'description'),
     })
-    return commandResult(result, 'feedback.courseSaved')
+    return commandResult(result, 'feedback.changesSaved')
   }
   if (intent === 'publish') {
     await publishCourse(repo, course)
@@ -171,7 +172,7 @@ async function unitAction(
       title: text(form, 'title'),
       description: text(form, 'description'),
     })
-    return commandResult(result, 'feedback.unitSaved')
+    return commandResult(result, 'feedback.changesSaved')
   }
   if (intent === 'publish') {
     const result = await publishUnit(repo, unit)
@@ -228,7 +229,7 @@ async function lessonAction(
       exercises,
     }
     const result = await saveLesson(repo, updated)
-    return commandResult(result, 'feedback.lessonSaved')
+    return commandResult(result, 'feedback.changesSaved')
   }
   if (intent === 'publish') {
     const result = await publishLesson(repo, lesson)

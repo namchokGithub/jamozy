@@ -1,26 +1,52 @@
 import { useState } from 'react'
-import { Link, useFetcher, useLoaderData } from 'react-router'
+import { Link, useFetcher, useLoaderData, useNavigate } from 'react-router'
 import type { Course } from '../../domain/models/course'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { PageSurface } from '../../components/ui/PageSurface'
-import { Dropdown } from '../../components/ui/Dropdown'
+import { AdminContentListToolbar } from './AdminContentListToolbar'
 import { AdminStatusActions } from './AdminStatusActions'
+import { AdminStatusBadge } from './AdminStatusBadge'
 import { useAdminFeedback } from './useAdminFeedback'
 import { useAdminMutationPending } from './useAdminMutationPending'
 import { AdminTopBar } from './AdminTopBar'
-import { statusKey, useAdminTranslation } from './i18n/admin-i18n'
+import { useAdminTranslation } from './i18n/admin-i18n'
 
 export default function AdminDashboardPage() {
   const { courses } = useLoaderData() as { courses: Course[] }
-  const { t } = useAdminTranslation()
+  const { locale, t } = useAdminTranslation()
   const create = useFetcher()
-  useAdminFeedback(create)
+  const navigate = useNavigate()
+  useAdminFeedback(create, (data) => {
+    if (data.createdId)
+      navigate(`/admin/courses/${data.createdId}`, { state: { created: true } })
+  })
   const isCreating = useAdminMutationPending()
   const [statusFilter, setStatusFilter] = useState('all')
-  const visibleCourses = courses.filter(
-    (course) => statusFilter === 'all' || course.status === statusFilter,
+  const [search, setSearch] = useState('')
+  const normalizedSearch = search.trim().toLocaleLowerCase()
+  const statusCounts = courses.reduce(
+    (counts, course) => {
+      if (course.status === 'draft') counts.draft += 1
+      if (course.status === 'published') counts.published += 1
+      if (course.status === 'archived') counts.archived += 1
+      return counts
+    },
+    { draft: 0, published: 0, archived: 0 },
   )
+  const visibleCourses = courses.filter(
+    (course) =>
+      (statusFilter === 'all' || course.status === statusFilter) &&
+      (!normalizedSearch ||
+        `${course.title} ${course.description}`
+          .toLocaleLowerCase()
+          .includes(normalizedSearch)),
+  )
+  const formatUpdatedAt = (date: Date) =>
+    new Intl.DateTimeFormat(locale === 'th' ? 'th-TH' : 'en-US', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(date)
   return (
     <PageSurface className="px-6 lg:px-8" contentClassName="max-w-[1200px]">
       <AdminTopBar breadcrumb={[{ label: t('breadcrumb.admin') }]} />
@@ -44,35 +70,56 @@ export default function AdminDashboardPage() {
           {isCreating ? t('action.saving') : t('action.createCourse')}
         </Button>
       </header>
-      <div className="mt-6 max-w-48">
-        <Dropdown
-          label={t('dashboard.statusFilter')}
-          value={statusFilter}
-          onChange={setStatusFilter}
-          options={[
-            { value: 'all', label: t('dashboard.allStatuses') },
-            { value: 'draft', label: t('status.draft') },
-            { value: 'published', label: t('status.published') },
-            { value: 'archived', label: t('status.archived') },
-          ]}
-        />
-      </div>
+      <AdminContentListToolbar
+        totalLabel={t('dashboard.totalCourses')}
+        total={courses.length}
+        counts={statusCounts}
+        search={search}
+        onSearch={setSearch}
+        status={statusFilter}
+        onStatusChange={setStatusFilter}
+      />
       <div className="mt-4 grid gap-3">
         {visibleCourses.map((course) => (
           <Card
             key={course.id}
-            className="flex flex-wrap items-center justify-between gap-4"
+            role="link"
+            tabIndex={0}
+            onClick={() => navigate(`/admin/courses/${course.id}`)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                navigate(`/admin/courses/${course.id}`)
+              }
+            }}
+            className="flex min-h-22 w-full cursor-pointer flex-wrap items-center justify-between gap-4 px-5 py-5 focus-visible:ring-2 focus-visible:ring-[#f2c5bb]"
           >
-            <div>
-              <p className="text-xs font-bold uppercase text-[#a85d4e]">
-                {t(statusKey(course.status))}
-              </p>
-              <h2 className="mt-1 text-lg font-bold">{course.title}</h2>
-              <p className="mt-1 text-sm text-[#667085]">
-                {course.description}
-              </p>
+            <div className="flex min-w-0 items-center gap-3">
+              <span
+                aria-hidden="true"
+                className="shrink-0 text-lg leading-none tracking-[-0.2em] text-[#c4a59a]"
+              >
+                ⋮⋮
+              </span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-3">
+                  <h2 className="truncate text-lg font-bold">{course.title}</h2>
+                  <AdminStatusBadge status={course.status} />
+                </div>
+                <p className="mt-1 text-sm text-[#667085]">
+                  {course.description}
+                </p>
+                <p className="mt-2 text-xs text-[#8b7d72]">
+                  {t('dashboard.lastUpdated', {
+                    date: formatUpdatedAt(course.updatedAt),
+                  })}
+                </p>
+              </div>
             </div>
-            <div className="flex gap-2">
+            <div
+              className="flex gap-2"
+              onClick={(event) => event.stopPropagation()}
+            >
               <Link
                 className="rounded-full border border-[#eadfd4] bg-white/90 px-4 py-2 text-sm font-semibold text-[#8d4c43] hover:border-[#d8b3a9] hover:bg-white"
                 to={`/admin/courses/${course.id}`}

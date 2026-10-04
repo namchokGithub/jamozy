@@ -81,7 +81,7 @@ describe('admin content lifecycle', () => {
       params: {},
     } as never)
 
-    expect(result).toEqual({ message: 'feedback.lessonSaved' })
+    expect(result).toEqual({ message: 'feedback.changesSaved' })
     expect((await repo.getLessonById('lesson'))?.exercises).toEqual([])
   })
 

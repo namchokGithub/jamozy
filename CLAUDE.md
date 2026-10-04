@@ -14,6 +14,9 @@ Claude Code specific guidance for the Jamozy repository. Shared agent rules (arc
    - original MVP requirement wording → `docs/REQUIREMENT-V1.md`
    - content attribution → `docs/CREDITS.md`
 4. Check `docs/DECISIONS.md` before revisiting a choice that may already be settled: read its index, then open only the relevant entries (`## DEC-0NN`). An accepted decision takes precedence over older plans or requirements where they conflict.
+5. Think through the request and present the proposed scope, assumptions, and intended action. Wait for explicit user approval before changing files, executing a plan, or taking an external action—even for a small or cosmetic change.
+6. If the work cannot be completed safely or clearly, ask before proceeding. Do not force a workaround or silently expand the scope; ask for clarification or help when it would improve confidence.
+7. State the relevant fact and ask the next useful question instead of repeatedly apologizing.
 
 ## Project State
 

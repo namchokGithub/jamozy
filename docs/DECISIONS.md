@@ -55,6 +55,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-038 | Split recipes may partition an enclosed counter with its outline | Accepted | 2026-10-01 |
 | DEC-039 | Jamo SVG runtime: committed choseong shards behind a flag | Accepted | 2026-10-03 |
 | DEC-040 | Spaces between words keep the Jamo SVG target renderer | Accepted | 2026-10-04 |
+| DEC-041 | AI agents propose and receive approval before acting | Accepted | 2026-10-04 |
 
 ---
 
@@ -916,3 +917,32 @@ it cannot mix fonts; the colored bar also shows learners when to press Space.
 **Consequences:** Shards, the compiler, the loader, and the Canvas renderer are
 unchanged. Targets without spaces render exactly as before.
 
+---
+
+## DEC-041 — AI agents propose and receive approval before acting
+
+**Date:** 2026-10-04
+**Status:** Accepted
+
+**Decision:** AI agents may independently analyze a request, identify risks,
+and prepare a recommendation, but must present the proposed scope and wait for
+explicit user approval before changing files, executing a plan, or taking an
+external action. This applies even to small, low-risk, cosmetic, or otherwise
+clear changes.
+
+When a request cannot be completed safely or clearly because of missing
+requirements, authority, access, consequences, or a technical constraint, the
+agent must ask before proceeding. It must not force a workaround, silently
+expand the scope, or make the missing decision itself. Agents should request
+clarification, help, or collaboration when that improves confidence. They
+should state the relevant fact and ask the next useful question rather than
+repeatedly apologizing.
+
+**Why:** Correctness and shared understanding are more valuable than
+unannounced autonomy. Explicit approval keeps responsibility for meaningful
+decisions with the user while still allowing agents to contribute analysis and
+recommendations.
+
+**Consequences:** `AGENTS.md` and `CLAUDE.md` require approval before any
+change or external action. The prior convention allowing clear, small,
+low-risk, or cosmetic changes to be implemented immediately is replaced.
