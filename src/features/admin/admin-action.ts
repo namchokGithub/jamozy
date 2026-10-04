@@ -53,6 +53,18 @@ function text(form: FormData, name: string): string {
   return String(form.get(name) ?? '').trim()
 }
 
+function parseOrder(value: FormDataEntryValue | null): string[] | null {
+  if (typeof value !== 'string') return null
+  try {
+    const order = JSON.parse(value)
+    return Array.isArray(order) && order.every((id) => typeof id === 'string')
+      ? order
+      : null
+  } catch {
+    return null
+  }
+}
+
 export function createAdminAction(repo: AdminContentRepository) {
   return async ({
     request,
@@ -83,6 +95,20 @@ export function createAdminAction(repo: AdminContentRepository) {
           type: 'word',
         })
         return { message: 'feedback.lessonCreated' }
+      }
+      if (intent === 'save-unit-order' && params.courseId) {
+        const order = parseOrder(form.get('order'))
+        if (!order) return { error: 'error.checkForm' }
+        for (const [index, id] of order.entries())
+          await repo.moveUnitToIndex(id, index)
+        return { message: 'feedback.unitReordered' }
+      }
+      if (intent === 'save-lesson-order' && params.unitId) {
+        const order = parseOrder(form.get('order'))
+        if (!order) return { error: 'error.checkForm' }
+        for (const [index, id] of order.entries())
+          await repo.moveLessonToIndex(id, index)
+        return { message: 'feedback.lessonReordered' }
       }
       const id = text(form, 'id')
       const kind = text(form, 'kind')
@@ -163,6 +189,14 @@ async function unitAction(
     await repo.moveUnit(id, intent === 'move-up' ? 'up' : 'down')
     return { message: 'feedback.unitReordered' }
   }
+  if (intent === 'move') {
+    const targetIndex = text(form, 'targetIndex')
+    const index = Number(targetIndex)
+    if (!targetIndex || !Number.isInteger(index) || index < 0)
+      return { error: 'error.checkForm' }
+    await repo.moveUnitToIndex(id, index)
+    return { message: 'feedback.unitReordered' }
+  }
   return { error: 'error.unknownUnitAction' }
 }
 
@@ -210,6 +244,14 @@ async function lessonAction(
   }
   if (intent === 'move-up' || intent === 'move-down') {
     await repo.moveLesson(id, intent === 'move-up' ? 'up' : 'down')
+    return { message: 'feedback.lessonReordered' }
+  }
+  if (intent === 'move') {
+    const targetIndex = text(form, 'targetIndex')
+    const index = Number(targetIndex)
+    if (!targetIndex || !Number.isInteger(index) || index < 0)
+      return { error: 'error.checkForm' }
+    await repo.moveLessonToIndex(id, index)
     return { message: 'feedback.lessonReordered' }
   }
   return { error: 'error.unknownLessonAction' }

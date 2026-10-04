@@ -3,8 +3,8 @@ export type AdminLocale = (typeof adminLocales)[number]
 
 export const en = {
   'language.label': 'Language',
-  'language.en': 'English',
-  'language.th': 'ไทย',
+  'language.en': 'EN',
+  'language.th': 'TH',
 
   'breadcrumb.label': 'Content location',
   'breadcrumb.admin': 'Admin',
@@ -47,6 +47,7 @@ export const en = {
   'action.moveDown': 'Move down',
   'action.moveItemUp': 'Move {name} up',
   'action.moveItemDown': 'Move {name} down',
+  'action.dragHandle': 'Drag to reorder',
   'action.close': 'Close',
 
   'confirm.publish.title': 'Publish this {kind}?',
@@ -148,8 +149,8 @@ export type AdminMessageKey = keyof typeof en
 
 export const th: Record<AdminMessageKey, string> = {
   'language.label': 'ภาษา',
-  'language.en': 'English',
-  'language.th': 'ไทย',
+  'language.en': 'EN',
+  'language.th': 'TH',
 
   'breadcrumb.label': 'ตำแหน่งเนื้อหา',
   'breadcrumb.admin': 'ผู้ดูแล',
@@ -192,6 +193,7 @@ export const th: Record<AdminMessageKey, string> = {
   'action.moveDown': 'เลื่อนลง',
   'action.moveItemUp': 'เลื่อน {name} ขึ้น',
   'action.moveItemDown': 'เลื่อน {name} ลง',
+  'action.dragHandle': 'ลากเพื่อจัดลำดับใหม่',
   'action.close': 'ปิด',
 
   'confirm.publish.title': 'เผยแพร่{kind}นี้?',

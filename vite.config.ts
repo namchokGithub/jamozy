@@ -17,10 +17,14 @@ export default defineConfig({
     },
   },
   build: {
+    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('/node_modules/@firebase/') || id.includes('/node_modules/firebase/')) {
+          if (
+            id.includes('/node_modules/@firebase/') ||
+            id.includes('/node_modules/firebase/')
+          ) {
             return 'firebase'
           }
           if (

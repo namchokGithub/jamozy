@@ -227,6 +227,20 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
     await this.swapOrder(siblings, lessonId, direction, 'lessons')
   }
 
+  async moveUnitToIndex(unitId: string, index: number): Promise<void> {
+    const unit = await this.getUnitById(unitId)
+    if (!unit) return
+    const siblings = await this.getUnitsByCourseId(unit.courseId)
+    await this.moveToIndex(siblings, unitId, index, 'units')
+  }
+
+  async moveLessonToIndex(lessonId: string, index: number): Promise<void> {
+    const lesson = await this.getLessonById(lessonId)
+    if (!lesson) return
+    const siblings = await this.getLessonsByUnitId(lesson.unitId)
+    await this.moveToIndex(siblings, lessonId, index, 'lessons')
+  }
+
   private async swapOrder<T extends { id: string; order: number }>(
     siblings: T[],
     id: string,
@@ -259,6 +273,41 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
       transaction.update(neighborRef, {
         order: current.order,
         updatedAt: new Date(),
+      })
+    })
+  }
+
+  private async moveToIndex<T extends { id: string; order: number }>(
+    siblings: T[],
+    id: string,
+    index: number,
+    collectionName: 'units' | 'lessons',
+  ): Promise<void> {
+    const currentIndex = siblings.findIndex((item) => item.id === id)
+    if (currentIndex < 0 || index < 0 || index >= siblings.length) return
+    const reordered = [...siblings]
+    const [current] = reordered.splice(currentIndex, 1)
+    reordered.splice(index, 0, current)
+    await runTransaction(db, async (transaction) => {
+      const snapshots = await Promise.all(
+        reordered.map((item) =>
+          transaction.get(doc(db, collectionName, item.id)),
+        ),
+      )
+      if (
+        snapshots.some(
+          (snapshot, position) =>
+            !snapshot.exists() ||
+            snapshot.data().order !== reordered[position].order,
+        )
+      ) {
+        throw new Error('Content order changed. Refresh and try again.')
+      }
+      reordered.forEach((item, order) => {
+        transaction.update(doc(db, collectionName, item.id), {
+          order,
+          updatedAt: new Date(),
+        })
       })
     })
   }

@@ -40,6 +40,7 @@ export function AdminStatusActions({
           key={action}
           type="button"
           variant={action === 'archive' ? 'secondary' : 'primary'}
+          className={action === 'archive' ? 'px-3 py-1.5 text-xs' : ''}
           disabled={isPending}
           onClick={() => setPendingIntent(action)}
         >

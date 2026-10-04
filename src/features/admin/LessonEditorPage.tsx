@@ -49,6 +49,9 @@ export default function LessonEditorPage() {
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(
     null,
   )
+  const [draggedExerciseId, setDraggedExerciseId] = useState<string | null>(
+    null,
+  )
   const [hasPendingExerciseOrder, setHasPendingExerciseOrder] = useState(false)
   const [titleError, setTitleError] = useState<string | null>(null)
   const [exerciseErrors, setExerciseErrors] = useState<Record<string, string>>(
@@ -105,15 +108,20 @@ export default function LessonEditorPage() {
           : item,
       ),
     )
-  const move = (index: number, direction: -1 | 1) =>
+  const moveExerciseTo = (targetIndex: number) => {
+    if (!draggedExerciseId) return
     setExercises((items) => {
+      const currentIndex = items.findIndex(
+        (exercise) => exercise.id === draggedExerciseId,
+      )
+      if (currentIndex < 0 || currentIndex === targetIndex) return items
       const next = [...items]
-      const target = index + direction
-      if (!next[target]) return items
-      ;[next[index], next[target]] = [next[target], next[index]]
+      const [dragged] = next.splice(currentIndex, 1)
+      next.splice(targetIndex, 0, dragged)
       setHasPendingExerciseOrder(true)
       return next
     })
+  }
   const cancelExercise = (exerciseId: string) => {
     const original = lesson.exercises.find(
       (exercise) => exercise.id === exerciseId,
@@ -128,7 +136,7 @@ export default function LessonEditorPage() {
     setEditingExerciseId(null)
   }
   return (
-    <PageSurface contentClassName="max-w-3xl">
+    <PageSurface className="px-6 lg:px-8" contentClassName="max-w-[1200px]">
       <AdminTopBar
         breadcrumb={[
           { label: t('breadcrumb.admin'), to: '/admin' },
@@ -144,11 +152,11 @@ export default function LessonEditorPage() {
         ]}
       />
       <header className="mt-4 flex flex-wrap justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold uppercase text-[#a85d4e]">
-            {t('kind.lesson')} · {t(statusKey(lesson.status))}
-          </p>
-          <h1 className="mt-1 text-3xl font-bold">{t('lesson.title')}</h1>
+        <div className="flex min-w-0 items-center gap-3">
+          <h1 className="truncate text-3xl font-bold">{title}</h1>
+          <span className="shrink-0 rounded-full bg-[#f8e5df] px-3 py-1 text-xs font-bold uppercase text-[#8d4c43]">
+            {t(statusKey(lesson.status))}
+          </span>
         </div>
         <AdminStatusActions
           id={lesson.id}
@@ -157,11 +165,13 @@ export default function LessonEditorPage() {
         />
       </header>
       {editingDetails ? (
-        <Card className="mt-6 grid gap-4">
+        <Card className="mt-6 max-w-210 grid gap-4">
           <label className="grid gap-1 text-sm font-semibold">
-            {t('field.title')}{' '}
-            <span aria-hidden="true" className="text-[#a85d4e]">
-              *
+            <span>
+              {t('field.title')}{' '}
+              <span aria-hidden="true" className="text-[#a85d4e]">
+                *
+              </span>
             </span>
             <input
               value={title}
@@ -206,7 +216,7 @@ export default function LessonEditorPage() {
           </div>
         </Card>
       ) : (
-        <Card className="mt-6 flex flex-wrap items-start justify-between gap-4">
+        <Card className="mt-6 max-w-210 flex flex-wrap items-start justify-between gap-4">
           <div>
             <h2 className="text-xl font-bold">{title}</h2>
             <p className="mt-2 text-sm text-[#667085]">
@@ -266,32 +276,31 @@ export default function LessonEditorPage() {
         )}
         <div className="mt-4 space-y-4">
           {exercises.map((exercise, index) => (
-            <Card key={exercise.id} className="grid gap-3">
+            <div
+              key={exercise.id}
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={() => {
+                moveExerciseTo(index)
+                setDraggedExerciseId(null)
+              }}
+              className="grid gap-3 border-b border-[#eadfd4] py-5 last:border-b-0"
+            >
               <div className="flex items-center justify-between">
                 <p className="text-sm font-bold">
                   {t('lesson.exerciseNumber', { number: index + 1 })}
                 </p>
                 <div className="flex flex-wrap justify-end gap-1">
-                  <Button
-                    aria-label={t('lesson.exerciseMoveUp', {
-                      number: index + 1,
-                    })}
-                    variant="ghost"
-                    disabled={isPending || index === 0}
-                    onClick={() => move(index, -1)}
+                  <button
+                    type="button"
+                    draggable
+                    aria-label={t('action.dragHandle')}
+                    disabled={isPending}
+                    onDragStart={() => setDraggedExerciseId(exercise.id)}
+                    onDragEnd={() => setDraggedExerciseId(null)}
+                    className="cursor-grab px-2 py-2 text-lg leading-none tracking-[-0.2em] text-[#a85d4e] active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {t('action.moveUp')}
-                  </Button>
-                  <Button
-                    aria-label={t('lesson.exerciseMoveDown', {
-                      number: index + 1,
-                    })}
-                    variant="ghost"
-                    disabled={isPending || index === exercises.length - 1}
-                    onClick={() => move(index, 1)}
-                  >
-                    {t('action.moveDown')}
-                  </Button>
+                    ⋮⋮
+                  </button>
                   <Button
                     variant="secondary"
                     disabled={isPending}
@@ -304,9 +313,11 @@ export default function LessonEditorPage() {
               {editingExerciseId === exercise.id ? (
                 <>
                   <label className="grid gap-1 text-sm font-semibold">
-                    {t('field.targetText')}{' '}
-                    <span aria-hidden="true" className="text-[#a85d4e]">
-                      *
+                    <span>
+                      {t('field.targetText')}{' '}
+                      <span aria-hidden="true" className="text-[#a85d4e]">
+                        *
+                      </span>
                     </span>
                     <input
                       value={exercise.targetText}
@@ -412,7 +423,7 @@ export default function LessonEditorPage() {
                   </p>
                 </div>
               )}
-            </Card>
+            </div>
           ))}
         </div>
       </section>

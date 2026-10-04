@@ -9,9 +9,6 @@ export function AdminLanguageSwitcher() {
       aria-label={t('language.label')}
       className="flex items-center gap-2 text-sm"
     >
-      <span className="font-semibold text-[#8b7d72]">
-        {t('language.label')}
-      </span>
       <div className="inline-flex rounded-full border border-[#eadfd4] bg-white/90 p-0.5">
         {adminLocales.map((option) => (
           <button

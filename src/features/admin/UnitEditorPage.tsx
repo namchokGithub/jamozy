@@ -21,16 +21,35 @@ export default function UnitEditorPage() {
   const { t } = useAdminTranslation()
   const fetcher = useFetcher()
   const [editingDetails, setEditingDetails] = useState(false)
+  const [orderedLessons, setOrderedLessons] = useState(lessons)
+  const [draggedLessonId, setDraggedLessonId] = useState<string | null>(null)
+  const [hasPendingLessonOrder, setHasPendingLessonOrder] = useState(false)
   const isPending = useAdminMutationPending()
   const handleSuccess = useCallback((data: { message?: string }) => {
     if (data.message === 'feedback.unitSaved') setEditingDetails(false)
+    if (data.message === 'feedback.lessonReordered')
+      setHasPendingLessonOrder(false)
   }, [])
   useAdminFeedback(fetcher, handleSuccess)
   const submit = (data: Record<string, string>) => {
     if (!isPending) fetcher.submit(data, { method: 'post' })
   }
+  const moveLessonTo = (targetIndex: number) => {
+    if (!draggedLessonId) return
+    setOrderedLessons((items) => {
+      const currentIndex = items.findIndex(
+        (item) => item.id === draggedLessonId,
+      )
+      if (currentIndex < 0 || currentIndex === targetIndex) return items
+      const next = [...items]
+      const [dragged] = next.splice(currentIndex, 1)
+      next.splice(targetIndex, 0, dragged)
+      return next
+    })
+    setHasPendingLessonOrder(true)
+  }
   return (
-    <PageSurface contentClassName="max-w-3xl">
+    <PageSurface className="px-6 lg:px-8" contentClassName="max-w-[1200px]">
       <AdminTopBar
         breadcrumb={[
           { label: t('breadcrumb.admin'), to: '/admin' },
@@ -42,24 +61,26 @@ export default function UnitEditorPage() {
         ]}
       />
       <header className="mt-4 flex flex-wrap justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold uppercase text-[#a85d4e]">
-            {t('kind.unit')} · {t(statusKey(unit.status))}
-          </p>
-          <h1 className="mt-1 text-3xl font-bold">{t('unit.title')}</h1>
+        <div className="flex min-w-0 items-center gap-3">
+          <h1 className="truncate text-3xl font-bold">{unit.title}</h1>
+          <span className="shrink-0 rounded-full bg-[#f8e5df] px-3 py-1 text-xs font-bold uppercase text-[#8d4c43]">
+            {t(statusKey(unit.status))}
+          </span>
         </div>
         <AdminStatusActions id={unit.id} kind="unit" status={unit.status} />
       </header>
-      {editingDetails ? (
-        <fetcher.Form method="post" className="mt-6">
-          <input type="hidden" name="intent" value="save" />
-          <input type="hidden" name="kind" value="unit" />
-          <input type="hidden" name="id" value={unit.id} />
-          <Card className="grid gap-4">
+      <Card className="mt-6 max-w-[840px]">
+        {editingDetails ? (
+          <fetcher.Form method="post" className="grid gap-4">
+            <input type="hidden" name="intent" value="save" />
+            <input type="hidden" name="kind" value="unit" />
+            <input type="hidden" name="id" value={unit.id} />
             <label className="grid gap-1 text-sm font-semibold">
-              {t('field.title')}{' '}
-              <span aria-hidden="true" className="text-[#a85d4e]">
-                *
+              <span>
+                {t('field.title')}{' '}
+                <span aria-hidden="true" className="text-[#a85d4e]">
+                  *
+                </span>
               </span>
               <input
                 name="title"
@@ -70,9 +91,9 @@ export default function UnitEditorPage() {
               />
             </label>
             <label className="grid gap-1 text-sm font-semibold">
-              {t('field.description')}{' '}
-              <span aria-hidden="true" className="text-[#a85d4e]">
-                *
+              <span>
+                {t('field.description')}{' '}
+                <span className="text-[#a85d4e]">*</span>
               </span>
               <textarea
                 name="description"
@@ -94,43 +115,77 @@ export default function UnitEditorPage() {
                 {t('action.cancel')}
               </Button>
             </div>
-          </Card>
-        </fetcher.Form>
-      ) : (
-        <Card className="mt-6 flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-bold">{unit.title}</h2>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-[#667085]">
-              {unit.description}
-            </p>
+          </fetcher.Form>
+        ) : (
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold">{unit.title}</h2>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-[#667085]">
+                {unit.description}
+              </p>
+            </div>
+            <Button
+              variant="secondary"
+              disabled={isPending}
+              onClick={() => setEditingDetails(true)}
+            >
+              {t('action.editDetails')}
+            </Button>
           </div>
-          <Button
-            variant="secondary"
-            disabled={isPending}
-            onClick={() => setEditingDetails(true)}
-          >
-            {t('action.editDetails')}
-          </Button>
-        </Card>
-      )}
+        )}
+      </Card>
       <section className="mt-8">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold">{t('unit.lessonsHeading')}</h2>
             <p className="text-sm text-[#667085]">{t('unit.lessonsHint')}</p>
           </div>
-          <Button
-            disabled={isPending}
-            onClick={() => submit({ intent: 'create-lesson' })}
-          >
-            {isPending ? t('action.saving') : t('action.createLesson')}
-          </Button>
+          <div className="flex gap-2">
+            {hasPendingLessonOrder && (
+              <>
+                <Button
+                  variant="secondary"
+                  disabled={isPending}
+                  onClick={() => {
+                    setOrderedLessons(lessons)
+                    setHasPendingLessonOrder(false)
+                  }}
+                >
+                  {t('action.cancel')}
+                </Button>
+                <Button
+                  disabled={isPending}
+                  onClick={() =>
+                    submit({
+                      intent: 'save-lesson-order',
+                      order: JSON.stringify(
+                        orderedLessons.map((item) => item.id),
+                      ),
+                    })
+                  }
+                >
+                  {isPending ? t('action.saving') : t('action.saveChanges')}
+                </Button>
+              </>
+            )}
+            <Button
+              disabled={isPending}
+              onClick={() => submit({ intent: 'create-lesson' })}
+            >
+              {isPending ? t('action.saving') : t('action.createLesson')}
+            </Button>
+          </div>
         </div>
         <div className="mt-4 space-y-3">
-          {lessons.map((lesson, index) => (
-            <Card
+          {orderedLessons.map((lesson, index) => (
+            <div
               key={lesson.id}
-              className="flex flex-wrap items-center justify-between gap-3"
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={() => {
+                moveLessonTo(index)
+                setDraggedLessonId(null)
+              }}
+              className="flex flex-wrap items-center justify-between gap-3 border-b border-[#eadfd4] py-4 last:border-b-0"
             >
               <div>
                 <p className="text-xs font-bold uppercase text-[#a85d4e]">
@@ -139,32 +194,19 @@ export default function UnitEditorPage() {
                 <h3 className="font-bold">{lesson.title}</h3>
               </div>
               <div className="flex items-center gap-1">
-                <Button
-                  aria-label={t('action.moveItemUp', { name: lesson.title })}
-                  variant="ghost"
-                  disabled={isPending || index === 0}
-                  onClick={() =>
-                    submit({ intent: 'move-up', kind: 'lesson', id: lesson.id })
-                  }
+                <button
+                  type="button"
+                  draggable
+                  aria-label={t('action.dragHandle')}
+                  disabled={isPending}
+                  onDragStart={() => setDraggedLessonId(lesson.id)}
+                  onDragEnd={() => setDraggedLessonId(null)}
+                  className="cursor-grab px-2 py-2 text-lg leading-none tracking-[-0.2em] text-[#a85d4e] active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {t('action.moveUp')}
-                </Button>
-                <Button
-                  aria-label={t('action.moveItemDown', { name: lesson.title })}
-                  variant="ghost"
-                  disabled={isPending || index === lessons.length - 1}
-                  onClick={() =>
-                    submit({
-                      intent: 'move-down',
-                      kind: 'lesson',
-                      id: lesson.id,
-                    })
-                  }
-                >
-                  {t('action.moveDown')}
-                </Button>
+                  ⋮⋮
+                </button>
                 <Link
-                  className="rounded-full px-3 py-2 text-sm font-semibold text-[#8d4c43] hover:bg-white"
+                  className="rounded-full border border-[#eadfd4] bg-white/90 px-3 py-2 text-sm font-semibold text-[#8d4c43] hover:border-[#d8b3a9] hover:bg-white"
                   to={`/admin/lessons/${lesson.id}`}
                 >
                   {t('action.edit')}
@@ -175,7 +217,7 @@ export default function UnitEditorPage() {
                   status={lesson.status}
                 />
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       </section>

@@ -12,7 +12,7 @@ export function AdminBreadcrumb({ items }: { items: AdminBreadcrumbItem[] }) {
   return (
     <nav
       aria-label={t('breadcrumb.label')}
-      className="flex select-none flex-wrap items-center gap-1.5 text-sm"
+      className="flex select-none flex-wrap items-center gap-1.5 text-sm font-medium text-[#8b7d72]"
     >
       {items.map((item, index) => (
         <span
@@ -34,7 +34,9 @@ export function AdminBreadcrumb({ items }: { items: AdminBreadcrumbItem[] }) {
               {item.label}
             </Link>
           ) : (
-            <span className="font-semibold text-[#39465b]">{item.label}</span>
+            <span aria-current="page" className="font-bold text-[#253247]">
+              {item.label}
+            </span>
           )}
         </span>
       ))}

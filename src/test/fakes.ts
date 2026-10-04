@@ -140,6 +140,12 @@ export class FakeAdminContentRepository implements AdminContentRepository {
   async moveLesson(id: string, direction: 'up' | 'down') {
     await this.move(this.lessons, id, direction, (item) => item.unitId)
   }
+  async moveUnitToIndex(id: string, index: number) {
+    await this.moveToIndex(this.units, id, index, (item) => item.courseId)
+  }
+  async moveLessonToIndex(id: string, index: number) {
+    await this.moveToIndex(this.lessons, id, index, (item) => item.unitId)
+  }
 
   private replace<T extends { id: string }>(items: T[], next: T) {
     const index = items.findIndex((item) => item.id === next.id)
@@ -165,6 +171,25 @@ export class FakeAdminContentRepository implements AdminContentRepository {
     const order = current.order
     current.order = neighbor.order
     neighbor.order = order
+  }
+  private async moveToIndex<T extends { id: string; order: number }>(
+    items: T[],
+    id: string,
+    index: number,
+    key: (item: T) => string,
+  ) {
+    const current = items.find((item) => item.id === id)
+    if (!current) return
+    const siblings = items
+      .filter((item) => key(item) === key(current))
+      .sort((a, b) => a.order - b.order)
+    const currentIndex = siblings.findIndex((item) => item.id === id)
+    if (currentIndex < 0 || index < 0 || index >= siblings.length) return
+    siblings.splice(currentIndex, 1)
+    siblings.splice(index, 0, current)
+    siblings.forEach((item, order) => {
+      item.order = order
+    })
   }
 }
 
@@ -254,11 +279,11 @@ export class FakeSessionSubmissionRepository implements SessionSubmissionReposit
   }
 }
 
-export class FakeOnePageLearningCheckpointRepository
-  implements OnePageLearningCheckpointRepository
-{
+export class FakeOnePageLearningCheckpointRepository implements OnePageLearningCheckpointRepository {
   private store = new Map<string, OnePageLearningCheckpoint>()
-  private key(userId: string, courseId: string) { return `${userId}:${courseId}` }
+  private key(userId: string, courseId: string) {
+    return `${userId}:${courseId}`
+  }
   async getCheckpoint(userId: string, courseId: string) {
     return this.store.get(this.key(userId, courseId)) ?? null
   }
@@ -268,14 +293,23 @@ export class FakeOnePageLearningCheckpointRepository
   async clearLesson(userId: string, courseId: string, lessonId: string) {
     const checkpoint = await this.getCheckpoint(userId, courseId)
     if (!checkpoint) return
-    const completedExerciseIdsByLesson = { ...checkpoint.completedExerciseIdsByLesson }
+    const completedExerciseIdsByLesson = {
+      ...checkpoint.completedExerciseIdsByLesson,
+    }
     const partialLessonResults = { ...checkpoint.partialLessonResults }
     delete completedExerciseIdsByLesson[lessonId]
     delete partialLessonResults[lessonId]
-    if (!Object.keys(completedExerciseIdsByLesson).length && !Object.keys(partialLessonResults).length) {
+    if (
+      !Object.keys(completedExerciseIdsByLesson).length &&
+      !Object.keys(partialLessonResults).length
+    ) {
       this.store.delete(this.key(userId, courseId))
       return
     }
-    await this.saveCheckpoint({ ...checkpoint, completedExerciseIdsByLesson, partialLessonResults })
+    await this.saveCheckpoint({
+      ...checkpoint,
+      completedExerciseIdsByLesson,
+      partialLessonResults,
+    })
   }
 }
