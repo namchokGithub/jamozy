@@ -6,11 +6,11 @@ const hands = [
   {
     title: 'Left hand',
     fingers: [
-      ['Pinky', '~ · 1 · Q · A · Z · Tab · Caps · Shift'],
-      ['Ring', '2 · W · S · X'],
-      ['Middle', '3 · E · D · C'],
-      ['Index', '4 · 5 · R · T · F · G · V · B'],
-      ['Thumb', 'Space (optional)'],
+      ['Pinky', ['~', '1', 'Q', 'A', 'Z', 'Tab', 'Caps', 'Shift']],
+      ['Ring', ['2', 'W', 'S', 'X']],
+      ['Middle', ['3', 'E', 'D', 'C']],
+      ['Index', ['4', '5', 'R', 'T', 'F', 'G', 'V', 'B']],
+      ['Thumb', ['Space']],
     ],
   },
   {
@@ -18,15 +18,35 @@ const hands = [
     fingers: [
       [
         'Pinky',
-        '= · - · 0 · ) · P · ; · : · / · ? · \' · " · [ · { · ] · } · Enter · Shift',
+        [
+          '=',
+          '-',
+          '0',
+          ')',
+          'P',
+          ';',
+          ':',
+          '/',
+          '?',
+          "'",
+          '"',
+          '[',
+          '{',
+          ']',
+          '}',
+          'Enter',
+          'Shift',
+        ],
       ],
-      ['Ring', '9 · O · L · . · >'],
-      ['Middle', '8 · I · K · , · <'],
-      ['Index', '6 · 7 · Y · U · J · H · N · M'],
-      ['Thumb', 'Space'],
+      ['Ring', ['9', 'O', 'L', '.', '>']],
+      ['Middle', ['8', 'I', 'K', ',', '<']],
+      ['Index', ['6', '7', 'Y', 'U', 'J', 'H', 'N', 'M']],
+      ['Thumb', ['Space']],
     ],
   },
 ] as const
+
+const specialKeyLabels = new Set(['Tab', 'Caps', 'Shift', 'Enter', 'Space'])
 
 const fingerCodes: Record<'left' | 'right', Record<Finger, string[]>> = {
   left: {
@@ -148,18 +168,37 @@ export default function FingerPlacementGuide({
         <div
           id="finger-placement-tooltip"
           role="tooltip"
-          className="pointer-events-none absolute right-0 top-9 z-10 grid w-80 origin-top-right gap-3 rounded-2xl border border-[#eadfd4] bg-[#fffdf9] p-3 text-sm text-[#596579] opacity-0 shadow-[0_18px_40px_-24px_rgba(54,41,31,0.5)] transition group-hover:opacity-100 group-focus-within:opacity-100 sm:grid-cols-2"
+          className="pointer-events-none absolute right-0 top-9 z-10 grid w-[min(30rem,calc(100vw-1.5rem))] origin-top-right gap-3 rounded-2xl bg-[#fffdf9] p-3 text-sm text-[#596579] opacity-0 shadow-[0_18px_40px_-24px_rgba(54,41,31,0.5)] transition group-hover:opacity-100 group-focus-within:opacity-100 sm:grid-cols-2 sm:p-4"
         >
           {hands.map((hand) => (
-            <div key={hand.title}>
+            <div
+              key={hand.title}
+              className="rounded-xl bg-[#f7f9fd] p-3 shadow-[0_5px_14px_-12px_rgba(54,78,112,0.5)]"
+            >
               <p className="font-bold text-[#39465b]">{hand.title}</p>
-              <dl className="mt-2 space-y-1">
+              <dl className="mt-2.5 space-y-2">
                 {hand.fingers.map(([finger, keys]) => (
-                  <div key={finger} className="flex gap-2 leading-5">
-                    <dt className="w-14 shrink-0 font-semibold text-[#a85d4e]">
+                  <div
+                    key={finger}
+                    className="grid grid-cols-[3.75rem_1fr] gap-2"
+                  >
+                    <dt className="pt-0.5 font-semibold text-[#a85d4e]">
                       {finger}
                     </dt>
-                    <dd>{keys}</dd>
+                    <dd className="flex flex-wrap items-center gap-1 text-xs font-medium leading-5 text-[#596579]">
+                      {keys.map((key) =>
+                        specialKeyLabels.has(key) ? (
+                          <span
+                            key={key}
+                            className="rounded-md bg-[#e9e1f8] px-1.5 py-0.5 text-[10px] font-semibold leading-4 text-[#5c4b88]"
+                          >
+                            {key}
+                          </span>
+                        ) : (
+                          <span key={key}>{key}</span>
+                        ),
+                      )}
+                    </dd>
                   </div>
                 ))}
               </dl>
