@@ -5,7 +5,10 @@ import type {
 } from '../../domain/korean/jamo-svg-runtime'
 import type { ExpectedKey } from '../../domain/korean/target-sequence'
 
+/** One typed character of the target: a precomposed syllable or a space (`' '`). */
 export type SyllableGroup = { syllable: string; jamo: string[] }
+
+export const isSpaceGroup = ({ syllable }: SyllableGroup) => syllable === ' '
 
 export type RendererChoice =
   | {
@@ -15,7 +18,10 @@ export type RendererChoice =
     }
   | { kind: 'canvas'; reason: string }
 
-/** Target syllables with their typed jamo; undefined when any group is not a precomposed syllable. */
+/**
+ * Target syllables and spaces with their typed keys; undefined when any other
+ * character (jamo, punctuation) appears or the target has no syllable.
+ */
 export function svgTargetSyllables(
   targetText: string,
   expectedKeys: ExpectedKey[],
@@ -30,17 +36,23 @@ export function svgTargetSyllables(
   const result: SyllableGroup[] = []
   for (const [syllableIndex, jamo] of groups) {
     const syllable = characters[syllableIndex] ?? ''
-    if (getChoseongShardIndex(syllable) === undefined) return undefined
+    if (syllable !== ' ' && getChoseongShardIndex(syllable) === undefined)
+      return undefined
     result.push({ syllable, jamo })
   }
-  return result.length ? result : undefined
+  return result.some((group) => !isSpaceGroup(group)) ? result : undefined
 }
 
-/** SVG only when every syllable has a glyph whose paths match its typed keys (DEC-039). */
+/** Syllables of the target, without spaces, for loading glyphs. */
+export const targetSyllables = (groups: SyllableGroup[]) =>
+  groups.filter((group) => !isSpaceGroup(group)).map(({ syllable }) => syllable)
+
+/** SVG only when every syllable has a glyph whose paths match its typed keys; spaces need none (DEC-039, DEC-040). */
 export function chooseRenderer(
-  groups: SyllableGroup[],
+  allGroups: SyllableGroup[],
   loaded: LoadedJamoSvgGlyphs | undefined,
 ): RendererChoice {
+  const groups = allGroups.filter((group) => !isSpaceGroup(group))
   if (!loaded)
     return { kind: 'canvas', reason: 'a runtime shard failed to load' }
   const missing = [

@@ -8,10 +8,16 @@ const COLORS = {
 }
 const TILE_CLASS = 'h-26 w-26 rounded-md border border-[#bfd7fb] bg-[#fafcff]'
 
+const SPACE_CLASS = 'flex h-26 w-8 items-end pb-3'
+
+function stateFor(index: number, keyIndex: number) {
+  if (index < keyIndex) return 'correct'
+  if (index === keyIndex) return 'current'
+  return 'pending'
+}
+
 function fillFor(index: number, keyIndex: number) {
-  if (index < keyIndex) return COLORS.correct
-  if (index === keyIndex) return COLORS.current
-  return COLORS.pending
+  return COLORS[stateFor(index, keyIndex)]
 }
 
 interface JamoSvgHangulTargetProps {
@@ -44,6 +50,24 @@ export default function JamoSvgHangulTarget({
     >
       {[...keyIndexes.entries()].map(([syllableIndex, indexes]) => {
         const syllable = characters[syllableIndex] ?? ''
+        if (syllable === ' ') {
+          // A space is a typed step too: a narrow gap with a state-colored bar.
+          const state = stateFor(indexes[0], session.keyIndex)
+          return (
+            <span
+              key={syllableIndex}
+              className={SPACE_CLASS}
+              data-testid="space-step"
+              data-state={state}
+              aria-hidden="true"
+            >
+              <span
+                className="h-1.5 w-full rounded-full"
+                style={{ backgroundColor: COLORS[state] }}
+              />
+            </span>
+          )
+        }
         const glyph = glyphs.get(syllable)
         if (!glyph) return null
         return (
@@ -70,11 +94,12 @@ export default function JamoSvgHangulTarget({
 }
 
 export function PendingHangulTiles({
-  count,
+  spaces,
   label,
   className = '',
 }: {
-  count: number
+  /** One entry per typed character; true where it is a space. */
+  spaces: boolean[]
   label: string
   className?: string
 }) {
@@ -85,13 +110,21 @@ export function PendingHangulTiles({
       aria-busy="true"
       role="img"
     >
-      {Array.from({ length: count }, (_, index) => (
-        <div
-          key={index}
-          className={TILE_CLASS}
-          data-testid="pending-hangul-tile"
-        />
-      ))}
+      {spaces.map((isSpace, index) =>
+        isSpace ? (
+          <span
+            key={index}
+            className={SPACE_CLASS}
+            data-testid="pending-space-tile"
+          />
+        ) : (
+          <div
+            key={index}
+            className={TILE_CLASS}
+            data-testid="pending-hangul-tile"
+          />
+        ),
+      )}
     </div>
   )
 }

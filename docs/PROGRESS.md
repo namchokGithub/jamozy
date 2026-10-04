@@ -30,8 +30,8 @@ Development-only data pipeline; the learner SVG renderer is behind a flag (off b
 | Jamo SVG Tagger (`/dev/jamo-svg-tagger`)  | Done        | Review per-step ownership of Pretendard 600 outlines, split recipes including enclosed counters ([[DEC-038]]), one step per typed key ([[DEC-037]]).                                                                                              |
 | Review queue and data                     | In progress | 1,858 committed reviews are all approved; 2,011 entries are queued. Coverage includes every syllable of the 5,467-word Korean 5800 list, the 18-syllable inflection/particle sample (`docs/informations/korean-inflection-sample.md`), and reference glyphs. `pnpm jamo-svg:audit` reports 0 findings for the approved set. |
 | Inflected and particle syllables          | In progress | The 18-syllable sample (`를 았 었 했 …`) is approved; a fuller list of endings and contracted verb forms is not yet enqueued. Syllables never used in real text are deliberately not reviewed; they keep the Canvas renderer.                     |
-| Runtime SVG dataset and per-step renderer | Done (flagged) | `pnpm jamo-svg:compile-runtime` writes 19 committed choseong shards (1,858 glyphs); `HangulTarget` renders per-step SVG when every syllable has approved data, else Canvas for the whole target ([[DEC-039]]). Off unless `VITE_JAMO_SVG_RENDERER=1`. |
-| Runtime SVG rollout | Not started | Before enabling for learners: try it on a Preview deploy (including mobile), decide whether targets with spaces may use SVG, and raise coverage of lesson vocabulary. |
+| Runtime SVG dataset and per-step renderer | Done (flagged) | `pnpm jamo-svg:compile-runtime` writes 19 committed choseong shards (1,858 glyphs); `HangulTarget` renders per-step SVG when every syllable has approved data, else Canvas for the whole target ([[DEC-039]]); spaces stay SVG as narrow gaps ([[DEC-040]]). Off unless `VITE_JAMO_SVG_RENDERER=1`. |
+| Runtime SVG rollout | Not started | Before enabling for learners: try it on a Preview deploy (including mobile), and raise coverage of lesson vocabulary. |
 
 ## Planned Learning Modes
 

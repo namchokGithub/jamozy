@@ -97,10 +97,46 @@ test('a standalone jamo renders Canvas without loading data', () => {
   expect(loadJamoSvgGlyphs).not.toHaveBeenCalled()
 })
 
-test('a target with a space renders Canvas (literal key)', () => {
-  render(<HangulTarget session={startTypingSession('가 나')} />)
+test('a target with a space renders SVG with a space step between words', async () => {
+  vi.mocked(loadJamoSvgGlyphs).mockResolvedValue(
+    loaded({ 가: glyph('ㄱ', 'ㅏ'), 나: glyph('ㄴ', 'ㅏ') }),
+  )
+  let session = startTypingSession('가 나')
+  const { container, rerender } = render(<HangulTarget session={session} />)
+  expect(screen.getAllByTestId('pending-hangul-tile')).toHaveLength(2)
+  expect(screen.getAllByTestId('pending-space-tile')).toHaveLength(1)
+  await act(async () => {})
+  expect(vi.mocked(loadJamoSvgGlyphs).mock.calls[0][0]).toEqual(['가', '나'])
+  expect(container.querySelectorAll('svg')).toHaveLength(2)
+  const spaceMarker = () =>
+    screen.getByTestId('space-step').getAttribute('data-state')
+  expect(spaceMarker()).toBe('pending')
+  session = pressKey(pressKey(session, 'KeyR', false), 'KeyK', false)
+  rerender(<HangulTarget session={session} />)
+  expect(spaceMarker()).toBe('current')
+  rerender(<HangulTarget session={pressKey(session, 'Space', false)} />)
+  expect(spaceMarker()).toBe('correct')
+  expect(fills(container)).toEqual(['#20b981', '#20b981', '#c84f82', '#c7c3bc'])
+})
+
+test('punctuation still renders Canvas for the whole target', () => {
+  render(<HangulTarget session={startTypingSession('가 나.')} />)
   expect(screen.getByTestId('canvas-target')).toBeInTheDocument()
   expect(loadJamoSvgGlyphs).not.toHaveBeenCalled()
+})
+
+test('a target of only spaces renders Canvas', () => {
+  render(<HangulTarget session={startTypingSession(' ')} />)
+  expect(screen.getByTestId('canvas-target')).toBeInTheDocument()
+  expect(loadJamoSvgGlyphs).not.toHaveBeenCalled()
+})
+
+test('a missing syllable beside a space still renders Canvas for the whole target', async () => {
+  vi.mocked(loadJamoSvgGlyphs).mockResolvedValue(
+    loaded({ 가: glyph('ㄱ', 'ㅏ') }),
+  )
+  render(<HangulTarget session={startTypingSession('가 나')} />)
+  expect(await screen.findByTestId('canvas-target')).toBeInTheDocument()
 })
 
 test('a step mismatch renders Canvas', async () => {

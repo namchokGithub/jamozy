@@ -204,6 +204,9 @@ props.
 
 ## 4. Selection flow and timing
 
+> Amended by DEC-040 (2026-10-04): spaces are allowed in step 1 and render
+> as narrow state-colored gaps; only syllables are loaded and checked.
+
 The flow runs when `session.targetText` changes (and on mount). `keyIndex`
 changes never trigger it.
 

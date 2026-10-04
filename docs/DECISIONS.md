@@ -54,6 +54,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-037 | Jamo SVG steps follow typed keys, including compound medials | Accepted | 2026-10-01 |
 | DEC-038 | Split recipes may partition an enclosed counter with its outline | Accepted | 2026-10-01 |
 | DEC-039 | Jamo SVG runtime: committed choseong shards behind a flag | Accepted | 2026-10-03 |
+| DEC-040 | Spaces between words keep the Jamo SVG target renderer | Accepted | 2026-10-04 |
 
 ---
 
@@ -892,3 +893,26 @@ shards with the reviews. Targets with a space or any non-syllable character
 render Canvas. Per-syllable fallback, or retiring Canvas, is decided later
 when coverage is high enough. Spec:
 `docs/superpowers/specs/2026-10-03-jamo-svg-runtime-design.md`.
+
+---
+
+## DEC-040 — Spaces between words keep the Jamo SVG target renderer
+
+**Date:** 2026-10-04
+**Status:** Accepted
+
+**Decision:** Amends DEC-039's fallback rule. A space in the target no longer
+sends the whole target to Canvas. `HangulTarget` uses SVG when the target has
+at least one syllable, every syllable has approved data with matching steps,
+and every other character is a space. Each space renders as a narrow gap with
+a bar colored by its `Space` key state (correct, current, pending). Any other
+non-syllable character (punctuation, standalone jamo) still renders Canvas for
+the whole target, and a target of only spaces renders Canvas.
+
+**Why:** Multi-word targets were always Canvas only because of the space, the
+most common reason a fully approved target fell back. A space has no glyph, so
+it cannot mix fonts; the colored bar also shows learners when to press Space.
+
+**Consequences:** Shards, the compiler, the loader, and the Canvas renderer are
+unchanged. Targets without spaces render exactly as before.
+

@@ -8,7 +8,9 @@ import DecomposedHangulTarget from './DecomposedHangulTarget'
 import JamoSvgHangulTarget, { PendingHangulTiles } from './JamoSvgHangulTarget'
 import {
   chooseRenderer,
+  isSpaceGroup,
   svgTargetSyllables,
+  targetSyllables,
   type RendererChoice,
   type SyllableGroup,
 } from './hangul-target-selection'
@@ -45,7 +47,7 @@ export default function HangulTarget({
   // Shards already in memory decide at once, so a new target never flashes blank tiles.
   const cachedChoice = useMemo(() => {
     if (!enabled || !groups) return undefined
-    const cached = peekJamoSvgGlyphs(groups.map(({ syllable }) => syllable))
+    const cached = peekJamoSvgGlyphs(targetSyllables(groups))
     return cached && chooseRenderer(groups, cached)
   }, [enabled, groups])
   const [decision, setDecision] = useState<{
@@ -56,7 +58,7 @@ export default function HangulTarget({
   useEffect(() => {
     if (!enabled) return
     if (!groups) {
-      warn('the target has characters other than Hangul syllables')
+      warn('the target has characters other than Hangul syllables and spaces')
       return
     }
     if (cachedChoice) {
@@ -79,7 +81,7 @@ export default function HangulTarget({
         }),
       JAMO_SVG_LOAD_TIMEOUT_MS,
     )
-    loadJamoSvgGlyphs(groups.map(({ syllable }) => syllable)).then(
+    loadJamoSvgGlyphs(targetSyllables(groups)).then(
       (loaded) => decide(chooseRenderer(groups, loaded)),
       () => decide({ kind: 'canvas', reason: 'the shard loader failed' }),
     )
@@ -97,7 +99,7 @@ export default function HangulTarget({
   if (!choice)
     return (
       <PendingHangulTiles
-        count={groups.length}
+        spaces={groups.map(isSpaceGroup)}
         label={targetText}
         className={className}
       />
