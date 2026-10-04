@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Link, useFetcher, useLoaderData } from 'react-router'
 import type { Course } from '../../domain/models/course'
 import type { Unit } from '../../domain/models/unit'
@@ -7,6 +7,7 @@ import { Card } from '../../components/ui/Card'
 import { PageSurface } from '../../components/ui/PageSurface'
 import { AdminStatusActions } from './AdminStatusActions'
 import { useAdminFeedback } from './useAdminFeedback'
+import { useAdminMutationPending } from './useAdminMutationPending'
 import { AdminTopBar } from './AdminTopBar'
 import { statusKey, useAdminTranslation } from './i18n/admin-i18n'
 
@@ -14,10 +15,15 @@ export default function CourseEditorPage() {
   const { course, units } = useLoaderData() as { course: Course; units: Unit[] }
   const { t } = useAdminTranslation()
   const fetcher = useFetcher()
-  useAdminFeedback(fetcher)
   const [editingDetails, setEditingDetails] = useState(false)
-  const submit = (data: Record<string, string>) =>
-    fetcher.submit(data, { method: 'post' })
+  const isPending = useAdminMutationPending()
+  const handleSuccess = useCallback((data: { message?: string }) => {
+    if (data.message === 'feedback.courseSaved') setEditingDetails(false)
+  }, [])
+  useAdminFeedback(fetcher, handleSuccess)
+  const submit = (data: Record<string, string>) => {
+    if (!isPending) fetcher.submit(data, { method: 'post' })
+  }
   return (
     <PageSurface contentClassName="max-w-3xl">
       <AdminTopBar
@@ -50,6 +56,8 @@ export default function CourseEditorPage() {
               <input
                 name="title"
                 defaultValue={course.title}
+                required
+                disabled={isPending}
                 className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
               />
             </label>
@@ -58,13 +66,18 @@ export default function CourseEditorPage() {
               <textarea
                 name="description"
                 defaultValue={course.description}
+                required
+                disabled={isPending}
                 className="min-h-24 rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
               />
             </label>
             <div className="flex flex-wrap gap-2">
-              <Button type="submit">{t('action.saveCourse')}</Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending ? t('action.saving') : t('action.saveCourse')}
+              </Button>
               <Button
                 variant="secondary"
+                disabled={isPending}
                 onClick={() => setEditingDetails(false)}
               >
                 {t('action.cancel')}
@@ -80,7 +93,11 @@ export default function CourseEditorPage() {
               {course.description}
             </p>
           </div>
-          <Button variant="secondary" onClick={() => setEditingDetails(true)}>
+          <Button
+            variant="secondary"
+            disabled={isPending}
+            onClick={() => setEditingDetails(true)}
+          >
             {t('action.editDetails')}
           </Button>
         </Card>
@@ -91,8 +108,11 @@ export default function CourseEditorPage() {
             <h2 className="text-xl font-bold">{t('course.unitsHeading')}</h2>
             <p className="text-sm text-[#667085]">{t('course.unitsHint')}</p>
           </div>
-          <Button onClick={() => submit({ intent: 'create-unit' })}>
-            {t('action.createUnit')}
+          <Button
+            disabled={isPending}
+            onClick={() => submit({ intent: 'create-unit' })}
+          >
+            {isPending ? t('action.saving') : t('action.createUnit')}
           </Button>
         </div>
         <div className="mt-4 space-y-3">
@@ -111,7 +131,7 @@ export default function CourseEditorPage() {
                 <Button
                   aria-label={t('action.moveItemUp', { name: unit.title })}
                   variant="ghost"
-                  disabled={index === 0}
+                  disabled={isPending || index === 0}
                   onClick={() =>
                     submit({ intent: 'move-up', kind: 'unit', id: unit.id })
                   }
@@ -121,7 +141,7 @@ export default function CourseEditorPage() {
                 <Button
                   aria-label={t('action.moveItemDown', { name: unit.title })}
                   variant="ghost"
-                  disabled={index === units.length - 1}
+                  disabled={isPending || index === units.length - 1}
                   onClick={() =>
                     submit({ intent: 'move-down', kind: 'unit', id: unit.id })
                   }

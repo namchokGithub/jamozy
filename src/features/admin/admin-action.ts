@@ -166,13 +166,13 @@ async function unitAction(
   return { error: 'error.unknownUnitAction' }
 }
 
-function exercisesFromForm(form: FormData): LessonExercise[] {
+function exercisesFromForm(form: FormData): LessonExercise[] | null {
   const raw = form.get('exercises')
-  if (typeof raw !== 'string') return []
+  if (typeof raw !== 'string') return null
   try {
     return JSON.parse(raw) as LessonExercise[]
   } catch {
-    return []
+    return null
   }
 }
 
@@ -184,20 +184,20 @@ async function lessonAction(
 ): Promise<AdminActionData> {
   const lesson = await repo.getLessonById(id)
   if (!lesson) return { error: 'error.lessonNotFound' }
-  const updated: Lesson = {
-    ...lesson,
-    title: text(form, 'title') || lesson.title,
-    type: (text(form, 'type') || lesson.type) as Lesson['type'],
-    exercises: exercisesFromForm(form).length
-      ? exercisesFromForm(form)
-      : lesson.exercises,
-  }
   if (intent === 'save') {
+    const exercises = exercisesFromForm(form)
+    if (!exercises) return { error: 'error.checkForm' }
+    const updated: Lesson = {
+      ...lesson,
+      title: text(form, 'title'),
+      type: text(form, 'type') as Lesson['type'],
+      exercises,
+    }
     const result = await saveLesson(repo, updated)
     return commandResult(result, 'feedback.lessonSaved')
   }
   if (intent === 'publish') {
-    const result = await publishLesson(repo, updated)
+    const result = await publishLesson(repo, lesson)
     return commandResult(result, 'feedback.lessonPublished')
   }
   if (intent === 'archive') {

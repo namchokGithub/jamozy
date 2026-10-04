@@ -7,6 +7,7 @@ import { PageSurface } from '../../components/ui/PageSurface'
 import { Dropdown } from '../../components/ui/Dropdown'
 import { AdminStatusActions } from './AdminStatusActions'
 import { useAdminFeedback } from './useAdminFeedback'
+import { useAdminMutationPending } from './useAdminMutationPending'
 import { AdminTopBar } from './AdminTopBar'
 import { statusKey, useAdminTranslation } from './i18n/admin-i18n'
 
@@ -15,6 +16,7 @@ export default function AdminDashboardPage() {
   const { t } = useAdminTranslation()
   const create = useFetcher()
   useAdminFeedback(create)
+  const isCreating = useAdminMutationPending()
   const [statusFilter, setStatusFilter] = useState('all')
   const visibleCourses = courses.filter(
     (course) => statusFilter === 'all' || course.status === statusFilter,
@@ -33,11 +35,13 @@ export default function AdminDashboardPage() {
           </p>
         </div>
         <Button
+          disabled={isCreating}
           onClick={() =>
+            !isCreating &&
             create.submit({ intent: 'create-course' }, { method: 'post' })
           }
         >
-          {t('action.createCourse')}
+          {isCreating ? t('action.saving') : t('action.createCourse')}
         </Button>
       </header>
       <div className="mt-6 max-w-48">

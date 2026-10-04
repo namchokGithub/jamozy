@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useFetcher, useLoaderData } from 'react-router'
 import type { Lesson, LessonExercise } from '../../domain/models/lesson'
 import type { Unit } from '../../domain/models/unit'
@@ -9,6 +9,7 @@ import { Dropdown } from '../../components/ui/Dropdown'
 import { PageSurface } from '../../components/ui/PageSurface'
 import { AdminStatusActions } from './AdminStatusActions'
 import { useAdminFeedback } from './useAdminFeedback'
+import { useAdminMutationPending } from './useAdminMutationPending'
 import { AdminTopBar } from './AdminTopBar'
 import { statusKey, useAdminTranslation } from './i18n/admin-i18n'
 
@@ -41,7 +42,6 @@ export default function LessonEditorPage() {
   }
   const { t } = useAdminTranslation()
   const fetcher = useFetcher()
-  useAdminFeedback(fetcher)
   const [title, setTitle] = useState(lesson.title)
   const [type, setType] = useState(lesson.type)
   const [exercises, setExercises] = useState(lesson.exercises)
@@ -50,7 +50,36 @@ export default function LessonEditorPage() {
     null,
   )
   const [hasPendingExerciseOrder, setHasPendingExerciseOrder] = useState(false)
-  const submit = (intent: string) =>
+  const [titleError, setTitleError] = useState<string | null>(null)
+  const [exerciseErrors, setExerciseErrors] = useState<Record<string, string>>(
+    {},
+  )
+  const isPending = useAdminMutationPending()
+  const handleSuccess = useCallback((data: { message?: string }) => {
+    if (data.message === 'feedback.lessonSaved') {
+      setEditingDetails(false)
+      setEditingExerciseId(null)
+      setHasPendingExerciseOrder(false)
+    }
+  }, [])
+  useAdminFeedback(fetcher, handleSuccess)
+  const validate = () => {
+    const firstInvalidExercise = exercises.find(
+      (exercise) => !exercise.targetText.trim(),
+    )
+    const nextExerciseErrors = Object.fromEntries(
+      exercises
+        .filter((exercise) => !exercise.targetText.trim())
+        .map((exercise) => [exercise.id, t('error.fieldRequired')]),
+    )
+    const nextTitleError = title.trim() ? null : t('error.fieldRequired')
+    setTitleError(nextTitleError)
+    setExerciseErrors(nextExerciseErrors)
+    if (firstInvalidExercise) setEditingExerciseId(firstInvalidExercise.id)
+    return !nextTitleError && Object.keys(nextExerciseErrors).length === 0
+  }
+  const submit = (intent: string) => {
+    if (isPending || (intent === 'save' && !validate())) return
     fetcher.submit(
       {
         intent,
@@ -62,6 +91,7 @@ export default function LessonEditorPage() {
       },
       { method: 'post' },
     )
+  }
   const update = (index: number, field: keyof LessonExercise, value: string) =>
     setExercises((items) =>
       items.map((item, current) =>
@@ -132,25 +162,35 @@ export default function LessonEditorPage() {
             {t('field.title')}
             <input
               value={title}
-              onChange={(event) => setTitle(event.target.value)}
+              aria-invalid={Boolean(titleError)}
+              onChange={(event) => {
+                setTitle(event.target.value)
+                setTitleError(null)
+              }}
+              disabled={isPending}
               className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
             />
+            {titleError && (
+              <p className="text-sm font-normal text-[#a85d4e]">{titleError}</p>
+            )}
           </label>
           <Dropdown
             label={t('field.lessonType')}
             value={type}
             onChange={setType}
+            disabled={isPending}
             options={lessonTypes.map((value) => ({
               value,
               label: t(`lessonType.${value}`),
             }))}
           />
           <div className="flex flex-wrap gap-2">
-            <Button onClick={() => submit('save')}>
-              {t('action.saveLesson')}
+            <Button disabled={isPending} onClick={() => submit('save')}>
+              {isPending ? t('action.saving') : t('action.saveLesson')}
             </Button>
             <Button
               variant="secondary"
+              disabled={isPending}
               onClick={() => {
                 setTitle(lesson.title)
                 setType(lesson.type)
@@ -169,7 +209,11 @@ export default function LessonEditorPage() {
               {t('lesson.typeValue', { type: t(`lessonType.${type}`) })}
             </p>
           </div>
-          <Button variant="secondary" onClick={() => setEditingDetails(true)}>
+          <Button
+            variant="secondary"
+            disabled={isPending}
+            onClick={() => setEditingDetails(true)}
+          >
             {t('action.editDetails')}
           </Button>
         </Card>
@@ -188,6 +232,7 @@ export default function LessonEditorPage() {
             </p>
           </div>
           <Button
+            disabled={isPending}
             onClick={() => {
               const exercise = newExercise()
               setExercises((items) => [...items, exercise])
@@ -199,11 +244,12 @@ export default function LessonEditorPage() {
         </div>
         {hasPendingExerciseOrder && (
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button onClick={() => submit('save')}>
-              {t('action.saveChanges')}
+            <Button disabled={isPending} onClick={() => submit('save')}>
+              {isPending ? t('action.saving') : t('action.saveChanges')}
             </Button>
             <Button
               variant="secondary"
+              disabled={isPending}
               onClick={() => {
                 setExercises(lesson.exercises)
                 setEditingExerciseId(null)
@@ -227,7 +273,7 @@ export default function LessonEditorPage() {
                       number: index + 1,
                     })}
                     variant="ghost"
-                    disabled={index === 0}
+                    disabled={isPending || index === 0}
                     onClick={() => move(index, -1)}
                   >
                     {t('action.moveUp')}
@@ -237,13 +283,14 @@ export default function LessonEditorPage() {
                       number: index + 1,
                     })}
                     variant="ghost"
-                    disabled={index === exercises.length - 1}
+                    disabled={isPending || index === exercises.length - 1}
                     onClick={() => move(index, 1)}
                   >
                     {t('action.moveDown')}
                   </Button>
                   <Button
                     variant="secondary"
+                    disabled={isPending}
                     onClick={() => setEditingExerciseId(exercise.id)}
                   >
                     {t('action.editExercise')}
@@ -256,11 +303,23 @@ export default function LessonEditorPage() {
                     {t('field.targetText')}
                     <input
                       value={exercise.targetText}
-                      onChange={(event) =>
+                      aria-invalid={Boolean(exerciseErrors[exercise.id])}
+                      onChange={(event) => {
                         update(index, 'targetText', event.target.value)
-                      }
+                        setExerciseErrors((errors) => {
+                          const next = { ...errors }
+                          delete next[exercise.id]
+                          return next
+                        })
+                      }}
+                      disabled={isPending}
                       className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
                     />
+                    {exerciseErrors[exercise.id] && (
+                      <p className="text-sm font-normal text-[#a85d4e]">
+                        {exerciseErrors[exercise.id]}
+                      </p>
+                    )}
                   </label>
                   <label className="grid gap-1 text-sm font-semibold">
                     {t('field.romanization')}
@@ -269,6 +328,7 @@ export default function LessonEditorPage() {
                       onChange={(event) =>
                         update(index, 'romanization', event.target.value)
                       }
+                      disabled={isPending}
                       className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
                     />
                   </label>
@@ -279,6 +339,7 @@ export default function LessonEditorPage() {
                       onChange={(event) =>
                         update(index, 'meaningTh', event.target.value)
                       }
+                      disabled={isPending}
                       className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
                     />
                   </label>
@@ -289,6 +350,7 @@ export default function LessonEditorPage() {
                       onChange={(event) =>
                         update(index, 'meaningEn', event.target.value)
                       }
+                      disabled={isPending}
                       className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
                     />
                   </label>
@@ -296,6 +358,7 @@ export default function LessonEditorPage() {
                     label={t('field.difficulty')}
                     value={exercise.difficulty}
                     onChange={(value) => update(index, 'difficulty', value)}
+                    disabled={isPending}
                     options={difficulties.map((value) => ({
                       value,
                       label: t(`difficulty.${value}`),
@@ -308,15 +371,17 @@ export default function LessonEditorPage() {
                       onChange={(event) =>
                         update(index, 'hint', event.target.value)
                       }
+                      disabled={isPending}
                       className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
                     />
                   </label>
                   <div className="flex flex-wrap gap-2">
-                    <Button onClick={() => submit('save')}>
-                      {t('action.saveChanges')}
+                    <Button disabled={isPending} onClick={() => submit('save')}>
+                      {isPending ? t('action.saving') : t('action.saveChanges')}
                     </Button>
                     <Button
                       variant="secondary"
+                      disabled={isPending}
                       onClick={() => cancelExercise(exercise.id)}
                     >
                       {t('action.cancel')}
