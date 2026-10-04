@@ -111,12 +111,11 @@ export default function HangulSvgInspectorPage() {
     () =>
       jamoSteps.map((jamo, step) => ({
         jamo,
-        paths:
-          glyph?.contours
-            ? glyph.pieces
-                .filter((piece) => assignments[piece.id] === step)
-                .map((piece) => piece.d)
-            : [],
+        paths: glyph?.contours
+          ? glyph.pieces
+              .filter((piece) => assignments[piece.id] === step)
+              .map((piece) => piece.d)
+          : [],
       })),
     [assignments, glyph, jamoSteps],
   )
@@ -214,7 +213,9 @@ export default function HangulSvgInspectorPage() {
                   <input
                     type="checkbox"
                     checked={showAlignmentOverlay}
-                    onChange={(event) => setShowAlignmentOverlay(event.target.checked)}
+                    onChange={(event) =>
+                      setShowAlignmentOverlay(event.target.checked)
+                    }
                   />
                   Overlay SVG
                 </label>
@@ -225,7 +226,9 @@ export default function HangulSvgInspectorPage() {
                 style={{ fontFamily: PRETENDARD_FAMILY, fontWeight: 600 }}
               >
                 {syllable}
-                {showAlignmentOverlay && <ExtractedOutlineOverlay glyph={glyph} />}
+                {showAlignmentOverlay && (
+                  <ExtractedOutlineOverlay glyph={glyph} />
+                )}
               </div>
             </Card>
             <Card>
@@ -267,7 +270,8 @@ export default function HangulSvgInspectorPage() {
                   }))}
                   sourceOutlineD={
                     showSplitSourceOverlay
-                      ? glyph.contours.find((contour) => contour.splitPieceIds)?.d
+                      ? glyph.contours.find((contour) => contour.splitPieceIds)
+                          ?.d
                       : undefined
                   }
                 />
@@ -422,7 +426,10 @@ export default function HangulSvgInspectorPage() {
               </div>
             </Card>
 
-            <Card className="min-w-0" tone={conflicts.length > 0 ? 'peach' : 'sage'}>
+            <Card
+              className="min-w-0"
+              tone={conflicts.length > 0 ? 'peach' : 'sage'}
+            >
               <h2 className="font-bold text-[#39465b]">Export preview</h2>
               <p className="mt-1 text-sm text-[#667085]">
                 One combined source-outline path per ordered physical-jamo step.
@@ -438,11 +445,11 @@ export default function HangulSvgInspectorPage() {
                 glyph.contours.some((contour) => contour.splitPieceIds) && (
                   <p className="mt-3 rounded-lg bg-[#eaf5e8] p-3 text-sm text-[#4a7049]">
                     Contour 3 was split into independently assigned ㅂ and ㅅ
-                    pieces. This preview is complete and no longer requires
-                    path splitting.
+                    pieces. This preview is complete and no longer requires path
+                    splitting.
                   </p>
                 )}
-              <pre className="mt-4 max-h-[38rem] w-full overflow-auto rounded-xl bg-[#253247] p-4 text-xs leading-5 text-[#edf3fb]">
+              <pre className="mt-4 max-h-152 w-full overflow-auto rounded-xl bg-[#253247] p-4 text-xs leading-5 text-[#edf3fb]">
                 {JSON.stringify(exportPreview, null, 2)}
               </pre>
               <Button

@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { useEffect, useRef } from 'react'
+import pretendardFontUrl from '../../assets/fonts/pretendard-latin-600-normal.ttf?url'
 import type { ExpectedKey } from '../../domain/korean/target-sequence'
 import type { TypingSessionState } from '../../domain/korean/typing-session'
 import {
@@ -30,12 +31,7 @@ export interface GuideDiagnostics {
 }
 
 export type GuideInspectionMode =
-  | 'original'
-  | 'colored'
-  | 'ownership'
-  | 'unassigned'
-  | 'overlap'
-  | 'fallback'
+  'original' | 'colored' | 'ownership' | 'unassigned' | 'overlap' | 'fallback'
 
 const TILE_SIZE = 104
 const HORIZONTAL_VOWELS = new Set(['ㅗ', 'ㅛ', 'ㅜ', 'ㅠ', 'ㅡ'])
@@ -56,16 +52,44 @@ function colorFor(index: number, keyIndex: number) {
   return 'pending'
 }
 
-const HANGUL_FONT = '"Noto Sans KR"'
+const HANGUL_FONT_FAMILY = 'Pretendard'
+const HANGUL_FONT = `"${HANGUL_FONT_FAMILY}"`
+const HANGUL_FONT_WEIGHT = '600'
+let hangulFontPromise: Promise<void> | undefined
 
 function setFont(context: CanvasRenderingContext2D, size: number) {
-  context.font = `700 ${size}px ${HANGUL_FONT}`
+  context.font = `${HANGUL_FONT_WEIGHT} ${size}px ${HANGUL_FONT}`
+}
+
+function loadHangulFont() {
+  if (
+    typeof document === 'undefined' ||
+    !document.fonts ||
+    typeof FontFace === 'undefined'
+  )
+    return Promise.resolve()
+  if (!hangulFontPromise) {
+    const font = new FontFace(HANGUL_FONT_FAMILY, `url(${pretendardFontUrl})`, {
+      weight: HANGUL_FONT_WEIGHT,
+      style: 'normal',
+    })
+    hangulFontPromise = font.load().then((loaded) => {
+      document.fonts.add(loaded)
+    })
+  }
+  return hangulFontPromise
 }
 
 export function waitForHangulFont(text: string) {
-  if (typeof document === 'undefined' || !document.fonts) return Promise.resolve()
-  return document.fonts
-    .load(`700 ${TILE_SIZE}px ${HANGUL_FONT}`, text)
+  if (typeof document === 'undefined' || !document.fonts)
+    return Promise.resolve()
+  return loadHangulFont()
+    .then(() =>
+      document.fonts.load(
+        `${HANGUL_FONT_WEIGHT} ${TILE_SIZE}px ${HANGUL_FONT}`,
+        text,
+      ),
+    )
     .then(
       () => undefined,
       // Offline or blocked font: draw with the fallback font instead of nothing.
@@ -349,12 +373,15 @@ function drawGuideRaster(
           sourcePixels.data[offset + 2],
         ]
       } else if (mode === 'colored') {
-        channels = COLOR_CHANNELS[colorFor(keys[ownership.step.order].index, keyIndex)]
+        channels =
+          COLOR_CHANNELS[colorFor(keys[ownership.step.order].index, keyIndex)]
       } else if (mode === 'ownership') {
         channels =
           ownership.ownerCount > 1
             ? DIAGNOSTIC_CHANNELS.active
-            : OWNERSHIP_CHANNELS[ownership.step.order % OWNERSHIP_CHANNELS.length]
+            : OWNERSHIP_CHANNELS[
+                ownership.step.order % OWNERSHIP_CHANNELS.length
+              ]
       } else if (mode === 'unassigned') {
         channels =
           ownership.ownerCount === 0
