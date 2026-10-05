@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useFetcher } from 'react-router'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useFetcher, useRevalidator } from 'react-router'
 import type { OnePageLearningPath } from '../../application/get-one-page-learning-path'
+import type { ExerciseResult } from '../../domain/korean/lesson-session'
 import { isKoreanJamoKey } from '../../domain/korean/keymap'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
@@ -11,12 +12,24 @@ interface OnePageLearningPlayerProps {
   learningPath: OnePageLearningPath
 }
 
+interface PendingCheckpoint {
+  courseId: string
+  lessonId: string
+  result: ExerciseResult
+}
+
 export default function OnePageLearningPlayer({
   learningPath,
 }: OnePageLearningPlayerProps) {
   const { session, start, pressKey } = useLessonSessionStore()
   const fetcher = useFetcher<{ onePageCheckpointed?: boolean }>()
+  const { revalidate } = useRevalidator()
   const completedIds = useRef(new Set<string>())
+  const pendingCheckpoints = useRef<PendingCheckpoint[]>([])
+  const activeCheckpoint = useRef<PendingCheckpoint | null>(null)
+  const completedCheckpointData = useRef(fetcher.data)
+  const revalidationRequested = useRef(false)
+  const [checkpointVersion, setCheckpointVersion] = useState(0)
   const [nowMs, setNowMs] = useState(0)
   const queueKey = useMemo(
     () =>
@@ -29,6 +42,7 @@ export default function OnePageLearningPlayer({
 
   useEffect(() => {
     completedIds.current = new Set()
+    revalidationRequested.current = false
     if (learningPath.queue.length > 0) {
       start(
         learningPath.queue.map(({ exercise }) => ({
@@ -37,21 +51,10 @@ export default function OnePageLearningPlayer({
         })),
       )
     }
-  }, [queueKey, learningPath.queue, start])
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey) return
-      if (!isKoreanJamoKey(event.code)) {
-        if (event.code === 'Space') event.preventDefault()
-        return
-      }
-      event.preventDefault()
-      pressKey(event.code, event.shiftKey)
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [pressKey])
+    // queueKey is the queue's semantic identity; a loader revalidation can
+    // replace the array without changing the exercises or resetting progress.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queueKey, start])
 
   useEffect(() => {
     if (sessionStartedAtMs === undefined) return
@@ -61,29 +64,84 @@ export default function OnePageLearningPlayer({
     return () => window.clearInterval(intervalId)
   }, [sessionStartedAtMs])
 
-  useEffect(() => {
-    const result = session?.lastCompletedExercise
+  const enqueueCompletedExercise = useCallback((result: ExerciseResult) => {
     if (!result || completedIds.current.has(result.exerciseId)) return
     const entry = learningPath.queue.find(
       ({ exercise }) => exercise.id === result.exerciseId,
     )
     if (!entry || !learningPath.selectedCourseId) return
     completedIds.current.add(result.exerciseId)
+    pendingCheckpoints.current.push({
+      courseId: learningPath.selectedCourseId,
+      lessonId: entry.lesson.id,
+      result,
+    })
+    setCheckpointVersion((version) => version + 1)
+  }, [
+    learningPath.queue,
+    learningPath.selectedCourseId,
+  ])
+
+  useEffect(() => {
+    session?.completedResults.forEach(enqueueCompletedExercise)
+  }, [enqueueCompletedExercise, session?.completedResults])
+
+  const handleKeyPress = useCallback(
+    (code: string, shiftKey: boolean) => pressKey(code, shiftKey),
+    [pressKey],
+  )
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return
+      if (!isKoreanJamoKey(event.code)) {
+        if (event.code === 'Space') event.preventDefault()
+        return
+      }
+      event.preventDefault()
+      handleKeyPress(event.code, event.shiftKey)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [handleKeyPress])
+
+  useEffect(() => {
+    if (
+      fetcher.state !== 'idle' ||
+      !activeCheckpoint.current ||
+      fetcher.data === completedCheckpointData.current
+    )
+      return
+    completedCheckpointData.current = fetcher.data
+    activeCheckpoint.current = null
+    setCheckpointVersion((version) => version + 1)
+  }, [fetcher.data, fetcher.state])
+
+  useEffect(() => {
+    if (fetcher.state !== 'idle' || activeCheckpoint.current) return
+    const nextCheckpoint = pendingCheckpoints.current.shift()
+    if (!nextCheckpoint) {
+      if (session?.status === 'completed' && !revalidationRequested.current) {
+        revalidationRequested.current = true
+        revalidate()
+      }
+      return
+    }
+    activeCheckpoint.current = nextCheckpoint
     fetcher.submit(
       JSON.stringify({
         intent: 'one-page-exercise-completed',
-        courseId: learningPath.selectedCourseId,
-        lessonId: entry.lesson.id,
-        result,
+        courseId: nextCheckpoint.courseId,
+        lessonId: nextCheckpoint.lessonId,
+        result: nextCheckpoint.result,
       }),
-      { method: 'post', encType: 'application/json' },
+      {
+        method: 'post',
+        encType: 'application/json',
+        defaultShouldRevalidate: false,
+      },
     )
-  }, [
-    fetcher,
-    learningPath.queue,
-    learningPath.selectedCourseId,
-    session?.lastCompletedExercise,
-  ])
+  }, [checkpointVersion, fetcher, fetcher.state, revalidate, session?.status])
 
   if (learningPath.courses.length === 0) return null
   const currentIndex = session?.currentIndex ?? 0
@@ -207,14 +265,9 @@ export default function OnePageLearningPlayer({
             nextKey={nextKey}
             showEnglishKeys
             opacity={1}
-            onKeyPress={pressKey}
+            onKeyPress={handleKeyPress}
           />
           <FingerPlacementGuide nextKey={nextKey} />
-          {fetcher.state !== 'idle' && (
-            <p className="mt-3 text-center text-sm text-[#667085]">
-              Saving progress…
-            </p>
-          )}
         </div>
       ) : (
         <div className="mt-6 rounded-3xl border border-dashed border-[#dfcfc0] bg-white/60 p-6 text-center text-sm text-[#667085]">
