@@ -18,19 +18,23 @@ export async function getOrderedLearningPath(
   const courses = [...(await courseRepo.getCourses())].sort(
     (left, right) => left.order - right.order,
   )
-  const ordered: OrderedLearningPathLesson[] = []
-  for (const course of courses) {
-    const units = [...(await courseRepo.getUnitsByCourseId(course.id))].sort(
-      (left, right) => left.order - right.order,
-    )
-    for (const unit of units) {
-      const lessons = [...(await lessonRepo.getLessonsByUnitId(unit.id))].sort(
-        (left, right) => left.order - right.order,
-      )
-      ordered.push(...lessons.map((lesson) => ({ course, unit, lesson })))
-    }
-  }
-  return ordered
+  // Query every course's units, then every unit's lessons, concurrently:
+  // sequential awaits made Home load in 1 + courses + units round trips.
+  const unitsByCourse = await Promise.all(
+    courses.map(async (course) =>
+      [...(await courseRepo.getUnitsByCourseId(course.id))]
+        .sort((left, right) => left.order - right.order)
+        .map((unit) => ({ course, unit })),
+    ),
+  )
+  const lessonsByUnit = await Promise.all(
+    unitsByCourse.flat().map(async ({ course, unit }) =>
+      [...(await lessonRepo.getLessonsByUnitId(unit.id))]
+        .sort((left, right) => left.order - right.order)
+        .map((lesson) => ({ course, unit, lesson })),
+    ),
+  )
+  return lessonsByUnit.flat()
 }
 
 export function findContiguousFrontier(

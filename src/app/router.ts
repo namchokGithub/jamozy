@@ -25,6 +25,7 @@ import { SessionManager } from '../application/session-manager'
 import CourseListPage from '../features/course/CourseListPage'
 import { createCourseListLoader } from '../features/course/CourseListPage.loader'
 import { createCourseListAction } from '../features/course/CourseListPage.action'
+import CourseListPageFallback from '../features/course/CourseListPageFallback'
 import CourseMapPage from '../features/course/CourseMapPage'
 import { createCourseMapLoader } from '../features/course/CourseMapPage.loader'
 import LessonDetailPage from '../features/lesson/LessonDetailPage'
@@ -185,6 +186,7 @@ export const router = createBrowserRouter([
   {
     path: '/',
     Component: CourseListPage,
+    HydrateFallback: CourseListPageFallback,
     loader: createCourseListLoader({
       courseRepo,
       reviewRepo,
