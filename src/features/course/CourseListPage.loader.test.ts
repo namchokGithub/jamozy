@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createCourseListLoader } from './CourseListPage.loader'
-import { FakeCourseRepository, FakeReviewRepository, FakeUserProfileRepository } from '../../test/fakes'
+import { FakeCourseRepository, FakeOnePageLearningCheckpointRepository, FakeProgressRepository, FakeReviewRepository, FakeUserProfileRepository } from '../../test/fakes'
+import type { LessonRepository } from '../../domain/repositories/lesson-repository'
+import type { Unit } from '../../domain/models/unit'
 import type { Course } from '../../domain/models/course'
 import type { ReviewItem } from '../../domain/models/review-item'
 
@@ -69,5 +71,33 @@ describe('createCourseListLoader', () => {
     await profiles.saveUserProfile('user1', { id: 'user1', displayName: 'Guest#1245', exp: 0, settings: { soundEnabled: true, showKeyboard: true, showEnglishKeys: true, keyboardOpacity: 0.7, romanizationEnabled: true, meaningLanguage: 'both', theme: 'light' }, stats: { lessonsCompleted: 0, wordsPracticed: 0, averageAccuracy: 0, bestAccuracy: 0, averageSpeedWpm: 0, totalTypingTimeSeconds: 0 }, createdAt: new Date(), updatedAt: new Date() })
     const loader = createCourseListLoader({ courseRepo: new FakeCourseRepository(), reviewRepo: new FakeReviewRepository(), userProfileRepo: profiles, ensureUser: async () => ({ uid: 'user1' }) })
     expect((await loader()).displayName).toBe('Guest#1245')
+  })
+
+  it('returns page data without waiting for the Home player path, querying courses once', async () => {
+    const courseRepo = new FakeCourseRepository(
+      [makeCourse('c1')],
+      [{ id: 'u1', courseId: 'c1', title: 'u1', description: '', order: 1, createdAt: new Date(), updatedAt: new Date() } satisfies Unit],
+    )
+    const getCourses = vi.spyOn(courseRepo, 'getCourses')
+    let releaseLessons: () => void = () => {}
+    const lessonRepo: LessonRepository = {
+      getLessonsByUnitId: () => new Promise((resolve) => { releaseLessons = () => resolve([]) }),
+      getLessonById: async () => null,
+    }
+    const loader = createCourseListLoader({
+      courseRepo,
+      reviewRepo: new FakeReviewRepository(),
+      lessonRepo,
+      progressRepo: new FakeProgressRepository(),
+      checkpointRepo: new FakeOnePageLearningCheckpointRepository(),
+      ensureUser: async () => ({ uid: 'user1' }),
+    })
+
+    const data = await loader()
+
+    expect(data.courses.map((c) => c.id)).toEqual(['c1'])
+    releaseLessons()
+    await expect(data.onePageLearningPath).resolves.toMatchObject({ selectedCourseId: null, queue: [] })
+    expect(getCourses).toHaveBeenCalledOnce()
   })
 })

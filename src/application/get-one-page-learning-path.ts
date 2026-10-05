@@ -1,3 +1,4 @@
+import type { Course } from '../domain/models/course'
 import type { LessonExercise } from '../domain/models/lesson'
 import type { OnePageLearningCheckpoint } from '../domain/models/one-page-learning-checkpoint'
 import type { Progress } from '../domain/models/progress'
@@ -31,6 +32,7 @@ export interface GetOnePageLearningPathDeps {
   lessonRepo: LessonRepository
   progressRepo: ProgressRepository
   checkpointRepo: OnePageLearningCheckpointRepository
+  courses?: Promise<Course[]>
 }
 
 function isCompleted(progress: Map<string, Progress>, lessonId: string): boolean {
@@ -88,7 +90,7 @@ export async function getOnePageLearningPath(
   after?: OnePageQueueCursor,
 ): Promise<OnePageLearningPath> {
   const [ordered, allProgress] = await Promise.all([
-    getOrderedLearningPath(deps.courseRepo, deps.lessonRepo),
+    getOrderedLearningPath(deps.courseRepo, deps.lessonRepo, deps.courses),
     deps.progressRepo.getAllProgress(userId),
   ])
   const progress = new Map(allProgress.map((entry) => [entry.lessonId, entry]))

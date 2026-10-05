@@ -14,8 +14,11 @@ export interface OrderedLearningPathLesson {
 export async function getOrderedLearningPath(
   courseRepo: CourseRepository,
   lessonRepo: LessonRepository,
+  // A caller that already requested the course list passes it in, so one
+  // load does not query courses twice.
+  coursesRequest: Promise<Course[]> = courseRepo.getCourses(),
 ): Promise<OrderedLearningPathLesson[]> {
-  const courses = [...(await courseRepo.getCourses())].sort(
+  const courses = [...(await coursesRequest)].sort(
     (left, right) => left.order - right.order,
   )
   // Query every course's units, then every unit's lessons, concurrently:

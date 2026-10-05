@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { Link, useFetcher, useLoaderData } from 'react-router'
+import { Suspense, useEffect, useRef, useState } from 'react'
+import { Await, Link, useFetcher, useLoaderData } from 'react-router'
 import {
   ArrowUpRight,
   BookOpen,
@@ -16,6 +16,7 @@ import { AuthModal } from '../auth/AuthModal'
 import { Button } from '../../components/ui/Button'
 import { useSnackbar } from '../../components/ui/SnackbarProvider'
 import OnePageLearningPlayer from '../home/OnePageLearningPlayer'
+import OnePageLearningPlayerSkeleton from '../home/OnePageLearningPlayerSkeleton'
 
 type CourseListActionData = {
   displayName?: string
@@ -191,12 +192,18 @@ export default function CourseListPage() {
           </nav>
         </header>
 
-        {onePageLearningPath && (
-          <OnePageLearningPlayer
-            key={onePageLearningPath.selectedCourseId}
-            learningPath={onePageLearningPath}
-          />
-        )}
+        <Suspense fallback={<OnePageLearningPlayerSkeleton />}>
+          <Await resolve={onePageLearningPath}>
+            {(learningPath) =>
+              learningPath && (
+                <OnePageLearningPlayer
+                  key={learningPath.selectedCourseId}
+                  learningPath={learningPath}
+                />
+              )
+            }
+          </Await>
+        </Suspense>
 
         <section className="relative mt-8 overflow-hidden rounded-4xl border border-[#f0dfd1] bg-[#fffdf9] px-6 py-8 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:px-10 sm:py-11">
           <div

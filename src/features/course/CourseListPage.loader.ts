@@ -15,7 +15,9 @@ export interface CourseListLoaderData {
   dueReviewCount: number
   displayName: string
   isAuthenticated: boolean
-  onePageLearningPath: OnePageLearningPath | null
+  // Not awaited: the page renders without waiting for the Home player, which
+  // streams in behind its own skeleton.
+  onePageLearningPath: Promise<OnePageLearningPath | null>
 }
 
 export function createCourseListLoader(deps: {
@@ -34,20 +36,22 @@ export function createCourseListLoader(deps: {
     const afterLesson = params?.get('afterLesson')
     const afterExercise = params?.get('afterExercise')
     const after = afterLesson && afterExercise ? { lessonId: afterLesson, exerciseId: afterExercise } : undefined
-    const [courses, items, profile, onePageLearningPath] = await Promise.all([
-      getCourses(deps.courseRepo),
+    const coursesRequest = getCourses(deps.courseRepo)
+    const onePageLearningPath = deps.lessonRepo && deps.progressRepo && deps.checkpointRepo
+      ? getOnePageLearningPath({
+          courseRepo: deps.courseRepo,
+          lessonRepo: deps.lessonRepo,
+          progressRepo: deps.progressRepo,
+          checkpointRepo: deps.checkpointRepo,
+          courses: coursesRequest,
+        }, user.uid, params?.get('course') ?? undefined, after)
+      : Promise.resolve(null)
+    const [courses, items, profile, session] = await Promise.all([
+      coursesRequest,
       getDueReviewItems(deps.reviewRepo, user.uid),
       deps.userProfileRepo?.getUserProfile(user.uid) ?? null,
-      deps.lessonRepo && deps.progressRepo && deps.checkpointRepo
-        ? getOnePageLearningPath({
-            courseRepo: deps.courseRepo,
-            lessonRepo: deps.lessonRepo,
-            progressRepo: deps.progressRepo,
-            checkpointRepo: deps.checkpointRepo,
-          }, user.uid, params?.get('course') ?? undefined, after)
-        : null,
+      deps.getSession?.(),
     ])
-    const session = await deps.getSession?.()
     return { courses, dueReviewCount: items.length, displayName: profile?.displayName ?? 'Guest', isAuthenticated: session?.kind === 'authenticated', onePageLearningPath }
   }
 }

@@ -163,14 +163,14 @@ export default function OnePageLearningPlayer({
     )
       return
     handledRefill.current = refill.data
-    // Each request is made for a specific tail entry; a response for an
-    // older tail would duplicate words, so it is dropped.
-    if (
-      useOnePagePlayerStore.getState().entries.at(-1) !== requestedTail.current
-    )
-      return
-    const path = refill.data.onePageLearningPath
-    append(path?.selectedCourseId === courseId ? path.queue : [])
+    const requestedFor = requestedTail.current
+    void refill.data.onePageLearningPath.then((path) => {
+      // Each request is made for a specific tail entry; a response for an
+      // older tail would duplicate words, so it is dropped.
+      if (useOnePagePlayerStore.getState().entries.at(-1) !== requestedFor)
+        return
+      append(path?.selectedCourseId === courseId ? path.queue : [])
+    })
   }, [append, courseId, refill.data, refill.state])
 
   if (initialPath.courses.length === 0) return null

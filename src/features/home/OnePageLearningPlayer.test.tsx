@@ -119,7 +119,7 @@ function loaderData(request: Request, initial: OnePageLearningPath, refills: Rec
   const onePageLearningPath = after
     ? refills[after] ?? { ...initial, queue: [] }
     : initial
-  return after ? { onePageLearningPath } : onePageLearningPath
+  return after ? { onePageLearningPath: Promise.resolve(onePageLearningPath) } : onePageLearningPath
 }
 
 function renderPlayerWithPendingSaves() {
