@@ -17,7 +17,12 @@ interface OnePageLearningPlayerProps {
 }
 
 type PendingCheckpoint =
-  | { intent: 'one-page-exercise-completed'; courseId: string; lessonId: string; result: ExerciseResult }
+  | {
+      intent: 'one-page-exercise-completed'
+      courseId: string
+      lessonId: string
+      result: ExerciseResult
+    }
   | { intent: 'one-page-retry-completion'; courseId: string; lessonId: string }
 
 // Refill the play queue once this many words, including the current one,
@@ -160,7 +165,9 @@ export default function OnePageLearningPlayer({
     handledRefill.current = refill.data
     // Each request is made for a specific tail entry; a response for an
     // older tail would duplicate words, so it is dropped.
-    if (useOnePagePlayerStore.getState().entries.at(-1) !== requestedTail.current)
+    if (
+      useOnePagePlayerStore.getState().entries.at(-1) !== requestedTail.current
+    )
       return
     const path = refill.data.onePageLearningPath
     append(path?.selectedCourseId === courseId ? path.queue : [])
@@ -285,7 +292,8 @@ export default function OnePageLearningPlayer({
         </div>
       ) : (
         <div className="mt-6 rounded-3xl border border-dashed border-[#dfcfc0] bg-white/60 p-6 text-center text-sm text-[#667085]">
-          This course is complete. Choose another course or revisit a lesson below.
+          This course is complete. Choose another course or revisit a lesson
+          below.
         </div>
       )}
     </section>
