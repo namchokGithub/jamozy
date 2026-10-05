@@ -17,7 +17,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | --- | -------- | ------ | ---- |
 | DEC-001 | Firebase Anonymous Auth for identity, no traditional sign-up | Superseded by DEC-027 | 2026-09-23 |
 | DEC-002 | Layered architecture: domain / application / infrastructure / features | Accepted | 2026-09-23 |
-| DEC-003 | Keystroke-level state stays client-side; Firestore writes only at checkpoints | Accepted | 2026-09-23 |
+| DEC-003 | Keystroke-level state stays client-side; Firestore writes only at checkpoints | Accepted (Home exercise-completion checkpoint: DEC-043) | 2026-09-23 |
 | DEC-004 | MVP excludes multiplayer, leaderboards, and social/competitive features | Accepted | 2026-09-23 |
 | DEC-005 | Pin `@vitejs/plugin-react` to 5.2.0, not latest | Accepted | 2026-09-23 |
 | DEC-006 | Level is derived from EXP, never stored | Accepted | 2026-09-23 |
@@ -37,26 +37,27 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-020 | Settings UI: shared `defaultUserProfile`, and two fetcher/equality pitfalls that only manual browser testing caught | Accepted | 2026-09-24 |
 | DEC-021 | Profile Dashboard: display-only rounding of running-average stats | Accepted | 2026-09-25 |
 | DEC-022 | Vocabulary-backed review identity and raw aggregate typing counters | Accepted | 2026-09-27 |
-| DEC-023 | Lazy Progress creation, canonical progression ordering, and profile update timestamp | Accepted | 2026-09-27 |
+| DEC-023 | Lazy Progress creation, canonical progression ordering, and profile update timestamp | Accepted (Home course excluded from global order: DEC-043) | 2026-09-27 |
 | DEC-024 | ID conventions, bounded lessons, deterministic review reasons, and deferred level balancing | Accepted | 2026-09-27 |
 | DEC-025 | Vocabulary import identity and nullable meanings; simplify persisted Progress states | Accepted | 2026-09-27 |
-| DEC-026 | Learning Modes, shared learner state, and contiguous progression frontier | Accepted | 2026-09-27 |
+| DEC-026 | Learning Modes, shared learner state, and contiguous progression frontier | Accepted (Home course exception: DEC-043) | 2026-09-27 |
 | DEC-027 | Guest local persistence and migration to authenticated accounts | Accepted | 2026-09-27 |
 | DEC-028 | Shared learner-state checkpoints and Daily Quest completion | Accepted | 2026-09-27 |
-| DEC-029 | Session history separated from learner state and lifetime aggregates | Accepted | 2026-09-28 |
-| DEC-030 | Guest-to-account migration merge policy | Accepted | 2026-09-28 |
+| DEC-029 | Session history separated from learner state and lifetime aggregates | Accepted (`home` session context: DEC-043) | 2026-09-28 |
+| DEC-030 | Guest-to-account migration merge policy | Accepted (Home exercise-progress merge: DEC-043) | 2026-09-28 |
 | DEC-031 | Preserve pre-session learner values as a compatibility baseline | Accepted | 2026-09-28 |
 | DEC-032 | Lesson Result review action opens the due Review queue | Accepted | 2026-09-28 |
-| DEC-033 | Intentional Learning Path replays grant 15 EXP | Accepted | 2026-09-29 |
-| DEC-034 | Admin content is claim-authorized and status-gated | Accepted | 2026-09-29 |
-| DEC-035 | Home one-page player uses browser-local exercise checkpoints | Accepted (queue/round details superseded by DEC-042) | 2026-09-29 |
+| DEC-033 | Intentional Learning Path replays grant 15 EXP | Accepted (Home replay = full shuffled session: DEC-043) | 2026-09-29 |
+| DEC-034 | Admin content is claim-authorized and status-gated | Accepted (extended by DEC-043: `Course.type`, Home export) | 2026-09-29 |
+| DEC-035 | Home one-page player uses browser-local exercise checkpoints | Superseded by DEC-043 | 2026-09-29 |
 | DEC-036 | Jamo SVG steps follow visual jamo for compound medials | Superseded by DEC-037 | 2026-10-01 |
 | DEC-037 | Jamo SVG steps follow typed keys, including compound medials | Accepted | 2026-10-01 |
 | DEC-038 | Split recipes may partition an enclosed counter with its outline | Accepted | 2026-10-01 |
 | DEC-039 | Jamo SVG runtime: committed choseong shards behind a flag | Accepted | 2026-10-03 |
 | DEC-040 | Spaces between words keep the Jamo SVG target renderer | Accepted | 2026-10-04 |
 | DEC-041 | AI agents propose and receive approval before acting | Accepted | 2026-10-04 |
-| DEC-042 | Home player owns a continuous client queue; loader only refills | Accepted | 2026-10-05 |
+| DEC-042 | Home player owns a continuous client queue; loader only refills | Accepted (cross-lesson queue superseded by DEC-043) | 2026-10-05 |
+| DEC-043 | Home plays one static-exported course with synced exercise progress | Accepted | 2026-10-05 |
 
 ---
 
@@ -93,7 +94,7 @@ implementation context only, not the target architecture.
 ## DEC-003 — Keystroke-level state stays client-side; Firestore writes only at checkpoints
 
 **Date:** 2026-09-23
-**Status:** Accepted
+**Status:** Accepted (Home exercise completion is a checkpoint; see [[DEC-043]])
 
 **Decision:** Typing-session state (current keystroke, in-progress accuracy) lives in Zustand only. Firestore is written to only at meaningful checkpoints (lesson complete, session end), not per keystroke.
 
@@ -420,7 +421,7 @@ Replace `UserStats.wordsPracticed`, `averageAccuracy`, and `averageSpeedWpm` wit
 ## DEC-023 — Lazy Progress creation, canonical progression ordering, and profile update timestamp
 
 **Date:** 2026-09-27
-**Status:** Accepted
+**Status:** Accepted (the `home` course is outside the global order; see [[DEC-043]])
 
 **Decision:** `users/{userId}/lessonProgress/{lessonId}` documents are created lazily. Their absence means the lesson is locked. Profile creation persists the global first lesson as `unlocked`; completing a lesson persists the next lesson as `unlocked` only when that document does not exist.
 
@@ -471,7 +472,7 @@ The flat EXP curve remains in place and is deferred for future game-balance work
 ## DEC-026 — Learning Modes, shared learner state, and contiguous progression frontier
 
 **Date:** 2026-09-27
-**Status:** Accepted
+**Status:** Accepted (the single `home` course is a second Course-structured experience; see [[DEC-043]])
 
 **Decision:** Keep `Course → Unit → Lesson → LessonExercise` exclusively for
 the structured Learning Path. Daily Quest, Topic, Keyboard Position, Random
@@ -597,7 +598,7 @@ typing-engine implementation changes.
 ## DEC-029 — Session history separated from learner state and lifetime aggregates
 
 **Date:** 2026-09-28
-**Status:** Accepted
+**Status:** Accepted (adds a `home` LearningSessionContext; see [[DEC-043]])
 
 **Decision:** `LearningSession` is the single historical record for a submitted
 Learning Path, Daily Quest, Topic, Keyboard Position, Review, or Random
@@ -639,7 +640,7 @@ session recovery is deferred. See `docs/SESSION-AND-HISTORY.md`.
 ## DEC-030 — Guest-to-account migration merge policy
 
 **Date:** 2026-09-28
-**Status:** Accepted
+**Status:** Accepted (Home exercise-progress merge rules in [[DEC-043]])
 
 **Decision:** A Guest-to-account migration unions state by its deterministic
 identity and is idempotent. `LessonProgress` keeps the furthest state
@@ -724,7 +725,7 @@ creation and its Leitner schedule remain unchanged.
 ## DEC-033 — Intentional Learning Path replays grant 15 EXP
 
 **Date:** 2026-09-29
-**Status:** Accepted
+**Status:** Accepted (a Home replay is one full shuffled session; see [[DEC-043]])
 
 **Decision:** The first completed Learning Path attempt keeps its normal
 accuracy-based EXP reward. An intentional replay of a lesson whose
@@ -744,7 +745,7 @@ limit needs its own persisted policy and decision.
 ## DEC-034 — Admin content is claim-authorized and status-gated
 
 **Date:** 2026-09-29
-**Status:** Accepted
+**Status:** Accepted (extended by [[DEC-043]]: `Course.type` and the Home static export)
 
 **Decision:** The single-owner `/admin` BO uses Firebase Auth's `admin: true`
 custom claim for its UX guard and Firestore Rules authorization. Course, Unit,
@@ -767,7 +768,7 @@ but retire them by archiving their Lesson instead of hard deletion.
 ## DEC-035 — Home one-page player uses browser-local exercise checkpoints
 
 **Date:** 2026-09-29
-**Status:** Accepted (queue/round details superseded by [[DEC-042]])
+**Status:** Superseded by [[DEC-043]]
 
 **Decision:** Home is the primary Learning Path player. It offers the first
 three incomplete courses, but a ten-exercise queue is always confined to one
@@ -953,7 +954,7 @@ low-risk, or cosmetic changes to be implemented immediately is replaced.
 ## DEC-042 — Home player owns a continuous client queue; loader only refills
 
 **Date:** 2026-10-05
-**Status:** Accepted
+**Status:** Accepted (cross-lesson queue and refill superseded by [[DEC-043]]; player-owned session rule kept)
 
 **Decision:** The Home one-page player owns its current play queue and
 position in client state (Zustand) for the life of a course round. Route
@@ -990,3 +991,77 @@ exercises out of its session and keeps only running WPM/accuracy totals.
 Pending lesson completions are retried once on mount. Other Home loader
 data (for example the due-review count) refreshes on the next navigation,
 not after each lesson.
+
+---
+
+## DEC-043 — Home plays one static-exported course with synced exercise progress
+
+**Date:** 2026-10-05
+**Status:** Accepted
+
+**Decision:**
+
+*Content.* `Course` gains `type: 'learning' | 'home'`; an absent type reads
+as `learning`. Exactly one published `home` course exists. Admin BO and
+Firestore remain its source of truth and keep [[DEC-034]]'s status gating. A
+build script exports the published Home course (units, lessons, exercises) to
+a static JSON file; the build fails unless exactly one published `home`
+course exists. At runtime Home reads only that JSON, so content changes reach
+learners on the next deploy. The `home` course is excluded from the Learning
+Path global order and frontier, the course list, Daily Quest, and unlock
+rules ([[DEC-009]], [[DEC-023]], [[DEC-026]]); learners may open any of its
+units or lessons.
+
+*Presentation.* Home lists the course's units as categories. A selected unit
+lists its lessons, each showing distinct completed exercises out of its
+total (for example `3/5`). A completed lesson always shows full (`5/5`).
+
+*Sessions.* Entering a lesson shuffles all of its exercises once; a session
+never repeats an exercise before it has played every exercise. Each new
+session, including after a refresh, shuffles again. When a session ends,
+Home moves automatically to the next lesson, then to the next unit, with a
+short non-blocking notice. After the last unit, the Home course is shown as
+completed and every lesson stays playable.
+
+*Exercise progress and completion.* `Progress` for a Home lesson also stores
+the distinct `completedExerciseIds` and the raw partial result (accepted and
+rejected keystrokes, mistakes, start time, and a stable `submissionId`) of
+those first completions. It is permanent and syncs like other Progress. When
+the IDs first cover every exercise, the lesson becomes `completed` and one
+LearningSession is submitted from the partial result with accuracy-based EXP;
+its `sessionId` is the partial result's `submissionId`. Exercises played
+after that within the same session submit nothing more. A later session that
+plays a completed lesson's whole shuffle submits a replay session worth 15
+EXP ([[DEC-033]]); an abandoned session submits nothing. Completion is never
+reset. Home lessons never create ReviewItems.
+
+*Resume.* Only `{ unitId, lessonId }` is kept, locally. A refresh restarts
+that lesson with a new shuffle; exercise progress is unaffected.
+
+*Background work.* Learning never waits on persistence. Home renders from the
+JSON and the last locally cached Progress, then refreshes Progress in the
+background. Every write (exercise progress, completion, replay session) goes
+to a durable local outbox, is retried in the background until it succeeds,
+and is idempotent by its stable IDs. A failed write is never shown as a
+blocking state.
+
+**Why:** Firestore content reads took ~1.8 s of a ~2.3 s Home load. Static
+content removes them, while Admin BO keeps authoring control. Syncing
+exercise progress and the partial result keeps counts and first-completion
+EXP correct across devices.
+
+**Consequences:** This supersedes [[DEC-035]] (no local Home checkpoint) and
+replaces [[DEC-042]]'s cross-lesson continuous queue with lesson-scoped
+shuffled sessions. DEC-042's rule still applies: the player owns its session
+and loader data never resets it. [[DEC-034]] is extended with `Course.type`
+and the export step. A completed Home exercise is a persistence checkpoint:
+one write per exercise, never per keystroke ([[DEC-003]]).
+`LearningSessionContext` gains `{ mode: 'home'; lessonId }` ([[DEC-029]]).
+Guest-to-account migration ([[DEC-030]]) unions `completedExerciseIds`; if
+either side is `completed`, its partial result is dropped, otherwise the
+Cloud partial result wins unless absent. Profile's `Lessons completed`
+([[DEC-031]]) counts completed Home lessons, since it derives from
+`LessonProgress`. Because a missing type reads as `learning`, the course
+list filters `home` out in the adapter rather than with a Firestore
+`where('type', '==', 'learning')` query, which would drop untyped courses.
+
