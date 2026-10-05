@@ -227,6 +227,37 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
     await this.swapOrder(siblings, lessonId, direction, 'lessons')
   }
 
+  async saveCourseOrder(courseIds: string[]): Promise<void> {
+    const courses = await this.getCourses()
+    const currentById = new Map(courses.map((course) => [course.id, course]))
+    if (
+      courseIds.length !== courses.length ||
+      new Set(courseIds).size !== courseIds.length ||
+      courseIds.some((courseId) => !currentById.has(courseId))
+    ) {
+      throw new Error('Content order changed. Refresh and try again.')
+    }
+    await runTransaction(db, async (transaction) => {
+      const references = courseIds.map((courseId) =>
+        doc(db, 'courses', courseId),
+      )
+      const snapshots = await Promise.all(
+        references.map((reference) => transaction.get(reference)),
+      )
+      if (
+        snapshots.some((snapshot, index) => {
+          const current = currentById.get(courseIds[index])
+          return !snapshot.exists() || snapshot.data().order !== current?.order
+        })
+      ) {
+        throw new Error('Content order changed. Refresh and try again.')
+      }
+      references.forEach((reference, order) => {
+        transaction.update(reference, { order, updatedAt: new Date() })
+      })
+    })
+  }
+
   async moveUnitToIndex(unitId: string, index: number): Promise<void> {
     const unit = await this.getUnitById(unitId)
     if (!unit) return
@@ -281,7 +312,7 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
     siblings: T[],
     id: string,
     index: number,
-    collectionName: 'units' | 'lessons',
+    collectionName: 'courses' | 'units' | 'lessons',
   ): Promise<void> {
     const currentIndex = siblings.findIndex((item) => item.id === id)
     if (currentIndex < 0 || index < 0 || index >= siblings.length) return

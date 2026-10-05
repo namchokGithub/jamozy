@@ -97,6 +97,12 @@ export function createAdminAction(repo: AdminContentRepository) {
         })
         return { message: 'feedback.lessonCreated', createdId: created.id }
       }
+      if (intent === 'save-course-order') {
+        const order = parseOrder(form.get('order'))
+        if (!order) return { error: 'error.checkForm' }
+        await repo.saveCourseOrder(order)
+        return { message: 'feedback.courseReordered' }
+      }
       if (intent === 'save-unit-order' && params.courseId) {
         const order = parseOrder(form.get('order'))
         if (!order) return { error: 'error.checkForm' }

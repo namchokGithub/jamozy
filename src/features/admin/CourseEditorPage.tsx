@@ -5,7 +5,10 @@ import type { Unit } from '../../domain/models/unit'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { PageSurface } from '../../components/ui/PageSurface'
-import { AdminStatusActions } from './AdminStatusActions'
+import {
+  AdminStatusActions,
+  AdminStatusActionsPreview,
+} from './AdminStatusActions'
 import { AdminStatusBadge } from './AdminStatusBadge'
 import { AdminContentListToolbar } from './AdminContentListToolbar'
 import { useAdminFeedback } from './useAdminFeedback'
@@ -14,6 +17,7 @@ import { useAdminUnsavedChanges } from './useAdminUnsavedChanges'
 import { AdminTopBar } from './AdminTopBar'
 import { useAdminTranslation } from './i18n/admin-i18n'
 import { useCreatedHighlight } from './useCreatedHighlight'
+import { AdminSortableList } from './AdminSortableList'
 
 export default function CourseEditorPage() {
   const { course, units } = useLoaderData() as { course: Course; units: Unit[] }
@@ -26,7 +30,6 @@ export default function CourseEditorPage() {
   const [orderedUnits, setOrderedUnits] = useState(units)
   const [unitSearch, setUnitSearch] = useState('')
   const [unitStatusFilter, setUnitStatusFilter] = useState('all')
-  const [draggedUnitId, setDraggedUnitId] = useState<string | null>(null)
   const isPending = useAdminMutationPending()
   useAdminUnsavedChanges(detailsDirty, t('feedback.unsavedChangesWarning'))
   const handleSuccess = useCallback(
@@ -44,12 +47,11 @@ export default function CourseEditorPage() {
   const submit = (data: Record<string, string>) => {
     if (!isPending) fetcher.submit(data, { method: 'post' })
   }
-  const moveUnitTo = (targetIndex: number) => {
-    if (!draggedUnitId) return
-    const currentIndex = orderedUnits.findIndex(
-      (item) => item.id === draggedUnitId,
-    )
-    if (currentIndex < 0 || currentIndex === targetIndex) return
+  const moveUnit = (activeId: string, targetId: string) => {
+    const currentIndex = orderedUnits.findIndex((item) => item.id === activeId)
+    const targetIndex = orderedUnits.findIndex((item) => item.id === targetId)
+    if (currentIndex < 0 || targetIndex < 0 || currentIndex === targetIndex)
+      return
     const next = [...orderedUnits]
     const [dragged] = next.splice(currentIndex, 1)
     next.splice(targetIndex, 0, dragged)
@@ -203,64 +205,77 @@ export default function CourseEditorPage() {
           status={unitStatusFilter}
           onStatusChange={setUnitStatusFilter}
         />
-        <div className="mt-4 space-y-3">
-          {visibleUnits.map((unit) => {
-            const index = orderedUnits.findIndex((item) => item.id === unit.id)
-            return (
-              <div
-                key={unit.id}
-                role="link"
-                tabIndex={0}
-                onClick={() => navigate(`/admin/units/${unit.id}`)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault()
-                    navigate(`/admin/units/${unit.id}`)
-                  }
-                }}
-                onDragOver={(event) => event.preventDefault()}
-                onDrop={() => {
-                  moveUnitTo(index)
-                  setDraggedUnitId(null)
-                }}
-                className="flex min-h-22 w-full cursor-pointer flex-wrap items-center justify-between gap-4 border-b border-[#eadfd4] py-5 last:border-b-0 focus-visible:ring-2 focus-visible:ring-[#f2c5bb]"
-              >
-                <div className="flex min-w-0 items-center gap-3">
-                  <button
-                    type="button"
-                    draggable
-                    aria-label={t('action.dragHandle')}
-                    disabled={isPending}
-                    onClick={(event) => event.stopPropagation()}
-                    onDragStart={() => setDraggedUnitId(unit.id)}
-                    onDragEnd={() => setDraggedUnitId(null)}
-                    className="shrink-0 cursor-grab px-1 py-2 text-lg leading-none tracking-[-0.2em] text-[#a85d4e] active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    ⋮⋮
-                  </button>
-                  <h3 className="truncate font-bold">{unit.title}</h3>
-                  <AdminStatusBadge status={unit.status} />
-                </div>
-                <div
-                  className="flex items-center gap-1"
+        <AdminSortableList
+          className="mt-4 space-y-3"
+          items={visibleUnits}
+          getId={(unit) => unit.id}
+          disabled={isPending}
+          onMove={moveUnit}
+          renderItem={(unit, { handleRef, isDragging, ref }) => (
+            <div
+              ref={ref}
+              role="link"
+              tabIndex={0}
+              onClick={() => navigate(`/admin/units/${unit.id}`)}
+              onKeyDown={(event) => {
+                if (event.target !== event.currentTarget) return
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  navigate(`/admin/units/${unit.id}`)
+                }
+              }}
+              className={`flex min-h-22 w-full cursor-pointer flex-wrap items-center justify-between gap-4 border-b border-[#eadfd4] py-5 last:border-b-0 focus-visible:ring-2 focus-visible:ring-[#f2c5bb] ${isDragging ? 'opacity-50' : ''}`}
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <button
+                  ref={handleRef}
+                  type="button"
+                  aria-label={t('action.dragHandle')}
+                  disabled={isPending}
                   onClick={(event) => event.stopPropagation()}
+                  className="shrink-0 cursor-grab px-1 py-2 text-lg leading-none tracking-[-0.2em] text-[#a85d4e] active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <Link
-                    className="rounded-full border border-[#eadfd4] bg-white/90 px-3 py-2 text-sm font-semibold text-[#8d4c43] hover:border-[#d8b3a9] hover:bg-white"
-                    to={`/admin/units/${unit.id}`}
-                  >
-                    {t('action.edit')}
-                  </Link>
-                  <AdminStatusActions
-                    id={unit.id}
-                    kind="unit"
-                    status={unit.status}
-                  />
-                </div>
+                  ⋮⋮
+                </button>
+                <h3 className="truncate font-bold">{unit.title}</h3>
+                <AdminStatusBadge status={unit.status} />
               </div>
-            )
-          })}
-        </div>
+              <div
+                className="flex items-center gap-1"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <Link
+                  className="rounded-full border border-[#eadfd4] bg-white/90 px-3 py-2 text-sm font-semibold text-[#8d4c43] hover:border-[#d8b3a9] hover:bg-white"
+                  to={`/admin/units/${unit.id}`}
+                >
+                  {t('action.edit')}
+                </Link>
+                <AdminStatusActions
+                  id={unit.id}
+                  kind="unit"
+                  status={unit.status}
+                />
+              </div>
+            </div>
+          )}
+          renderOverlay={(unit) => (
+            <div className="flex min-h-22 w-full flex-wrap items-center justify-between gap-4 border border-[#eadfd4] px-4 py-5">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="shrink-0 px-1 py-2 text-lg leading-none tracking-[-0.2em] text-[#a85d4e]">
+                  ⋮⋮
+                </span>
+                <h3 className="truncate font-bold">{unit.title}</h3>
+                <AdminStatusBadge status={unit.status} />
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="rounded-full border border-[#eadfd4] bg-white/90 px-3 py-2 text-sm font-semibold text-[#8d4c43]">
+                  {t('action.edit')}
+                </span>
+                <AdminStatusActionsPreview status={unit.status} />
+              </div>
+            </div>
+          )}
+        />
       </section>
     </PageSurface>
   )

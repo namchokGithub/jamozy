@@ -140,6 +140,18 @@ export class FakeAdminContentRepository implements AdminContentRepository {
   async moveLesson(id: string, direction: 'up' | 'down') {
     await this.move(this.lessons, id, direction, (item) => item.unitId)
   }
+  async saveCourseOrder(courseIds: string[]) {
+    if (
+      courseIds.length !== this.courses.length ||
+      new Set(courseIds).size !== courseIds.length ||
+      courseIds.some((id) => !this.courses.some((course) => course.id === id))
+    )
+      throw new Error('Content order changed. Refresh and try again.')
+    courseIds.forEach((id, order) => {
+      const course = this.courses.find((item) => item.id === id)
+      if (course) course.order = order
+    })
+  }
   async moveUnitToIndex(id: string, index: number) {
     await this.moveToIndex(this.units, id, index, (item) => item.courseId)
   }
