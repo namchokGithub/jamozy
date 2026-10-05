@@ -32,7 +32,7 @@ and sentences while improving typing accuracy and speed.
 ## Core Features
 
 - Progressive Unit → Lesson learning structure
-- One-page Home learning player with up to 10 exercises per selected course
+- One-page Home learning player with a continuous word queue per selected course
 - Korean typing exercises
 - Virtual Korean keyboard guide
 - Finger-placement reference for Korean keyboard practice
@@ -53,16 +53,19 @@ Learn → Type → Review → Improve → Unlock
 ### Home One-page Learning Path
 
 Home is the fast path into practice. It presents up to the first three courses
-that are not finished; the learner chooses one course, then types a queue of
-up to ten exercises in `Unit → Lesson → Exercise` order. A queue never fills
-its remaining slots from another course.
+that are not finished; the learner chooses one course, then types its
+exercises in `Unit → Lesson → Exercise` order without stopping: the next
+words load in the background before the current batch runs out. The queue
+never takes words from another course ([[DEC-042]]).
 
 The active exercise shows Korean, Thai/English meanings, romanization, live
 WPM/accuracy, the virtual keyboard, and a finger-placement guide. Completing
 an exercise saves a browser-local IndexedDB checkpoint, so a refresh resumes
 at the next exercise. The checkpoint is local even for signed-in users and is
 not cloud-synced or migrated. Only the final exercise of a lesson creates the
-normal submitted lesson result, progress, EXP, and review effects.
+normal submitted lesson result, progress, EXP, and review effects. Saving
+never interrupts typing, and a failed lesson completion retries in the
+background.
 
 The Hero and the standard learning-path cards remain below the player. Learners
 can still open a Course and choose a specific Lesson through the existing flow.

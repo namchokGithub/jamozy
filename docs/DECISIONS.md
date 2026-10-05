@@ -49,13 +49,14 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-032 | Lesson Result review action opens the due Review queue | Accepted | 2026-09-28 |
 | DEC-033 | Intentional Learning Path replays grant 15 EXP | Accepted | 2026-09-29 |
 | DEC-034 | Admin content is claim-authorized and status-gated | Accepted | 2026-09-29 |
-| DEC-035 | Home one-page player uses browser-local exercise checkpoints | Accepted | 2026-09-29 |
+| DEC-035 | Home one-page player uses browser-local exercise checkpoints | Accepted (queue/round details superseded by DEC-042) | 2026-09-29 |
 | DEC-036 | Jamo SVG steps follow visual jamo for compound medials | Superseded by DEC-037 | 2026-10-01 |
 | DEC-037 | Jamo SVG steps follow typed keys, including compound medials | Accepted | 2026-10-01 |
 | DEC-038 | Split recipes may partition an enclosed counter with its outline | Accepted | 2026-10-01 |
 | DEC-039 | Jamo SVG runtime: committed choseong shards behind a flag | Accepted | 2026-10-03 |
 | DEC-040 | Spaces between words keep the Jamo SVG target renderer | Accepted | 2026-10-04 |
 | DEC-041 | AI agents propose and receive approval before acting | Accepted | 2026-10-04 |
+| DEC-042 | Home player owns a continuous client queue; loader only refills | Accepted | 2026-10-05 |
 
 ---
 
@@ -766,7 +767,7 @@ but retire them by archiving their Lesson instead of hard deletion.
 ## DEC-035 — Home one-page player uses browser-local exercise checkpoints
 
 **Date:** 2026-09-29
-**Status:** Accepted
+**Status:** Accepted (queue/round details superseded by [[DEC-042]])
 
 **Decision:** Home is the primary Learning Path player. It offers the first
 three incomplete courses, but a ten-exercise queue is always confined to one
@@ -946,3 +947,46 @@ recommendations.
 **Consequences:** `AGENTS.md` and `CLAUDE.md` require approval before any
 change or external action. The prior convention allowing clear, small,
 low-risk, or cosmetic changes to be implemented immediately is replaced.
+
+---
+
+## DEC-042 — Home player owns a continuous client queue; loader only refills
+
+**Date:** 2026-10-05
+**Status:** Accepted
+
+**Decision:** The Home one-page player owns its current play queue and
+position in client state (Zustand) for the life of a course round. Route
+loader data seeds the queue once, on mount or course change; later loader
+revalidations never restart or replace it. When three or fewer exercises
+remain, the player requests the next batch (up to ten exercises after a
+`(lessonId, exerciseId)` cursor, in canonical Learning Path order) and
+appends it without resetting the current exercise, timers, or counters.
+Replay courses wrap to their first exercise.
+
+Checkpoints, lesson completion, EXP, review items, and completion retries
+run in the background. The player shows no saving state and no manual
+"save completed lesson" control; a pending lesson completion is retried
+automatically.
+
+**Why:** Home is a pick-up-and-play surface: see a word, type it, get the
+next one immediately. The previous ten-exercise round paused on its last
+word until checkpoints drained and the loader revalidated, and any
+revalidation during play rebuilt the queue and jumped back to its start.
+
+**Consequences:** Persistence semantics from [[DEC-035]] are unchanged:
+browser-local checkpoints keyed by `(userId, courseId)`, one
+LearningSession per completed lesson through the receipt boundary, no
+per-keystroke writes. A cursor-based refill is independent of checkpoint
+acknowledgement, so in-flight saves cannot cause duplicates or gaps.
+Loader data is still not mirrored into Zustand; only the transient play
+queue lives there ([[DEC-003]]). DEC-035's ten-exercise round and
+end-of-round revalidation are superseded.
+
+A refill keeps the player's course even if that course stopped being
+selectable mid-play; if its last lesson completed before the refill, the
+course is then a replay course and wraps. The player compacts finished
+exercises out of its session and keeps only running WPM/accuracy totals.
+Pending lesson completions are retried once on mount. Other Home loader
+data (for example the due-review count) refreshes on the next navigation,
+not after each lesson.

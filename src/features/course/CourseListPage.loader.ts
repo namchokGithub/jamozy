@@ -30,6 +30,10 @@ export function createCourseListLoader(deps: {
 }) {
   return async (args?: LoaderFunctionArgs): Promise<CourseListLoaderData> => {
     const user = await deps.ensureUser()
+    const params = args ? new URL(args.request.url).searchParams : null
+    const afterLesson = params?.get('afterLesson')
+    const afterExercise = params?.get('afterExercise')
+    const after = afterLesson && afterExercise ? { lessonId: afterLesson, exerciseId: afterExercise } : undefined
     const [courses, items, profile, onePageLearningPath] = await Promise.all([
       getCourses(deps.courseRepo),
       getDueReviewItems(deps.reviewRepo, user.uid),
@@ -40,7 +44,7 @@ export function createCourseListLoader(deps: {
             lessonRepo: deps.lessonRepo,
             progressRepo: deps.progressRepo,
             checkpointRepo: deps.checkpointRepo,
-          }, user.uid, args ? new URL(args.request.url).searchParams.get('course') ?? undefined : undefined)
+          }, user.uid, params?.get('course') ?? undefined, after)
         : null,
     ])
     const session = await deps.getSession?.()
