@@ -34,20 +34,20 @@
 
 ## File Structure
 
-| File | Responsibility |
-| --- | --- |
-| `src/domain/models/course.ts` | `CourseType`, `Course.type`, `courseType()` reader defaulting to `learning`. |
-| `src/domain/models/progress.ts` | Optional `completedExerciseIds` and `homePartialResult` on `Progress`. |
-| `src/domain/models/learning-session.ts` | `{ mode: 'home'; lessonId }` context. |
-| `src/domain/models/home-content.ts` | Static Home content schema (Zod) shared by the export script and runtime reader. |
-| `src/domain/home/home-session.ts` | Pure shuffle, session progression, lesson/unit advance, and progress display rules. |
-| `scripts/export-home-content.ts` | Build-time export of the published `home` course to `public/content/home.json`. |
-| `src/infrastructure/static/static-home-content-repository.ts` | Fetch and validate `home.json`. |
-| `src/application/record-home-exercise.ts` | Merge one completed exercise into `Progress`; submit first completion. |
-| `src/application/submit-home-replay.ts` | Submit a full replay session for a completed lesson. |
-| `src/infrastructure/local/home-outbox.ts` | Durable IndexedDB outbox with background retry. |
-| `src/infrastructure/local/home-resume-store.ts` | Local `{ unitId, lessonId }` resume state. |
-| `src/features/home/*` | Unit categories, lesson list with `n/m`, shuffled player, auto-advance notice. |
+| File                                                          | Responsibility                                                                      |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `src/domain/models/course.ts`                                 | `CourseType`, `Course.type`, `courseType()` reader defaulting to `learning`.        |
+| `src/domain/models/progress.ts`                               | Optional`completedExerciseIds` and `homePartialResult` on `Progress`.               |
+| `src/domain/models/learning-session.ts`                       | `{ mode: 'home'; lessonId }` context.                                               |
+| `src/domain/models/home-content.ts`                           | Static Home content schema (Zod) shared by the export script and runtime reader.    |
+| `src/domain/home/home-session.ts`                             | Pure shuffle, session progression, lesson/unit advance, and progress display rules. |
+| `scripts/export-home-content.ts`                              | Build-time export of the published`home` course to `public/content/home.json`.      |
+| `src/infrastructure/static/static-home-content-repository.ts` | Fetch and validate`home.json`.                                                      |
+| `src/application/record-home-exercise.ts`                     | Merge one completed exercise into`Progress`; submit first completion.               |
+| `src/application/submit-home-replay.ts`                       | Submit a full replay session for a completed lesson.                                |
+| `src/infrastructure/local/home-outbox.ts`                     | Durable IndexedDB outbox with background retry.                                     |
+| `src/infrastructure/local/home-resume-store.ts`               | Local`{ unitId, lessonId }` resume state.                                           |
+| `src/features/home/*`                                         | Unit categories, lesson list with`n/m`, shuffled player, auto-advance notice.       |
 
 ---
 
@@ -56,7 +56,7 @@
 **Files:** `docs/DOMAIN-MODEL.md`, `docs/LEARNING-MODES.md`, `docs/SESSION-AND-HISTORY.md`, `docs/AUTH-AND-PERSISTENCE.md`, `AGENTS.md`, `src/domain/models/{course,progress,learning-session,home-content}.ts`, model tests.
 
 - [x] **Step 1:** Update topic docs to DEC-043: `Course.type`; `Progress.completedExerciseIds` and `homePartialResult`; `home` session context; replace "Local one-page checkpoint" sections; Home as a Course-structured exception in LEARNING-MODES; migration rule in AUTH-AND-PERSISTENCE.
-- [ ] **Step 2:** Propose to the user an `AGENTS.md` hard-rule wording that names Home exercise completion as a checkpoint; apply only after approval.
+- [x] **Step 2:** Propose to the user an `AGENTS.md` hard-rule wording that names Home exercise completion as a checkpoint; apply only after approval.
 - [x] **Step 3:** Write failing tests: `courseType()` defaults to `learning`; `home-content` schema accepts a valid export and rejects missing IDs or empty exercises.
 - [x] **Step 4:** Implement the model changes; keep new `Progress` fields optional so existing records and adapters stay valid.
 - [x] **Step 5:** `pnpm test`, `pnpm tsc -b`.
@@ -65,12 +65,12 @@
 
 **Files:** `src/application/admin-content.ts`, `src/features/admin/CourseEditorPage.tsx`, `src/infrastructure/firebase/repositories/firebase-course-repository.ts`, `src/application/learning-path-order.ts`, `src/application/get-course.ts`, related tests.
 
-- [ ] **Step 1:** Write failing tests: publishing a second `home` course is rejected by `publishCourse`; `getOrderedLearningPath` and `getCourses` omit `home` courses, including when other courses lack `type`.
-- [ ] **Step 2:** Add the `type` select to the course editor and persist it through `saveCourse`.
-- [ ] **Step 3:** Filter `home` in the application layer (not with a Firestore `where`, which drops untyped courses).
-- [ ] **Step 4:** Check Daily Quest and course-map loaders for course enumeration and exclude `home` there too.
+- [x] **Step 1:** Write failing tests: publishing a second `home` course is rejected by `publishCourse`; `getOrderedLearningPath` and `getCourses` omit `home` courses, including when other courses lack `type`.
+- [x] **Step 2:** Add the `type` select to the course editor and persist it through `saveCourse`.
+- [x] **Step 3:** Filter `home` in the application layer (not with a Firestore `where`, which drops untyped courses).
+- [x] **Step 4:** Check Daily Quest and course-map loaders for course enumeration and exclude `home` there too.
 - [ ] **Step 5:** Ask the user whether a rules-level guard for `type` is wanted; if yes, update `firestore.rules` and `firestore.rules.test.ts`, run `pnpm test:rules`.
-- [ ] **Step 6:** `pnpm test`.
+- [x] **Step 6:** `pnpm test`.
 
 ### Task 3: Build-time Home export
 

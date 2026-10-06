@@ -34,6 +34,7 @@ const commandErrorKeys: Record<string, AdminMessageKey> = {
   'Publish the parent Course first.': 'error.publishCourseFirst',
   'Publish the parent Unit first.': 'error.publishUnitFirst',
   'Add at least one Exercise before publishing.': 'error.exerciseRequired',
+  'Only one published Home course is allowed.': 'error.oneHomeCourse',
 }
 
 function commandError(error: string): AdminActionData {
@@ -146,20 +147,25 @@ async function courseAction(
       ...course,
       title: text(form, 'title'),
       description: text(form, 'description'),
+      type: text(form, 'type') === 'home' ? 'home' : 'learning',
     })
     return commandResult(result, 'feedback.changesSaved')
   }
   if (intent === 'publish') {
-    await publishCourse(repo, course)
-    return { message: 'feedback.coursePublished' }
+    return commandResult(
+      await publishCourse(repo, course),
+      'feedback.coursePublished',
+    )
   }
   if (intent === 'archive') {
     await archiveCourse(repo, course)
     return { message: 'feedback.courseArchived' }
   }
   if (intent === 'restore') {
-    await restoreCourse(repo, course)
-    return { message: 'feedback.courseRestored' }
+    return commandResult(
+      await restoreCourse(repo, course),
+      'feedback.courseRestored',
+    )
   }
   return { error: 'error.unknownCourseAction' }
 }

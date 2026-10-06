@@ -1,4 +1,4 @@
-import type { Course } from '../domain/models/course'
+import { courseType, type Course } from '../domain/models/course'
 import type { Lesson } from '../domain/models/lesson'
 import type { Progress } from '../domain/models/progress'
 import type { Unit } from '../domain/models/unit'
@@ -18,9 +18,9 @@ export async function getOrderedLearningPath(
   // load does not query courses twice.
   coursesRequest: Promise<Course[]> = courseRepo.getCourses(),
 ): Promise<OrderedLearningPathLesson[]> {
-  const courses = [...(await coursesRequest)].sort(
-    (left, right) => left.order - right.order,
-  )
+  const courses = (await coursesRequest)
+    .filter((course) => courseType(course) === 'learning')
+    .sort((left, right) => left.order - right.order)
   // Query every course's units, then every unit's lessons, concurrently:
   // sequential awaits made Home load in 1 + courses + units round trips.
   const unitsByCourse = await Promise.all(
@@ -31,11 +31,13 @@ export async function getOrderedLearningPath(
     ),
   )
   const lessonsByUnit = await Promise.all(
-    unitsByCourse.flat().map(async ({ course, unit }) =>
-      [...(await lessonRepo.getLessonsByUnitId(unit.id))]
-        .sort((left, right) => left.order - right.order)
-        .map((lesson) => ({ course, unit, lesson })),
-    ),
+    unitsByCourse
+      .flat()
+      .map(async ({ course, unit }) =>
+        [...(await lessonRepo.getLessonsByUnitId(unit.id))]
+          .sort((left, right) => left.order - right.order)
+          .map((lesson) => ({ course, unit, lesson })),
+      ),
   )
   return lessonsByUnit.flat()
 }

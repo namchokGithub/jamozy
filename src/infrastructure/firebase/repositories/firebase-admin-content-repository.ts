@@ -12,7 +12,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '../firebase'
 import type { AdminContentRepository } from '../../../domain/repositories/admin-content-repository'
-import type { Course } from '../../../domain/models/course'
+import type { Course, CourseType } from '../../../domain/models/course'
 import type { Lesson } from '../../../domain/models/lesson'
 import type { Unit } from '../../../domain/models/unit'
 import type {
@@ -47,6 +47,9 @@ function toCourse(id: string, data: DocumentData): Course {
     title: data.title,
     description: data.description,
     order: data.order,
+    ...(data.type === 'home' || data.type === 'learning'
+      ? { type: data.type as CourseType }
+      : {}),
     createdAt: date(data.createdAt),
     updatedAt: date(data.updatedAt),
     ...statusFields(data),

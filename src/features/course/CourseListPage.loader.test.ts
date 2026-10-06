@@ -80,8 +80,9 @@ describe('createCourseListLoader', () => {
     )
     const getCourses = vi.spyOn(courseRepo, 'getCourses')
     let releaseLessons: () => void = () => {}
+    const lessonsGate = new Promise<void>((resolve) => { releaseLessons = resolve })
     const lessonRepo: LessonRepository = {
-      getLessonsByUnitId: () => new Promise((resolve) => { releaseLessons = () => resolve([]) }),
+      getLessonsByUnitId: () => lessonsGate.then(() => []),
       getLessonById: async () => null,
     }
     const loader = createCourseListLoader({

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { archiveCourse, publishLesson, restoreCourse } from './admin-content'
+import { archiveCourse, publishCourse, publishLesson, restoreCourse, saveCourse } from './admin-content'
 import { FakeAdminContentRepository } from '../test/fakes'
 import { createAdminAction } from '../features/admin/admin-action'
 import type { Course } from '../domain/models/course'
@@ -193,4 +193,53 @@ describe('admin content lifecycle', () => {
     await restoreCourse(repo, (await repo.getCourseById('course'))!)
     expect((await repo.getCourseById('course'))?.status).toBe('draft')
   })
+
+  describe('single published Home course (DEC-043)', () => {
+    const home = (id: string, status: Course['status']): Course =>
+      ({ ...course, id, type: 'home', status })
+
+    it('blocks publishing a second Home course', async () => {
+      const repo = new FakeAdminContentRepository([home('home-1', 'published'), home('home-2', 'draft')])
+
+      const result = await publishCourse(repo, (await repo.getCourseById('home-2'))!)
+
+      expect(result).toEqual({ ok: false, error: 'Only one published Home course is allowed.' })
+      expect((await repo.getCourseById('home-2'))?.status).toBe('draft')
+    })
+
+    it('allows republishing the existing Home course and publishing Learning courses', async () => {
+      const repo = new FakeAdminContentRepository([home('home-1', 'published'), { ...course, id: 'other', status: 'draft' }])
+
+      expect(await publishCourse(repo, (await repo.getCourseById('home-1'))!)).toEqual({ ok: true })
+      expect(await publishCourse(repo, (await repo.getCourseById('other'))!)).toEqual({ ok: true })
+    })
+
+    it('blocks changing a published Learning course to Home when a Home course is published', async () => {
+      const repo = new FakeAdminContentRepository([home('home-1', 'published'), { ...course, id: 'other' }])
+
+      const result = await saveCourse(repo, { ...(await repo.getCourseById('other'))!, type: 'home' })
+
+      expect(result.ok).toBe(false)
+      expect((await repo.getCourseById('other'))?.type).toBeUndefined()
+    })
+
+    it('blocks restoring an archived Home course to published while another is published', async () => {
+      const repo = new FakeAdminContentRepository([
+        home('home-1', 'published'),
+        { ...home('home-2', 'archived'), archivedFromStatus: 'published' },
+      ])
+
+      const result = await restoreCourse(repo, (await repo.getCourseById('home-2'))!)
+
+      expect(result.ok).toBe(false)
+      expect((await repo.getCourseById('home-2'))?.status).toBe('archived')
+    })
+
+    it('rejects an unknown course type', async () => {
+      const repo = new FakeAdminContentRepository([course])
+      const result = await saveCourse(repo, { ...course, type: 'quest' as never })
+      expect(result.ok).toBe(false)
+    })
+  })
 })
+

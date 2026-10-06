@@ -67,4 +67,21 @@ describe('getOrderedLearningPath', () => {
 
     expect(calls.sort()).toEqual(['c1', 'c2'])
   })
+
+  it('leaves the Home course out of the global order (DEC-043)', async () => {
+    const courseRepo = {
+      getCourses: async () => [course('c1', 1), { ...course('home', 0), type: 'home' as const }],
+      getUnitsByCourseId: async (courseId: string) => units.filter((u) => u.courseId === courseId)
+        .concat(courseId === 'home' ? [unit('home-u1', 'home', 1)] : []),
+    } as unknown as CourseRepository
+    const lessonRepo = {
+      getLessonsByUnitId: async (unitId: string) => lessons.filter((l) => l.unitId === unitId)
+        .concat(unitId === 'home-u1' ? [lesson('home-l1', 'home-u1', 1)] : []),
+    } as unknown as LessonRepository
+
+    const ordered = await getOrderedLearningPath(courseRepo, lessonRepo)
+
+    expect(ordered.map(({ course }) => course.id)).not.toContain('home')
+  })
 })
+

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { archiveContent, restoreContent } from '../domain/models/content-status'
-import type { Course } from '../domain/models/course'
+import { courseType, type Course } from '../domain/models/course'
 import type { Lesson, LessonExercise } from '../domain/models/lesson'
 import type { Unit } from '../domain/models/unit'
 import type { AdminContentRepository } from '../domain/repositories/admin-content-repository'
@@ -25,12 +25,37 @@ function validationError(error: z.ZodError): AdminCommandResult {
   }
 }
 
+const ONE_HOME_COURSE = 'Only one published Home course is allowed.'
+
+// Home plays exactly one published `home` course (DEC-043).
+async function conflictsWithPublishedHome(
+  repo: AdminContentRepository,
+  course: Course,
+): Promise<boolean> {
+  if (course.status !== 'published' || courseType(course) !== 'home')
+    return false
+  return (await repo.getCourses()).some(
+    (other) =>
+      other.id !== course.id &&
+      other.status === 'published' &&
+      courseType(other) === 'home',
+  )
+}
+
 export async function saveCourse(
   repo: AdminContentRepository,
   course: Course,
 ): Promise<AdminCommandResult> {
-  const parsed = z.object({ title: text, description: text }).safeParse(course)
+  const parsed = z
+    .object({
+      title: text,
+      description: text,
+      type: z.enum(['learning', 'home']).optional(),
+    })
+    .safeParse(course)
   if (!parsed.success) return validationError(parsed.error)
+  if (await conflictsWithPublishedHome(repo, course))
+    return { ok: false, error: ONE_HOME_COURSE }
   await repo.saveCourse(course)
   return { ok: true }
 }
@@ -74,7 +99,10 @@ export async function publishCourse(
 ): Promise<AdminCommandResult> {
   const { archivedFromStatus: _archivedFromStatus, ...saved } = course
   void _archivedFromStatus
-  await repo.saveCourse({ ...saved, status: 'published' })
+  const published: Course = { ...saved, status: 'published' }
+  if (await conflictsWithPublishedHome(repo, published))
+    return { ok: false, error: ONE_HOME_COURSE }
+  await repo.saveCourse(published)
   return { ok: true }
 }
 
@@ -120,10 +148,14 @@ export async function archiveCourse(
 export async function restoreCourse(
   repo: AdminContentRepository,
   course: Course,
-): Promise<void> {
+): Promise<AdminCommandResult> {
   const { archivedFromStatus: _archivedFromStatus, ...restorable } = course
   void _archivedFromStatus
-  await repo.saveCourse({ ...restorable, ...restoreContent(course) })
+  const restored: Course = { ...restorable, ...restoreContent(course) }
+  if (await conflictsWithPublishedHome(repo, restored))
+    return { ok: false, error: ONE_HOME_COURSE }
+  await repo.saveCourse(restored)
+  return { ok: true }
 }
 export async function archiveUnit(
   repo: AdminContentRepository,

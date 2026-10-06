@@ -1,8 +1,13 @@
 import { useCallback, useState } from 'react'
 import { Link, useFetcher, useLoaderData, useNavigate } from 'react-router'
-import type { Course } from '../../domain/models/course'
+import {
+  courseType,
+  type Course,
+  type CourseType,
+} from '../../domain/models/course'
 import type { Unit } from '../../domain/models/unit'
 import { Button } from '../../components/ui/Button'
+import { Dropdown } from '../../components/ui/Dropdown'
 import { Card } from '../../components/ui/Card'
 import { PageSurface } from '../../components/ui/PageSurface'
 import {
@@ -19,6 +24,7 @@ import { useAdminTranslation } from './i18n/admin-i18n'
 import { useCreatedHighlight } from './useCreatedHighlight'
 import { AdminSortableList } from './AdminSortableList'
 
+const courseTypes: CourseType[] = ['learning', 'home']
 export default function CourseEditorPage() {
   const { course, units } = useLoaderData() as { course: Course; units: Unit[] }
   const { t } = useAdminTranslation()
@@ -27,6 +33,7 @@ export default function CourseEditorPage() {
   const createdHighlight = useCreatedHighlight()
   const [editingDetails, setEditingDetails] = useState(false)
   const [detailsDirty, setDetailsDirty] = useState(false)
+  const [type, setType] = useState(courseType(course))
   const [orderedUnits, setOrderedUnits] = useState(units)
   const [unitSearch, setUnitSearch] = useState('')
   const [unitStatusFilter, setUnitStatusFilter] = useState('all')
@@ -147,6 +154,20 @@ export default function CourseEditorPage() {
                 className="min-h-24 rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
               />
             </label>
+            <input type="hidden" name="type" value={type} />
+            <Dropdown
+              label={t('field.courseType')}
+              value={type}
+              onChange={(value) => {
+                setType(value)
+                setDetailsDirty(true)
+              }}
+              disabled={isPending}
+              options={courseTypes.map((value) => ({
+                value,
+                label: t(`courseType.${value}`),
+              }))}
+            />
             <div className="flex flex-wrap gap-2">
               <Button type="submit" disabled={isPending || !detailsDirty}>
                 {isPending ? t('action.saving') : t('action.saveCourse')}
@@ -157,6 +178,7 @@ export default function CourseEditorPage() {
                 onClick={() => {
                   setEditingDetails(false)
                   setDetailsDirty(false)
+                  setType(courseType(course))
                 }}
               >
                 {t('action.cancel')}
@@ -169,6 +191,9 @@ export default function CourseEditorPage() {
               <h2 className="text-xl font-bold">{course.title}</h2>
               <p className="mt-2 max-w-xl text-sm leading-6 text-[#667085]">
                 {course.description}
+              </p>
+              <p className="mt-2 text-xs font-semibold text-[#7863a8]">
+                {t('field.courseType')}: {t(`courseType.${courseType(course)}`)}
               </p>
             </div>
             <Button

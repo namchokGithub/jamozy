@@ -37,6 +37,16 @@ describe('getCourses', () => {
     const courses = await getCourses(repo)
     expect(courses.map((c) => c.id)).toEqual(['a', 'b'])
   })
+
+  it('omits the Home course and keeps untyped courses (DEC-043)', async () => {
+    const repo = new FakeCourseRepository([
+      makeCourse('a', 1),
+      { ...makeCourse('home', 2), type: 'home' },
+      { ...makeCourse('b', 3), type: 'learning' },
+    ])
+    const courses = await getCourses(repo)
+    expect(courses.map((c) => c.id)).toEqual(['a', 'b'])
+  })
 })
 
 describe('getCourseUnits', () => {
@@ -51,6 +61,15 @@ describe('getCourseUnits', () => {
 })
 
 describe('getCourseMap', () => {
+  it('treats the Home course as not found (DEC-043)', async () => {
+    const deps = {
+      courseRepo: new FakeCourseRepository([{ ...makeCourse('home', 1), type: 'home' }]),
+      lessonRepo: new FakeLessonRepository(),
+      progressRepo: new FakeProgressRepository(),
+    }
+    await expect(getCourseMap(deps, 'user1', 'home')).rejects.toBeInstanceOf(NotFoundError)
+  })
+
   it('throws when the course does not exist', async () => {
     const deps = {
       courseRepo: new FakeCourseRepository(),
