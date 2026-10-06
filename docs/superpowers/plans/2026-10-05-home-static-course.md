@@ -115,7 +115,7 @@ Done 2026-10-06: `HomeOutbox` (application) over `HomeSyncJobRepository`; Indexe
 - [x] **Step 2:** Implement pure functions; reuse `lesson-session` typing reducers.
 - [x] **Step 3:** `pnpm test`.
 
-Done 2026-10-06: `shuffleExercises`, `nextHomeLesson`, `resolveHomeResume`, `homeLessonProgress` (pending outbox IDs count), `isHomeCourseComplete`, `homeReplayTotals`. The player reuses `lesson-session` reducers; a session is the shuffled lesson, ending when `status === 'completed'`.
+Done 2026-10-06: `shuffleExercises`, `nextHomeLesson`, `resolveHomeResume`, `homeLessonProgress` (pending outbox IDs count), `homeReplayTotals`. The player reuses `lesson-session` reducers; a session is the shuffled lesson, ending when `status === 'completed'`.
 
 ### Task 7: Home UI and wiring
 

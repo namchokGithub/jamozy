@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 import {
   homeLessonProgress,
   homeReplayTotals,
-  isHomeCourseComplete,
   nextHomeLesson,
   resolveHomeResume,
   shuffleExercises,
@@ -140,29 +139,6 @@ describe('homeLessonProgress', () => {
         progress({ status: 'completed', completedExerciseIds: [] }),
       ),
     ).toEqual({ done: 2, total: 2 })
-  })
-})
-
-describe('isHomeCourseComplete', () => {
-  it('is true only when every lesson is completed', () => {
-    const done = (lessonId: string) =>
-      progress({ lessonId, status: 'completed' })
-    expect(
-      isHomeCourseComplete(
-        units,
-        new Map([
-          ['l1', done('l1')],
-          ['l2', done('l2')],
-        ]),
-      ),
-    ).toBe(false)
-    expect(
-      isHomeCourseComplete(
-        units,
-        new Map(['l1', 'l2', 'l3'].map((id) => [id, done(id)])),
-      ),
-    ).toBe(true)
-    expect(isHomeCourseComplete([], new Map())).toBe(false)
   })
 })
 

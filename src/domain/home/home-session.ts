@@ -87,20 +87,6 @@ export function homeLessonProgress(
   }
 }
 
-/** True once every Home lesson is completed. */
-export function isHomeCourseComplete(
-  units: readonly HomeUnitShape[],
-  progressByLesson: ReadonlyMap<string, Progress>,
-): boolean {
-  const refs = lessonRefs(units)
-  return (
-    refs.length > 0 &&
-    refs.every(
-      ({ lessonId }) => progressByLesson.get(lessonId)?.status === 'completed',
-    )
-  )
-}
-
 /** Totals of a finished session, submitted as a replay of a completed lesson. */
 export function homeReplayTotals(
   state: LessonSessionState,
