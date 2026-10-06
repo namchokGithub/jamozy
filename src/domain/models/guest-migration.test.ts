@@ -64,6 +64,44 @@ describe('guest migration merge rules', () => {
     expect(merged.attempts).toBe(3)
   })
 
+  it('unions Home exercises and keeps Cloud\'s partial result for an incomplete lesson (DEC-043)', () => {
+    const cloudPartial = { submissionId: 'cloud', startedAtMs: 1, acceptedKeystrokes: 4, rejectedKeystrokes: 0 }
+    const merged = mergeProgress(
+      progress('unlocked', { completedExerciseIds: ['e1', 'e2'], homePartialResult: cloudPartial }),
+      progress('unlocked', { completedExerciseIds: ['e2', 'e3'], homePartialResult: { ...cloudPartial, submissionId: 'guest' } }),
+    )
+
+    expect(merged.completedExerciseIds).toEqual(['e1', 'e2', 'e3'])
+    expect(merged.homePartialResult?.submissionId).toBe('cloud')
+  })
+
+  it('uses the Guest partial result when Cloud has none (DEC-043)', () => {
+    const merged = mergeProgress(
+      progress('unlocked'),
+      progress('unlocked', { completedExerciseIds: ['e1'], homePartialResult: { submissionId: 'guest', startedAtMs: 1, acceptedKeystrokes: 2, rejectedKeystrokes: 1 } }),
+    )
+
+    expect(merged.completedExerciseIds).toEqual(['e1'])
+    expect(merged.homePartialResult?.submissionId).toBe('guest')
+  })
+
+  it('drops the partial result when either side completed the Home lesson (DEC-043)', () => {
+    const merged = mergeProgress(
+      progress('unlocked', { completedExerciseIds: ['e1'], homePartialResult: { submissionId: 'cloud', startedAtMs: 1, acceptedKeystrokes: 2, rejectedKeystrokes: 0 } }),
+      progress('completed', { completedExerciseIds: ['e1', 'e2'] }),
+    )
+
+    expect(merged.status).toBe('completed')
+    expect(merged).not.toHaveProperty('homePartialResult')
+    expect(merged.completedExerciseIds).toEqual(['e1', 'e2'])
+  })
+
+  it('adds no Home fields to Learning Path progress', () => {
+    const merged = mergeProgress(progress('unlocked'), progress('completed'))
+    expect(merged).not.toHaveProperty('completedExerciseIds')
+    expect(merged).not.toHaveProperty('homePartialResult')
+  })
+
   it('never delays review when the Guest item is due sooner', () => {
     const merged = mergeReviewItem(
       review({ nextReviewAt: new Date('2026-01-10'), box: 4, resolved: true }),

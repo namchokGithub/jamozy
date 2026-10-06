@@ -105,11 +105,13 @@ export default function CourseEditorPage() {
           </h1>
           <AdminStatusBadge status={course.status} />
         </div>
-        <AdminStatusActions
-          id={course.id}
-          kind="course"
-          status={course.status}
-        />
+        <div className="flex items-center gap-2">
+          <AdminStatusActions
+            id={course.id}
+            kind="course"
+            status={course.status}
+          />
+        </div>
       </header>
       {detailsDirty && (
         <div className="mt-4 rounded-xl bg-[#fff1d8] px-4 py-3 text-sm font-semibold text-[#92703e]">

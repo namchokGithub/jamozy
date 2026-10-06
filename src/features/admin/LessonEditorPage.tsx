@@ -191,11 +191,13 @@ export default function LessonEditorPage() {
           </h1>
           <AdminStatusBadge status={lesson.status} />
         </div>
-        <AdminStatusActions
-          id={lesson.id}
-          kind="lesson"
-          status={lesson.status}
-        />
+        <div className="flex items-center gap-2">
+          <AdminStatusActions
+            id={lesson.id}
+            kind="lesson"
+            status={lesson.status}
+          />
+        </div>
       </header>
       {hasUnsavedChanges && (
         <div className="mt-4 rounded-xl bg-[#fff1d8] px-4 py-3 text-sm font-semibold text-[#92703e]">

@@ -111,7 +111,9 @@ export default function UnitEditorPage() {
           </h1>
           <AdminStatusBadge status={unit.status} />
         </div>
-        <AdminStatusActions id={unit.id} kind="unit" status={unit.status} />
+        <div className="flex items-center gap-2">
+          <AdminStatusActions id={unit.id} kind="unit" status={unit.status} />
+        </div>
       </header>
       {detailsDirty && (
         <div className="mt-4 rounded-xl bg-[#fff1d8] px-4 py-3 text-sm font-semibold text-[#92703e]">

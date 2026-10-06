@@ -55,14 +55,29 @@ const progressRank: Record<Progress['status'], number> = { unlocked: 1, complete
 export function mergeProgress(cloud: Progress | null, guest: Progress): Progress {
   if (!cloud) return guest
   const status = progressRank[guest.status] > progressRank[cloud.status] ? guest.status : cloud.status
+  const { completedExerciseIds: _ids, homePartialResult: _partial, ...cloudBase } = cloud
+  void _ids
+  void _partial
   return {
-    ...cloud,
+    ...cloudBase,
     status,
     bestAccuracy: Math.max(cloud.bestAccuracy, guest.bestAccuracy),
     bestSpeedWpm: Math.max(cloud.bestSpeedWpm, guest.bestSpeedWpm),
     attempts: Math.max(cloud.attempts, guest.attempts),
     lastAttemptAt: later(cloud.lastAttemptAt, guest.lastAttemptAt),
     completedAt: later(cloud.completedAt, guest.completedAt),
+    ...mergeHomeExerciseProgress(cloud, guest, status),
+  }
+}
+
+// DEC-043: union completed exercises; a completed lesson keeps no partial
+// result, otherwise Cloud's wins unless absent.
+function mergeHomeExerciseProgress(cloud: Progress, guest: Progress, status: Progress['status']): Pick<Progress, 'completedExerciseIds' | 'homePartialResult'> {
+  const ids = [...new Set([...(cloud.completedExerciseIds ?? []), ...(guest.completedExerciseIds ?? [])])]
+  const partial = status === 'completed' ? undefined : cloud.homePartialResult ?? guest.homePartialResult
+  return {
+    ...(cloud.completedExerciseIds || guest.completedExerciseIds ? { completedExerciseIds: ids } : {}),
+    ...(partial ? { homePartialResult: partial } : {}),
   }
 }
 

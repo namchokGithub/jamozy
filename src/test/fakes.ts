@@ -271,6 +271,9 @@ export class FakeSessionSubmissionRepository implements SessionSubmissionReposit
   }> = []
   private outcomes = new Map<string, SessionSubmissionOutcome>()
 
+  // When given, applies Progress effects like the real adapters do.
+  constructor(private progressRepo?: ProgressRepository) {}
+
   async submit(
     userId: string,
     session: LearningSession,
@@ -287,6 +290,8 @@ export class FakeSessionSubmissionRepository implements SessionSubmissionReposit
     }
     this.outcomes.set(key, outcome)
     this.submissions.push({ userId, session, effects })
+    for (const progress of effects.progress)
+      await this.progressRepo?.saveProgress(userId, progress)
     return outcome
   }
 }

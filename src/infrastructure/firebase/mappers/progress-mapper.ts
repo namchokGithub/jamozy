@@ -1,8 +1,14 @@
 import type { DocumentData } from 'firebase/firestore'
 import { Timestamp } from 'firebase/firestore'
-import type { Progress } from '../../../domain/models/progress'
+import type {
+  HomePartialResult,
+  Progress,
+} from '../../../domain/models/progress'
 
-export function toProgress(lessonId: string, data: DocumentData): Progress | null {
+export function toProgress(
+  lessonId: string,
+  data: DocumentData,
+): Progress | null {
   if (data.status === 'locked') return null
   return {
     lessonId,
@@ -12,6 +18,12 @@ export function toProgress(lessonId: string, data: DocumentData): Progress | nul
     attempts: data.attempts,
     lastAttemptAt: data.lastAttemptAt ? data.lastAttemptAt.toDate() : null,
     completedAt: data.completedAt ? data.completedAt.toDate() : null,
+    ...(Array.isArray(data.completedExerciseIds)
+      ? { completedExerciseIds: data.completedExerciseIds as string[] }
+      : {}),
+    ...(data.homePartialResult
+      ? { homePartialResult: data.homePartialResult as HomePartialResult }
+      : {}),
   }
 }
 
@@ -28,5 +40,13 @@ export function toProgressDoc(progress: Progress): DocumentData {
     completedAt: progress.completedAt
       ? Timestamp.fromDate(progress.completedAt)
       : null,
+    // Home-only fields (DEC-043); omitted rather than undefined, which
+    // Firestore rejects.
+    ...(progress.completedExerciseIds
+      ? { completedExerciseIds: progress.completedExerciseIds }
+      : {}),
+    ...(progress.homePartialResult
+      ? { homePartialResult: progress.homePartialResult }
+      : {}),
   }
 }

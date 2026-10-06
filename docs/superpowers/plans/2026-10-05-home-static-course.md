@@ -87,12 +87,14 @@ Decided 2026-10-06: `build` runs `content:export-home` every time and `public/co
 
 **Files:** `src/application/record-home-exercise.ts`, `src/application/submit-home-replay.ts`, `src/application/complete-lesson-session.ts`, `src/application/migrate-guest-data-to-account.ts`, Firebase/local progress adapters, tests, `src/test/fakes.ts`.
 
-- [ ] **Step 1:** Write failing tests for `recordHomeExercise`: unions IDs without double counting; accumulates the partial result once per new exercise; on first full coverage marks `completed`, submits one session with `mode: 'home'`, accuracy EXP, `sessionId = submissionId`, no ReviewItems, no frontier lookup; a duplicate call after completion is a no-op.
-- [ ] **Step 2:** Write failing tests for `submitHomeReplay`: completed lesson plus full shuffle grants 15 EXP with a new session ID; never changes completion or exercise IDs.
-- [ ] **Step 3:** Add a `home` option to `completeLessonSession` (or a sibling) that skips `reviewEffects` and `getOrderedLearningPath`.
-- [ ] **Step 4:** Make Firebase and local progress adapters round-trip the new fields.
-- [ ] **Step 5:** Extend Guest-to-account migration with the DEC-043 merge rule and test it with fakes only (no real Firebase data).
-- [ ] **Step 6:** `pnpm test`.
+- [x] **Step 1:** Write failing tests for `recordHomeExercise`: unions IDs without double counting; accumulates the partial result once per new exercise; on first full coverage marks `completed`, submits one session with `mode: 'home'`, accuracy EXP, `sessionId = submissionId`, no ReviewItems, no frontier lookup; a duplicate call after completion is a no-op.
+- [x] **Step 2:** Write failing tests for `submitHomeReplay`: completed lesson plus full shuffle grants 15 EXP with a new session ID; never changes completion or exercise IDs.
+- [x] **Step 3:** Add a `home` option to `completeLessonSession` (or a sibling) that skips `reviewEffects` and `getOrderedLearningPath`.
+- [x] **Step 4:** Make Firebase and local progress adapters round-trip the new fields.
+- [x] **Step 5:** Extend Guest-to-account migration with the DEC-043 merge rule and test it with fakes only (no real Firebase data).
+- [x] **Step 6:** `pnpm test`.
+
+Done 2026-10-06 as a sibling of `completeLessonSession`: `home-session-submission.ts` (shared submit + Progress shape), `record-home-exercise.ts`, `submit-home-replay.ts`. `completeLessonSession` is unchanged except exporting `expForAccuracy`. First-completion WPM spans every session since the first exercise, so it can be low.
 
 ### Task 5: Background outbox
 
