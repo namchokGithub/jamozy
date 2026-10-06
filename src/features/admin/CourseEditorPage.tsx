@@ -34,7 +34,19 @@ export default function CourseEditorPage() {
   const [editingDetails, setEditingDetails] = useState(false)
   const [detailsDirty, setDetailsDirty] = useState(false)
   const [type, setType] = useState(courseType(course))
-  const [orderedUnits, setOrderedUnits] = useState(units)
+  // Keep only the dragged order locally; unit data (status after Publish,
+  // Archive, Restore) always comes from the revalidated loader.
+  const [orderedUnitIds, setOrderedUnitIds] = useState(() =>
+    units.map((item) => item.id),
+  )
+  const unitsById = new Map(units.map((item) => [item.id, item]))
+  const orderedUnits = [
+    ...orderedUnitIds.flatMap((id) => {
+      const item = unitsById.get(id)
+      return item ? [item] : []
+    }),
+    ...units.filter((item) => !orderedUnitIds.includes(item.id)),
+  ]
   const [unitSearch, setUnitSearch] = useState('')
   const [unitStatusFilter, setUnitStatusFilter] = useState('all')
   const isPending = useAdminMutationPending()
@@ -62,7 +74,7 @@ export default function CourseEditorPage() {
     const next = [...orderedUnits]
     const [dragged] = next.splice(currentIndex, 1)
     next.splice(targetIndex, 0, dragged)
-    setOrderedUnits(next)
+    setOrderedUnitIds(next.map((item) => item.id))
     submit({
       intent: 'save-unit-order',
       order: JSON.stringify(next.map((item) => item.id)),

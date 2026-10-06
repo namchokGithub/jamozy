@@ -32,7 +32,19 @@ export default function UnitEditorPage() {
   const createdHighlight = useCreatedHighlight()
   const [editingDetails, setEditingDetails] = useState(false)
   const [detailsDirty, setDetailsDirty] = useState(false)
-  const [orderedLessons, setOrderedLessons] = useState(lessons)
+  // Keep only the dragged order locally; lesson data (status after Publish,
+  // Archive, Restore) always comes from the revalidated loader.
+  const [orderedLessonIds, setOrderedLessonIds] = useState(() =>
+    lessons.map((item) => item.id),
+  )
+  const lessonsById = new Map(lessons.map((item) => [item.id, item]))
+  const orderedLessons = [
+    ...orderedLessonIds.flatMap((id) => {
+      const item = lessonsById.get(id)
+      return item ? [item] : []
+    }),
+    ...lessons.filter((item) => !orderedLessonIds.includes(item.id)),
+  ]
   const [lessonSearch, setLessonSearch] = useState('')
   const [lessonStatusFilter, setLessonStatusFilter] = useState('all')
   const isPending = useAdminMutationPending()
@@ -64,7 +76,7 @@ export default function UnitEditorPage() {
     const next = [...orderedLessons]
     const [dragged] = next.splice(currentIndex, 1)
     next.splice(targetIndex, 0, dragged)
-    setOrderedLessons(next)
+    setOrderedLessonIds(next.map((item) => item.id))
     submit({
       intent: 'save-lesson-order',
       order: JSON.stringify(next.map((item) => item.id)),
