@@ -49,6 +49,8 @@ export const en = {
   'action.moveItemDown': 'Move {name} down',
   'action.dragHandle': 'Drag to reorder',
   'action.close': 'Close',
+  'action.leave': 'Leave',
+  'action.stay': 'Stay',
 
   'confirm.publish.title': 'Publish this {kind}?',
   'confirm.archive.title': 'Archive this {kind}?',
@@ -225,6 +227,8 @@ export const th: Record<AdminMessageKey, string> = {
   'action.moveItemDown': 'เลื่อน {name} ลง',
   'action.dragHandle': 'ลากเพื่อจัดลำดับใหม่',
   'action.close': 'ปิด',
+  'action.leave': 'ออกจากหน้านี้',
+  'action.stay': 'อยู่ต่อ',
 
   'confirm.publish.title': 'เผยแพร่{kind}นี้?',
   'confirm.archive.title': 'เก็บถาวร{kind}นี้?',

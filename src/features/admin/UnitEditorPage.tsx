@@ -14,6 +14,7 @@ import { AdminStatusBadge } from './AdminStatusBadge'
 import { AdminContentListToolbar } from './AdminContentListToolbar'
 import { useAdminFeedback } from './useAdminFeedback'
 import { useAdminMutationPending } from './useAdminMutationPending'
+import { AdminUnsavedChangesDialog } from './AdminUnsavedChangesDialog'
 import { useAdminUnsavedChanges } from './useAdminUnsavedChanges'
 import { AdminTopBar } from './AdminTopBar'
 import { useAdminTranslation } from './i18n/admin-i18n'
@@ -48,7 +49,10 @@ export default function UnitEditorPage() {
   const [lessonSearch, setLessonSearch] = useState('')
   const [lessonStatusFilter, setLessonStatusFilter] = useState('all')
   const isPending = useAdminMutationPending()
-  useAdminUnsavedChanges(detailsDirty, t('feedback.unsavedChangesWarning'))
+  const unsavedChangesBlocker = useAdminUnsavedChanges(
+    detailsDirty,
+    t('feedback.unsavedChangesWarning'),
+  )
   const handleSuccess = useCallback(
     (data: { message?: string; createdId?: string }) => {
       if (data.message === 'feedback.changesSaved') {
@@ -100,6 +104,7 @@ export default function UnitEditorPage() {
   )
   return (
     <PageSurface className="px-6 lg:px-8" contentClassName="max-w-[1200px]">
+      <AdminUnsavedChangesDialog blocker={unsavedChangesBlocker} />
       <AdminTopBar
         breadcrumb={[
           { label: t('breadcrumb.admin'), to: '/admin' },

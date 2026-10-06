@@ -11,6 +11,7 @@ import { AdminStatusActions } from './AdminStatusActions'
 import { AdminStatusBadge } from './AdminStatusBadge'
 import { useAdminFeedback } from './useAdminFeedback'
 import { useAdminMutationPending } from './useAdminMutationPending'
+import { AdminUnsavedChangesDialog } from './AdminUnsavedChangesDialog'
 import { useAdminUnsavedChanges } from './useAdminUnsavedChanges'
 import { AdminTopBar } from './AdminTopBar'
 import { useAdminTranslation } from './i18n/admin-i18n'
@@ -66,7 +67,10 @@ export default function LessonEditorPage() {
     title !== lesson.title ||
     type !== lesson.type ||
     JSON.stringify(exercises) !== JSON.stringify(lesson.exercises)
-  useAdminUnsavedChanges(hasUnsavedChanges, t('feedback.unsavedChangesWarning'))
+  const unsavedChangesBlocker = useAdminUnsavedChanges(
+    hasUnsavedChanges,
+    t('feedback.unsavedChangesWarning'),
+  )
   const handleSuccess = useCallback(
     (data: { message?: string }) => {
       if (data.message === 'feedback.changesSaved') {
@@ -172,6 +176,7 @@ export default function LessonEditorPage() {
   )
   return (
     <PageSurface className="px-6 lg:px-8" contentClassName="max-w-[1200px]">
+      <AdminUnsavedChangesDialog blocker={unsavedChangesBlocker} />
       <AdminTopBar
         breadcrumb={[
           { label: t('breadcrumb.admin'), to: '/admin' },
