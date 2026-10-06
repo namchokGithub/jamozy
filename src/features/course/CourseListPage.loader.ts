@@ -14,13 +14,19 @@ import type { HomeContentRepository } from '../../domain/repositories/home-conte
 import type { HomeLocalStateRepository } from '../../domain/repositories/home-local-state-repository'
 import type { Progress } from '../../domain/models/progress'
 
-export interface CourseListLoaderData {
+export interface CourseListPageData {
   courses: Course[]
   dueReviewCount: number
   displayName: string
   isAuthenticated: boolean
-  // None of these are awaited: the page renders first and each part streams
-  // in behind its own skeleton.
+}
+
+export interface CourseListLoaderData {
+  // None of these are awaited: the page renders as soon as the user is known
+  // and each part streams in behind its own placeholder, so the Home player
+  // never waits on Firestore.
+  // Account details, review count, and the Learning Path course list.
+  page: Promise<CourseListPageData>
   // The static Home course (DEC-043), or null when none is deployed.
   homePlayer: Promise<HomePlayerData | null>
   // Live Progress of Home lessons, read in the background; null without
@@ -71,12 +77,17 @@ export function createCourseListLoader(deps: {
           }, user.uid, params?.get('course') ?? undefined, after)
         : null,
     )
-    const [courses, items, profile, session] = await Promise.all([
+    const page = Promise.all([
       coursesRequest,
       getDueReviewItems(deps.reviewRepo, user.uid),
       deps.userProfileRepo?.getUserProfile(user.uid) ?? null,
       deps.getSession?.(),
-    ])
-    return { courses, dueReviewCount: items.length, displayName: profile?.displayName ?? 'Guest', isAuthenticated: session?.kind === 'authenticated', homePlayer, homeProgress, onePageLearningPath }
+    ]).then(([courses, items, profile, session]) => ({
+      courses,
+      dueReviewCount: items.length,
+      displayName: profile?.displayName ?? 'Guest',
+      isAuthenticated: session?.kind === 'authenticated',
+    }))
+    return { page, homePlayer, homeProgress, onePageLearningPath }
   }
 }

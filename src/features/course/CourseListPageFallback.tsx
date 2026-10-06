@@ -1,7 +1,6 @@
-import HomePlayerSkeleton from '../home/HomePlayerSkeleton'
-
-// Shown while the Home loader runs on a fresh page load, so a refresh shows
-// the page frame instead of a blank screen.
+// Shown only until the Home loader knows the user (page data and the Home
+// player stream in afterwards), so a refresh shows the page frame instead of
+// a blank screen.
 export default function CourseListPageFallback() {
   return (
     <main
@@ -31,8 +30,6 @@ export default function CourseListPageFallback() {
             <div className="h-10 w-10 animate-pulse rounded-full bg-[#f2edf9]" />
           </div>
         </header>
-
-        <HomePlayerSkeleton />
       </div>
     </main>
   )

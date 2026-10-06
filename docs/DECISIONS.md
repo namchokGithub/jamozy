@@ -13,51 +13,51 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 
 ## Index
 
-| DEC | Decision | Status | Date |
-| --- | -------- | ------ | ---- |
-| DEC-001 | Firebase Anonymous Auth for identity, no traditional sign-up | Superseded by DEC-027 | 2026-09-23 |
-| DEC-002 | Layered architecture: domain / application / infrastructure / features | Accepted | 2026-09-23 |
-| DEC-003 | Keystroke-level state stays client-side; Firestore writes only at checkpoints | Accepted (Home exercise-completion checkpoint: DEC-043) | 2026-09-23 |
-| DEC-004 | MVP excludes multiplayer, leaderboards, and social/competitive features | Accepted | 2026-09-23 |
-| DEC-005 | Pin `@vitejs/plugin-react` to 5.2.0, not latest | Accepted | 2026-09-23 |
-| DEC-006 | Level is derived from EXP, never stored | Accepted | 2026-09-23 |
-| DEC-007 | Settings live as a field on the user doc | Accepted | 2026-09-23 |
-| DEC-008 | Spaced repetition (Leitner boxes) for review scheduling | Accepted | 2026-09-23 |
-| DEC-009 | Sequential unlock: previous lesson completed unlocks the next | Accepted (creation/ordering details superseded by DEC-023; Progress-state shape superseded by DEC-025) | 2026-09-23 |
-| DEC-010 | `LessonExercise` gains `difficulty` and split Thai/English `meaning` | Accepted (meaning nullability superseded by DEC-025) | 2026-09-23 |
-| DEC-011 | `UserStats` added as an embedded entity on `UserProfile` | Accepted (field shape superseded by DEC-022) | 2026-09-23 |
-| DEC-012 | `ReviewItem.reason` field added | Accepted | 2026-09-23 |
-| DEC-013 | `UserSettings` expanded to the full requirement.md list | Accepted (field shape superseded in part by DEC-027) | 2026-09-23 |
-| DEC-014 | Application-layer additions found necessary while building the use cases | Accepted | 2026-09-23 |
-| DEC-015 | Firestore content-write security boundary | Superseded — client content writes locked before launch | 2026-09-23 |
-| DEC-016 | Composite Firestore indexes, and `ensureUser` injected into loaders (not imported) | Accepted | 2026-09-23 |
-| DEC-017 | Korean typing engine: own 2-beolsik composition, not the OS IME; jamo-level blocking; progressive partial-compound display | Accepted | 2026-09-24 |
-| DEC-018 | Lesson typing session: accuracy scale boundary, deterministic `ReviewItem` id, and a store `generation` counter to survive React StrictMode | Accepted | 2026-09-24 |
-| DEC-019 | Review system: unbounded due-count default, strict per-item correctness, no same-session requeue, and reusing the `generation` counter for a second store consumer | Accepted | 2026-09-24 |
-| DEC-020 | Settings UI: shared `defaultUserProfile`, and two fetcher/equality pitfalls that only manual browser testing caught | Accepted | 2026-09-24 |
-| DEC-021 | Profile Dashboard: display-only rounding of running-average stats | Accepted | 2026-09-25 |
-| DEC-022 | Vocabulary-backed review identity and raw aggregate typing counters | Accepted | 2026-09-27 |
-| DEC-023 | Lazy Progress creation, canonical progression ordering, and profile update timestamp | Accepted (Home course excluded from global order: DEC-043) | 2026-09-27 |
-| DEC-024 | ID conventions, bounded lessons, deterministic review reasons, and deferred level balancing | Accepted | 2026-09-27 |
-| DEC-025 | Vocabulary import identity and nullable meanings; simplify persisted Progress states | Accepted | 2026-09-27 |
-| DEC-026 | Learning Modes, shared learner state, and contiguous progression frontier | Accepted (Home course exception: DEC-043) | 2026-09-27 |
-| DEC-027 | Guest local persistence and migration to authenticated accounts | Accepted | 2026-09-27 |
-| DEC-028 | Shared learner-state checkpoints and Daily Quest completion | Accepted | 2026-09-27 |
-| DEC-029 | Session history separated from learner state and lifetime aggregates | Accepted (`home` session context: DEC-043) | 2026-09-28 |
-| DEC-030 | Guest-to-account migration merge policy | Accepted (Home exercise-progress merge: DEC-043) | 2026-09-28 |
-| DEC-031 | Preserve pre-session learner values as a compatibility baseline | Accepted | 2026-09-28 |
-| DEC-032 | Lesson Result review action opens the due Review queue | Accepted | 2026-09-28 |
-| DEC-033 | Intentional Learning Path replays grant 15 EXP | Accepted (Home replay = full shuffled session: DEC-043) | 2026-09-29 |
-| DEC-034 | Admin content is claim-authorized and status-gated | Accepted (extended by DEC-043: `Course.type`, Home export) | 2026-09-29 |
-| DEC-035 | Home one-page player uses browser-local exercise checkpoints | Superseded by DEC-043 | 2026-09-29 |
-| DEC-036 | Jamo SVG steps follow visual jamo for compound medials | Superseded by DEC-037 | 2026-10-01 |
-| DEC-037 | Jamo SVG steps follow typed keys, including compound medials | Accepted | 2026-10-01 |
-| DEC-038 | Split recipes may partition an enclosed counter with its outline | Accepted | 2026-10-01 |
-| DEC-039 | Jamo SVG runtime: committed choseong shards behind a flag | Accepted | 2026-10-03 |
-| DEC-040 | Spaces between words keep the Jamo SVG target renderer | Accepted | 2026-10-04 |
-| DEC-041 | AI agents propose and receive approval before acting | Accepted | 2026-10-04 |
-| DEC-042 | Home player owns a continuous client queue; loader only refills | Accepted (cross-lesson queue superseded by DEC-043) | 2026-10-05 |
-| DEC-043 | Home plays one static-exported course with synced exercise progress | Accepted | 2026-10-05 |
+| DEC     | Decision                                                                                                                                                          | Status                                                                                                 | Date       |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------- |
+| DEC-001 | Firebase Anonymous Auth for identity, no traditional sign-up                                                                                                      | Superseded by DEC-027                                                                                  | 2026-09-23 |
+| DEC-002 | Layered architecture: domain / application / infrastructure / features                                                                                            | Accepted                                                                                               | 2026-09-23 |
+| DEC-003 | Keystroke-level state stays client-side; Firestore writes only at checkpoints                                                                                     | Accepted (Home exercise-completion checkpoint: DEC-043)                                                | 2026-09-23 |
+| DEC-004 | MVP excludes multiplayer, leaderboards, and social/competitive features                                                                                           | Accepted                                                                                               | 2026-09-23 |
+| DEC-005 | Pin`@vitejs/plugin-react` to 5.2.0, not latest                                                                                                                    | Accepted                                                                                               | 2026-09-23 |
+| DEC-006 | Level is derived from EXP, never stored                                                                                                                           | Accepted                                                                                               | 2026-09-23 |
+| DEC-007 | Settings live as a field on the user doc                                                                                                                          | Accepted                                                                                               | 2026-09-23 |
+| DEC-008 | Spaced repetition (Leitner boxes) for review scheduling                                                                                                           | Accepted                                                                                               | 2026-09-23 |
+| DEC-009 | Sequential unlock: previous lesson completed unlocks the next                                                                                                     | Accepted (creation/ordering details superseded by DEC-023; Progress-state shape superseded by DEC-025) | 2026-09-23 |
+| DEC-010 | `LessonExercise` gains `difficulty` and split Thai/English `meaning`                                                                                              | Accepted (meaning nullability superseded by DEC-025)                                                   | 2026-09-23 |
+| DEC-011 | `UserStats` added as an embedded entity on `UserProfile`                                                                                                          | Accepted (field shape superseded by DEC-022)                                                           | 2026-09-23 |
+| DEC-012 | `ReviewItem.reason` field added                                                                                                                                   | Accepted                                                                                               | 2026-09-23 |
+| DEC-013 | `UserSettings` expanded to the full requirement.md list                                                                                                           | Accepted (field shape superseded in part by DEC-027)                                                   | 2026-09-23 |
+| DEC-014 | Application-layer additions found necessary while building the use cases                                                                                          | Accepted                                                                                               | 2026-09-23 |
+| DEC-015 | Firestore content-write security boundary                                                                                                                         | Superseded — client content writes locked before launch                                                | 2026-09-23 |
+| DEC-016 | Composite Firestore indexes, and`ensureUser` injected into loaders (not imported)                                                                                 | Accepted                                                                                               | 2026-09-23 |
+| DEC-017 | Korean typing engine: own 2-beolsik composition, not the OS IME; jamo-level blocking; progressive partial-compound display                                        | Accepted                                                                                               | 2026-09-24 |
+| DEC-018 | Lesson typing session: accuracy scale boundary, deterministic`ReviewItem` id, and a store `generation` counter to survive React StrictMode                        | Accepted                                                                                               | 2026-09-24 |
+| DEC-019 | Review system: unbounded due-count default, strict per-item correctness, no same-session requeue, and reusing the`generation` counter for a second store consumer | Accepted                                                                                               | 2026-09-24 |
+| DEC-020 | Settings UI: shared`defaultUserProfile`, and two fetcher/equality pitfalls that only manual browser testing caught                                                | Accepted                                                                                               | 2026-09-24 |
+| DEC-021 | Profile Dashboard: display-only rounding of running-average stats                                                                                                 | Accepted                                                                                               | 2026-09-25 |
+| DEC-022 | Vocabulary-backed review identity and raw aggregate typing counters                                                                                               | Accepted                                                                                               | 2026-09-27 |
+| DEC-023 | Lazy Progress creation, canonical progression ordering, and profile update timestamp                                                                              | Accepted (Home course excluded from global order: DEC-043)                                             | 2026-09-27 |
+| DEC-024 | ID conventions, bounded lessons, deterministic review reasons, and deferred level balancing                                                                       | Accepted                                                                                               | 2026-09-27 |
+| DEC-025 | Vocabulary import identity and nullable meanings; simplify persisted Progress states                                                                              | Accepted                                                                                               | 2026-09-27 |
+| DEC-026 | Learning Modes, shared learner state, and contiguous progression frontier                                                                                         | Accepted (Home course exception: DEC-043)                                                              | 2026-09-27 |
+| DEC-027 | Guest local persistence and migration to authenticated accounts                                                                                                   | Accepted                                                                                               | 2026-09-27 |
+| DEC-028 | Shared learner-state checkpoints and Daily Quest completion                                                                                                       | Accepted                                                                                               | 2026-09-27 |
+| DEC-029 | Session history separated from learner state and lifetime aggregates                                                                                              | Accepted (`home` session context: DEC-043)                                                             | 2026-09-28 |
+| DEC-030 | Guest-to-account migration merge policy                                                                                                                           | Accepted (Home exercise-progress merge: DEC-043)                                                       | 2026-09-28 |
+| DEC-031 | Preserve pre-session learner values as a compatibility baseline                                                                                                   | Accepted                                                                                               | 2026-09-28 |
+| DEC-032 | Lesson Result review action opens the due Review queue                                                                                                            | Accepted                                                                                               | 2026-09-28 |
+| DEC-033 | Intentional Learning Path replays grant 15 EXP                                                                                                                    | Accepted (Home replay = full shuffled session: DEC-043)                                                | 2026-09-29 |
+| DEC-034 | Admin content is claim-authorized and status-gated                                                                                                                | Accepted (extended by DEC-043:`Course.type`, Home export)                                              | 2026-09-29 |
+| DEC-035 | Home one-page player uses browser-local exercise checkpoints                                                                                                      | Superseded by DEC-043                                                                                  | 2026-09-29 |
+| DEC-036 | Jamo SVG steps follow visual jamo for compound medials                                                                                                            | Superseded by DEC-037                                                                                  | 2026-10-01 |
+| DEC-037 | Jamo SVG steps follow typed keys, including compound medials                                                                                                      | Accepted                                                                                               | 2026-10-01 |
+| DEC-038 | Split recipes may partition an enclosed counter with its outline                                                                                                  | Accepted                                                                                               | 2026-10-01 |
+| DEC-039 | Jamo SVG runtime: committed choseong shards behind a flag                                                                                                         | Accepted                                                                                               | 2026-10-03 |
+| DEC-040 | Spaces between words keep the Jamo SVG target renderer                                                                                                            | Accepted                                                                                               | 2026-10-04 |
+| DEC-041 | AI agents propose and receive approval before acting                                                                                                              | Accepted                                                                                               | 2026-10-04 |
+| DEC-042 | Home player owns a continuous client queue; loader only refills                                                                                                   | Accepted (cross-lesson queue superseded by DEC-043)                                                    | 2026-10-05 |
+| DEC-043 | Home plays one static-exported course with synced exercise progress                                                                                               | Accepted                                                                                               | 2026-10-05 |
 
 ---
 
@@ -344,11 +344,11 @@ retaining the repository/application boundary.
 
 1. **Accuracy is converted from a 0–1 fraction to a 0–100 scale at the `lesson-session.ts` boundary.** `typing-session.ts`'s own `getAccuracy()` returns 0–1 (an internal, per-exercise concern, left unchanged), but `application/complete-lesson.ts`'s `calculateExpGained` (`accuracy > 90`, `accuracy === 100`) and every other accuracy field in the app (`Progress.bestAccuracy`, `UserStats.averageAccuracy`) are 0–100. `lesson-session.ts`'s `getLessonResult()` does the ×100 conversion once, so nothing downstream needs to know the engine's internal scale differs.
 2. **`ReviewItem.id` was set to `LessonExercise.id` (deterministic), not a generated id.** This avoided a client-side scan but assumed exercise IDs were unique across the whole app. This identity rule is superseded by [[DEC-022]]: vocabulary-backed items use `vocabularyId`, while non-vocabulary items use `${lessonId}:${exerciseId}`.
-3. **`lesson-session-store.ts` (Zustand) exposes a `generation` counter, incremented on every `start()` call and untouched by `pressKey()`.** `LessonTypingSession` needs to know whether the store's current `session` belongs to *this* mount or is a previous lesson's leftover (the store is a module-level singleton, so nothing resets it between lessons). A first attempt used a one-shot ref flag to skip exactly the render where `start()` was first called — this passed every Vitest test, but still broke live in the browser: `src/main.tsx` wraps the app in `<StrictMode>`, whose dev-mode double-invoke of mount effects consumes a one-shot flag on its thrown-away first pass, leaving the kept second pass to read the stale session and submit it. The `generation` counter fixes this by tracking identity rather than a run count — the submit effect only fires once the store's live `generation` equals the value this mount's own `start()` call returned, which holds regardless of how many times StrictMode re-invokes the effects. `LessonTypingSession.test.tsx` now renders through `<StrictMode>` (matching `main.tsx`) specifically so this class of bug is caught by the unit suite, not only by manual browser testing.
+3. **`lesson-session-store.ts` (Zustand) exposes a `generation` counter, incremented on every `start()` call and untouched by `pressKey()`.** `LessonTypingSession` needs to know whether the store's current `session` belongs to _this_ mount or is a previous lesson's leftover (the store is a module-level singleton, so nothing resets it between lessons). A first attempt used a one-shot ref flag to skip exactly the render where `start()` was first called — this passed every Vitest test, but still broke live in the browser: `src/main.tsx` wraps the app in `<StrictMode>`, whose dev-mode double-invoke of mount effects consumes a one-shot flag on its thrown-away first pass, leaving the kept second pass to read the stale session and submit it. The `generation` counter fixes this by tracking identity rather than a run count — the submit effect only fires once the store's live `generation` equals the value this mount's own `start()` call returned, which holds regardless of how many times StrictMode re-invokes the effects. `LessonTypingSession.test.tsx` now renders through `<StrictMode>` (matching `main.tsx`) specifically so this class of bug is caught by the unit suite, not only by manual browser testing.
 
 **Why:** All three surfaced only when checking this pass's code against surrounding, already-established contracts (the rest of the app's accuracy scale, `DOMAIN-MODEL.md`'s existing id note, and the app's actual render tree) rather than treating this feature as an isolated unit — the kind of integration detail a fresh whole-branch review is specifically for. Full details, including the exact repro, in `.superpowers/sdd/2026-09-24-lesson-typing-session/progress.md`.
 
-**Consequences:** Any future code that computes accuracy must go through `getLessonResult()` (or otherwise multiply by 100), not read `typing-session.ts`'s internal fraction directly. The `ReviewItem` identity consequence in point 2 is superseded by [[DEC-022]]. Any future Zustand store shared across mounted components with StrictMode active should default to an identity/generation check rather than a one-shot ref flag when gating "did *my* mount's own action already take effect."
+**Consequences:** Any future code that computes accuracy must go through `getLessonResult()` (or otherwise multiply by 100), not read `typing-session.ts`'s internal fraction directly. The `ReviewItem` identity consequence in point 2 is superseded by [[DEC-022]]. Any future Zustand store shared across mounted components with StrictMode active should default to an identity/generation check rather than a one-shot ref flag when gating "did _my_ mount's own action already take effect."
 
 ---
 
@@ -362,7 +362,7 @@ retaining the repository/application boundary.
 1. **`getDueReviewItems` gains a `limit` parameter that defaults to `Infinity`, not to the 20-item session cap.** `CourseListPage`'s "N words due for review" badge calls it with no `limit` (the true count); only the `/review` route's own loader passes `limit: 20`. Defaulting to 20 instead would have silently under-reported the badge once a learner has more than 20 items due — caught during the spec's own self-review, before implementation, not by the later code review.
 2. **`wasCorrect` for a review item is `mistakes.length === 0` — stricter than "did it eventually finish."** The typing engine's jamo-level blocking ([[DEC-017]]) means every item is eventually typed correctly regardless of how many wrong keys preceded it; a single rejected keystroke anywhere still resets that item's Leitner box to 1, exactly the same "any mistake is a mistake" rule already used when a lesson mistake first creates a `ReviewItem` ([[DEC-018]]).
 3. **No same-session requeue of a wrong item (single linear pass, Anki-style requeue explicitly rejected).** A wrong item's box resets and it becomes due again in a future session, never immediately in this one — matches `lesson-session.ts`'s existing single-pass sequencing with zero new domain logic, at the cost of not letting a learner "fix" a mistake within the same sitting.
-4. **`ReviewTypingSession.tsx` reuses `lesson-session-store.ts`'s `generation` counter** ([[DEC-018]], point 3) rather than re-deriving its own cross-mount-staleness guard. This is the store's *second* consumer, and the fresh review that closed out DEC-018 explicitly asked this round to verify the reuse — it renders through `<StrictMode>` in its own test file for the same reason `LessonTypingSession.test.tsx` does, and a mutation-testing pass during this round's review confirmed swapping the `generation` check back to the earlier one-shot-ref approach makes the StrictMode-specific test fail again.
+4. **`ReviewTypingSession.tsx` reuses `lesson-session-store.ts`'s `generation` counter** ([[DEC-018]], point 3) rather than re-deriving its own cross-mount-staleness guard. This is the store's _second_ consumer, and the fresh review that closed out DEC-018 explicitly asked this round to verify the reuse — it renders through `<StrictMode>` in its own test file for the same reason `LessonTypingSession.test.tsx` does, and a mutation-testing pass during this round's review confirmed swapping the `generation` check back to the earlier one-shot-ref approach makes the StrictMode-specific test fail again.
 
 **Why:** All four are integration details this feature's own spec surfaced against the app's existing contracts (the badge vs. session-size distinction, the engine's blocking behavior, the existing sequencing logic, and the shared store's known failure mode) rather than choices specific to review in isolation.
 
@@ -484,7 +484,7 @@ recommended lesson is the first lesson in global order that is not completed.
 A soft-locked future Learning Path lesson may be practiced and completed early;
 that completion is retained. When advancing after a Learning Path completion,
 skip already-completed future lessons but stop at the first missing or unlocked
-lesson. Practice Modes, Daily Quest, and Review never write LessonProgress or
+lesson. Practice Modes, Daily Queโst, and Review never write LessonProgress or
 unlock Learning Path content.
 
 Topics are metadata plus `VocabularyEntry.topicIds` membership. Topic counts
@@ -1001,7 +1001,7 @@ not after each lesson.
 
 **Decision:**
 
-*Content.* `Course` gains `type: 'learning' | 'home'`; an absent type reads
+_Content._ `Course` gains `type: 'learning' | 'home'`; an absent type reads
 as `learning`. Exactly one published `home` course exists. Admin BO and
 Firestore remain its source of truth and keep [[DEC-034]]'s status gating.
 Every `pnpm build` first exports the published Home course (units, lessons,
@@ -1015,18 +1015,18 @@ Path global order and frontier, the course list, Daily Quest, and unlock
 rules ([[DEC-009]], [[DEC-023]], [[DEC-026]]); learners may open any of its
 units or lessons.
 
-*Presentation.* Home lists the course's units as categories. A selected unit
+_Presentation._ Home lists the course's units as categories. A selected unit
 lists its lessons, each showing distinct completed exercises out of its
 total (for example `3/5`). A completed lesson always shows full (`5/5`).
 
-*Sessions.* Entering a lesson shuffles all of its exercises once; a session
+_Sessions._ Entering a lesson shuffles all of its exercises once; a session
 never repeats an exercise before it has played every exercise. Each new
 session, including after a refresh, shuffles again. When a session ends,
 Home moves automatically to the next lesson, then to the next unit, with a
 short non-blocking notice. After the last lesson of the last unit, Home loops
 back to the first lesson; every lesson stays playable.
 
-*Exercise progress and completion.* `Progress` for a Home lesson also stores
+_Exercise progress and completion._ `Progress` for a Home lesson also stores
 the distinct `completedExerciseIds` and the raw partial result (accepted and
 rejected keystrokes, start time, and a stable `submissionId`) of those first
 completions; mistakes are not kept because Home creates no ReviewItems. It is permanent and syncs like other Progress. When
@@ -1038,10 +1038,10 @@ plays a completed lesson's whole shuffle submits a replay session worth 15
 EXP ([[DEC-033]]); an abandoned session submits nothing. Completion is never
 reset. Home lessons never create ReviewItems.
 
-*Resume.* Only `{ unitId, lessonId }` is kept, locally. A refresh restarts
+_Resume._ Only `{ unitId, lessonId }` is kept, locally. A refresh restarts
 that lesson with a new shuffle; exercise progress is unaffected.
 
-*Background work.* Learning never waits on persistence. Home renders from the
+_Background work._ Learning never waits on persistence. Home renders from the
 JSON and the last locally cached Progress, then refreshes Progress in the
 background. Every write (exercise progress, completion, replay session) goes
 to a durable local outbox, is retried in the background until it succeeds,
@@ -1068,4 +1068,3 @@ Cloud partial result wins unless absent. Profile's `Lessons completed`
 `LessonProgress`. Because a missing type reads as `learning`, the course
 list filters `home` out in the adapter rather than with a Firestore
 `where('type', '==', 'learning')` query, which would drop untyped courses.
-

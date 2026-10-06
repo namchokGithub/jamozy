@@ -15,6 +15,18 @@ function makeCourse(id: string): Course {
   }
 }
 
+// Mirrors CourseListLoaderData: page data streams in as a promise.
+function pageData(courses: Course[], dueReviewCount: number) {
+  return {
+    page: Promise.resolve({
+      courses,
+      dueReviewCount,
+      displayName: 'Guest',
+      isAuthenticated: false,
+    }),
+  }
+}
+
 describe('CourseListPage', () => {
   it('presents a welcoming hero and learning-path section around the course links', async () => {
     const router = createMemoryRouter(
@@ -22,10 +34,7 @@ describe('CourseListPage', () => {
         {
           path: '/',
           Component: CourseListPage,
-          loader: async () => ({
-            courses: [makeCourse('c1')],
-            dueReviewCount: 0,
-          }),
+          loader: async () => pageData([makeCourse('c1')], 0),
         },
       ],
       { initialEntries: ['/'] },
@@ -53,10 +62,7 @@ describe('CourseListPage', () => {
         {
           path: '/',
           Component: CourseListPage,
-          loader: async () => ({
-            courses: [makeCourse('c1')],
-            dueReviewCount: 0,
-          }),
+          loader: async () => pageData([makeCourse('c1')], 0),
         },
       ],
       { initialEntries: ['/'] },
@@ -75,7 +81,7 @@ describe('CourseListPage', () => {
         {
           path: '/',
           Component: CourseListPage,
-          loader: async () => ({ courses: [], dueReviewCount: 0 }),
+          loader: async () => pageData([], 0),
         },
       ],
       { initialEntries: ['/'] },
@@ -92,7 +98,7 @@ describe('CourseListPage', () => {
         {
           path: '/',
           Component: CourseListPage,
-          loader: async () => ({ courses: [], dueReviewCount: 3 }),
+          loader: async () => pageData([], 3),
         },
       ],
       { initialEntries: ['/'] },
@@ -111,7 +117,7 @@ describe('CourseListPage', () => {
         {
           path: '/',
           Component: CourseListPage,
-          loader: async () => ({ courses: [], dueReviewCount: 0 }),
+          loader: async () => pageData([], 0),
         },
       ],
       { initialEntries: ['/'] },
@@ -130,7 +136,7 @@ describe('CourseListPage', () => {
         {
           path: '/',
           Component: CourseListPage,
-          loader: async () => ({ courses: [], dueReviewCount: 0 }),
+          loader: async () => pageData([], 0),
         },
       ],
       { initialEntries: ['/'] },
@@ -147,7 +153,7 @@ describe('CourseListPage', () => {
         {
           path: '/',
           Component: CourseListPage,
-          loader: async () => ({ courses: [], dueReviewCount: 0 }),
+          loader: async () => pageData([], 0),
         },
       ],
       { initialEntries: ['/'] },
