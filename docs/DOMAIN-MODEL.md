@@ -17,12 +17,18 @@ Conventions: document-backed cloud entities (`Course`, `Unit`, `Lesson`, `Vocabu
 | title       | string | e.g. "Hangul Basics"               |
 | description | string | short summary shown on course list |
 | order       | number | canonical display/unlock order among courses; unique globally |
+| type        | `'learning' \| 'home'` \| absent | absent reads as `learning`; exactly one published `home` course ([[DEC-043]]) |
 | status      | `'draft' \| 'published' \| 'archived'` | learner visibility state ([[DEC-034]]) |
 | archivedFromStatus | `'draft' \| 'published'` \| absent | recorded on Archive and used by Restore |
 | createdAt   | Date   |                                    |
 | updatedAt   | Date   |                                    |
 
 Relationships: a `Unit` belongs to a `Course` via `Unit.courseId`. No nested subcollection — flat top-level collections per README.
+
+The `home` course keeps the same Course → Unit → Lesson → LessonExercise
+structure and Admin BO status gating, but learners never read it from
+Firestore: a build script exports it to static JSON for Home. It is outside
+the Learning Path global order, frontier, and unlock rules ([[DEC-043]]).
 
 ---
 
@@ -161,6 +167,8 @@ VocabularyProgress. Label this state `Practiced` or `Encountered`, never
 | attempts      | number                                  | total attempt count                                          |
 | lastAttemptAt | Date\| null                             |                                                              |
 | completedAt   | Date\| null                             | set on first`status === 'completed'`                         |
+| completedExerciseIds | string[] \| absent                | Home lessons only: distinct exercises ever completed ([[DEC-043]]) |
+| homePartialResult | `HomePartialResult` \| absent         | Home lessons only: raw totals of those first completions; removed once the lesson completes |
 
 **Cross-checked against `docs/requirement.md`:** that doc lists a 4th `Mastered` state and names `'unlocked'` as `Ready`. The target model keeps only persisted `'unlocked'/'completed'`; locked is represented by a missing document, and no `Mastered` trigger is specified.
 
@@ -172,14 +180,20 @@ Not persisted here: in-progress keystroke/session state. Per `AGENTS.md`, that s
 
 The global sequence is the lexicographic order of `(Course.order, Unit.order, Lesson.order)`: courses sort by `Course.order`; units by `Unit.order` within their course; lessons by `Lesson.order` within their unit. The next lesson may therefore cross a Unit and then a Course boundary. Document IDs never determine progression order.
 
-### Local one-page checkpoint
+### Home exercise progress
 
-The Home player’s exercise-level resume state is a local IndexedDB-only record,
-keyed by `(userId, courseId)`, not a Firestore domain document. It retains
-completed exercise IDs plus raw partial lesson counters, mistakes, start time,
-and a stable submission ID until that lesson submits. It is not migrated when a
-Guest signs in, and must not be confused with `Progress` or `LearningSession`
-([[DEC-035]]).
+For a Home lesson, `Progress` also records exercise-level progress
+([[DEC-043]]). `completedExerciseIds` is a set: replaying an exercise never
+adds to it. `HomePartialResult` holds `submissionId`, `startedAtMs`,
+`acceptedKeystrokes`, and `rejectedKeystrokes` for each exercise's first
+completion. When the IDs first cover every exercise, the lesson becomes
+`completed`, one LearningSession is submitted with `id = submissionId`, and
+`homePartialResult` is removed. Both fields are permanent and sync like other
+Progress; a Home lesson displays as full once `completed`. Home lessons have
+no missing-is-locked meaning: a missing document means not started.
+
+The only local Home state is the resume pointer `{ unitId, lessonId }`; it is
+not a domain record and is not migrated.
 
 ---
 
@@ -252,8 +266,8 @@ again after `expAwarded` is true.
 
 **Authenticated path:** `users/{userId}/learningSessions/{sessionId}`
 **Implemented file:** `src/domain/models/learning-session.ts` (currently
-supports Learning Path and Review; other contexts below remain target-model
-work).
+supports Learning Path, Home, and Review; other contexts below remain
+target-model work).
 
 | Field | Type | Notes |
 | --- | --- | --- |
@@ -273,6 +287,7 @@ object:
 ```ts
 type LearningSessionContext =
   | { mode: 'learning-path'; lessonId: string }
+  | { mode: 'home'; lessonId: string }
   | { mode: 'daily-quest'; dateKey: string }
   | { mode: 'topic'; topicId: string }
   | { mode: 'keyboard-position'; positionId: string }

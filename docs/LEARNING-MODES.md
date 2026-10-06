@@ -13,8 +13,9 @@ Firestore data have not yet migrated to it.
 | Learner state | Records learner-specific progress, statistics, review schedules, and quest state. |
 
 Daily Quest, Topics, and Keyboard Position are experiences, never
-`Course.type` variants. `Course → Unit → Lesson → LessonExercise` remains the
-structured Learning Path only.
+`Course.type` variants. `Course → Unit → Lesson → LessonExercise` is the
+structured Learning Path, plus one exception: the single `home` course that
+Home plays ([[DEC-043]]). `Course.type` has only `learning` and `home`.
 
 ## Experiences
 
@@ -36,6 +37,24 @@ lessons stop the frontier.
 Example: after `L1` completes, a learner may complete `L3` early while `L2` is
 still missing. The recommendation remains `L2`. Completing `L2` skips the
 already-completed `L3` and unlocks `L4`.
+
+### Home
+
+Home plays the single `home` course from a build-time static JSON export, so
+opening Home never waits on Firestore ([[DEC-043]]). Units are categories;
+each lesson shows distinct completed exercises out of its total, and a
+completed lesson always shows full. Any unit or lesson may be opened; the
+`home` course has no lock, frontier, or place in the Learning Path order.
+
+A session shuffles all of the lesson's exercises once and plays each exactly
+once; every new session, including after a refresh, reshuffles. At session
+end Home moves to the next lesson, then the next unit, with a non-blocking
+notice. A lesson completes when its exercises have each been completed at
+least once, across sessions and devices. First completion grants the normal
+accuracy-based EXP; a full session of an already-completed lesson grants 15
+EXP ([[DEC-033]]); an abandoned session grants nothing. Completion is never
+reset, and Home never creates ReviewItems. All Home persistence runs in the
+background through a retrying local outbox.
 
 ### Practice Modes
 
@@ -134,6 +153,7 @@ concrete timezone policy remains undecided.
 | Experience | MVP EXP policy | Unlocks Learning Path? |
 | --- | --- | --- |
 | Learning Path | Existing lesson-completion rule | Yes, through the contiguous frontier |
+| Home | First completion by accuracy; full replay session 15 EXP | No |
 | Daily Quest | Once per daily quest | No |
 | Topic | No EXP | No |
 | Keyboard Position | No EXP | No |

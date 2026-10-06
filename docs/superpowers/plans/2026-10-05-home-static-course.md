@@ -55,11 +55,11 @@
 
 **Files:** `docs/DOMAIN-MODEL.md`, `docs/LEARNING-MODES.md`, `docs/SESSION-AND-HISTORY.md`, `docs/AUTH-AND-PERSISTENCE.md`, `AGENTS.md`, `src/domain/models/{course,progress,learning-session,home-content}.ts`, model tests.
 
-- [ ] **Step 1:** Update topic docs to DEC-043: `Course.type`; `Progress.completedExerciseIds` and `homePartialResult`; `home` session context; replace "Local one-page checkpoint" sections; Home as a Course-structured exception in LEARNING-MODES; migration rule in AUTH-AND-PERSISTENCE.
+- [x] **Step 1:** Update topic docs to DEC-043: `Course.type`; `Progress.completedExerciseIds` and `homePartialResult`; `home` session context; replace "Local one-page checkpoint" sections; Home as a Course-structured exception in LEARNING-MODES; migration rule in AUTH-AND-PERSISTENCE.
 - [ ] **Step 2:** Propose to the user an `AGENTS.md` hard-rule wording that names Home exercise completion as a checkpoint; apply only after approval.
-- [ ] **Step 3:** Write failing tests: `courseType()` defaults to `learning`; `home-content` schema accepts a valid export and rejects missing IDs or empty exercises.
-- [ ] **Step 4:** Implement the model changes; keep new `Progress` fields optional so existing records and adapters stay valid.
-- [ ] **Step 5:** `pnpm test`, `pnpm tsc -b`.
+- [x] **Step 3:** Write failing tests: `courseType()` defaults to `learning`; `home-content` schema accepts a valid export and rejects missing IDs or empty exercises.
+- [x] **Step 4:** Implement the model changes; keep new `Progress` fields optional so existing records and adapters stay valid.
+- [x] **Step 5:** `pnpm test`, `pnpm tsc -b`.
 
 ### Task 2: Admin BO type field and Learning Path isolation
 

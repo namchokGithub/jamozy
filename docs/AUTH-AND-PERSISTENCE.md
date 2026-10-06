@@ -131,6 +131,8 @@ history record.
 | Data | Merge rule |
 | --- | --- |
 | `LessonProgress` | Keep the furthest state: `completed` > `unlocked` > `missing`. |
+| Home `completedExerciseIds` | Union ([[DEC-043]]). |
+| Home `homePartialResult` | Drop it if either side is `completed`; otherwise keep Cloud's, or Guest's when Cloud has none. |
 | EXP | Do not add Guest and Cloud totals directly. Aggregate only submitted sessions whose `sessionId` has not already contributed to the destination. |
 | `UserStats` raw counters | Like EXP, aggregate only from sessions not already aggregated in the destination; derive averages from the resulting raw counters. |
 | `ReviewItem` | Union by deterministic identity. Keep the state that makes review due sooner (the earlier `nextReviewAt`); preserve one item only. |

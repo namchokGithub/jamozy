@@ -1025,8 +1025,8 @@ completed and every lesson stays playable.
 
 *Exercise progress and completion.* `Progress` for a Home lesson also stores
 the distinct `completedExerciseIds` and the raw partial result (accepted and
-rejected keystrokes, mistakes, start time, and a stable `submissionId`) of
-those first completions. It is permanent and syncs like other Progress. When
+rejected keystrokes, start time, and a stable `submissionId`) of those first
+completions; mistakes are not kept because Home creates no ReviewItems. It is permanent and syncs like other Progress. When
 the IDs first cover every exercise, the lesson becomes `completed` and one
 LearningSession is submitted from the partial result with accuracy-based EXP;
 its `sessionId` is the partial result's `submissionId`. Exercises played
