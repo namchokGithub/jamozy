@@ -57,6 +57,9 @@ export const en = {
     'This hides the content from learners without changing learner history.',
   'confirm.visibility.body':
     'This change will update content visibility for learners.',
+  'confirm.publishWithParents.body':
+    'Not published yet: {parents}. They will be published first, which also shows their other Published content to learners.',
+  'action.publishWithParents': 'Publish all',
 
   'dashboard.eyebrow': 'Owner workspace',
   'dashboard.title': 'Content management',
@@ -230,6 +233,9 @@ export const th: Record<AdminMessageKey, string> = {
     'เนื้อหานี้จะถูกซ่อนจากผู้เรียน โดยไม่เปลี่ยนประวัติการเรียนของผู้เรียน',
   'confirm.visibility.body':
     'การเปลี่ยนแปลงนี้จะอัปเดตการมองเห็นเนื้อหาสำหรับผู้เรียน',
+  'confirm.publishWithParents.body':
+    'ยังไม่เผยแพร่: {parents} ระบบจะเผยแพร่รายการเหล่านี้ก่อน และเนื้อหาอื่นที่เผยแพร่แล้วภายใต้รายการเหล่านี้จะแสดงต่อผู้เรียนด้วย',
+  'action.publishWithParents': 'เผยแพร่ทั้งหมด',
 
   'dashboard.eyebrow': 'พื้นที่ทำงานของเจ้าของ',
   'dashboard.title': 'จัดการเนื้อหา',

@@ -124,7 +124,18 @@ export default function UnitEditorPage() {
           <AdminStatusBadge status={unit.status} />
         </div>
         <div className="flex items-center gap-2">
-          <AdminStatusActions id={unit.id} kind="unit" status={unit.status} />
+          <AdminStatusActions
+            id={unit.id}
+            kind="unit"
+            status={unit.status}
+            parents={[
+              course && {
+                kind: 'course',
+                title: course.title,
+                status: course.status,
+              },
+            ]}
+          />
         </div>
       </header>
       {detailsDirty && (
@@ -275,6 +286,14 @@ export default function UnitEditorPage() {
                   id={lesson.id}
                   kind="lesson"
                   status={lesson.status}
+                  parents={[
+                    course && {
+                      kind: 'course',
+                      title: course.title,
+                      status: course.status,
+                    },
+                    { kind: 'unit', title: unit.title, status: unit.status },
+                  ]}
                 />
               </div>
             </div>

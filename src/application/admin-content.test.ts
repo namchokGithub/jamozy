@@ -3,6 +3,8 @@ import {
   archiveCourse,
   publishCourse,
   publishLesson,
+  publishLessonWithParents,
+  publishUnitWithParents,
   restoreCourse,
   restoreLesson,
   restoreUnit,
@@ -360,6 +362,94 @@ describe('admin content lifecycle', () => {
     await archiveCourse(repo, draft)
     await restoreCourse(repo, (await repo.getCourseById('course'))!)
     expect((await repo.getCourseById('course'))?.status).toBe('draft')
+  })
+
+  describe('publishing with unpublished parents', () => {
+    const exercise = {
+      id: 'exercise',
+      targetText: '가',
+      romanization: null,
+      meaningTh: '',
+      meaningEn: '',
+      difficulty: 'easy' as const,
+      hint: null,
+    }
+    const draftCourse = { ...course, status: 'draft' as const }
+    const draftUnit = { ...unit, status: 'draft' as const }
+    const archivedCourse = {
+      ...course,
+      status: 'archived' as const,
+      archivedFromStatus: 'draft' as const,
+    }
+
+    it('publishes the Course, Unit, and Lesson top-down', async () => {
+      const repo = new FakeAdminContentRepository(
+        [draftCourse],
+        [draftUnit],
+        [lesson([exercise])],
+      )
+
+      const result = await createAdminAction(repo)({
+        request: lessonSaveRequest({
+          intent: 'publish-with-parents',
+          kind: 'lesson',
+          id: 'lesson',
+        }),
+        params: {},
+      } as never)
+
+      expect(result).toEqual({ message: 'feedback.lessonPublished' })
+      expect((await repo.getCourseById('course'))?.status).toBe('published')
+      expect((await repo.getUnitById('unit'))?.status).toBe('published')
+      expect((await repo.getLessonById('lesson'))?.status).toBe('published')
+    })
+
+    it('publishes an archived parent Course and clears its archive record', async () => {
+      const repo = new FakeAdminContentRepository([archivedCourse], [draftUnit])
+
+      await expect(publishUnitWithParents(repo, draftUnit)).resolves.toEqual({
+        ok: true,
+      })
+
+      const published = await repo.getCourseById('course')
+      expect(published?.status).toBe('published')
+      expect(published?.archivedFromStatus).toBeUndefined()
+      expect((await repo.getUnitById('unit'))?.status).toBe('published')
+    })
+
+    it('publishes no parent when the Lesson cannot be published', async () => {
+      const repo = new FakeAdminContentRepository(
+        [draftCourse],
+        [draftUnit],
+        [lesson([])],
+      )
+
+      await expect(publishLessonWithParents(repo, lesson([]))).resolves.toEqual(
+        {
+          ok: false,
+          error: 'Add at least one Exercise before publishing.',
+        },
+      )
+      expect((await repo.getCourseById('course'))?.status).toBe('draft')
+      expect((await repo.getUnitById('unit'))?.status).toBe('draft')
+    })
+
+    it('publishes nothing when the parent Home course conflicts', async () => {
+      const repo = new FakeAdminContentRepository(
+        [
+          { ...course, id: 'home', type: 'home' },
+          { ...draftCourse, type: 'home' },
+        ],
+        [draftUnit],
+      )
+
+      await expect(publishUnitWithParents(repo, draftUnit)).resolves.toEqual({
+        ok: false,
+        error: 'Only one published Home course is allowed.',
+      })
+      expect((await repo.getCourseById('course'))?.status).toBe('draft')
+      expect((await repo.getUnitById('unit'))?.status).toBe('draft')
+    })
   })
 
   describe('restoring an archived Published Unit or Lesson', () => {

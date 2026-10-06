@@ -198,6 +198,59 @@ export async function publishLesson(
   return { ok: true }
 }
 
+function asPublished<T extends ContentStatusFields>(item: T): T {
+  const { archivedFromStatus: _archivedFromStatus, ...published } = item
+  void _archivedFromStatus
+  return { ...published, status: 'published' } as T
+}
+
+// Checks a non-Published parent Course could be published, without writing.
+async function unpublishableCourse(
+  repo: AdminContentRepository,
+  course: Course,
+): Promise<AdminCommandFailure | null> {
+  if (course.status === 'published') return null
+  return (await conflictsWithPublishedHome(repo, asPublished(course)))
+    ? { ok: false, error: ONE_HOME_COURSE }
+    : null
+}
+
+// Publishes a Unit and, first, its parent Course when that is not Published.
+// Every check runs before the first write, so a rejection changes nothing.
+export async function publishUnitWithParents(
+  repo: AdminContentRepository,
+  unit: Unit,
+): Promise<AdminCommandResult> {
+  const course = await repo.getCourseById(unit.courseId)
+  if (!course) return { ok: false, error: 'Parent Course was not found.' }
+  const blocked = await unpublishableCourse(repo, course)
+  if (blocked) return blocked
+  if (course.status !== 'published') await repo.saveCourse(asPublished(course))
+  await repo.saveUnit(asPublished(unit))
+  return { ok: true }
+}
+
+// Publishes a Lesson and, top-down, its non-Published Unit and Course.
+// Every check runs before the first write, so a rejection changes nothing.
+export async function publishLessonWithParents(
+  repo: AdminContentRepository,
+  input: Lesson,
+): Promise<AdminCommandResult> {
+  const lesson = withTypeableTargetText(input)
+  const invalid = unpublishableExercises(lesson)
+  if (invalid) return invalid
+  const unit = await repo.getUnitById(lesson.unitId)
+  if (!unit) return { ok: false, error: 'Parent Unit was not found.' }
+  const course = await repo.getCourseById(unit.courseId)
+  if (!course) return { ok: false, error: 'Parent Course was not found.' }
+  const blocked = await unpublishableCourse(repo, course)
+  if (blocked) return blocked
+  if (course.status !== 'published') await repo.saveCourse(asPublished(course))
+  if (unit.status !== 'published') await repo.saveUnit(asPublished(unit))
+  await repo.saveLesson(asPublished(lesson))
+  return { ok: true }
+}
+
 export async function archiveCourse(
   repo: AdminContentRepository,
   course: Course,

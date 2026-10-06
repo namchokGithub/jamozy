@@ -293,6 +293,13 @@ export default function CourseEditorPage() {
                   id={unit.id}
                   kind="unit"
                   status={unit.status}
+                  parents={[
+                    {
+                      kind: 'course',
+                      title: course.title,
+                      status: course.status,
+                    },
+                  ]}
                 />
               </div>
             </div>

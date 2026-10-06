@@ -6,9 +6,16 @@ import { ConfirmationModal } from '../../components/ui/ConfirmationModal'
 import type { AdminActionData } from './admin-action'
 import { useAdminFeedback } from './useAdminFeedback'
 import { useAdminMutationPending } from './useAdminMutationPending'
-import { useAdminTranslation } from './i18n/admin-i18n'
+import { statusKey, useAdminTranslation } from './i18n/admin-i18n'
 
 type StatusIntent = 'publish' | 'archive' | 'restore'
+
+/** A Course or Unit above the item; listed when Publish must publish it too. */
+export interface AdminStatusParent {
+  kind: 'course' | 'unit'
+  title: string
+  status: ContentStatus | undefined
+}
 
 function actionsForStatus(status: ContentStatus | undefined): StatusIntent[] {
   return status === 'archived'
@@ -22,10 +29,13 @@ export function AdminStatusActions({
   id,
   kind,
   status,
+  parents = [],
 }: {
   id: string
   kind: 'course' | 'unit' | 'lesson'
   status: ContentStatus | undefined
+  /** Ancestors top-down; null when the loader could not find one. */
+  parents?: (AdminStatusParent | null)[]
 }) {
   const fetcher = useFetcher<AdminActionData>()
   const { t } = useAdminTranslation()
@@ -36,6 +46,12 @@ export function AdminStatusActions({
     fetcher.submit({ intent, id, kind }, { method: 'post' })
   }
   const actions = actionsForStatus(status)
+  const unpublishedParents = parents.filter(
+    (parent): parent is AdminStatusParent =>
+      parent !== null && parent.status !== 'published',
+  )
+  const withParents =
+    pendingIntent === 'publish' && unpublishedParents.length > 0
   return (
     <>
       {actions.map((action) => (
@@ -60,20 +76,34 @@ export function AdminStatusActions({
         body={
           pendingIntent === 'archive'
             ? t('confirm.archive.body')
-            : t('confirm.visibility.body')
+            : withParents
+              ? t('confirm.publishWithParents.body', {
+                  parents: unpublishedParents
+                    .map(
+                      (parent) =>
+                        `${t(`kind.${parent.kind}`)} “${parent.title}” (${t(statusKey(parent.status))})`,
+                    )
+                    .join(', '),
+                })
+              : t('confirm.visibility.body')
         }
         cancelLabel={t('action.cancel')}
         confirmLabel={
           isPending
             ? t('action.saving')
-            : pendingIntent
-              ? t(`action.${pendingIntent}`)
-              : ''
+            : withParents
+              ? t('action.publishWithParents')
+              : pendingIntent
+                ? t(`action.${pendingIntent}`)
+                : ''
         }
         closeLabel={t('action.close')}
         isConfirming={isPending}
         onClose={() => setPendingIntent(null)}
-        onConfirm={() => pendingIntent && submit(pendingIntent)}
+        onConfirm={() =>
+          pendingIntent &&
+          submit(withParents ? 'publish-with-parents' : pendingIntent)
+        }
       />
     </>
   )

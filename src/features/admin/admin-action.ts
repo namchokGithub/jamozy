@@ -6,7 +6,9 @@ import {
   archiveUnit,
   publishCourse,
   publishLesson,
+  publishLessonWithParents,
   publishUnit,
+  publishUnitWithParents,
   restoreCourse,
   restoreLesson,
   restoreUnit,
@@ -194,6 +196,10 @@ async function unitAction(
     const result = await publishUnit(repo, unit)
     return commandResult(result, 'feedback.unitPublished')
   }
+  if (intent === 'publish-with-parents') {
+    const result = await publishUnitWithParents(repo, unit)
+    return commandResult(result, 'feedback.unitPublished')
+  }
   if (intent === 'archive') {
     await archiveUnit(repo, unit)
     return { message: 'feedback.unitArchived' }
@@ -244,6 +250,10 @@ async function lessonAction(
   }
   if (intent === 'publish') {
     const result = await publishLesson(repo, lesson)
+    return commandResult(result, 'feedback.lessonPublished')
+  }
+  if (intent === 'publish-with-parents') {
+    const result = await publishLessonWithParents(repo, lesson)
     return commandResult(result, 'feedback.lessonPublished')
   }
   if (intent === 'archive') {

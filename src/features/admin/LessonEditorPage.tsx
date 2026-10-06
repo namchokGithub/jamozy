@@ -204,6 +204,14 @@ export default function LessonEditorPage() {
             id={lesson.id}
             kind="lesson"
             status={lesson.status}
+            parents={[
+              course && {
+                kind: 'course',
+                title: course.title,
+                status: course.status,
+              },
+              unit && { kind: 'unit', title: unit.title, status: unit.status },
+            ]}
           />
         </div>
       </header>
