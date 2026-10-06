@@ -53,7 +53,8 @@ notice; after the last lesson it loops back to the first. A lesson completes whe
 least once, across sessions and devices. First completion grants the sum of
 the difficulty-based first-completion rewards for its exercises, including
 eligible perfect-exercise bonuses ([[DEC-045]]); a full session of an
-already-completed lesson grants 15 EXP ([[DEC-033]]); an abandoned session
+already-completed lesson awards each replayed exercise by difficulty
+([[DEC-046]]); an abandoned session
 grants nothing. Completion is never
 reset, and Home never creates ReviewItems. All Home persistence runs in the
 background through a retrying local outbox.
@@ -155,8 +156,8 @@ concrete timezone policy remains undecided.
 
 | Experience | MVP EXP policy | Unlocks Learning Path? |
 | --- | --- | --- |
-| Learning Path | First-completed exercise: Easy 15, Medium 25, Hard 30 EXP; perfect exercise +5; full replay session 15 EXP | Yes, through the contiguous frontier |
-| Home | Same first-completed exercise reward; full replay session 15 EXP | No |
+| Learning Path | First-completed exercise: Easy 15, Medium 25, Hard 30 EXP; perfect exercise +5; replayed exercise: Easy 3, Medium 5, Hard 10 EXP | Yes, through the contiguous frontier |
+| Home | Same first-completed exercise reward; replayed exercise: Easy 3, Medium 5, Hard 10 EXP | No |
 | Daily Quest | Sum of item rewards once per quest: Easy 5, Medium 10, Hard 15 EXP | No |
 | Topic / Keyboard Position / Random Practice | Per completed item: Easy 3, Medium 5, Hard 10 EXP | No |
 | Review | Per completed item: Easy 3, Medium 5, Hard 10 EXP | No |

@@ -62,10 +62,10 @@ then moves on to the next lesson (and unit) with a short notice, looping back
 to the first lesson after the last one. A lesson
 completes once every exercise has been typed at least once, across sessions
 and devices: first completion grants difficulty-based EXP per exercise, with
-an additional bonus for a perfect exercise; a full replay of a completed
-lesson grants 15 EXP. Home lessons create no review items. See
-[`docs/LEVELING.md`](docs/LEVELING.md) and [[DEC-045]] for the reward amounts
-and bonus calculation. Every save runs in the background through a retrying
+an additional bonus for a perfect exercise; a full replay awards each exercise
+by its difficulty. Home lessons create no review items. See
+[`docs/LEVELING.md`](docs/LEVELING.md), [[DEC-045]], and [[DEC-046]] for the
+reward amounts and bonus calculation. Every save runs in the background through a retrying
 local outbox.
 
 When no Home course is published, Home falls back to the Learning Path player

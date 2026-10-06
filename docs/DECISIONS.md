@@ -47,7 +47,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-030 | Guest-to-account migration merge policy                                                                                                                           | Accepted (Home exercise-progress merge: DEC-043)                                                       | 2026-09-28 |
 | DEC-031 | Preserve pre-session learner values as a compatibility baseline                                                                                                   | Accepted                                                                                               | 2026-09-28 |
 | DEC-032 | Lesson Result review action opens the due Review queue                                                                                                            | Accepted                                                                                               | 2026-09-28 |
-| DEC-033 | Intentional Learning Path replays grant 15 EXP                                                                                                                    | Accepted (replay reward retained by DEC-045; Home replay = full shuffled session: DEC-043)             | 2026-09-29 |
+| DEC-033 | Intentional Learning Path replays grant 15 EXP                                                                                                                    | Superseded by DEC-046                                                                              | 2026-09-29 |
 | DEC-034 | Admin content is claim-authorized and status-gated                                                                                                                | Accepted (extended by DEC-043:`Course.type`, Home export)                                              | 2026-09-29 |
 | DEC-035 | Home one-page player uses browser-local exercise checkpoints                                                                                                      | Superseded by DEC-043                                                                                  | 2026-09-29 |
 | DEC-036 | Jamo SVG steps follow visual jamo for compound medials                                                                                                            | Superseded by DEC-037                                                                                  | 2026-10-01 |
@@ -60,6 +60,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-043 | Home plays one static-exported course with synced exercise progress                                                                                               | Accepted                                                                                               | 2026-10-05 |
 | DEC-044 | Jamo SVG renderer enabled in Production without a Preview gate                                                                                                    | Accepted                                                                                               | 2026-10-06 |
 | DEC-045 | Difficulty-based EXP rewards and bonus calculation                                                                                                                | Accepted                                                                                               | 2026-10-06 |
+| DEC-046 | Difficulty-based EXP rewards for completed-lesson replays                                                                                                        | Accepted                                                                                               | 2026-10-06 |
 
 ---
 
@@ -727,9 +728,10 @@ creation and its Leitner schedule remain unchanged.
 ## DEC-033 — Intentional Learning Path replays grant 15 EXP
 
 **Date:** 2026-09-29
+**Superseded by:** [[DEC-046]]
 **Status:** Accepted (replay award retained by [[DEC-045]]; a Home replay is one full shuffled session, see [[DEC-043]])
 
-**Decision:** An intentional replay of a lesson whose
+**Decision:** _Superseded reward policy:_ an intentional replay of a lesson whose
 `LessonProgress` is already `completed` creates a new submitted session and
 grants a flat 15 EXP. It does not change the lesson's completion state, unlock
 the next lesson, or create first-completion review effects.
@@ -738,9 +740,8 @@ the next lesson, or create first-completion review effects.
 predictable reward without competing with progression through new content.
 
 **Consequences:** This supersedes DEC-014's no-repeat-EXP rule for the active
-`completeLessonSession` path. There is no daily cap in MVP; any future balance
-limit needs its own persisted policy and decision. The first-completion reward
-is now defined by [[DEC-045]], replacing the former accuracy-based rule.
+`completeLessonSession` path. [[DEC-046]] replaces the 15-EXP amount. The
+replay identity and non-progression effects remain valid.
 
 ---
 
@@ -1037,8 +1038,9 @@ LearningSession is submitted from the partial result with the earned
 difficulty-based EXP for its first-completed exercises ([[DEC-045]]); its
 `sessionId` is the partial result's `submissionId`. Exercises played
 after that within the same session submit nothing more. A later session that
-plays a completed lesson's whole shuffle submits a replay session worth 15
-EXP ([[DEC-033]]); an abandoned session submits nothing. Completion is never
+plays a completed lesson's whole shuffle submits a replay session that awards
+its exercises' difficulty-based replay EXP ([[DEC-046]]); an abandoned session
+submits nothing. Completion is never
 reset. Home lessons never create ReviewItems.
 
 _Resume._ Only `{ unitId, lessonId }` is kept, locally. A refresh restarts
@@ -1113,8 +1115,8 @@ Each eligible item contributes its base reward once when completed. A
 Daily Quest grants the sum of its completed items once for that quest; retries
 can update learner state but cannot grant the quest reward again. A first-time
 perfect exercise (100% accuracy) adds 5 flat EXP. A full replay of an already
-completed lesson retains the existing 15 EXP reward ([[DEC-033]], [[DEC-043]]);
-an abandoned session grants nothing. Topic, Keyboard Position, and other
+completed lesson awards each replayed exercise by its difficulty under
+[[DEC-046]]; an abandoned session grants nothing. Topic, Keyboard Position, and other
 Practice activities use the Review/Practice row when they complete eligible
 items. No activity reward changes Learning Path unlock rules.
 
@@ -1142,3 +1144,26 @@ the old behavior; code and live learner data are unchanged by this
 documentation decision and require a separately scoped implementation and
 rollout. `LearningSession.expGained` continues to record the amount actually
 awarded by the implementation in effect for that submission.
+
+---
+
+## DEC-046 — Difficulty-based EXP rewards for completed-lesson replays
+
+**Date:** 2026-10-06
+**Status:** Accepted
+
+**Decision:** Supersede [[DEC-033]]'s flat 15-EXP replay reward. A completed
+Learning Path or Home lesson replay awards EXP for each exercise in the full
+replay session: Easy 3, Medium 5, and Hard 10. Calculate each exercise reward
+independently with its eligible flat and percentage bonuses under [[DEC-045]],
+then sum the rounded exercise rewards for the session. A replay that does not
+complete the full shuffled lesson awards nothing.
+
+**Why:** Replay reward should reflect the difficulty of the exercises actually
+practised and use the same per-exercise reward boundary as Review and Practice.
+
+**Consequences:** A replay still creates a new submitted session and never
+changes lesson completion, unlocks, or first-completion review effects. The
+replay session receipt records the final total and its per-exercise reward
+inputs so a retry cannot duplicate or recalculate the reward. Existing code
+continues to award flat 15 EXP until a separately scoped implementation ships.

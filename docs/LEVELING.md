@@ -1,5 +1,3 @@
-Consistency
-
 # Leveling, Rank, Perk, Achievement ↓→
 
 ---
@@ -262,7 +260,7 @@ Lv.100+ = Soft Cap, Lv.100+ ใช้ multiplier แบบขั้นบัน�
 ```JavaScript
 baseExp := 50 * math.Pow(level, 1.20)
 
-rebirthMultiplier := 1.0 + (0.25 * float64(rebirthCount))
+rebirthMultiplier := 1.0 + (0.15 * float64(rebirthCount))
 
 softCapMultiplier := 1.0
 
