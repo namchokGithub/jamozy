@@ -79,7 +79,7 @@
 - [x] **Step 1:** Extract a pure `toHomeContent(courses, units, lessons)` and test it: exactly one published `home` course or throw; only published units/lessons; order by `order`; output matches the `home-content` schema.
 - [x] **Step 2:** Implement the script with the client SDK and published-only queries (like `scripts/seed-firestore.ts` config loading); write `public/content/home.json`.
 - [x] **Step 3:** Add `content:export-home` and make `build` run it before `vite build`. Ask the user whether the generated file is committed or built in CI (Cloudflare Pages needs `VITE_FIREBASE_*` at build time if built there).
-- [ ] **Step 4:** Run the export against the real project only after the user confirms; it reads, never writes.
+- [x] **Step 4:** Run the export against the real project only after the user confirms; it reads, never writes.
 
 Decided 2026-10-06: `build` runs `content:export-home` every time and `public/content/home.json` is git-ignored; CI needs `VITE_FIREBASE_*`. No published Home course is a warning (stale export removed), not a failure. Step 4 is deferred until Home content exists, so `pnpm build` is not run against the real project yet.
 
@@ -111,9 +111,11 @@ Done 2026-10-06: `HomeOutbox` (application) over `HomeSyncJobRepository`; Indexe
 
 **Files:** `src/domain/home/home-session.ts`, tests.
 
-- [ ] **Step 1:** Write failing tests: shuffle contains every exercise exactly once (injectable random); session ends after the last one; next lesson, then next unit, then course-complete; display `n/m` is full when `completed`.
-- [ ] **Step 2:** Implement pure functions; reuse `lesson-session` typing reducers.
-- [ ] **Step 3:** `pnpm test`.
+- [x] **Step 1:** Write failing tests: shuffle contains every exercise exactly once (injectable random); session ends after the last one; next lesson, then next unit, then course-complete; display `n/m` is full when `completed`.
+- [x] **Step 2:** Implement pure functions; reuse `lesson-session` typing reducers.
+- [x] **Step 3:** `pnpm test`.
+
+Done 2026-10-06: `shuffleExercises`, `nextHomeLesson`, `resolveHomeResume`, `homeLessonProgress` (pending outbox IDs count), `isHomeCourseComplete`, `homeReplayTotals`. The player reuses `lesson-session` reducers; a session is the shuffled lesson, ending when `status === 'completed'`.
 
 ### Task 7: Home UI and wiring
 
