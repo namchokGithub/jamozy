@@ -440,3 +440,81 @@ describe('admin content lifecycle', () => {
     })
   })
 })
+
+describe('admin content order', () => {
+  const units = (...ids: string[]): Unit[] =>
+    ids.map((id, order) => ({ ...unit, id, order }))
+  const lessons = (...ids: string[]): Lesson[] =>
+    ids.map((id, order) => ({ ...lesson([]), id, order }))
+  const orderRequest = (intent: string, order: string[]) =>
+    lessonSaveRequest({ intent, order: JSON.stringify(order) })
+  const orderOf = (items: { id: string }[]) => items.map((item) => item.id)
+
+  it('saves a whole Unit order for its Course', async () => {
+    const repo = new FakeAdminContentRepository(
+      [course],
+      [...units('a', 'b', 'c'), { ...unit, id: 'other', courseId: 'x' }],
+    )
+
+    const result = await createAdminAction(repo)({
+      request: orderRequest('save-unit-order', ['c', 'a', 'b']),
+      params: { courseId: 'course' },
+    } as never)
+
+    expect(result).toEqual({ message: 'feedback.unitReordered' })
+    expect(orderOf(await repo.getUnitsByCourseId('course'))).toEqual([
+      'c',
+      'a',
+      'b',
+    ])
+  })
+
+  it('saves a whole Lesson order for its Unit', async () => {
+    const repo = new FakeAdminContentRepository(
+      [course],
+      [unit],
+      lessons('a', 'b', 'c'),
+    )
+
+    const result = await createAdminAction(repo)({
+      request: orderRequest('save-lesson-order', ['b', 'c', 'a']),
+      params: { unitId: 'unit' },
+    } as never)
+
+    expect(result).toEqual({ message: 'feedback.lessonReordered' })
+    expect(orderOf(await repo.getLessonsByUnitId('unit'))).toEqual([
+      'b',
+      'c',
+      'a',
+    ])
+  })
+
+  it.each([
+    ['is missing a sibling', ['b', 'a']],
+    ['repeats a sibling', ['a', 'a', 'b']],
+    ['names an item from another parent', ['a', 'b', 'other']],
+  ])(
+    'rejects a Unit order that %s and keeps the saved order',
+    async (_case, order) => {
+      const repo = new FakeAdminContentRepository(
+        [course],
+        [...units('a', 'b', 'c'), { ...unit, id: 'other', courseId: 'x' }],
+      )
+
+      const result = await createAdminAction(repo)({
+        request: orderRequest('save-unit-order', order),
+        params: { courseId: 'course' },
+      } as never)
+
+      expect(result).toEqual({
+        error: 'error.actionFailed',
+        errorDetail: 'Content order changed. Refresh and try again.',
+      })
+      expect(orderOf(await repo.getUnitsByCourseId('course'))).toEqual([
+        'a',
+        'b',
+        'c',
+      ])
+    },
+  )
+})

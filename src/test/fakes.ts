@@ -136,73 +136,30 @@ export class FakeAdminContentRepository implements AdminContentRepository {
   async saveLesson(lesson: Lesson) {
     this.replace(this.lessons, lesson)
   }
-  async moveUnit(id: string, direction: 'up' | 'down') {
-    await this.move(this.units, id, direction, (item) => item.courseId)
-  }
-  async moveLesson(id: string, direction: 'up' | 'down') {
-    await this.move(this.lessons, id, direction, (item) => item.unitId)
-  }
   async saveCourseOrder(courseIds: string[]) {
-    if (
-      courseIds.length !== this.courses.length ||
-      new Set(courseIds).size !== courseIds.length ||
-      courseIds.some((id) => !this.courses.some((course) => course.id === id))
-    )
-      throw new Error('Content order changed. Refresh and try again.')
-    courseIds.forEach((id, order) => {
-      const course = this.courses.find((item) => item.id === id)
-      if (course) course.order = order
-    })
+    this.saveOrder(await this.getCourses(), courseIds)
   }
-  async moveUnitToIndex(id: string, index: number) {
-    await this.moveToIndex(this.units, id, index, (item) => item.courseId)
+  async saveUnitOrder(courseId: string, unitIds: string[]) {
+    this.saveOrder(await this.getUnitsByCourseId(courseId), unitIds)
   }
-  async moveLessonToIndex(id: string, index: number) {
-    await this.moveToIndex(this.lessons, id, index, (item) => item.unitId)
+  async saveLessonOrder(unitId: string, lessonIds: string[]) {
+    this.saveOrder(await this.getLessonsByUnitId(unitId), lessonIds)
   }
 
   private replace<T extends { id: string }>(items: T[], next: T) {
     const index = items.findIndex((item) => item.id === next.id)
     if (index >= 0) items[index] = next
   }
-  private async move<T extends { id: string; order: number }>(
-    items: T[],
-    id: string,
-    direction: 'up' | 'down',
-    key: (item: T) => string,
-  ) {
-    const current = items.find((item) => item.id === id)
-    if (!current) return
-    const siblings = items
-      .filter((item) => key(item) === key(current))
-      .sort((a, b) => a.order - b.order)
-    const neighbor =
-      siblings[
-        siblings.findIndex((item) => item.id === id) +
-          (direction === 'up' ? -1 : 1)
-      ]
-    if (!neighbor) return
-    const order = current.order
-    current.order = neighbor.order
-    neighbor.order = order
-  }
-  private async moveToIndex<T extends { id: string; order: number }>(
-    items: T[],
-    id: string,
-    index: number,
-    key: (item: T) => string,
-  ) {
-    const current = items.find((item) => item.id === id)
-    if (!current) return
-    const siblings = items
-      .filter((item) => key(item) === key(current))
-      .sort((a, b) => a.order - b.order)
-    const currentIndex = siblings.findIndex((item) => item.id === id)
-    if (currentIndex < 0 || index < 0 || index >= siblings.length) return
-    siblings.splice(currentIndex, 1)
-    siblings.splice(index, 0, current)
-    siblings.forEach((item, order) => {
-      item.order = order
+  private saveOrder(siblings: { id: string; order: number }[], ids: string[]) {
+    if (
+      ids.length !== siblings.length ||
+      new Set(ids).size !== ids.length ||
+      ids.some((id) => !siblings.some((item) => item.id === id))
+    )
+      throw new Error('Content order changed. Refresh and try again.')
+    ids.forEach((id, order) => {
+      const item = siblings.find((sibling) => sibling.id === id)
+      if (item) item.order = order
     })
   }
 }
@@ -336,7 +293,9 @@ export class FakeOnePageLearningCheckpointRepository implements OnePageLearningC
 export class FakeHomeSyncJobRepository implements HomeSyncJobRepository {
   readonly jobs: HomeSyncJob[] = []
   async list() {
-    return [...this.jobs].sort((a, b) => a.enqueuedAt.getTime() - b.enqueuedAt.getTime())
+    return [...this.jobs].sort(
+      (a, b) => a.enqueuedAt.getTime() - b.enqueuedAt.getTime(),
+    )
   }
   async save(job: HomeSyncJob) {
     const index = this.jobs.findIndex(({ id }) => id === job.id)

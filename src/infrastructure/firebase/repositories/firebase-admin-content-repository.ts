@@ -20,6 +20,8 @@ import type {
   RestorableContentStatus,
 } from '../../../domain/models/content-status'
 
+const ORDER_CHANGED = 'Content order changed. Refresh and try again.'
+
 function date(value: unknown): Date {
   return value &&
     typeof value === 'object' &&
@@ -216,132 +218,57 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
     )
   }
 
-  async moveUnit(unitId: string, direction: 'up' | 'down'): Promise<void> {
-    const unit = await this.getUnitById(unitId)
-    if (!unit) return
-    const siblings = await this.getUnitsByCourseId(unit.courseId)
-    await this.swapOrder(siblings, unitId, direction, 'units')
-  }
-
-  async moveLesson(lessonId: string, direction: 'up' | 'down'): Promise<void> {
-    const lesson = await this.getLessonById(lessonId)
-    if (!lesson) return
-    const siblings = await this.getLessonsByUnitId(lesson.unitId)
-    await this.swapOrder(siblings, lessonId, direction, 'lessons')
-  }
-
   async saveCourseOrder(courseIds: string[]): Promise<void> {
-    const courses = await this.getCourses()
-    const currentById = new Map(courses.map((course) => [course.id, course]))
+    await this.saveOrder('courses', await this.getCourses(), courseIds)
+  }
+
+  async saveUnitOrder(courseId: string, unitIds: string[]): Promise<void> {
+    await this.saveOrder(
+      'units',
+      await this.getUnitsByCourseId(courseId),
+      unitIds,
+    )
+  }
+
+  async saveLessonOrder(unitId: string, lessonIds: string[]): Promise<void> {
+    await this.saveOrder(
+      'lessons',
+      await this.getLessonsByUnitId(unitId),
+      lessonIds,
+    )
+  }
+
+  // Rewrites every sibling's order in one transaction, and refuses an order
+  // that is not exactly the current siblings or that changed since it was read.
+  private async saveOrder(
+    collectionName: 'courses' | 'units' | 'lessons',
+    siblings: { id: string; order: number }[],
+    ids: string[],
+  ): Promise<void> {
+    const currentById = new Map(siblings.map((item) => [item.id, item]))
     if (
-      courseIds.length !== courses.length ||
-      new Set(courseIds).size !== courseIds.length ||
-      courseIds.some((courseId) => !currentById.has(courseId))
+      ids.length !== siblings.length ||
+      new Set(ids).size !== ids.length ||
+      ids.some((id) => !currentById.has(id))
     ) {
-      throw new Error('Content order changed. Refresh and try again.')
+      throw new Error(ORDER_CHANGED)
     }
     await runTransaction(db, async (transaction) => {
-      const references = courseIds.map((courseId) =>
-        doc(db, 'courses', courseId),
-      )
+      const references = ids.map((id) => doc(db, collectionName, id))
       const snapshots = await Promise.all(
         references.map((reference) => transaction.get(reference)),
       )
       if (
-        snapshots.some((snapshot, index) => {
-          const current = currentById.get(courseIds[index])
-          return !snapshot.exists() || snapshot.data().order !== current?.order
-        })
+        snapshots.some(
+          (snapshot, index) =>
+            !snapshot.exists() ||
+            snapshot.data().order !== currentById.get(ids[index])?.order,
+        )
       ) {
-        throw new Error('Content order changed. Refresh and try again.')
+        throw new Error(ORDER_CHANGED)
       }
       references.forEach((reference, order) => {
         transaction.update(reference, { order, updatedAt: new Date() })
-      })
-    })
-  }
-
-  async moveUnitToIndex(unitId: string, index: number): Promise<void> {
-    const unit = await this.getUnitById(unitId)
-    if (!unit) return
-    const siblings = await this.getUnitsByCourseId(unit.courseId)
-    await this.moveToIndex(siblings, unitId, index, 'units')
-  }
-
-  async moveLessonToIndex(lessonId: string, index: number): Promise<void> {
-    const lesson = await this.getLessonById(lessonId)
-    if (!lesson) return
-    const siblings = await this.getLessonsByUnitId(lesson.unitId)
-    await this.moveToIndex(siblings, lessonId, index, 'lessons')
-  }
-
-  private async swapOrder<T extends { id: string; order: number }>(
-    siblings: T[],
-    id: string,
-    direction: 'up' | 'down',
-    collectionName: 'units' | 'lessons',
-  ): Promise<void> {
-    const index = siblings.findIndex((item) => item.id === id)
-    const neighbor = siblings[index + (direction === 'up' ? -1 : 1)]
-    const current = siblings[index]
-    if (!current || !neighbor) return
-    await runTransaction(db, async (transaction) => {
-      const currentRef = doc(db, collectionName, current.id)
-      const neighborRef = doc(db, collectionName, neighbor.id)
-      const [currentSnapshot, neighborSnapshot] = await Promise.all([
-        transaction.get(currentRef),
-        transaction.get(neighborRef),
-      ])
-      if (
-        !currentSnapshot.exists() ||
-        !neighborSnapshot.exists() ||
-        currentSnapshot.data().order !== current.order ||
-        neighborSnapshot.data().order !== neighbor.order
-      ) {
-        throw new Error('Content order changed. Refresh and try again.')
-      }
-      transaction.update(currentRef, {
-        order: neighbor.order,
-        updatedAt: new Date(),
-      })
-      transaction.update(neighborRef, {
-        order: current.order,
-        updatedAt: new Date(),
-      })
-    })
-  }
-
-  private async moveToIndex<T extends { id: string; order: number }>(
-    siblings: T[],
-    id: string,
-    index: number,
-    collectionName: 'courses' | 'units' | 'lessons',
-  ): Promise<void> {
-    const currentIndex = siblings.findIndex((item) => item.id === id)
-    if (currentIndex < 0 || index < 0 || index >= siblings.length) return
-    const reordered = [...siblings]
-    const [current] = reordered.splice(currentIndex, 1)
-    reordered.splice(index, 0, current)
-    await runTransaction(db, async (transaction) => {
-      const snapshots = await Promise.all(
-        reordered.map((item) =>
-          transaction.get(doc(db, collectionName, item.id)),
-        ),
-      )
-      if (
-        snapshots.some(
-          (snapshot, position) =>
-            !snapshot.exists() ||
-            snapshot.data().order !== reordered[position].order,
-        )
-      ) {
-        throw new Error('Content order changed. Refresh and try again.')
-      }
-      reordered.forEach((item, order) => {
-        transaction.update(doc(db, collectionName, item.id), {
-          order,
-          updatedAt: new Date(),
-        })
       })
     })
   }

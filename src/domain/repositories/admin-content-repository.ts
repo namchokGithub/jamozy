@@ -19,9 +19,8 @@ export interface AdminContentRepository {
     input: Pick<Lesson, 'unitId' | 'title' | 'type'>,
   ): Promise<Lesson>
   saveLesson(lesson: Lesson): Promise<void>
-  moveUnit(unitId: string, direction: 'up' | 'down'): Promise<void>
-  moveLesson(lessonId: string, direction: 'up' | 'down'): Promise<void>
+  /** Order calls take every sibling ID in its new order and write atomically. */
   saveCourseOrder(courseIds: string[]): Promise<void>
-  moveUnitToIndex(unitId: string, index: number): Promise<void>
-  moveLessonToIndex(lessonId: string, index: number): Promise<void>
+  saveUnitOrder(courseId: string, unitIds: string[]): Promise<void>
+  saveLessonOrder(unitId: string, lessonIds: string[]): Promise<void>
 }

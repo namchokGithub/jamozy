@@ -113,15 +113,13 @@ export function createAdminAction(repo: AdminContentRepository) {
       if (intent === 'save-unit-order' && params.courseId) {
         const order = parseOrder(form.get('order'))
         if (!order) return { error: 'error.checkForm' }
-        for (const [index, id] of order.entries())
-          await repo.moveUnitToIndex(id, index)
+        await repo.saveUnitOrder(params.courseId, order)
         return { message: 'feedback.unitReordered' }
       }
       if (intent === 'save-lesson-order' && params.unitId) {
         const order = parseOrder(form.get('order'))
         if (!order) return { error: 'error.checkForm' }
-        for (const [index, id] of order.entries())
-          await repo.moveLessonToIndex(id, index)
+        await repo.saveLessonOrder(params.unitId, order)
         return { message: 'feedback.lessonReordered' }
       }
       const id = text(form, 'id')
@@ -204,18 +202,6 @@ async function unitAction(
     await restoreUnit(repo, unit)
     return { message: 'feedback.unitRestored' }
   }
-  if (intent === 'move-up' || intent === 'move-down') {
-    await repo.moveUnit(id, intent === 'move-up' ? 'up' : 'down')
-    return { message: 'feedback.unitReordered' }
-  }
-  if (intent === 'move') {
-    const targetIndex = text(form, 'targetIndex')
-    const index = Number(targetIndex)
-    if (!targetIndex || !Number.isInteger(index) || index < 0)
-      return { error: 'error.checkForm' }
-    await repo.moveUnitToIndex(id, index)
-    return { message: 'feedback.unitReordered' }
-  }
   return { error: 'error.unknownUnitAction' }
 }
 
@@ -260,18 +246,6 @@ async function lessonAction(
   if (intent === 'restore') {
     await restoreLesson(repo, lesson)
     return { message: 'feedback.lessonRestored' }
-  }
-  if (intent === 'move-up' || intent === 'move-down') {
-    await repo.moveLesson(id, intent === 'move-up' ? 'up' : 'down')
-    return { message: 'feedback.lessonReordered' }
-  }
-  if (intent === 'move') {
-    const targetIndex = text(form, 'targetIndex')
-    const index = Number(targetIndex)
-    if (!targetIndex || !Number.isInteger(index) || index < 0)
-      return { error: 'error.checkForm' }
-    await repo.moveLessonToIndex(id, index)
-    return { message: 'feedback.lessonReordered' }
   }
   return { error: 'error.unknownLessonAction' }
 }
