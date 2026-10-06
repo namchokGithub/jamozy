@@ -32,7 +32,7 @@ and sentences while improving typing accuracy and speed.
 ## Core Features
 
 - Progressive Unit → Lesson learning structure
-- One-page Home learning player with a continuous word queue per selected course
+- Home player for one Admin-managed Home course, exported to static JSON at build
 - Korean typing exercises
 - Virtual Korean keyboard guide
 - Finger-placement reference for Korean keyboard practice
@@ -50,27 +50,22 @@ and sentences while improving typing accuracy and speed.
 
 Learn → Type → Review → Improve → Unlock
 
-### Home One-page Learning Path
+### Home
 
-Home is the fast path into practice. It presents up to the first three courses
-that are not finished; the learner chooses one course, then types its
-exercises in `Unit → Lesson → Exercise` order without stopping: the next
-words load in the background before the current batch runs out. The queue
-never takes words from another course ([[DEC-042]]).
+Home is the fast path into practice ([[DEC-043]]). It plays a single course of
+type `home`, authored in Admin BO and exported to `public/content/home.json`
+by every `pnpm build`, so opening Home never waits on Firestore. Units are
+categories; each lesson shows its distinct completed exercises, such as `3/5`.
 
-The active exercise shows Korean, Thai/English meanings, romanization, live
-WPM/accuracy, the virtual keyboard, and a finger-placement guide. Completing
-an exercise saves a browser-local IndexedDB checkpoint, so a refresh resumes
-at the next exercise. The checkpoint is local even for signed-in users and is
-not cloud-synced or migrated. Only the final exercise of a lesson creates the
-normal submitted lesson result, progress, EXP, and review effects. Saving
-never interrupts typing, and a failed lesson completion retries in the
-background.
+A lesson session plays all of its exercises once in a fresh shuffled order,
+then moves on to the next lesson (and unit) with a short notice. A lesson
+completes once every exercise has been typed at least once, across sessions
+and devices: the first completion grants accuracy-based EXP, and a full
+replay of a completed lesson grants 15 EXP. Home lessons create no review
+items. Every save runs in the background through a retrying local outbox.
 
-The Hero and the standard learning-path cards remain below the player. Learners
-can still open a Course and choose a specific Lesson through the existing flow.
-When every available course is complete, Home falls back to replaying the first
-three courses; completed lessons retain the existing lower replay EXP reward.
+When no Home course is published, Home falls back to the Learning Path player
+([[DEC-042]]). The Hero and learning-path cards remain below the player.
 
 ## Learning Modes
 
@@ -384,19 +379,18 @@ Current sources:
 
 The core MVP is functionally complete: Learning Path, lessons, results,
 review, guest and authenticated persistence, settings, profile, and Admin BO
-are implemented. The Home one-page Learning Path player is awaiting its final
-manual verification pass. See the [Progress Tracker](docs/PROGRESS.md) for
+are implemented. The Home player ([[DEC-043]]) is awaiting its final manual
+verification pass. See the [Progress Tracker](docs/PROGRESS.md) for
 the detailed current status.
 
 ### MVP
 
-MVP is complete apart from final user-owned verification of the Home one-page
-Learning Path player. See [Progress Tracker](docs/PROGRESS.md) for the
+MVP is complete apart from final user-owned verification of the Home player. See [Progress Tracker](docs/PROGRESS.md) for the
 verification checklist and post-MVP roadmap.
 
 ### Next / Post-MVP
 
-- Complete the Home one-page Learning Path player's manual verification.
+- Complete the Home player's manual verification.
 - Set up a Cloudflare Pages deployment pipeline and use Preview deployments
   for release checks.
 - Decide whether sound feedback ships or is deferred, then implement the

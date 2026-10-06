@@ -133,6 +133,6 @@ Done 2026-10-06. Decisions: writes go through a `HomeServices` React context bui
 
 **Files:** `get-one-page-learning-path.ts`, `save-one-page-checkpoint.ts`, `local-one-page-learning-checkpoint-repository.ts`, `one-page-player-store.ts`, DEC-042 refill/cursor code, their tests, `README.md`, `docs/PROGRESS.md`, `docs/log/2026-10.md`.
 
-- [ ] **Step 1:** ~~Delete the DEC-035 checkpoint and DEC-042 refill paths~~ Changed 2026-10-06: keep them as the fallback player when no Home content is deployed; delete nothing.
-- [ ] **Step 2:** Update README Home section and checklist, PROGRESS, and the monthly log.
-- [ ] **Step 3:** `pnpm test`, `pnpm lint`, `pnpm build`.
+- [x] **Step 1:** ~~Delete the DEC-035 checkpoint and DEC-042 refill paths~~ Changed 2026-10-06: keep them as the fallback player when no Home content is deployed; delete nothing.
+- [x] **Step 2:** Update README Home section and checklist, PROGRESS, and the monthly log.
+- [x] **Step 3:** `pnpm test`, `pnpm lint`, `pnpm build`.
