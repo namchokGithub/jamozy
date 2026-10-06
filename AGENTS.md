@@ -138,6 +138,14 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 - Use Zustand only for transient interactive session state such as typing input,
   current exercise, mistakes, timers, and in-progress accuracy.
 
+Git Releases
+
+- git add package.json {{file_name}}
+- git commit -m "chore(release): v{{version_no}}"
+- git tag -a v{{version_no}}-m "v{{version_no}}"
+- git push origin <branch></branch> && git push origin v{{version_no}}
+- gh release create v{{version_no}} --prerelease --title "Jamozy v{{version_no}}" --{{file_name}}
+
 ## Git Commit Message
 
 - Before making any change, present the proposed scope and wait for explicit user approval. This applies even to clear, small, low-risk, or cosmetic changes.
