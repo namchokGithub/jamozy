@@ -17,7 +17,7 @@ import { Button } from '../../components/ui/Button'
 import { useSnackbar } from '../../components/ui/SnackbarProvider'
 import OnePageLearningPlayer from '../home/OnePageLearningPlayer'
 import HomePlayer from '../home/HomePlayer'
-import OnePageLearningPlayerSkeleton from '../home/OnePageLearningPlayerSkeleton'
+import HomePlayerSkeleton from '../home/HomePlayerSkeleton'
 
 type CourseListActionData = {
   displayName?: string
@@ -193,7 +193,9 @@ export default function CourseListPage() {
           </nav>
         </header>
 
-        <Suspense fallback={<OnePageLearningPlayerSkeleton />}>
+        {/* home.json and the device cache load almost at once, so the Home
+            player needs no skeleton; only the Firestore fallback shows one. */}
+        <Suspense fallback={null}>
           <Await resolve={homePlayer}>
             {(player) =>
               player ? (
@@ -204,16 +206,18 @@ export default function CourseListPage() {
                 />
               ) : (
                 // No Home content deployed: keep the Learning Path player.
-                <Await resolve={onePageLearningPath}>
-                  {(learningPath) =>
-                    learningPath && (
-                      <OnePageLearningPlayer
-                        key={learningPath.selectedCourseId}
-                        learningPath={learningPath}
-                      />
-                    )
-                  }
-                </Await>
+                <Suspense fallback={<HomePlayerSkeleton />}>
+                  <Await resolve={onePageLearningPath}>
+                    {(learningPath) =>
+                      learningPath && (
+                        <OnePageLearningPlayer
+                          key={learningPath.selectedCourseId}
+                          learningPath={learningPath}
+                        />
+                      )
+                    }
+                  </Await>
+                </Suspense>
               )
             }
           </Await>

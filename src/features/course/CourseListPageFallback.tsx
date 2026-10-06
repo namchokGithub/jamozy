@@ -1,4 +1,4 @@
-import OnePageLearningPlayerSkeleton from '../home/OnePageLearningPlayerSkeleton'
+import HomePlayerSkeleton from '../home/HomePlayerSkeleton'
 
 // Shown while the Home loader runs on a fresh page load, so a refresh shows
 // the page frame instead of a blank screen.
@@ -32,7 +32,7 @@ export default function CourseListPageFallback() {
           </div>
         </header>
 
-        <OnePageLearningPlayerSkeleton />
+        <HomePlayerSkeleton />
       </div>
     </main>
   )

@@ -284,7 +284,7 @@ export default function HomePlayer({
               >
                 {entry.title}
                 <span
-                  className={`rounded-full px-1.5 text-[11px] ${done === total ? 'bg-[#e4f1d8] text-[#4f7a35]' : 'bg-[#f2edf9] text-[#7863a8]'}`}
+                  className={`rounded-full px-1.5 text-[11px] ${done === total ? 'bg-[#fdf0f5] text-[#a8396a]' : 'bg-[#f2edf9] text-[#7863a8]'}`}
                 >
                   {done}/{total}
                 </span>
