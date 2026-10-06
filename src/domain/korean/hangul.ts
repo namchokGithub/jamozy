@@ -92,3 +92,29 @@ export const COMPOUND_JONGSEONG_PARTS: Record<string, [string, string]> = {
   ㅀ: ['ㄹ', 'ㅎ'],
   ㅄ: ['ㅂ', 'ㅅ'],
 }
+
+const CONJOINING_CHOSEONG_BASE = 0x1100
+const CONJOINING_JUNGSEONG_BASE = 0x1161
+const CONJOINING_JONGSEONG_BASE = 0x11a8
+
+function toCompatibilityJamo(char: string): string {
+  const code = char.codePointAt(0) ?? 0
+  const choseong = CHOSEONG_LIST[code - CONJOINING_CHOSEONG_BASE]
+  if (code >= CONJOINING_CHOSEONG_BASE && choseong) return choseong
+  const jungseong = JUNGSEONG_LIST[code - CONJOINING_JUNGSEONG_BASE]
+  if (code >= CONJOINING_JUNGSEONG_BASE && jungseong) return jungseong
+  // JONGSEONG_LIST[0] is the empty "no final" slot.
+  const jongseong = JONGSEONG_LIST[code - CONJOINING_JONGSEONG_BASE + 1]
+  if (code >= CONJOINING_JONGSEONG_BASE && jongseong) return jongseong
+  return char
+}
+
+/**
+ * Rewrites Hangul into the characters the 2-beolsik keyboard types: composes
+ * decomposed (NFD) syllables, then maps standalone modern conjoining jamo
+ * (U+1100 block) to compatibility jamo (U+3131 block), e.g. ᄀ → ㄱ. Archaic
+ * jamo with no key are left unchanged.
+ */
+export function normalizeHangulText(text: string): string {
+  return Array.from(text.normalize('NFC'), toCompatibilityJamo).join('')
+}

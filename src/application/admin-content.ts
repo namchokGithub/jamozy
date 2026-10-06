@@ -4,6 +4,7 @@ import { courseType, type Course } from '../domain/models/course'
 import type { Lesson, LessonExercise } from '../domain/models/lesson'
 import type { Unit } from '../domain/models/unit'
 import type { AdminContentRepository } from '../domain/repositories/admin-content-repository'
+import { normalizeHangulText } from '../domain/korean/hangul'
 import {
   findUntypeableCharacters,
   formatCharacters,
@@ -97,10 +98,23 @@ export async function saveUnit(
   return { ok: true }
 }
 
+// Pasted Hangul is often conjoining jamo (ᄀ U+1100) that looks like the
+// compatibility jamo the keyboard types (ㄱ U+3131); store the typeable form.
+function withTypeableTargetText(lesson: Lesson): Lesson {
+  return {
+    ...lesson,
+    exercises: lesson.exercises.map((exercise) => ({
+      ...exercise,
+      targetText: normalizeHangulText(exercise.targetText),
+    })),
+  }
+}
+
 export async function saveLesson(
   repo: AdminContentRepository,
-  lesson: Lesson,
+  input: Lesson,
 ): Promise<AdminCommandResult> {
+  const lesson = withTypeableTargetText(input)
   const parsed = z
     .object({
       title: text,
@@ -146,8 +160,9 @@ export async function publishUnit(
 
 export async function publishLesson(
   repo: AdminContentRepository,
-  lesson: Lesson,
+  input: Lesson,
 ): Promise<AdminCommandResult> {
+  const lesson = withTypeableTargetText(input)
   const unit = await repo.getUnitById(lesson.unitId)
   if (!unit || unit.status !== 'published')
     return { ok: false, error: 'Publish the parent Unit first.' }
