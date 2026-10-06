@@ -150,6 +150,8 @@ export const en = {
   'error.publishUnitFirst': 'Publish the parent Unit first.',
   'error.exerciseRequired': 'Add at least one Exercise before publishing.',
   'error.oneHomeCourse': 'Only one published Home course is allowed.',
+  'error.untypeableText':
+    'Target text has characters the keyboard cannot type. Retype them with a Korean keyboard:',
   'error.fieldRequired': 'This field is required.',
   'error.checkForm': 'Please check the form.',
   'error.actionFailed': 'Unable to save content.',
@@ -315,6 +317,8 @@ export const th: Record<AdminMessageKey, string> = {
   'error.publishUnitFirst': 'เผยแพร่ยูนิตระดับบนก่อน',
   'error.exerciseRequired': 'เพิ่มแบบฝึกหัดอย่างน้อยหนึ่งข้อก่อนเผยแพร่',
   'error.oneHomeCourse': 'เผยแพร่คอร์สหน้า Home ได้เพียงคอร์สเดียว',
+  'error.untypeableText':
+    'ข้อความเป้าหมายมีตัวอักษรที่พิมพ์ด้วยแป้นไม่ได้ ให้พิมพ์ใหม่ด้วยแป้นภาษาเกาหลี:',
   'error.fieldRequired': 'กรุณากรอกช่องนี้',
   'error.checkForm': 'กรุณาตรวจสอบแบบฟอร์ม',
   'error.actionFailed': 'ไม่สามารถบันทึกเนื้อหาได้',

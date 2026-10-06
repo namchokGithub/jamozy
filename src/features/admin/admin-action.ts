@@ -35,6 +35,8 @@ const commandErrorKeys: Record<string, AdminMessageKey> = {
   'Publish the parent Unit first.': 'error.publishUnitFirst',
   'Add at least one Exercise before publishing.': 'error.exerciseRequired',
   'Only one published Home course is allowed.': 'error.oneHomeCourse',
+  'Target text has characters the keyboard cannot type.':
+    'error.untypeableText',
 }
 
 function commandError(error: string): AdminActionData {
@@ -48,7 +50,9 @@ function commandResult(
   result: AdminCommandResult,
   message: AdminMessageKey,
 ): AdminActionData {
-  return result.ok ? { message } : commandError(result.error)
+  if (result.ok) return { message }
+  const data = commandError(result.error)
+  return result.detail ? { ...data, errorDetail: result.detail } : data
 }
 
 function text(form: FormData, name: string): string {

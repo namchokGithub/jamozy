@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { archiveCourse, publishCourse, publishLesson, restoreCourse, saveCourse } from './admin-content'
+import { archiveCourse, publishCourse, publishLesson, restoreCourse, saveCourse, saveLesson } from './admin-content'
 import { FakeAdminContentRepository } from '../test/fakes'
 import { createAdminAction } from '../features/admin/admin-action'
 import type { Course } from '../domain/models/course'
@@ -161,6 +161,51 @@ describe('admin content lifecycle', () => {
       error: 'Add at least one Exercise before publishing.',
     })
     expect((await repo.getLessonById('lesson'))?.status).toBe('draft')
+  })
+
+  describe('untypeable target text', () => {
+    const exercise = (id: string, targetText: string) => ({
+      id, targetText, romanization: null, meaningTh: '', meaningEn: '', difficulty: 'easy' as const, hint: null,
+    })
+
+    it('blocks saving a Lesson whose Exercise the keyboard cannot type', async () => {
+      const repo = new FakeAdminContentRepository([course], [unit], [lesson([])])
+
+      const result = await saveLesson(repo, lesson([exercise('e1', '가'), exercise('e2', '\u1100')]))
+
+      expect(result).toEqual({
+        ok: false,
+        error: 'Target text has characters the keyboard cannot type.',
+        detail: 'Exercise 2: "\u1100" U+1100',
+      })
+      expect((await repo.getLessonById('lesson'))?.exercises).toEqual([])
+    })
+
+    it('blocks publishing a Lesson whose Exercise the keyboard cannot type', async () => {
+      const bad = lesson([exercise('e1', '\u1100\u1101')])
+      const repo = new FakeAdminContentRepository([course], [unit], [bad])
+
+      expect(await publishLesson(repo, bad)).toEqual({
+        ok: false,
+        error: 'Target text has characters the keyboard cannot type.',
+        detail: 'Exercise 1: "\u1100" U+1100, "\u1101" U+1101',
+      })
+      expect((await repo.getLessonById('lesson'))?.status).toBe('draft')
+    })
+
+    it('shows the untypeable characters through the admin action', async () => {
+      const repo = new FakeAdminContentRepository([course], [unit], [lesson([])])
+
+      const result = await createAdminAction(repo)({
+        request: lessonSaveRequest({
+          intent: 'save', kind: 'lesson', id: 'lesson', title: 'Lesson', type: 'character',
+          exercises: JSON.stringify([exercise('e1', '\u1100')]),
+        }),
+        params: {},
+      } as never)
+
+      expect(result).toEqual({ error: 'error.untypeableText', errorDetail: 'Exercise 1: "\u1100" U+1100' })
+    })
   })
 
   it('blocks publishing a Lesson below a non-published parent', async () => {

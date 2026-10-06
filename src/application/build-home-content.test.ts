@@ -171,4 +171,25 @@ describe('buildHomeContent', () => {
       }),
     ).toThrow()
   })
+
+  it('fails with the lessons and exercises the keyboard cannot type', () => {
+    const exercise = lesson('l1', 'u1', 1).exercises[0]
+    expect(() =>
+      buildHomeContent({
+        courses: [course('home')],
+        units: [unit('u1', 1)],
+        lessons: [
+          lesson('l1', 'u1', 1, {
+            exercises: [
+              exercise,
+              { ...exercise, id: 'bad', targetText: '\u1100' },
+            ],
+          }),
+        ],
+        exportedAt: at,
+      }),
+    ).toThrow(
+      'Home content has text the keyboard cannot type: lesson l1 exercise bad: "\u1100" U+1100',
+    )
+  })
 })

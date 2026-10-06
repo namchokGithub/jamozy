@@ -63,3 +63,30 @@ export function buildExpectedKeys(targetText: string): ExpectedKey[] {
 
   return keys
 }
+
+/**
+ * Distinct characters in `targetText` that the 2-beolsik keymap cannot type,
+ * in order of appearance — for example conjoining jamo such as U+1100, which
+ * look like compatibility jamo (ㄱ U+3131) but have no key.
+ */
+export function findUntypeableCharacters(targetText: string): string[] {
+  const untypeable = new Set<string>()
+  for (const char of Array.from(targetText)) {
+    try {
+      buildExpectedKeys(char)
+    } catch {
+      untypeable.add(char)
+    }
+  }
+  return [...untypeable]
+}
+
+/** Formats characters for an error message, e.g. `"ᄀ" U+1100`. */
+export function formatCharacters(chars: string[]): string {
+  return chars
+    .map((char) => {
+      const codePoint = char.codePointAt(0) ?? 0
+      return `"${char}" U+${codePoint.toString(16).toUpperCase().padStart(4, '0')}`
+    })
+    .join(', ')
+}

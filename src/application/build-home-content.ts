@@ -1,3 +1,7 @@
+import {
+  findUntypeableCharacters,
+  formatCharacters,
+} from '../domain/korean/target-sequence'
 import { isPublishedContent } from '../domain/models/content-status'
 import { courseType, type Course } from '../domain/models/course'
 import {
@@ -67,6 +71,23 @@ export function buildHomeContent({
         })),
     }))
     .filter((unit) => unit.lessons.length > 0)
+
+  const untypeable = homeUnits.flatMap((unit) =>
+    unit.lessons.flatMap((lesson) =>
+      lesson.exercises.flatMap((exercise) => {
+        const chars = findUntypeableCharacters(exercise.targetText)
+        return chars.length > 0
+          ? [
+              `lesson ${lesson.id} exercise ${exercise.id}: ${formatCharacters(chars)}`,
+            ]
+          : []
+      }),
+    ),
+  )
+  if (untypeable.length > 0)
+    throw new Error(
+      `Home content has text the keyboard cannot type: ${untypeable.join('; ')}`,
+    )
 
   return homeContentSchema.parse({
     schemaVersion: 1,

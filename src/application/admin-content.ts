@@ -4,6 +4,10 @@ import { courseType, type Course } from '../domain/models/course'
 import type { Lesson, LessonExercise } from '../domain/models/lesson'
 import type { Unit } from '../domain/models/unit'
 import type { AdminContentRepository } from '../domain/repositories/admin-content-repository'
+import {
+  findUntypeableCharacters,
+  formatCharacters,
+} from '../domain/korean/target-sequence'
 
 const text = z.string().trim().min(1, 'This field is required.')
 const exerciseSchema = z.object({
@@ -16,7 +20,26 @@ const exerciseSchema = z.object({
   hint: z.string().nullable(),
 })
 
-export type AdminCommandResult = { ok: true } | { ok: false; error: string }
+export type AdminCommandResult =
+  { ok: true } | { ok: false; error: string; detail?: string }
+
+const UNTYPEABLE_TEXT = 'Target text has characters the keyboard cannot type.'
+
+// Every Exercise must be typeable on the 2-beolsik keymap, or the player
+// cannot start it. Lists each offending Exercise by its 1-based position.
+function untypeableExercises(
+  exercises: LessonExercise[],
+): AdminCommandResult | null {
+  const problems = exercises.flatMap((exercise, index) => {
+    const chars = findUntypeableCharacters(exercise.targetText)
+    return chars.length > 0
+      ? [`Exercise ${index + 1}: ${formatCharacters(chars)}`]
+      : []
+  })
+  return problems.length > 0
+    ? { ok: false, error: UNTYPEABLE_TEXT, detail: problems.join('; ') }
+    : null
+}
 
 function validationError(error: z.ZodError): AdminCommandResult {
   return {
@@ -87,6 +110,8 @@ export async function saveLesson(
     })
     .safeParse(lesson)
   if (!parsed.success) return validationError(parsed.error)
+  const untypeable = untypeableExercises(lesson.exercises)
+  if (untypeable) return untypeable
   if (!(await repo.getUnitById(lesson.unitId)))
     return { ok: false, error: 'Parent Unit was not found.' }
   await repo.saveLesson(lesson)
@@ -133,6 +158,8 @@ export async function publishLesson(
     return { ok: false, error: 'Add at least one Exercise before publishing.' }
   const parsed = z.array(exerciseSchema).safeParse(lesson.exercises)
   if (!parsed.success) return validationError(parsed.error)
+  const untypeable = untypeableExercises(lesson.exercises)
+  if (untypeable) return untypeable
   const { archivedFromStatus: _archivedFromStatus, ...published } = lesson
   void _archivedFromStatus
   await repo.saveLesson({ ...published, status: 'published' })
