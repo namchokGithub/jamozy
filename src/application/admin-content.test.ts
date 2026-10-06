@@ -170,6 +170,40 @@ describe('admin content lifecycle', () => {
     expect((await repo.getLessonById('lesson'))?.status).toBe('draft')
   })
 
+  it('blocks saving a published Lesson without an Exercise', async () => {
+    const existingExercise = {
+      id: 'exercise',
+      targetText: '가',
+      romanization: null,
+      meaningTh: '',
+      meaningEn: '',
+      difficulty: 'easy' as const,
+      hint: null,
+    }
+    const repo = new FakeAdminContentRepository(
+      [course],
+      [unit],
+      [lesson([existingExercise], 'published')],
+    )
+
+    const result = await createAdminAction(repo)({
+      request: lessonSaveRequest({
+        intent: 'save',
+        kind: 'lesson',
+        id: 'lesson',
+        title: 'Lesson',
+        type: 'word',
+        exercises: '[]',
+      }),
+      params: {},
+    } as never)
+
+    expect(result).toEqual({ error: 'error.publishedExerciseRequired' })
+    expect((await repo.getLessonById('lesson'))?.exercises).toEqual([
+      existingExercise,
+    ])
+  })
+
   describe('untypeable target text', () => {
     const exercise = (id: string, targetText: string) => ({
       id,

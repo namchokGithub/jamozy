@@ -149,6 +149,8 @@ export const en = {
   'error.publishCourseFirst': 'Publish the parent Course first.',
   'error.publishUnitFirst': 'Publish the parent Unit first.',
   'error.exerciseRequired': 'Add at least one Exercise before publishing.',
+  'error.publishedExerciseRequired':
+    'A published Lesson needs at least one Exercise.',
   'error.oneHomeCourse': 'Only one published Home course is allowed.',
   'error.untypeableText':
     'Target text has characters the keyboard cannot type. Retype them with a Korean keyboard:',
@@ -316,6 +318,8 @@ export const th: Record<AdminMessageKey, string> = {
   'error.publishCourseFirst': 'เผยแพร่คอร์สระดับบนก่อน',
   'error.publishUnitFirst': 'เผยแพร่ยูนิตระดับบนก่อน',
   'error.exerciseRequired': 'เพิ่มแบบฝึกหัดอย่างน้อยหนึ่งข้อก่อนเผยแพร่',
+  'error.publishedExerciseRequired':
+    'บทเรียนที่เผยแพร่แล้วต้องมีแบบฝึกหัดอย่างน้อยหนึ่งข้อ',
   'error.oneHomeCourse': 'เผยแพร่คอร์สหน้า Home ได้เพียงคอร์สเดียว',
   'error.untypeableText':
     'ข้อความเป้าหมายมีตัวอักษรที่พิมพ์ด้วยแป้นไม่ได้ ให้พิมพ์ใหม่ด้วยแป้นภาษาเกาหลี:',

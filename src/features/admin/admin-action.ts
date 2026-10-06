@@ -34,6 +34,8 @@ const commandErrorKeys: Record<string, AdminMessageKey> = {
   'Publish the parent Course first.': 'error.publishCourseFirst',
   'Publish the parent Unit first.': 'error.publishUnitFirst',
   'Add at least one Exercise before publishing.': 'error.exerciseRequired',
+  'A published Lesson needs at least one Exercise.':
+    'error.publishedExerciseRequired',
   'Only one published Home course is allowed.': 'error.oneHomeCourse',
   'Target text has characters the keyboard cannot type.':
     'error.untypeableText',

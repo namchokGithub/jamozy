@@ -126,6 +126,12 @@ export async function saveLesson(
     })
     .safeParse(lesson)
   if (!parsed.success) return validationError(parsed.error)
+  // Saving must not bypass publishLesson's Exercise requirement.
+  if (lesson.status === 'published' && lesson.exercises.length === 0)
+    return {
+      ok: false,
+      error: 'A published Lesson needs at least one Exercise.',
+    }
   const untypeable = untypeableExercises(lesson.exercises)
   if (untypeable) return untypeable
   if (!(await repo.getUnitById(lesson.unitId)))
