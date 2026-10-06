@@ -258,4 +258,34 @@ describe('HomeOutbox', () => {
     )
     expect(await outbox.pendingExerciseIds('other')).toEqual(new Map())
   })
+
+  it('keeps enqueue order for jobs in the same millisecond', async () => {
+    const { outbox, jobs, sessionSubmissionRepo } = setup()
+    sessionSubmissionRepo.failuresLeft = 1
+    for (const id of ['e1', 'e2'])
+      await outbox.enqueueExercise({
+        userId: 'u1',
+        lesson,
+        result: result(id),
+        submissionId: id,
+      })
+    await outbox.enqueueReplay({
+      userId: 'u1',
+      lessonId: 'lesson-1',
+      sessionId: 'r1',
+      totals: {
+        startedAtMs: 0,
+        durationSeconds: 1,
+        exercisesAttempted: 2,
+        acceptedKeystrokes: 4,
+        rejectedKeystrokes: 0,
+      },
+    })
+
+    const ordered = await jobs.list()
+    expect(ordered.map(({ kind }) => kind)).toEqual(['exercise', 'replay'])
+    expect(ordered[0].enqueuedAt.getTime()).toBeLessThan(
+      ordered[1].enqueuedAt.getTime(),
+    )
+  })
 })

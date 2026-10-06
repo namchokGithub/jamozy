@@ -20,6 +20,9 @@ import { FirebaseAccountMigrationRepository } from '../infrastructure/firebase/r
 import { createLearnerRepositories } from './learner-repositories'
 import { HomeOutbox } from '../application/home-outbox'
 import { LocalHomeSyncJobRepository } from '../infrastructure/local/local-home-sync-job-repository'
+import { LocalHomeStateRepository } from '../infrastructure/local/local-home-state-repository'
+import { StaticHomeContentRepository } from '../infrastructure/static/static-home-content-repository'
+import { createHomeServices } from './home-services'
 import { FirebaseAuthRepository } from '../infrastructure/firebase/firebase-auth-repository'
 import { FirebaseAdminAuthRepository } from '../infrastructure/firebase/firebase-admin-auth-repository'
 import { FirebaseAdminContentRepository } from '../infrastructure/firebase/repositories/firebase-admin-content-repository'
@@ -130,6 +133,12 @@ export const homeOutbox = new HomeOutbox({
 void homeOutbox.drain()
 window.addEventListener('online', () => void homeOutbox.drain())
 sessionManager.onChange(() => void homeOutbox.drain())
+const homeLocalState = new LocalHomeStateRepository()
+export const homeServices = createHomeServices({
+  outbox: homeOutbox,
+  localState: homeLocalState,
+  getActiveUser,
+})
 const developmentRoutes = import.meta.env.DEV
   ? [
       { path: '/dev/hangul-guides', Component: HangulGuideTunerPage },
@@ -219,6 +228,11 @@ export const router = createBrowserRouter([
       lessonRepo,
       progressRepo,
       checkpointRepo: onePageCheckpointRepo,
+      home: {
+        contentRepo: new StaticHomeContentRepository(),
+        localState: homeLocalState,
+        pendingExerciseIds: (userId) => homeOutbox.pendingExerciseIds(userId),
+      },
       ensureUser: getActiveUser,
       getSession: () => sessionManager.getActiveSession(),
     }),

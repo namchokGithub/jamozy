@@ -16,6 +16,7 @@ import { AuthModal } from '../auth/AuthModal'
 import { Button } from '../../components/ui/Button'
 import { useSnackbar } from '../../components/ui/SnackbarProvider'
 import OnePageLearningPlayer from '../home/OnePageLearningPlayer'
+import HomePlayer from '../home/HomePlayer'
 import OnePageLearningPlayerSkeleton from '../home/OnePageLearningPlayerSkeleton'
 
 type CourseListActionData = {
@@ -25,7 +26,7 @@ type CourseListActionData = {
 }
 
 export default function CourseListPage() {
-  const { courses, dueReviewCount, displayName, isAuthenticated, onePageLearningPath } =
+  const { courses, dueReviewCount, displayName, isAuthenticated, homePlayer, homeProgress, onePageLearningPath } =
     useLoaderData() as CourseListLoaderData
   const fetcher = useFetcher<CourseListActionData>()
   const { showError, showSuccess } = useSnackbar()
@@ -193,13 +194,26 @@ export default function CourseListPage() {
         </header>
 
         <Suspense fallback={<OnePageLearningPlayerSkeleton />}>
-          <Await resolve={onePageLearningPath}>
-            {(learningPath) =>
-              learningPath && (
-                <OnePageLearningPlayer
-                  key={learningPath.selectedCourseId}
-                  learningPath={learningPath}
+          <Await resolve={homePlayer}>
+            {(player) =>
+              player ? (
+                <HomePlayer
+                  key={player.content.exportedAt}
+                  data={player}
+                  liveProgress={homeProgress}
                 />
+              ) : (
+                // No Home content deployed: keep the Learning Path player.
+                <Await resolve={onePageLearningPath}>
+                  {(learningPath) =>
+                    learningPath && (
+                      <OnePageLearningPlayer
+                        key={learningPath.selectedCourseId}
+                        learningPath={learningPath}
+                      />
+                    )
+                  }
+                </Await>
               )
             }
           </Await>

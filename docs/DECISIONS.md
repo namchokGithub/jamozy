@@ -1006,8 +1006,9 @@ as `learning`. Exactly one published `home` course exists. Admin BO and
 Firestore remain its source of truth and keep [[DEC-034]]'s status gating.
 Every `pnpm build` first exports the published Home course (units, lessons,
 exercises) to a generated, git-ignored static JSON file. With no published
-`home` course the export only warns and the build ships without Home content;
-more than one fails the build. At runtime Home reads only that JSON, so
+`home` course the export only warns and the build ships without Home content,
+and Home falls back to the Learning Path player of [[DEC-042]]; more than one
+fails the build. At runtime Home reads only that JSON, so
 content changes reach learners on the next deploy, and the build needs the
 `VITE_FIREBASE_*` config. The `home` course is excluded from the Learning
 Path global order and frontier, the course list, Daily Quest, and unlock
@@ -1052,9 +1053,10 @@ content removes them, while Admin BO keeps authoring control. Syncing
 exercise progress and the partial result keeps counts and first-completion
 EXP correct across devices.
 
-**Consequences:** This supersedes [[DEC-035]] (no local Home checkpoint) and
-replaces [[DEC-042]]'s cross-lesson continuous queue with lesson-scoped
-shuffled sessions. DEC-042's rule still applies: the player owns its session
+**Consequences:** When Home content is deployed it supersedes [[DEC-035]]
+(no local Home checkpoint) and [[DEC-042]]'s cross-lesson continuous queue
+with lesson-scoped shuffled sessions; both remain only as the fallback player
+when no Home content exists. DEC-042's rule still applies: the player owns its session
 and loader data never resets it. [[DEC-034]] is extended with `Course.type`
 and the export step. A completed Home exercise is a persistence checkpoint:
 one write per exercise, never per keystroke ([[DEC-003]]).

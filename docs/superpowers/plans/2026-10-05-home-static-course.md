@@ -121,16 +121,18 @@ Done 2026-10-06: `shuffleExercises`, `nextHomeLesson`, `resolveHomeResume`, `hom
 
 **Files:** `src/features/home/*`, `src/features/course/CourseListPage.{tsx,loader.ts,action.ts}`, `src/infrastructure/local/home-resume-store.ts`, `src/app/router.ts`.
 
-- [ ] **Step 1:** Loader returns the static Home content promise and local cache only; the Learning Path course list stays a separately streamed section. A missing `home.json` (no published Home course) renders no Home player, not an error.
-- [ ] **Step 2:** Build unit categories, lesson list with `n/m`, and the shuffled player; resume from `{ unitId, lessonId }`.
-- [ ] **Step 3:** On each completed exercise enqueue `record-home-exercise`; at a completed lesson's full session end enqueue `submit-home-replay`; auto-advance with a non-blocking notice.
-- [ ] **Step 4:** Add behavior tests for non-visual logic only: no Firestore call before first render; refresh restarts the lesson with a new shuffle and keeps progress.
-- [ ] **Step 5:** `pnpm lint`, `pnpm build`; hand manual UI verification to the user.
+- [x] **Step 1:** Loader returns the static Home content promise and local cache only; the Learning Path course list stays a separately streamed section. A missing `home.json` (no published Home course) renders no Home player, not an error.
+- [x] **Step 2:** Build unit categories, lesson list with `n/m`, and the shuffled player; resume from `{ unitId, lessonId }`.
+- [x] **Step 3:** On each completed exercise enqueue `record-home-exercise`; at a completed lesson's full session end enqueue `submit-home-replay`; auto-advance with a non-blocking notice.
+- [x] **Step 4:** Add behavior tests for non-visual logic only: no Firestore call before first render; refresh restarts the lesson with a new shuffle and keeps progress.
+- [x] **Step 5:** `pnpm lint`, `pnpm build`; hand manual UI verification to the user.
+
+Done 2026-10-06. Decisions: writes go through a `HomeServices` React context built in the app layer (`src/app/home-services.ts`), not route actions; after the last lesson Home shows a completed state and waits for a lesson pick; the lesson-complete notice shows for 3 s. The loader streams `homePlayer` (static JSON + device cache + resume + pending outbox IDs) and `homeProgress` (live Progress, cached on read; null on failure). Without Home content the loader and page fall back to the DEC-042 player, so its code stays. Local stores `homeProgressCache` and `homeResume` (DB version 6). Manual UI verification is the user's.
 
 ### Task 8: Remove superseded code and close out
 
 **Files:** `get-one-page-learning-path.ts`, `save-one-page-checkpoint.ts`, `local-one-page-learning-checkpoint-repository.ts`, `one-page-player-store.ts`, DEC-042 refill/cursor code, their tests, `README.md`, `docs/PROGRESS.md`, `docs/log/2026-10.md`.
 
-- [ ] **Step 1:** Delete the DEC-035 checkpoint and DEC-042 refill paths once Task 7 replaces them; leave existing IndexedDB checkpoint data unread rather than deleting it.
+- [ ] **Step 1:** ~~Delete the DEC-035 checkpoint and DEC-042 refill paths~~ Changed 2026-10-06: keep them as the fallback player when no Home content is deployed; delete nothing.
 - [ ] **Step 2:** Update README Home section and checklist, PROGRESS, and the monthly log.
 - [ ] **Step 3:** `pnpm test`, `pnpm lint`, `pnpm build`.

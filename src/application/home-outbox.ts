@@ -31,6 +31,7 @@ export interface HomeOutboxDeps {
 // retries with backoff, and each use case is idempotent so a re-run is safe.
 export class HomeOutbox {
   private draining: Promise<void> | null = null
+  private lastEnqueuedMs = 0
   private drainAgain = false
 
   constructor(private readonly deps: HomeOutboxDeps) {}
@@ -158,10 +159,15 @@ export class HomeOutbox {
   }
 
   private newJob(userId: string) {
+    // Strictly increasing, so jobs from the same millisecond keep their order.
+    this.lastEnqueuedMs = Math.max(
+      this.now().getTime(),
+      this.lastEnqueuedMs + 1,
+    )
     return {
       id: this.deps.newId?.() ?? crypto.randomUUID(),
       userId,
-      enqueuedAt: this.now(),
+      enqueuedAt: new Date(this.lastEnqueuedMs),
       attempts: 0,
       nextAttemptAt: null,
     }
