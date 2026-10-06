@@ -67,13 +67,21 @@ export default function LessonEditorPage() {
     type !== lesson.type ||
     JSON.stringify(exercises) !== JSON.stringify(lesson.exercises)
   useAdminUnsavedChanges(hasUnsavedChanges, t('feedback.unsavedChangesWarning'))
-  const handleSuccess = useCallback((data: { message?: string }) => {
-    if (data.message === 'feedback.changesSaved') {
-      setEditingDetails(false)
-      setEditingExerciseId(null)
-      setHasPendingExerciseOrder(false)
-    }
-  }, [])
+  const handleSuccess = useCallback(
+    (data: { message?: string }) => {
+      if (data.message === 'feedback.changesSaved') {
+        // Adopt the revalidated Lesson: the server trims and normalizes text,
+        // so keeping the typed values would leave the editor marked dirty.
+        setTitle(lesson.title)
+        setType(lesson.type)
+        setExercises(lesson.exercises)
+        setEditingDetails(false)
+        setEditingExerciseId(null)
+        setHasPendingExerciseOrder(false)
+      }
+    },
+    [lesson],
+  )
   useAdminFeedback(fetcher, handleSuccess)
   const validate = () => {
     const firstInvalidExercise = exercises.find(
