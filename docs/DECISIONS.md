@@ -20,7 +20,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-003 | Keystroke-level state stays client-side; Firestore writes only at checkpoints                                                                                     | Accepted (Home exercise-completion checkpoint: DEC-043)                                                | 2026-09-23 |
 | DEC-004 | MVP excludes multiplayer, leaderboards, and social/competitive features                                                                                           | Accepted                                                                                               | 2026-09-23 |
 | DEC-005 | Pin`@vitejs/plugin-react` to 5.2.0, not latest                                                                                                                    | Accepted                                                                                               | 2026-09-23 |
-| DEC-006 | Level is derived from EXP, never stored                                                                                                                           | Accepted                                                                                               | 2026-09-23 |
+| DEC-006 | Level is derived from EXP, never stored                                                                                                                           | Accepted (EXP award policy updated by DEC-045)                                                         | 2026-09-23 |
 | DEC-007 | Settings live as a field on the user doc                                                                                                                          | Accepted                                                                                               | 2026-09-23 |
 | DEC-008 | Spaced repetition (Leitner boxes) for review scheduling                                                                                                           | Accepted                                                                                               | 2026-09-23 |
 | DEC-009 | Sequential unlock: previous lesson completed unlocks the next                                                                                                     | Accepted (creation/ordering details superseded by DEC-023; Progress-state shape superseded by DEC-025) | 2026-09-23 |
@@ -47,17 +47,19 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-030 | Guest-to-account migration merge policy                                                                                                                           | Accepted (Home exercise-progress merge: DEC-043)                                                       | 2026-09-28 |
 | DEC-031 | Preserve pre-session learner values as a compatibility baseline                                                                                                   | Accepted                                                                                               | 2026-09-28 |
 | DEC-032 | Lesson Result review action opens the due Review queue                                                                                                            | Accepted                                                                                               | 2026-09-28 |
-| DEC-033 | Intentional Learning Path replays grant 15 EXP                                                                                                                    | Accepted (Home replay = full shuffled session: DEC-043)                                                | 2026-09-29 |
+| DEC-033 | Intentional Learning Path replays grant 15 EXP                                                                                                                    | Accepted (replay reward retained by DEC-045; Home replay = full shuffled session: DEC-043)             | 2026-09-29 |
 | DEC-034 | Admin content is claim-authorized and status-gated                                                                                                                | Accepted (extended by DEC-043:`Course.type`, Home export)                                              | 2026-09-29 |
 | DEC-035 | Home one-page player uses browser-local exercise checkpoints                                                                                                      | Superseded by DEC-043                                                                                  | 2026-09-29 |
 | DEC-036 | Jamo SVG steps follow visual jamo for compound medials                                                                                                            | Superseded by DEC-037                                                                                  | 2026-10-01 |
 | DEC-037 | Jamo SVG steps follow typed keys, including compound medials                                                                                                      | Accepted                                                                                               | 2026-10-01 |
 | DEC-038 | Split recipes may partition an enclosed counter with its outline                                                                                                  | Accepted                                                                                               | 2026-10-01 |
-| DEC-039 | Jamo SVG runtime: committed choseong shards behind a flag                                                                                                         | Accepted                                                                                               | 2026-10-03 |
+| DEC-039 | Jamo SVG runtime: committed choseong shards behind a flag                                                                                                         | Accepted (rollout gate replaced by DEC-044)                                                            | 2026-10-03 |
 | DEC-040 | Spaces between words keep the Jamo SVG target renderer                                                                                                            | Accepted                                                                                               | 2026-10-04 |
 | DEC-041 | AI agents propose and receive approval before acting                                                                                                              | Accepted                                                                                               | 2026-10-04 |
 | DEC-042 | Home player owns a continuous client queue; loader only refills                                                                                                   | Accepted (cross-lesson queue superseded by DEC-043)                                                    | 2026-10-05 |
 | DEC-043 | Home plays one static-exported course with synced exercise progress                                                                                               | Accepted                                                                                               | 2026-10-05 |
+| DEC-044 | Jamo SVG renderer enabled in Production without a Preview gate                                                                                                    | Accepted                                                                                               | 2026-10-06 |
+| DEC-045 | Difficulty-based EXP rewards and bonus calculation                                                                                                                | Accepted                                                                                               | 2026-10-06 |
 
 ---
 
@@ -139,11 +141,11 @@ implementation context only, not the target architecture.
 
 **Why:** User chose "derived" over "stored" to resolve the open question in `docs/DOMAIN-MODEL.md`. A derived value can't drift from its source, and the leveling curve can be tuned later without a data migration — only `exp` is ever written.
 
-**Consequences:** The exact formula (`100` EXP per level) is an MVP placeholder, not confirmed game-design balance. Lives as `levelFromExp()` in `domain/models/user-profile.ts` — change it there, not in UI code.
+**Consequences:** The exact formula (`100` EXP per level) is an MVP placeholder, not confirmed game-design balance. EXP award amounts and calculation order are updated by [[DEC-045]], but the MVP level curve remains flat until a separate level-curve decision. Lives as `levelFromExp()` in `domain/models/user-profile.ts` — change it there, not in UI code.
 
 **Reaffirmed 2026-09-23:** cross-checked against `docs/requirement.md`, whose own example ("Level 7, 430/600 EXP") implies an increasing per-level curve and separately lists "Level" as a thing to save. User re-confirmed this decision stands as-is over that example.
 
-**Deferred 2026-09-27 ([[DEC-024]]):** retain the flat 100-EXP curve until later game-balance work has real learning-volume and EXP-rate data. This is deliberately not a schema change: `level` remains derived from the only persisted value, `exp`.
+**Deferred 2026-09-27 ([[DEC-024]]):** retain the flat 100-EXP curve until later game-balance work has real learning-volume and EXP-rate data. [[DEC-045]] now changes how EXP is earned; the level curve remains flat pending its own decision. This is deliberately not a schema change: `level` remains derived from the only persisted value, `exp`.
 
 ---
 
@@ -725,10 +727,9 @@ creation and its Leitner schedule remain unchanged.
 ## DEC-033 — Intentional Learning Path replays grant 15 EXP
 
 **Date:** 2026-09-29
-**Status:** Accepted (a Home replay is one full shuffled session; see [[DEC-043]])
+**Status:** Accepted (replay award retained by [[DEC-045]]; a Home replay is one full shuffled session, see [[DEC-043]])
 
-**Decision:** The first completed Learning Path attempt keeps its normal
-accuracy-based EXP reward. An intentional replay of a lesson whose
+**Decision:** An intentional replay of a lesson whose
 `LessonProgress` is already `completed` creates a new submitted session and
 grants a flat 15 EXP. It does not change the lesson's completion state, unlock
 the next lesson, or create first-completion review effects.
@@ -738,7 +739,8 @@ predictable reward without competing with progression through new content.
 
 **Consequences:** This supersedes DEC-014's no-repeat-EXP rule for the active
 `completeLessonSession` path. There is no daily cap in MVP; any future balance
-limit needs its own persisted policy and decision.
+limit needs its own persisted policy and decision. The first-completion reward
+is now defined by [[DEC-045]], replacing the former accuracy-based rule.
 
 ---
 
@@ -1031,8 +1033,9 @@ the distinct `completedExerciseIds` and the raw partial result (accepted and
 rejected keystrokes, start time, and a stable `submissionId`) of those first
 completions; mistakes are not kept because Home creates no ReviewItems. It is permanent and syncs like other Progress. When
 the IDs first cover every exercise, the lesson becomes `completed` and one
-LearningSession is submitted from the partial result with accuracy-based EXP;
-its `sessionId` is the partial result's `submissionId`. Exercises played
+LearningSession is submitted from the partial result with the earned
+difficulty-based EXP for its first-completed exercises ([[DEC-045]]); its
+`sessionId` is the partial result's `submissionId`. Exercises played
 after that within the same session submit nothing more. A later session that
 plays a completed lesson's whole shuffle submits a replay session worth 15
 EXP ([[DEC-033]]); an abandoned session submits nothing. Completion is never
@@ -1068,3 +1071,74 @@ Cloud partial result wins unless absent. Profile's `Lessons completed`
 `LessonProgress`. Because a missing type reads as `learning`, the course
 list filters `home` out in the adapter rather than with a Firestore
 `where('type', '==', 'learning')` query, which would drop untyped courses.
+
+## DEC-044 — Jamo SVG renderer enabled in Production without a Preview gate
+
+**Date:** 2026-10-06
+**Status:** Accepted
+
+**Decision:** Amends the rollout plan around [[DEC-039]]. Production builds on
+Cloudflare Pages set `VITE_JAMO_SVG_RENDERER=1`, so learners get the per-step
+SVG renderer now. The planned gate (validate on a Preview deployment including
+mobile, then raise lesson-vocabulary coverage) no longer blocks enabling it.
+The fallback rules of DEC-039 and [[DEC-040]] are unchanged.
+
+**Why:** The owner chose to ship the renderer to learners directly rather than
+wait for the Preview check and more review coverage.
+
+**Consequences:** A target with any syllable lacking approved data still
+renders Canvas (Noto), so a lesson can show both Pretendard SVG and Noto Canvas
+targets. Mobile behaviour is unverified. The flag stays as a kill switch:
+unset it in Cloudflare Pages and redeploy to return to Canvas. Mobile checks
+and coverage work continue as follow-ups.
+
+---
+
+## DEC-045 — Difficulty-based EXP rewards and bonus calculation
+
+**Date:** 2026-10-06
+**Status:** Accepted
+
+**Decision:** Adopt the activity EXP amounts and calculation order in
+`docs/LEVELING.md` for submitted learning activities. Difficulty is taken
+from each completed `LessonExercise` or practice/review item:
+
+| Activity                                             | Easy | Medium | Hard |
+| ---------------------------------------------------- | ---: | -----: | ---: |
+| First completion of a Learning Path or Home exercise |   15 |     25 |   30 |
+| Review or Practice item                              |    3 |      5 |   10 |
+| Daily Quest item                                     |    5 |     10 |   15 |
+
+Each eligible item contributes its base reward once when completed. A
+Daily Quest grants the sum of its completed items once for that quest; retries
+can update learner state but cannot grant the quest reward again. A first-time
+perfect exercise (100% accuracy) adds 5 flat EXP. A full replay of an already
+completed lesson retains the existing 15 EXP reward ([[DEC-033]], [[DEC-043]]);
+an abandoned session grants nothing. Topic, Keyboard Position, and other
+Practice activities use the Review/Practice row when they complete eligible
+items. No activity reward changes Learning Path unlock rules.
+
+For each reward, calculate `round((Base EXP + Flat Bonus) × (1 + Total EXP Bonus))`. Add flat bonuses before percentage bonuses, then round once at the
+end. Bonus sources and effect values are the ones documented in LEVELING.md;
+unearned/unavailable bonuses contribute zero. Reward and bonus calculation
+must be idempotent at the submitted activity checkpoint.
+
+This decision updates the MVP EXP award policy. The derived Level formula
+remains the flat 100 EXP per level from [[DEC-006]] until a separate decision
+adopts LEVELING.md's rebirth-based curve and associated profile state. Rank,
+Rebirth, Perks, achievements, and the expanded daily/lifetime stat collections
+remain design proposals and are not authorized domain-model changes here.
+
+**Why:** Rewarding completed items according to their difficulty applies the
+same predictable progression across lessons and practice, while small review
+and quest rewards recognize those activities without changing curriculum
+progression. The explicit calculation order keeps flat and percentage bonuses
+consistent.
+
+**Consequences:** This changes the target EXP behavior from the current
+accuracy-based first-lesson reward and zero EXP for Review/Practice. Existing
+implementation and historical requirement/spec/plan documents still describe
+the old behavior; code and live learner data are unchanged by this
+documentation decision and require a separately scoped implementation and
+rollout. `LearningSession.expGained` continues to record the amount actually
+awarded by the implementation in effect for that submission.

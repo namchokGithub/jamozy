@@ -61,9 +61,12 @@ A lesson session plays all of its exercises once in a fresh shuffled order,
 then moves on to the next lesson (and unit) with a short notice, looping back
 to the first lesson after the last one. A lesson
 completes once every exercise has been typed at least once, across sessions
-and devices: the first completion grants accuracy-based EXP, and a full
-replay of a completed lesson grants 15 EXP. Home lessons create no review
-items. Every save runs in the background through a retrying local outbox.
+and devices: first completion grants difficulty-based EXP per exercise, with
+an additional bonus for a perfect exercise; a full replay of a completed
+lesson grants 15 EXP. Home lessons create no review items. See
+[`docs/LEVELING.md`](docs/LEVELING.md) and [[DEC-045]] for the reward amounts
+and bonus calculation. Every save runs in the background through a retrying
+local outbox.
 
 When no Home course is published, Home falls back to the Learning Path player
 ([[DEC-042]]). The Hero and learning-path cards remain below the player.
@@ -400,11 +403,10 @@ verification checklist and post-MVP roadmap.
 - Dedicated Lesson Result visual redesign
 - History, summaries, and analytics
 - Learning Modes: VocabularyProgress, JamoStats, Practice, and Daily Quest
-- Roll out per-step Jamo SVG rendering: it is built behind the
-  `VITE_JAMO_SVG_RENDERER` flag with 1,858 approved syllables (DEC-039).
-  First validate it in a Preview deployment, including mobile, resolve the
-  space-target policy, and raise lesson-vocabulary coverage before enabling it
-  for learners. See the
+- Per-step Jamo SVG rendering is enabled in Production through
+  `VITE_JAMO_SVG_RENDERER=1` with 1,858 approved syllables (DEC-039, DEC-044).
+  Check it on mobile and raise lesson-vocabulary coverage so fewer targets
+  fall back to Canvas. See the
   [Progress Tracker](docs/PROGRESS.md#dev-tooling-jamo-svg).
 - Account linking between authentication providers
 - Achievements, daily streaks, pronunciation audio, and additional curriculum
