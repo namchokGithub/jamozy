@@ -21,10 +21,18 @@ become familiar with Hangul and the Korean keyboard through structured practice.
 Learners progress from basic characters and syllables to words, phrases,
 and sentences while improving typing accuracy and speed.
 
+<img
+    src="public/screenshot/jamozy-0.1.0.png"
+    alt="Jamozy SC-0.1.0"
+    width="1024"
+    height="1024"
+    align="center"
+  />
+
 ## Core Features
 
 - Progressive Unit → Lesson learning structure
-- One-page Home learning player with up to 10 exercises per selected course
+- Home player for one Admin-managed Home course, exported to static JSON at build
 - Korean typing exercises
 - Virtual Korean keyboard guide
 - Finger-placement reference for Korean keyboard practice
@@ -42,24 +50,23 @@ and sentences while improving typing accuracy and speed.
 
 Learn → Type → Review → Improve → Unlock
 
-### Home One-page Learning Path
+### Home
 
-Home is the fast path into practice. It presents up to the first three courses
-that are not finished; the learner chooses one course, then types a queue of
-up to ten exercises in `Unit → Lesson → Exercise` order. A queue never fills
-its remaining slots from another course.
+Home is the fast path into practice ([[DEC-043]]). It plays a single course of
+type `home`, authored in Admin BO and exported to `public/content/home.json`
+by every `pnpm build`, so opening Home never waits on Firestore. Units are
+categories; each lesson shows its distinct completed exercises, such as `3/5`.
 
-The active exercise shows Korean, Thai/English meanings, romanization, live
-WPM/accuracy, the virtual keyboard, and a finger-placement guide. Completing
-an exercise saves a browser-local IndexedDB checkpoint, so a refresh resumes
-at the next exercise. The checkpoint is local even for signed-in users and is
-not cloud-synced or migrated. Only the final exercise of a lesson creates the
-normal submitted lesson result, progress, EXP, and review effects.
+A lesson session plays all of its exercises once in a fresh shuffled order,
+then moves on to the next lesson (and unit) with a short notice, looping back
+to the first lesson after the last one. A lesson
+completes once every exercise has been typed at least once, across sessions
+and devices: the first completion grants accuracy-based EXP, and a full
+replay of a completed lesson grants 15 EXP. Home lessons create no review
+items. Every save runs in the background through a retrying local outbox.
 
-The Hero and the standard learning-path cards remain below the player. Learners
-can still open a Course and choose a specific Lesson through the existing flow.
-When every available course is complete, Home falls back to replaying the first
-three courses; completed lessons retain the existing lower replay EXP reward.
+When no Home course is published, Home falls back to the Learning Path player
+([[DEC-042]]). The Hero and learning-path cards remain below the player.
 
 ## Learning Modes
 
@@ -363,7 +370,7 @@ Current sources:
 
 - Korean-English Learners' Dictionary vocabulary list (5,800 words),
   National Institute of Korean Language (국립국어원) —
-  <https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=71&pageIndex=1>
+  [https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=71&amp;pageIndex=1](https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=71&pageIndex=1)
 - 현대 국어 사용 빈도 조사 2, National Institute of Korean Language (국립국어원)
 
 > Lesson content is treated as shared application data, while progress, review
@@ -373,19 +380,18 @@ Current sources:
 
 The core MVP is functionally complete: Learning Path, lessons, results,
 review, guest and authenticated persistence, settings, profile, and Admin BO
-are implemented. The Home one-page Learning Path player is awaiting its final
-manual verification pass. See the [Progress Tracker](docs/PROGRESS.md) for
+are implemented. The Home player ([[DEC-043]]) is awaiting its final manual
+verification pass. See the [Progress Tracker](docs/PROGRESS.md) for
 the detailed current status.
 
 ### MVP
 
-MVP is complete apart from final user-owned verification of the Home one-page
-Learning Path player. See [Progress Tracker](docs/PROGRESS.md) for the
+MVP is complete apart from final user-owned verification of the Home player. See [Progress Tracker](docs/PROGRESS.md) for the
 verification checklist and post-MVP roadmap.
 
 ### Next / Post-MVP
 
-- Complete the Home one-page Learning Path player's manual verification.
+- Complete the Home player's manual verification.
 - Set up a Cloudflare Pages deployment pipeline and use Preview deployments
   for release checks.
 - Decide whether sound feedback ships or is deferred, then implement the

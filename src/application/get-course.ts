@@ -1,14 +1,21 @@
 import type { CourseRepository } from '../domain/repositories/course-repository'
 import type { LessonRepository } from '../domain/repositories/lesson-repository'
 import type { ProgressRepository } from '../domain/repositories/progress-repository'
-import type { Course } from '../domain/models/course'
+import { courseType, type Course } from '../domain/models/course'
 import type { Unit } from '../domain/models/unit'
 import type { Lesson } from '../domain/models/lesson'
 import type { Progress } from '../domain/models/progress'
 import { NotFoundError } from '../domain/errors'
 
-export function getCourses(courseRepo: CourseRepository): Promise<Course[]> {
-  return courseRepo.getCourses()
+// Learning Path courses only: the `home` course is played from its static
+// export and never listed (DEC-043). Filtered here, not with a Firestore
+// `where`, because an absent type reads as `learning`.
+export async function getCourses(
+  courseRepo: CourseRepository,
+): Promise<Course[]> {
+  return (await courseRepo.getCourses()).filter(
+    (course) => courseType(course) === 'learning',
+  )
 }
 
 export function getCourseUnits(
@@ -45,7 +52,7 @@ export async function getCourseMap(
   courseId: string,
 ): Promise<CourseMap> {
   const course = await deps.courseRepo.getCourseById(courseId)
-  if (!course) {
+  if (!course || courseType(course) !== 'learning') {
     throw new NotFoundError(`Course not found: ${courseId}`)
   }
 

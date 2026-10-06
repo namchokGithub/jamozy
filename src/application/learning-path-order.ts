@@ -1,4 +1,4 @@
-import type { Course } from '../domain/models/course'
+import { courseType, type Course } from '../domain/models/course'
 import type { Lesson } from '../domain/models/lesson'
 import type { Progress } from '../domain/models/progress'
 import type { Unit } from '../domain/models/unit'
@@ -14,23 +14,32 @@ export interface OrderedLearningPathLesson {
 export async function getOrderedLearningPath(
   courseRepo: CourseRepository,
   lessonRepo: LessonRepository,
+  // A caller that already requested the course list passes it in, so one
+  // load does not query courses twice.
+  coursesRequest: Promise<Course[]> = courseRepo.getCourses(),
 ): Promise<OrderedLearningPathLesson[]> {
-  const courses = [...(await courseRepo.getCourses())].sort(
-    (left, right) => left.order - right.order,
+  const courses = (await coursesRequest)
+    .filter((course) => courseType(course) === 'learning')
+    .sort((left, right) => left.order - right.order)
+  // Query every course's units, then every unit's lessons, concurrently:
+  // sequential awaits made Home load in 1 + courses + units round trips.
+  const unitsByCourse = await Promise.all(
+    courses.map(async (course) =>
+      [...(await courseRepo.getUnitsByCourseId(course.id))]
+        .sort((left, right) => left.order - right.order)
+        .map((unit) => ({ course, unit })),
+    ),
   )
-  const ordered: OrderedLearningPathLesson[] = []
-  for (const course of courses) {
-    const units = [...(await courseRepo.getUnitsByCourseId(course.id))].sort(
-      (left, right) => left.order - right.order,
-    )
-    for (const unit of units) {
-      const lessons = [...(await lessonRepo.getLessonsByUnitId(unit.id))].sort(
-        (left, right) => left.order - right.order,
-      )
-      ordered.push(...lessons.map((lesson) => ({ course, unit, lesson })))
-    }
-  }
-  return ordered
+  const lessonsByUnit = await Promise.all(
+    unitsByCourse
+      .flat()
+      .map(async ({ course, unit }) =>
+        [...(await lessonRepo.getLessonsByUnitId(unit.id))]
+          .sort((left, right) => left.order - right.order)
+          .map((lesson) => ({ course, unit, lesson })),
+      ),
+  )
+  return lessonsByUnit.flat()
 }
 
 export function findContiguousFrontier(

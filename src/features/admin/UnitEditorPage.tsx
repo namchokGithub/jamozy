@@ -6,7 +6,10 @@ import type { Unit } from '../../domain/models/unit'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { PageSurface } from '../../components/ui/PageSurface'
-import { AdminStatusActions } from './AdminStatusActions'
+import {
+  AdminStatusActions,
+  AdminStatusActionsPreview,
+} from './AdminStatusActions'
 import { AdminStatusBadge } from './AdminStatusBadge'
 import { AdminContentListToolbar } from './AdminContentListToolbar'
 import { useAdminFeedback } from './useAdminFeedback'
@@ -15,6 +18,7 @@ import { useAdminUnsavedChanges } from './useAdminUnsavedChanges'
 import { AdminTopBar } from './AdminTopBar'
 import { useAdminTranslation } from './i18n/admin-i18n'
 import { useCreatedHighlight } from './useCreatedHighlight'
+import { AdminSortableList } from './AdminSortableList'
 
 export default function UnitEditorPage() {
   const { unit, course, lessons } = useLoaderData() as {
@@ -31,7 +35,6 @@ export default function UnitEditorPage() {
   const [orderedLessons, setOrderedLessons] = useState(lessons)
   const [lessonSearch, setLessonSearch] = useState('')
   const [lessonStatusFilter, setLessonStatusFilter] = useState('all')
-  const [draggedLessonId, setDraggedLessonId] = useState<string | null>(null)
   const isPending = useAdminMutationPending()
   useAdminUnsavedChanges(detailsDirty, t('feedback.unsavedChangesWarning'))
   const handleSuccess = useCallback(
@@ -51,12 +54,13 @@ export default function UnitEditorPage() {
   const submit = (data: Record<string, string>) => {
     if (!isPending) fetcher.submit(data, { method: 'post' })
   }
-  const moveLessonTo = (targetIndex: number) => {
-    if (!draggedLessonId) return
+  const moveLesson = (activeId: string, targetId: string) => {
     const currentIndex = orderedLessons.findIndex(
-      (item) => item.id === draggedLessonId,
+      (item) => item.id === activeId,
     )
-    if (currentIndex < 0 || currentIndex === targetIndex) return
+    const targetIndex = orderedLessons.findIndex((item) => item.id === targetId)
+    if (currentIndex < 0 || targetIndex < 0 || currentIndex === targetIndex)
+      return
     const next = [...orderedLessons]
     const [dragged] = next.splice(currentIndex, 1)
     next.splice(targetIndex, 0, dragged)
@@ -107,7 +111,9 @@ export default function UnitEditorPage() {
           </h1>
           <AdminStatusBadge status={unit.status} />
         </div>
-        <AdminStatusActions id={unit.id} kind="unit" status={unit.status} />
+        <div className="flex items-center gap-2">
+          <AdminStatusActions id={unit.id} kind="unit" status={unit.status} />
+        </div>
       </header>
       {detailsDirty && (
         <div className="mt-4 rounded-xl bg-[#fff1d8] px-4 py-3 text-sm font-semibold text-[#92703e]">
@@ -208,66 +214,77 @@ export default function UnitEditorPage() {
           status={lessonStatusFilter}
           onStatusChange={setLessonStatusFilter}
         />
-        <div className="mt-4 space-y-3">
-          {visibleLessons.map((lesson) => {
-            const index = orderedLessons.findIndex(
-              (item) => item.id === lesson.id,
-            )
-            return (
-              <div
-                key={lesson.id}
-                role="link"
-                tabIndex={0}
-                onClick={() => navigate(`/admin/lessons/${lesson.id}`)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault()
-                    navigate(`/admin/lessons/${lesson.id}`)
-                  }
-                }}
-                onDragOver={(event) => event.preventDefault()}
-                onDrop={() => {
-                  moveLessonTo(index)
-                  setDraggedLessonId(null)
-                }}
-                className="flex min-h-22 w-full cursor-pointer flex-wrap items-center justify-between gap-4 border-b border-[#eadfd4] py-5 last:border-b-0 focus-visible:ring-2 focus-visible:ring-[#f2c5bb]"
-              >
-                <div className="flex min-w-0 items-center gap-3">
-                  <button
-                    type="button"
-                    draggable
-                    aria-label={t('action.dragHandle')}
-                    disabled={isPending}
-                    onClick={(event) => event.stopPropagation()}
-                    onDragStart={() => setDraggedLessonId(lesson.id)}
-                    onDragEnd={() => setDraggedLessonId(null)}
-                    className="shrink-0 cursor-grab px-1 py-2 text-lg leading-none tracking-[-0.2em] text-[#a85d4e] active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    ⋮⋮
-                  </button>
-                  <h3 className="truncate font-bold">{lesson.title}</h3>
-                  <AdminStatusBadge status={lesson.status} />
-                </div>
-                <div
-                  className="flex items-center gap-1"
+        <AdminSortableList
+          className="mt-4 space-y-3"
+          items={visibleLessons}
+          getId={(lesson) => lesson.id}
+          disabled={isPending}
+          onMove={moveLesson}
+          renderItem={(lesson, { handleRef, isDragging, ref }) => (
+            <div
+              ref={ref}
+              role="link"
+              tabIndex={0}
+              onClick={() => navigate(`/admin/lessons/${lesson.id}`)}
+              onKeyDown={(event) => {
+                if (event.target !== event.currentTarget) return
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  navigate(`/admin/lessons/${lesson.id}`)
+                }
+              }}
+              className={`flex min-h-22 w-full cursor-pointer flex-wrap items-center justify-between gap-4 border-b border-[#eadfd4] py-5 last:border-b-0 focus-visible:ring-2 focus-visible:ring-[#f2c5bb] ${isDragging ? 'opacity-50' : ''}`}
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <button
+                  ref={handleRef}
+                  type="button"
+                  aria-label={t('action.dragHandle')}
+                  disabled={isPending}
                   onClick={(event) => event.stopPropagation()}
+                  className="shrink-0 cursor-grab px-1 py-2 text-lg leading-none tracking-[-0.2em] text-[#a85d4e] active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <Link
-                    className="rounded-full border border-[#eadfd4] bg-white/90 px-3 py-2 text-sm font-semibold text-[#8d4c43] hover:border-[#d8b3a9] hover:bg-white"
-                    to={`/admin/lessons/${lesson.id}`}
-                  >
-                    {t('action.edit')}
-                  </Link>
-                  <AdminStatusActions
-                    id={lesson.id}
-                    kind="lesson"
-                    status={lesson.status}
-                  />
-                </div>
+                  ⋮⋮
+                </button>
+                <h3 className="truncate font-bold">{lesson.title}</h3>
+                <AdminStatusBadge status={lesson.status} />
               </div>
-            )
-          })}
-        </div>
+              <div
+                className="flex items-center gap-1"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <Link
+                  className="rounded-full border border-[#eadfd4] bg-white/90 px-3 py-2 text-sm font-semibold text-[#8d4c43] hover:border-[#d8b3a9] hover:bg-white"
+                  to={`/admin/lessons/${lesson.id}`}
+                >
+                  {t('action.edit')}
+                </Link>
+                <AdminStatusActions
+                  id={lesson.id}
+                  kind="lesson"
+                  status={lesson.status}
+                />
+              </div>
+            </div>
+          )}
+          renderOverlay={(lesson) => (
+            <div className="flex min-h-22 w-full flex-wrap items-center justify-between gap-4 border border-[#eadfd4] px-4 py-5">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="shrink-0 px-1 py-2 text-lg leading-none tracking-[-0.2em] text-[#a85d4e]">
+                  ⋮⋮
+                </span>
+                <h3 className="truncate font-bold">{lesson.title}</h3>
+                <AdminStatusBadge status={lesson.status} />
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="rounded-full border border-[#eadfd4] bg-white/90 px-3 py-2 text-sm font-semibold text-[#8d4c43]">
+                  {t('action.edit')}
+                </span>
+                <AdminStatusActionsPreview status={lesson.status} />
+              </div>
+            </div>
+          )}
+        />
       </section>
     </PageSurface>
   )

@@ -88,6 +88,39 @@ export function pressKey(state: LessonSessionState, code: string, shiftKey: bool
   }
 }
 
+// Extends a running session without resetting the current exercise, its
+// timer, or its counters. A session that already ran out of exercises moves
+// straight to the first appended one.
+export function appendExercises(
+  state: LessonSessionState,
+  exercises: Array<Pick<LessonExercise, 'id' | 'targetText'>>,
+): LessonSessionState {
+  if (exercises.length === 0) return state
+  const appended = [...state.exercises, ...exercises]
+  if (state.status !== 'completed') return { ...state, exercises: appended }
+  const nextIndex = state.exercises.length
+  return {
+    ...state,
+    exercises: appended,
+    currentIndex: nextIndex,
+    currentSession: startTypingSession(appended[nextIndex].targetText),
+    status: 'typing',
+  }
+}
+
+// Drops exercises before the current one and their results, so a continuous
+// session does not grow without bound. Callers must consume completedResults
+// first; the current exercise is kept even when the session is completed.
+export function compactLessonSession(state: LessonSessionState): LessonSessionState {
+  return {
+    ...state,
+    exercises: state.exercises.slice(state.currentIndex),
+    currentIndex: 0,
+    completedResults: [],
+    lastCompletedExercise: null,
+  }
+}
+
 export interface MistakeReport {
   sourceExerciseId: string
   targetText: string

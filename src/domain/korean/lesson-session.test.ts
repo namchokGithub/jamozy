@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
+  appendExercises,
+  compactLessonSession,
   getLessonProgress,
   getLessonResult,
   pressKey,
@@ -142,5 +144,81 @@ describe('lessonResultSchema', () => {
     expect(() =>
       lessonResultSchema.parse({ accuracy: 150, speedWpm: 2, durationSeconds: 60, startedAtMs: 0, exercisesAttempted: 1, acceptedKeystrokes: 10, rejectedKeystrokes: 0, mistakes: [] }),
     ).toThrow()
+  })
+})
+
+describe('appendExercises', () => {
+  it('extends a running session without resetting the current exercise', () => {
+    let state = startLessonSession([{ id: 'e1', targetText: '가' }])
+    state = pressKey(state, 'KeyR', false)
+
+    const appended = appendExercises(state, [{ id: 'e2', targetText: '나' }])
+
+    expect(appended.exercises.map(({ id }) => id)).toEqual(['e1', 'e2'])
+    expect(appended.currentIndex).toBe(0)
+    expect(appended.currentSession).toBe(state.currentSession)
+    expect(appended.startedAt).toBe(state.startedAt)
+    expect(appended.status).toBe('typing')
+  })
+
+  it('moves a completed session straight to the first appended exercise', () => {
+    let state = startLessonSession([{ id: 'e1', targetText: '가' }])
+    state = pressKey(state, 'KeyR', false)
+    state = pressKey(state, 'KeyK', false)
+    expect(state.status).toBe('completed')
+
+    const appended = appendExercises(state, [{ id: 'e2', targetText: '나' }])
+
+    expect(appended.status).toBe('typing')
+    expect(appended.currentIndex).toBe(1)
+    expect(appended.currentSession.targetText).toBe('나')
+    expect(appended.completedResults).toBe(state.completedResults)
+  })
+
+  it('starts an empty session on the first appended exercise', () => {
+    const appended = appendExercises(startLessonSession([]), [{ id: 'e1', targetText: '가' }])
+
+    expect(appended.status).toBe('typing')
+    expect(appended.currentIndex).toBe(0)
+    expect(appended.currentSession.targetText).toBe('가')
+  })
+
+  it('returns the same state when nothing is appended', () => {
+    const state = startLessonSession([{ id: 'e1', targetText: '가' }])
+    expect(appendExercises(state, [])).toBe(state)
+  })
+})
+
+describe('compactLessonSession', () => {
+  it('drops finished exercises and their results but keeps the current exercise', () => {
+    let state = startLessonSession([
+      { id: 'e1', targetText: '가' },
+      { id: 'e2', targetText: '나' },
+    ])
+    state = pressKey(state, 'KeyR', false)
+    state = pressKey(state, 'KeyK', false)
+    state = pressKey(state, 'KeyS', false)
+
+    const compacted = compactLessonSession(state)
+
+    expect(compacted.exercises.map(({ id }) => id)).toEqual(['e2'])
+    expect(compacted.currentIndex).toBe(0)
+    expect(compacted.currentSession).toBe(state.currentSession)
+    expect(compacted.completedResults).toEqual([])
+    expect(compacted.lastCompletedExercise).toBeNull()
+  })
+
+  it('keeps the last exercise of a completed session so more can be appended', () => {
+    let state = startLessonSession([{ id: 'e1', targetText: '가' }])
+    state = pressKey(state, 'KeyR', false)
+    state = pressKey(state, 'KeyK', false)
+
+    const compacted = compactLessonSession(state)
+    expect(compacted.exercises.map(({ id }) => id)).toEqual(['e1'])
+    expect(compacted.status).toBe('completed')
+
+    const appended = appendExercises(compacted, [{ id: 'e2', targetText: '나' }])
+    expect(appended.currentIndex).toBe(1)
+    expect(appended.currentSession.targetText).toBe('나')
   })
 })

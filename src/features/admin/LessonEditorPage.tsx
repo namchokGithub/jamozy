@@ -15,6 +15,7 @@ import { useAdminUnsavedChanges } from './useAdminUnsavedChanges'
 import { AdminTopBar } from './AdminTopBar'
 import { useAdminTranslation } from './i18n/admin-i18n'
 import { useCreatedHighlight } from './useCreatedHighlight'
+import { AdminSortableList } from './AdminSortableList'
 
 const lessonTypes: Lesson['type'][] = [
   'character',
@@ -53,9 +54,6 @@ export default function LessonEditorPage() {
   const [difficultyFilter, setDifficultyFilter] = useState('all')
   const [editingDetails, setEditingDetails] = useState(false)
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(
-    null,
-  )
-  const [draggedExerciseId, setDraggedExerciseId] = useState<string | null>(
     null,
   )
   const [hasPendingExerciseOrder, setHasPendingExerciseOrder] = useState(false)
@@ -119,13 +117,16 @@ export default function LessonEditorPage() {
           : item,
       ),
     )
-  const moveExerciseTo = (targetIndex: number) => {
-    if (!draggedExerciseId) return
+  const moveExercise = (activeId: string, targetId: string) => {
     setExercises((items) => {
       const currentIndex = items.findIndex(
-        (exercise) => exercise.id === draggedExerciseId,
+        (exercise) => exercise.id === activeId,
       )
-      if (currentIndex < 0 || currentIndex === targetIndex) return items
+      const targetIndex = items.findIndex(
+        (exercise) => exercise.id === targetId,
+      )
+      if (currentIndex < 0 || targetIndex < 0 || currentIndex === targetIndex)
+        return items
       const next = [...items]
       const [dragged] = next.splice(currentIndex, 1)
       next.splice(targetIndex, 0, dragged)
@@ -190,11 +191,13 @@ export default function LessonEditorPage() {
           </h1>
           <AdminStatusBadge status={lesson.status} />
         </div>
-        <AdminStatusActions
-          id={lesson.id}
-          kind="lesson"
-          status={lesson.status}
-        />
+        <div className="flex items-center gap-2">
+          <AdminStatusActions
+            id={lesson.id}
+            kind="lesson"
+            status={lesson.status}
+          />
+        </div>
       </header>
       {hasUnsavedChanges && (
         <div className="mt-4 rounded-xl bg-[#fff1d8] px-4 py-3 text-sm font-semibold text-[#92703e]">
@@ -359,28 +362,26 @@ export default function LessonEditorPage() {
             </Button>
           </div>
         )}
-        <div className="mt-4 space-y-4">
-          {visibleExercises.map((exercise) => {
+        <AdminSortableList
+          className="mt-4 space-y-4"
+          items={visibleExercises}
+          getId={(exercise) => exercise.id}
+          disabled={isPending}
+          onMove={moveExercise}
+          renderItem={(exercise, { handleRef, isDragging, ref }) => {
             const index = exercises.findIndex((item) => item.id === exercise.id)
             return (
               <div
-                key={exercise.id}
-                onDragOver={(event) => event.preventDefault()}
-                onDrop={() => {
-                  moveExerciseTo(index)
-                  setDraggedExerciseId(null)
-                }}
-                className="grid min-h-22 w-full gap-3 border-b border-[#eadfd4] py-5 last:border-b-0"
+                ref={ref}
+                className={`grid min-h-22 w-full gap-3 border-b border-[#eadfd4] py-5 last:border-b-0 ${isDragging ? 'opacity-50' : ''}`}
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex min-w-0 items-center gap-3">
                     <button
+                      ref={handleRef}
                       type="button"
-                      draggable
                       aria-label={t('action.dragHandle')}
                       disabled={isPending}
-                      onDragStart={() => setDraggedExerciseId(exercise.id)}
-                      onDragEnd={() => setDraggedExerciseId(null)}
                       className="shrink-0 cursor-grab px-1 py-2 text-lg leading-none tracking-[-0.2em] text-[#a85d4e] active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       ⋮⋮
@@ -543,8 +544,125 @@ export default function LessonEditorPage() {
                 )}
               </div>
             )
-          })}
-        </div>
+          }}
+          renderOverlay={(exercise) => {
+            const index = exercises.findIndex((item) => item.id === exercise.id)
+            return (
+              <div className="grid min-h-22 w-full gap-3 border border-[#eadfd4] px-4 py-5">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="shrink-0 px-1 py-2 text-lg leading-none tracking-[-0.2em] text-[#a85d4e]">
+                      ⋮⋮
+                    </span>
+                    <p className="truncate text-sm font-bold">
+                      {exercise.targetText ||
+                        t('lesson.exerciseNumber', { number: index + 1 })}
+                    </p>
+                  </div>
+                  <span className="rounded-full border border-[#eadfd4] bg-white/90 px-3 py-2 text-sm font-semibold text-[#8d4c43]">
+                    {t('action.editExercise')}
+                  </span>
+                </div>
+                {editingExerciseId === exercise.id ? (
+                  <div className="grid gap-5">
+                    <fieldset className="grid gap-3">
+                      <legend className="text-sm font-bold text-[#39465b]">
+                        {t('lesson.exerciseContent')}
+                      </legend>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="grid gap-1 text-sm font-semibold">
+                          {t('field.targetText')}
+                          <input
+                            value={exercise.targetText}
+                            readOnly
+                            className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
+                          />
+                        </label>
+                        <label className="grid gap-1 text-sm font-semibold">
+                          {t('field.romanization')}
+                          <input
+                            value={exercise.romanization ?? ''}
+                            readOnly
+                            className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
+                          />
+                        </label>
+                      </div>
+                    </fieldset>
+                    <fieldset className="grid gap-3">
+                      <legend className="text-sm font-bold text-[#39465b]">
+                        {t('lesson.exerciseTranslation')}
+                      </legend>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="grid gap-1 text-sm font-semibold">
+                          {t('field.meaningTh')}
+                          <input
+                            value={exercise.meaningTh}
+                            readOnly
+                            className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
+                          />
+                        </label>
+                        <label className="grid gap-1 text-sm font-semibold">
+                          {t('field.meaningEn')}
+                          <input
+                            value={exercise.meaningEn}
+                            readOnly
+                            className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
+                          />
+                        </label>
+                      </div>
+                    </fieldset>
+                    <fieldset className="grid gap-3">
+                      <legend className="text-sm font-bold text-[#39465b]">
+                        {t('lesson.exerciseMetadata')}
+                      </legend>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="grid gap-1 text-sm font-semibold">
+                          {t('field.difficulty')}
+                          <input
+                            value={t(`difficulty.${exercise.difficulty}`)}
+                            readOnly
+                            className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
+                          />
+                        </label>
+                        <label className="grid gap-1 text-sm font-semibold">
+                          {t('field.hint')}
+                          <input
+                            value={exercise.hint ?? ''}
+                            readOnly
+                            className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
+                          />
+                        </label>
+                      </div>
+                    </fieldset>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="inline-flex items-center justify-center rounded-full border border-[#a85d4e] bg-[#a85d4e] px-4 py-2 text-sm font-semibold text-white">
+                        {t('action.saveChanges')}
+                      </span>
+                      <span className="inline-flex items-center justify-center rounded-full border border-[#eadfd4] bg-white/90 px-4 py-2 text-sm font-semibold text-[#39465b]">
+                        {t('action.cancel')}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-1 text-sm text-[#667085]">
+                    <p className="font-semibold text-[#39465b]">
+                      {exercise.targetText || t('lesson.untitledExercise')}
+                    </p>
+                    <p>
+                      {exercise.romanization ?? t('lesson.noRomanization')} ·{' '}
+                      {t(`difficulty.${exercise.difficulty}`)}
+                    </p>
+                    <p>
+                      {exercise.meaningTh ||
+                        exercise.meaningEn ||
+                        t('lesson.noMeaning')}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )
+          }}
+        />
       </section>
     </PageSurface>
   )

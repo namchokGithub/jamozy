@@ -98,6 +98,7 @@ export default function VirtualKeyboard({
     const isActiveShift = isShiftKey && (nextKey?.shift || virtualShiftActive)
     const displayLabel = label ?? englishLabel(code)
     const isJamoKey = isKoreanJamoKey(code)
+    const hasHomeRowMarker = code === 'KeyF' || code === 'KeyJ'
     const canPress = Boolean(onKeyPress && (isJamoKey || isShiftKey))
 
     const handleClick = () => {
@@ -130,9 +131,17 @@ export default function VirtualKeyboard({
             )}
             <span className="text-base leading-4">{jamo.base}</span>
             {showEnglishKeys && (
-              <span className="mt-0.5 text-[10px] leading-3 text-slate-400">
+              <span
+                className={`mt-0.5 text-[10px] leading-3 text-slate-400 ${hasHomeRowMarker ? 'mb-1.5' : ''}`}
+              >
                 {englishLabel(code)}
               </span>
+            )}
+            {hasHomeRowMarker && (
+              <span
+                aria-hidden="true"
+                className="absolute bottom-1 h-0.5 w-5 rounded-full bg-gray-300/50 sm:bottom-1.5 sm:h-px sm:w-4"
+              />
             )}
           </>
         ) : (

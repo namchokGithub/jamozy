@@ -18,6 +18,11 @@ import { LocalGuestMigrationRepository } from '../infrastructure/local/local-gue
 import { LocalOnePageLearningCheckpointRepository } from '../infrastructure/local/local-one-page-learning-checkpoint-repository'
 import { FirebaseAccountMigrationRepository } from '../infrastructure/firebase/repositories/firebase-account-migration-repository'
 import { createLearnerRepositories } from './learner-repositories'
+import { HomeOutbox } from '../application/home-outbox'
+import { LocalHomeSyncJobRepository } from '../infrastructure/local/local-home-sync-job-repository'
+import { LocalHomeStateRepository } from '../infrastructure/local/local-home-state-repository'
+import { StaticHomeContentRepository } from '../infrastructure/static/static-home-content-repository'
+import { createHomeServices } from './home-services'
 import { FirebaseAuthRepository } from '../infrastructure/firebase/firebase-auth-repository'
 import { FirebaseAdminAuthRepository } from '../infrastructure/firebase/firebase-admin-auth-repository'
 import { FirebaseAdminContentRepository } from '../infrastructure/firebase/repositories/firebase-admin-content-repository'
@@ -25,6 +30,7 @@ import { SessionManager } from '../application/session-manager'
 import CourseListPage from '../features/course/CourseListPage'
 import { createCourseListLoader } from '../features/course/CourseListPage.loader'
 import { createCourseListAction } from '../features/course/CourseListPage.action'
+import CourseListPageFallback from '../features/course/CourseListPageFallback'
 import CourseMapPage from '../features/course/CourseMapPage'
 import { createCourseMapLoader } from '../features/course/CourseMapPage.loader'
 import LessonDetailPage from '../features/lesson/LessonDetailPage'
@@ -104,6 +110,35 @@ const {
   sessionSubmissionRepo,
   getActiveUser,
 } = learners
+
+// Background writer for Home progress (DEC-043). It drains on start, when
+// the browser comes back online, and when the signed-in user changes, since
+// each job runs only for the user who did the work.
+export const homeOutbox = new HomeOutbox({
+  jobs: new LocalHomeSyncJobRepository(),
+  useCases: { progressRepo, userProfileRepo, sessionSubmissionRepo },
+  getActiveUser,
+  schedule: (run, delayMs) => {
+    window.setTimeout(run, delayMs)
+  },
+  onDropped: (job, error) => {
+    if (import.meta.env.DEV)
+      console.warn(
+        '[home-outbox] Dropped a job that cannot succeed.',
+        job,
+        error,
+      )
+  },
+})
+void homeOutbox.drain()
+window.addEventListener('online', () => void homeOutbox.drain())
+sessionManager.onChange(() => void homeOutbox.drain())
+const homeLocalState = new LocalHomeStateRepository()
+export const homeServices = createHomeServices({
+  outbox: homeOutbox,
+  localState: homeLocalState,
+  getActiveUser,
+})
 const developmentRoutes = import.meta.env.DEV
   ? [
       { path: '/dev/hangul-guides', Component: HangulGuideTunerPage },
@@ -185,6 +220,7 @@ export const router = createBrowserRouter([
   {
     path: '/',
     Component: CourseListPage,
+    HydrateFallback: CourseListPageFallback,
     loader: createCourseListLoader({
       courseRepo,
       reviewRepo,
@@ -192,6 +228,11 @@ export const router = createBrowserRouter([
       lessonRepo,
       progressRepo,
       checkpointRepo: onePageCheckpointRepo,
+      home: {
+        contentRepo: new StaticHomeContentRepository(),
+        localState: homeLocalState,
+        pendingExerciseIds: (userId) => homeOutbox.pendingExerciseIds(userId),
+      },
       ensureUser: getActiveUser,
       getSession: () => sessionManager.getActiveSession(),
     }),

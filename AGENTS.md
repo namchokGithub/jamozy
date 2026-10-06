@@ -87,7 +87,7 @@ Hard rules:
 - Keep persistence access out of React UI components. Components call application use cases, never Firestore or IndexedDB directly.
 - Access persisted data only through repository interfaces (`domain/repositories`), never through `infrastructure/firebase` or future local adapters directly from `features/`.
 - Keep typing-session state (current keystroke, in-progress lesson) in client state (Zustand), not Firestore.
-- Never write persisted learner state per keystroke. Persist submitted results only at meaningful checkpoints (lesson complete, session end).
+- Never write persisted learner state per keystroke. Persist submitted results only at meaningful checkpoints (lesson complete, session end, or a completed Home exercise per DEC-043).
 - Keep learning content separate from learner state — do not merge them in a single document/model. The target collection paths and field schemas live in `docs/DOMAIN-MODEL.md`.
 - Prefer small, focused features over speculative gamification or abstractions. No multiplayer/leaderboard/social code — out of MVP scope.
 

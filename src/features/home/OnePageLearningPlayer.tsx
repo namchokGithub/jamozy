@@ -1,57 +1,78 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useFetcher } from 'react-router'
-import type { OnePageLearningPath } from '../../application/get-one-page-learning-path'
+import type {
+  OnePageLearningPath,
+  OnePageQueueExercise,
+} from '../../application/get-one-page-learning-path'
+import type { ExerciseResult } from '../../domain/korean/lesson-session'
 import { isKoreanJamoKey } from '../../domain/korean/keymap'
-import { useLessonSessionStore } from '../typing/lesson-session-store'
+import type { CourseListLoaderData } from '../course/CourseListPage.loader'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
 import FingerPlacementGuide from './FingerPlacementGuide'
+import { useOnePagePlayerStore } from './one-page-player-store'
 
 interface OnePageLearningPlayerProps {
   learningPath: OnePageLearningPath
 }
 
+type PendingCheckpoint =
+  | {
+      intent: 'one-page-exercise-completed'
+      courseId: string
+      lessonId: string
+      result: ExerciseResult
+    }
+  | { intent: 'one-page-retry-completion'; courseId: string; lessonId: string }
+
+// Refill the play queue once this many words, including the current one,
+// remain (DEC-042).
+const REFILL_THRESHOLD = 3
+
 export default function OnePageLearningPlayer({
   learningPath,
 }: OnePageLearningPlayerProps) {
-  const { session, start, pressKey } = useLessonSessionStore()
+  const {
+    entries,
+    session,
+    completedCount,
+    exhausted,
+    acceptedKeystrokes: completedAcceptedKeystrokes,
+    rejectedKeystrokes: completedRejectedKeystrokes,
+    start,
+    append,
+    pressKey,
+  } = useOnePagePlayerStore()
   const fetcher = useFetcher<{ onePageCheckpointed?: boolean }>()
-  const completedIds = useRef(new Set<string>())
+  const refill = useFetcher<CourseListLoaderData>()
+  // The player owns its queue from mount on; later loader data for the same
+  // course (revalidations) never restarts it. The parent keys the player by
+  // course, so a course change mounts a fresh player.
+  const [initialPath] = useState(learningPath)
+  const courseId = initialPath.selectedCourseId
+  const pendingCheckpoints = useRef<PendingCheckpoint[]>([])
+  const activeCheckpoint = useRef<PendingCheckpoint | null>(null)
+  const completedCheckpointData = useRef(fetcher.data)
+  const retryQueued = useRef(false)
+  const requestedTail = useRef<OnePageQueueExercise | null>(null)
+  const handledRefill = useRef(refill.data)
+  const [checkpointVersion, setCheckpointVersion] = useState(0)
   const [nowMs, setNowMs] = useState(0)
-  const queueKey = useMemo(
-    () =>
-      learningPath.queue
-        .map(({ lesson, exercise }) => `${lesson.id}:${exercise.id}`)
-        .join(','),
-    [learningPath.queue],
-  )
   const sessionStartedAtMs = session?.startedAt.getTime()
 
   useEffect(() => {
-    completedIds.current = new Set()
-    if (learningPath.queue.length > 0) {
-      start(
-        learningPath.queue.map(({ exercise }) => ({
-          id: exercise.id,
-          targetText: exercise.targetText,
-        })),
-      )
+    start(initialPath.queue)
+    // A lesson whose completion failed earlier is retried in the background.
+    if (initialPath.pendingLessonId && courseId && !retryQueued.current) {
+      retryQueued.current = true
+      pendingCheckpoints.current.push({
+        intent: 'one-page-retry-completion',
+        courseId,
+        lessonId: initialPath.pendingLessonId,
+      })
+      setCheckpointVersion((version) => version + 1)
     }
-  }, [queueKey, learningPath.queue, start])
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey) return
-      if (!isKoreanJamoKey(event.code)) {
-        if (event.code === 'Space') event.preventDefault()
-        return
-      }
-      event.preventDefault()
-      pressKey(event.code, event.shiftKey)
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [pressKey])
+  }, [courseId, initialPath, start])
 
   useEffect(() => {
     if (sessionStartedAtMs === undefined) return
@@ -61,47 +82,106 @@ export default function OnePageLearningPlayer({
     return () => window.clearInterval(intervalId)
   }, [sessionStartedAtMs])
 
-  useEffect(() => {
-    const result = session?.lastCompletedExercise
-    if (!result || completedIds.current.has(result.exerciseId)) return
-    const entry = learningPath.queue.find(
-      ({ exercise }) => exercise.id === result.exerciseId,
-    )
-    if (!entry || !learningPath.selectedCourseId) return
-    completedIds.current.add(result.exerciseId)
-    fetcher.submit(
-      JSON.stringify({
+  const handleKeyPress = useCallback(
+    (code: string, shiftKey: boolean) => {
+      const completed = pressKey(code, shiftKey)
+      if (!completed || !courseId) return
+      pendingCheckpoints.current.push({
         intent: 'one-page-exercise-completed',
-        courseId: learningPath.selectedCourseId,
-        lessonId: entry.lesson.id,
-        result,
-      }),
-      { method: 'post', encType: 'application/json' },
-    )
-  }, [
-    fetcher,
-    learningPath.queue,
-    learningPath.selectedCourseId,
-    session?.lastCompletedExercise,
-  ])
+        courseId,
+        lessonId: completed.entry.lesson.id,
+        result: completed.result,
+      })
+      setCheckpointVersion((version) => version + 1)
+    },
+    [courseId, pressKey],
+  )
 
-  if (learningPath.courses.length === 0) return null
-  const currentIndex = session?.currentIndex ?? 0
-  const active = learningPath.queue[currentIndex]
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return
+      if (!isKoreanJamoKey(event.code)) {
+        if (event.code === 'Space') event.preventDefault()
+        return
+      }
+      event.preventDefault()
+      handleKeyPress(event.code, event.shiftKey)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [handleKeyPress])
+
+  useEffect(() => {
+    if (
+      fetcher.state !== 'idle' ||
+      !activeCheckpoint.current ||
+      fetcher.data === completedCheckpointData.current
+    )
+      return
+    completedCheckpointData.current = fetcher.data
+    activeCheckpoint.current = null
+    setCheckpointVersion((version) => version + 1)
+  }, [fetcher.data, fetcher.state])
+
+  useEffect(() => {
+    if (fetcher.state !== 'idle' || activeCheckpoint.current) return
+    const nextCheckpoint = pendingCheckpoints.current.shift()
+    if (!nextCheckpoint) return
+    activeCheckpoint.current = nextCheckpoint
+    fetcher.submit(JSON.stringify(nextCheckpoint), {
+      method: 'post',
+      encType: 'application/json',
+      defaultShouldRevalidate: false,
+    })
+  }, [checkpointVersion, fetcher, fetcher.state])
+
+  const tail = entries.at(-1) ?? null
+  useEffect(() => {
+    if (
+      exhausted ||
+      !courseId ||
+      !tail ||
+      entries.length > REFILL_THRESHOLD ||
+      refill.state !== 'idle' ||
+      requestedTail.current === tail
+    )
+      return
+    requestedTail.current = tail
+    const params = new URLSearchParams({
+      course: courseId,
+      afterLesson: tail.lesson.id,
+      afterExercise: tail.exercise.id,
+    })
+    refill.load(`/?${params}`)
+  }, [courseId, entries.length, exhausted, refill, refill.state, tail])
+
+  useEffect(() => {
+    if (
+      refill.state !== 'idle' ||
+      !refill.data ||
+      refill.data === handledRefill.current
+    )
+      return
+    handledRefill.current = refill.data
+    const requestedFor = requestedTail.current
+    void refill.data.onePageLearningPath.then((path) => {
+      // Each request is made for a specific tail entry; a response for an
+      // older tail would duplicate words, so it is dropped.
+      if (useOnePagePlayerStore.getState().entries.at(-1) !== requestedFor)
+        return
+      append(path?.selectedCourseId === courseId ? path.queue : [])
+    })
+  }, [append, courseId, refill.data, refill.state])
+
+  if (initialPath.courses.length === 0) return null
+  const active = entries[session?.currentIndex ?? 0]
+  const finished = !session || (session.status === 'completed' && exhausted)
   const nextKey =
     session?.currentSession.expectedKeys[session.currentSession.keyIndex]
-  const acceptedKeystrokes = session
-    ? session.completedResults.reduce(
-        (total, result) => total + result.correctKeyCount,
-        0,
-      ) + session.currentSession.keyIndex
-    : 0
-  const rejectedKeystrokes = session
-    ? session.completedResults.reduce(
-        (total, result) => total + result.mistakes.length,
-        0,
-      ) + session.currentSession.mistakes.length
-    : 0
+  const acceptedKeystrokes =
+    completedAcceptedKeystrokes + (session?.currentSession.keyIndex ?? 0)
+  const rejectedKeystrokes =
+    completedRejectedKeystrokes + (session?.currentSession.mistakes.length ?? 0)
   const elapsedSeconds = session
     ? Math.max((nowMs - session.startedAt.getTime()) / 1000, 1)
     : 1
@@ -136,8 +216,7 @@ export default function OnePageLearningPlayer({
           </h2>
         </div>
         <p className="rounded-full bg-[#f2edf9] px-3 py-1.5 text-sm font-semibold text-[#7863a8]">
-          {Math.min(currentIndex + 1, learningPath.queue.length)} /{' '}
-          {learningPath.queue.length || 0}
+          {completedCount} typed
         </p>
       </div>
 
@@ -146,14 +225,14 @@ export default function OnePageLearningPlayer({
           <Link
             key={course.id}
             to={`/?course=${encodeURIComponent(course.id)}`}
-            className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${course.id === learningPath.selectedCourseId ? 'border-[#9d8bc8] bg-[#e9e1f8] text-[#5c4b88]' : 'border-[#eadfd4] bg-white text-[#667085] hover:border-[#c8b9e7]'}`}
+            className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${course.id === courseId ? 'border-[#9d8bc8] bg-[#e9e1f8] text-[#5c4b88]' : 'border-[#eadfd4] bg-white text-[#667085] hover:border-[#c8b9e7]'}`}
           >
             {course.title}
           </Link>
         ))}
       </nav>
 
-      {active && session ? (
+      {active && session && !finished ? (
         <div className="mt-4">
           <p className="text-sm font-semibold text-[#a85d4e]">
             {active.lesson.title}
@@ -207,37 +286,14 @@ export default function OnePageLearningPlayer({
             nextKey={nextKey}
             showEnglishKeys
             opacity={1}
-            onKeyPress={pressKey}
+            onKeyPress={handleKeyPress}
           />
           <FingerPlacementGuide nextKey={nextKey} />
-          {fetcher.state !== 'idle' && (
-            <p className="mt-3 text-center text-sm text-[#667085]">
-              Saving progress…
-            </p>
-          )}
         </div>
       ) : (
         <div className="mt-6 rounded-3xl border border-dashed border-[#dfcfc0] bg-white/60 p-6 text-center text-sm text-[#667085]">
-          {learningPath.pendingLessonId ? (
-            <button
-              type="button"
-              className="rounded-full bg-[#e9e1f8] px-4 py-2 font-semibold text-[#5c4b88]"
-              onClick={() =>
-                fetcher.submit(
-                  JSON.stringify({
-                    intent: 'one-page-retry-completion',
-                    courseId: learningPath.selectedCourseId,
-                    lessonId: learningPath.pendingLessonId,
-                  }),
-                  { method: 'post', encType: 'application/json' },
-                )
-              }
-            >
-              Save completed lesson
-            </button>
-          ) : (
-            'This course is complete. Choose another course or revisit a lesson below.'
-          )}
+          This course is complete. Choose another course or revisit a lesson
+          below.
         </div>
       )}
     </section>

@@ -1,5 +1,6 @@
 export type LearningSessionContext =
   | { mode: 'learning-path'; lessonId: string }
+  | { mode: 'home'; lessonId: string }
   | { mode: 'review' }
 
 export interface LearningSession {

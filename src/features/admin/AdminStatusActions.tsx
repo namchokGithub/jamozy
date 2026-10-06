@@ -10,6 +10,14 @@ import { useAdminTranslation } from './i18n/admin-i18n'
 
 type StatusIntent = 'publish' | 'archive' | 'restore'
 
+function actionsForStatus(status: ContentStatus | undefined): StatusIntent[] {
+  return status === 'archived'
+    ? ['restore']
+    : status === 'published'
+      ? ['archive']
+      : ['publish', 'archive']
+}
+
 export function AdminStatusActions({
   id,
   kind,
@@ -27,12 +35,7 @@ export function AdminStatusActions({
   const submit = (intent: string) => {
     fetcher.submit({ intent, id, kind }, { method: 'post' })
   }
-  const actions: StatusIntent[] =
-    status === 'archived'
-      ? ['restore']
-      : status === 'published'
-        ? ['archive']
-        : ['publish', 'archive']
+  const actions = actionsForStatus(status)
   return (
     <>
       {actions.map((action) => (
@@ -74,4 +77,24 @@ export function AdminStatusActions({
       />
     </>
   )
+}
+
+export function AdminStatusActionsPreview({
+  status,
+}: {
+  status: ContentStatus | undefined
+}) {
+  const { t } = useAdminTranslation()
+  return actionsForStatus(status).map((action) => (
+    <span
+      key={action}
+      className={`inline-flex items-center justify-center rounded-full border text-sm font-semibold ${
+        action === 'archive'
+          ? 'border-[#eadfd4] bg-white/90 px-3 py-1.5 text-xs text-[#39465b]'
+          : 'border-[#a85d4e] bg-[#a85d4e] px-4 py-2 text-white'
+      }`}
+    >
+      {t(`action.${action}`)}
+    </span>
+  ))
 }

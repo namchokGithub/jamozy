@@ -1,9 +1,14 @@
 import { z } from 'zod'
 import { archiveContent, restoreContent } from '../domain/models/content-status'
-import type { Course } from '../domain/models/course'
+import { courseType, type Course } from '../domain/models/course'
 import type { Lesson, LessonExercise } from '../domain/models/lesson'
 import type { Unit } from '../domain/models/unit'
 import type { AdminContentRepository } from '../domain/repositories/admin-content-repository'
+import { normalizeHangulText } from '../domain/korean/hangul'
+import {
+  findUntypeableCharacters,
+  formatCharacters,
+} from '../domain/korean/target-sequence'
 
 const text = z.string().trim().min(1, 'This field is required.')
 const exerciseSchema = z.object({
@@ -16,7 +21,26 @@ const exerciseSchema = z.object({
   hint: z.string().nullable(),
 })
 
-export type AdminCommandResult = { ok: true } | { ok: false; error: string }
+export type AdminCommandResult =
+  { ok: true } | { ok: false; error: string; detail?: string }
+
+const UNTYPEABLE_TEXT = 'Target text has characters the keyboard cannot type.'
+
+// Every Exercise must be typeable on the 2-beolsik keymap, or the player
+// cannot start it. Lists each offending Exercise by its 1-based position.
+function untypeableExercises(
+  exercises: LessonExercise[],
+): AdminCommandResult | null {
+  const problems = exercises.flatMap((exercise, index) => {
+    const chars = findUntypeableCharacters(exercise.targetText)
+    return chars.length > 0
+      ? [`Exercise ${index + 1}: ${formatCharacters(chars)}`]
+      : []
+  })
+  return problems.length > 0
+    ? { ok: false, error: UNTYPEABLE_TEXT, detail: problems.join('; ') }
+    : null
+}
 
 function validationError(error: z.ZodError): AdminCommandResult {
   return {
@@ -25,12 +49,37 @@ function validationError(error: z.ZodError): AdminCommandResult {
   }
 }
 
+const ONE_HOME_COURSE = 'Only one published Home course is allowed.'
+
+// Home plays exactly one published `home` course (DEC-043).
+async function conflictsWithPublishedHome(
+  repo: AdminContentRepository,
+  course: Course,
+): Promise<boolean> {
+  if (course.status !== 'published' || courseType(course) !== 'home')
+    return false
+  return (await repo.getCourses()).some(
+    (other) =>
+      other.id !== course.id &&
+      other.status === 'published' &&
+      courseType(other) === 'home',
+  )
+}
+
 export async function saveCourse(
   repo: AdminContentRepository,
   course: Course,
 ): Promise<AdminCommandResult> {
-  const parsed = z.object({ title: text, description: text }).safeParse(course)
+  const parsed = z
+    .object({
+      title: text,
+      description: text,
+      type: z.enum(['learning', 'home']).optional(),
+    })
+    .safeParse(course)
   if (!parsed.success) return validationError(parsed.error)
+  if (await conflictsWithPublishedHome(repo, course))
+    return { ok: false, error: ONE_HOME_COURSE }
   await repo.saveCourse(course)
   return { ok: true }
 }
@@ -49,10 +98,25 @@ export async function saveUnit(
   return { ok: true }
 }
 
+// Pasted Hangul is often conjoining jamo (ᄀ U+1100) that looks like the
+// compatibility jamo the keyboard types (ㄱ U+3131); store the typeable form.
+// Surrounding whitespace is dropped too: a trailing space would otherwise
+// become a Space the learner must type.
+function withTypeableTargetText(lesson: Lesson): Lesson {
+  return {
+    ...lesson,
+    exercises: lesson.exercises.map((exercise) => ({
+      ...exercise,
+      targetText: normalizeHangulText(exercise.targetText).trim(),
+    })),
+  }
+}
+
 export async function saveLesson(
   repo: AdminContentRepository,
-  lesson: Lesson,
+  input: Lesson,
 ): Promise<AdminCommandResult> {
+  const lesson = withTypeableTargetText(input)
   const parsed = z
     .object({
       title: text,
@@ -62,6 +126,8 @@ export async function saveLesson(
     })
     .safeParse(lesson)
   if (!parsed.success) return validationError(parsed.error)
+  const untypeable = untypeableExercises(lesson.exercises)
+  if (untypeable) return untypeable
   if (!(await repo.getUnitById(lesson.unitId)))
     return { ok: false, error: 'Parent Unit was not found.' }
   await repo.saveLesson(lesson)
@@ -74,7 +140,10 @@ export async function publishCourse(
 ): Promise<AdminCommandResult> {
   const { archivedFromStatus: _archivedFromStatus, ...saved } = course
   void _archivedFromStatus
-  await repo.saveCourse({ ...saved, status: 'published' })
+  const published: Course = { ...saved, status: 'published' }
+  if (await conflictsWithPublishedHome(repo, published))
+    return { ok: false, error: ONE_HOME_COURSE }
+  await repo.saveCourse(published)
   return { ok: true }
 }
 
@@ -93,8 +162,9 @@ export async function publishUnit(
 
 export async function publishLesson(
   repo: AdminContentRepository,
-  lesson: Lesson,
+  input: Lesson,
 ): Promise<AdminCommandResult> {
+  const lesson = withTypeableTargetText(input)
   const unit = await repo.getUnitById(lesson.unitId)
   if (!unit || unit.status !== 'published')
     return { ok: false, error: 'Publish the parent Unit first.' }
@@ -105,6 +175,8 @@ export async function publishLesson(
     return { ok: false, error: 'Add at least one Exercise before publishing.' }
   const parsed = z.array(exerciseSchema).safeParse(lesson.exercises)
   if (!parsed.success) return validationError(parsed.error)
+  const untypeable = untypeableExercises(lesson.exercises)
+  if (untypeable) return untypeable
   const { archivedFromStatus: _archivedFromStatus, ...published } = lesson
   void _archivedFromStatus
   await repo.saveLesson({ ...published, status: 'published' })
@@ -120,10 +192,14 @@ export async function archiveCourse(
 export async function restoreCourse(
   repo: AdminContentRepository,
   course: Course,
-): Promise<void> {
+): Promise<AdminCommandResult> {
   const { archivedFromStatus: _archivedFromStatus, ...restorable } = course
   void _archivedFromStatus
-  await repo.saveCourse({ ...restorable, ...restoreContent(course) })
+  const restored: Course = { ...restorable, ...restoreContent(course) }
+  if (await conflictsWithPublishedHome(repo, restored))
+    return { ok: false, error: ONE_HOME_COURSE }
+  await repo.saveCourse(restored)
+  return { ok: true }
 }
 export async function archiveUnit(
   repo: AdminContentRepository,

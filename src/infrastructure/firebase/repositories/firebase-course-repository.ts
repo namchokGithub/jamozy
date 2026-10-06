@@ -9,7 +9,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '../firebase'
 import type { CourseRepository } from '../../../domain/repositories/course-repository'
-import type { Course } from '../../../domain/models/course'
+import type { Course, CourseType } from '../../../domain/models/course'
 import type { Unit } from '../../../domain/models/unit'
 import type {
   ContentStatus,
@@ -34,6 +34,9 @@ function toCourse(id: string, data: Record<string, unknown>): Course {
     createdAt: (data.createdAt as { toDate(): Date }).toDate(),
     updatedAt: (data.updatedAt as { toDate(): Date }).toDate(),
     status: (data.status as ContentStatus | undefined) ?? 'draft',
+    ...(data.type === 'home' || data.type === 'learning'
+      ? { type: data.type as CourseType }
+      : {}),
     ...(data.archivedFromStatus
       ? {
           archivedFromStatus:

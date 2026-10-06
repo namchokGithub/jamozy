@@ -20,7 +20,7 @@ export interface CompleteLessonSessionDeps {
   sessionSubmissionRepo: SessionSubmissionRepository
 }
 
-function expForAccuracy(accuracy: number): number {
+export function expForAccuracy(accuracy: number): number {
   return 100 + (accuracy > 90 ? 20 : 0) + (accuracy === 100 ? 50 : 0)
 }
 

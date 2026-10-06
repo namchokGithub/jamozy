@@ -1,3 +1,4 @@
+import type { Course } from '../domain/models/course'
 import type { LessonExercise } from '../domain/models/lesson'
 import type { OnePageLearningCheckpoint } from '../domain/models/one-page-learning-checkpoint'
 import type { Progress } from '../domain/models/progress'
@@ -19,11 +20,19 @@ export interface OnePageLearningPath {
   pendingLessonId: string | null
 }
 
+export interface OnePageQueueCursor {
+  lessonId: string
+  exerciseId: string
+}
+
+const QUEUE_SIZE = 10
+
 export interface GetOnePageLearningPathDeps {
   courseRepo: CourseRepository
   lessonRepo: LessonRepository
   progressRepo: ProgressRepository
   checkpointRepo: OnePageLearningCheckpointRepository
+  courses?: Promise<Course[]>
 }
 
 function isCompleted(progress: Map<string, Progress>, lessonId: string): boolean {
@@ -59,13 +68,29 @@ function reconcileCheckpoint(
   return { ...checkpoint, completedExerciseIdsByLesson, partialLessonResults }
 }
 
+// Exercises in canonical order after the cursor. Replay courses wrap to their
+// first exercise, repeating the course until a full queue is available.
+function exercisesAfter(
+  exercises: OnePageQueueExercise[],
+  after: OnePageQueueCursor,
+  wrap: boolean,
+): OnePageQueueExercise[] {
+  const index = exercises.findIndex(({ lesson, exercise }) =>
+    lesson.id === after.lessonId && exercise.id === after.exerciseId)
+  const following = exercises.slice(index + 1)
+  if (!wrap || exercises.length === 0) return following
+  const cycles = Math.ceil(QUEUE_SIZE / exercises.length) + 1
+  return [...following, ...Array.from({ length: cycles }, () => exercises).flat()]
+}
+
 export async function getOnePageLearningPath(
   deps: GetOnePageLearningPathDeps,
   userId: string,
   selectedCourseId?: string,
+  after?: OnePageQueueCursor,
 ): Promise<OnePageLearningPath> {
   const [ordered, allProgress] = await Promise.all([
-    getOrderedLearningPath(deps.courseRepo, deps.lessonRepo),
+    getOrderedLearningPath(deps.courseRepo, deps.lessonRepo, deps.courses),
     deps.progressRepo.getAllProgress(userId),
   ])
   const progress = new Map(allProgress.map((entry) => [entry.lessonId, entry]))
@@ -82,7 +107,10 @@ export async function getOnePageLearningPath(
     const course = ordered.find((entry) => entry.course.id === courseId)!.course
     return { id: course.id, title: course.title, description: course.description }
   })
-  const courseId = selectedCourseId && selectableCourseIds.includes(selectedCourseId)
+  // A refill keeps the player's course even if it stopped being selectable
+  // while the learner was still playing it.
+  const courseId = selectedCourseId && (selectableCourseIds.includes(selectedCourseId) ||
+    (after && ordered.some(({ course }) => course.id === selectedCourseId)))
     ? selectedCourseId
     : selectableCourseIds[0] ?? null
   if (!courseId) return { courses, selectedCourseId: null, queue: [], checkpoint: null, pendingLessonId: null }
@@ -94,12 +122,14 @@ export async function getOnePageLearningPath(
     await deps.checkpointRepo.saveCheckpoint({ ...checkpoint, updatedAt: new Date() })
   }
   const isReplayCourse = !incompleteCourseIds.includes(courseId)
-  const queue = courseEntries
-    .filter(({ lesson }) => isReplayCourse || !isCompleted(progress, lesson.id))
-    .flatMap((entry) => entry.lesson.exercises
-      .filter((exercise) => !checkpoint?.completedExerciseIdsByLesson[entry.lesson.id]?.includes(exercise.id))
-      .map((exercise) => ({ ...entry, exercise })))
-    .slice(0, 10)
+  const isQueued = ({ lesson, exercise }: OnePageQueueExercise) =>
+    (isReplayCourse || !isCompleted(progress, lesson.id)) &&
+    !checkpoint?.completedExerciseIdsByLesson[lesson.id]?.includes(exercise.id)
+  const courseExercises = courseEntries.flatMap((entry) =>
+    entry.lesson.exercises.map((exercise) => ({ ...entry, exercise })))
+  const queue = after
+    ? exercisesAfter(courseExercises, after, isReplayCourse).filter(isQueued).slice(0, QUEUE_SIZE)
+    : courseExercises.filter(isQueued).slice(0, QUEUE_SIZE)
   const pendingLessonId = checkpoint
     ? courseEntries.find(({ lesson }) =>
       (isReplayCourse || !isCompleted(progress, lesson.id)) &&

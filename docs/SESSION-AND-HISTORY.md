@@ -45,14 +45,17 @@ No record is written per keystroke. MVP history contains submitted/completed
 sessions only; abandoned or incomplete sessions are not persisted unless a
 future product decision requires them.
 
-## Local one-page resume state
+## Home sessions
 
-The Home one-page Learning Path player may retain completed-exercise boundaries
-and partial raw lesson counters in local IndexedDB ([[DEC-035]]). This is
-temporary UI resume state, not a `LearningSession` or learner-history record:
-it is never stored in Firestore, migrated to an account, or written for each
-keystroke. Only completion of a lesson’s final exercise creates the usual
-receipt-gated `LearningSession` and learner-state effects.
+A completed Home exercise is a persistence checkpoint: it updates the lesson's
+`Progress.completedExerciseIds` and `homePartialResult`, never a
+`LearningSession` ([[DEC-043]]). When the IDs first cover every exercise,
+one `{ mode: 'home' }` session is submitted whose `id` is the partial
+result's `submissionId`, so a retried submission cannot grant EXP twice. A
+full shuffled session of an already-completed lesson submits a replay session
+with a new ID; an abandoned session submits nothing. Every Home write goes
+through a durable local outbox and is retried in the background. The local
+resume pointer `{ unitId, lessonId }` is UI state, not history.
 
 ## Identity and retry behavior
 

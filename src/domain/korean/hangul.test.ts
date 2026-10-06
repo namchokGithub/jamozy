@@ -7,6 +7,7 @@ import {
   decomposeSyllable,
   getChoseongShardIndex,
   shardFileName,
+  normalizeHangulText,
 } from './hangul'
 
 describe('decomposeSyllable / composeSyllable round trips', () => {
@@ -78,3 +79,25 @@ describe('getChoseongShardIndex', () => {
     expect(shardFileName(18)).toBe('18.json')
   })
 })
+
+describe('normalizeHangulText', () => {
+  it('maps standalone conjoining jamo to compatibility jamo', () => {
+    // Choseong U+1100/U+1101, jungseong U+1161/U+1175, jongseong U+11A8/U+11AA/U+11C2.
+    expect(normalizeHangulText('\u1100\u1101 \u1161\u1175 \u11A8\u11AA\u11C2'))
+      .toBe('ㄱㄲ ㅏㅣ ㄱㄳㅎ')
+  })
+
+  it('composes decomposed (NFD) syllables', () => {
+    expect(normalizeHangulText('\u1100\u1161\u11A8')).toBe('각')
+    expect(normalizeHangulText('안녕'.normalize('NFD'))).toBe('안녕')
+  })
+
+  it('leaves compatibility jamo, syllables, and other text unchanged', () => {
+    expect(normalizeHangulText('ㄱ 가, abc.')).toBe('ㄱ 가, abc.')
+  })
+
+  it('leaves archaic conjoining jamo that have no key unchanged', () => {
+    expect(normalizeHangulText('\u1140')).toBe('\u1140')
+  })
+})
+

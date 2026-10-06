@@ -19,6 +19,8 @@ import type {
 import type { AdminContentRepository } from '../domain/repositories/admin-content-repository'
 import type { OnePageLearningCheckpoint } from '../domain/models/one-page-learning-checkpoint'
 import type { OnePageLearningCheckpointRepository } from '../domain/repositories/one-page-learning-checkpoint-repository'
+import type { HomeSyncJob } from '../domain/models/home-sync-job'
+import type { HomeSyncJobRepository } from '../domain/repositories/home-sync-job-repository'
 
 export class FakeCourseRepository implements CourseRepository {
   constructor(
@@ -140,6 +142,18 @@ export class FakeAdminContentRepository implements AdminContentRepository {
   async moveLesson(id: string, direction: 'up' | 'down') {
     await this.move(this.lessons, id, direction, (item) => item.unitId)
   }
+  async saveCourseOrder(courseIds: string[]) {
+    if (
+      courseIds.length !== this.courses.length ||
+      new Set(courseIds).size !== courseIds.length ||
+      courseIds.some((id) => !this.courses.some((course) => course.id === id))
+    )
+      throw new Error('Content order changed. Refresh and try again.')
+    courseIds.forEach((id, order) => {
+      const course = this.courses.find((item) => item.id === id)
+      if (course) course.order = order
+    })
+  }
   async moveUnitToIndex(id: string, index: number) {
     await this.moveToIndex(this.units, id, index, (item) => item.courseId)
   }
@@ -259,6 +273,9 @@ export class FakeSessionSubmissionRepository implements SessionSubmissionReposit
   }> = []
   private outcomes = new Map<string, SessionSubmissionOutcome>()
 
+  // When given, applies Progress effects like the real adapters do.
+  constructor(private progressRepo?: ProgressRepository) {}
+
   async submit(
     userId: string,
     session: LearningSession,
@@ -275,6 +292,8 @@ export class FakeSessionSubmissionRepository implements SessionSubmissionReposit
     }
     this.outcomes.set(key, outcome)
     this.submissions.push({ userId, session, effects })
+    for (const progress of effects.progress)
+      await this.progressRepo?.saveProgress(userId, progress)
     return outcome
   }
 }
@@ -311,5 +330,21 @@ export class FakeOnePageLearningCheckpointRepository implements OnePageLearningC
       completedExerciseIdsByLesson,
       partialLessonResults,
     })
+  }
+}
+
+export class FakeHomeSyncJobRepository implements HomeSyncJobRepository {
+  readonly jobs: HomeSyncJob[] = []
+  async list() {
+    return [...this.jobs].sort((a, b) => a.enqueuedAt.getTime() - b.enqueuedAt.getTime())
+  }
+  async save(job: HomeSyncJob) {
+    const index = this.jobs.findIndex(({ id }) => id === job.id)
+    if (index === -1) this.jobs.push(job)
+    else this.jobs[index] = job
+  }
+  async remove(job: HomeSyncJob) {
+    const index = this.jobs.findIndex(({ id }) => id === job.id)
+    if (index !== -1) this.jobs.splice(index, 1)
   }
 }
