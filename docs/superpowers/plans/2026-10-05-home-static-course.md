@@ -26,7 +26,7 @@
 1. **First completion across sessions/devices:** IDs union and the partial result accumulates until every exercise is covered; exactly one first-completion session with the partial result's `submissionId` (Task 4).
 2. **Replay:** only a full shuffled session of a completed lesson submits, with 15 EXP; abandoning submits nothing; completion is never reset (Task 4, Task 7).
 3. **Outbox idempotency:** a retried or duplicated write produces no duplicate EXP, session, or exercise count (Task 5).
-4. **Export guard:** the build fails unless exactly one published `home` course exists; drafts and archived items never reach the JSON (Task 3).
+4. **Export guard:** no published `home` course warns and ships without Home content; more than one fails the build; drafts and archived items never reach the JSON (Task 3).
 5. **Learning Path isolation:** the `home` course never appears in the course list, global order, frontier, or Daily Quest (Task 2).
 6. **Guest migration:** `completedExerciseIds` union; partial-result rule per DEC-043 (Task 4).
 
@@ -69,17 +69,19 @@
 - [x] **Step 2:** Add the `type` select to the course editor and persist it through `saveCourse`.
 - [x] **Step 3:** Filter `home` in the application layer (not with a Firestore `where`, which drops untyped courses).
 - [x] **Step 4:** Check Daily Quest and course-map loaders for course enumeration and exclude `home` there too.
-- [ ] **Step 5:** Ask the user whether a rules-level guard for `type` is wanted; if yes, update `firestore.rules` and `firestore.rules.test.ts`, run `pnpm test:rules`.
+- [x] **Step 5:** Ask the user whether a rules-level guard for `type` is wanted; if yes, update `firestore.rules` and `firestore.rules.test.ts`, run `pnpm test:rules`. Decided 2026-10-06: no rules guard; the use case and export enforce it.
 - [x] **Step 6:** `pnpm test`.
 
 ### Task 3: Build-time Home export
 
 **Files:** `scripts/export-home-content.ts`, `package.json`, `public/content/home.json` (generated), `.gitignore` decision, tests for the pure export transform.
 
-- [ ] **Step 1:** Extract a pure `toHomeContent(courses, units, lessons)` and test it: exactly one published `home` course or throw; only published units/lessons; order by `order`; output matches the `home-content` schema.
-- [ ] **Step 2:** Implement the script with the client SDK and published-only queries (like `scripts/seed-firestore.ts` config loading); write `public/content/home.json`.
-- [ ] **Step 3:** Add `content:export-home` and make `build` run it before `vite build`. Ask the user whether the generated file is committed or built in CI (Cloudflare Pages needs `VITE_FIREBASE_*` at build time if built there).
+- [x] **Step 1:** Extract a pure `toHomeContent(courses, units, lessons)` and test it: exactly one published `home` course or throw; only published units/lessons; order by `order`; output matches the `home-content` schema.
+- [x] **Step 2:** Implement the script with the client SDK and published-only queries (like `scripts/seed-firestore.ts` config loading); write `public/content/home.json`.
+- [x] **Step 3:** Add `content:export-home` and make `build` run it before `vite build`. Ask the user whether the generated file is committed or built in CI (Cloudflare Pages needs `VITE_FIREBASE_*` at build time if built there).
 - [ ] **Step 4:** Run the export against the real project only after the user confirms; it reads, never writes.
+
+Decided 2026-10-06: `build` runs `content:export-home` every time and `public/content/home.json` is git-ignored; CI needs `VITE_FIREBASE_*`. No published Home course is a warning (stale export removed), not a failure. Step 4 is deferred until Home content exists, so `pnpm build` is not run against the real project yet.
 
 ### Task 4: Home progress and completion use cases
 
@@ -113,7 +115,7 @@
 
 **Files:** `src/features/home/*`, `src/features/course/CourseListPage.{tsx,loader.ts,action.ts}`, `src/infrastructure/local/home-resume-store.ts`, `src/app/router.ts`.
 
-- [ ] **Step 1:** Loader returns the static Home content promise and local cache only; the Learning Path course list stays a separately streamed section.
+- [ ] **Step 1:** Loader returns the static Home content promise and local cache only; the Learning Path course list stays a separately streamed section. A missing `home.json` (no published Home course) renders no Home player, not an error.
 - [ ] **Step 2:** Build unit categories, lesson list with `n/m`, and the shuffled player; resume from `{ unitId, lessonId }`.
 - [ ] **Step 3:** On each completed exercise enqueue `record-home-exercise`; at a completed lesson's full session end enqueue `submit-home-replay`; auto-advance with a non-blocking notice.
 - [ ] **Step 4:** Add behavior tests for non-visual logic only: no Firestore call before first render; refresh restarts the lesson with a new shuffle and keeps progress.

@@ -1003,11 +1003,13 @@ not after each lesson.
 
 *Content.* `Course` gains `type: 'learning' | 'home'`; an absent type reads
 as `learning`. Exactly one published `home` course exists. Admin BO and
-Firestore remain its source of truth and keep [[DEC-034]]'s status gating. A
-build script exports the published Home course (units, lessons, exercises) to
-a static JSON file; the build fails unless exactly one published `home`
-course exists. At runtime Home reads only that JSON, so content changes reach
-learners on the next deploy. The `home` course is excluded from the Learning
+Firestore remain its source of truth and keep [[DEC-034]]'s status gating.
+Every `pnpm build` first exports the published Home course (units, lessons,
+exercises) to a generated, git-ignored static JSON file. With no published
+`home` course the export only warns and the build ships without Home content;
+more than one fails the build. At runtime Home reads only that JSON, so
+content changes reach learners on the next deploy, and the build needs the
+`VITE_FIREBASE_*` config. The `home` course is excluded from the Learning
 Path global order and frontier, the course list, Daily Quest, and unlock
 rules ([[DEC-009]], [[DEC-023]], [[DEC-026]]); learners may open any of its
 units or lessons.
