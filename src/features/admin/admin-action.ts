@@ -4,6 +4,9 @@ import {
   archiveCourse,
   archiveLesson,
   archiveUnit,
+  createDraftCourse,
+  createDraftLesson,
+  createDraftUnit,
   publishCourse,
   publishLesson,
   publishLessonWithParents,
@@ -13,10 +16,18 @@ import {
   restoreLesson,
   restoreUnit,
   saveCourse,
+  saveCourseOrder,
   saveLesson,
+  saveLessonOrder,
   saveUnit,
+  saveUnitOrder,
   type AdminCommandResult,
 } from '../../application/admin-content'
+import {
+  getAdminCourse,
+  getAdminLesson,
+  getAdminUnit,
+} from '../../application/get-admin-content'
 import type { Lesson, LessonExercise } from '../../domain/models/lesson'
 import type { AdminMessageKey } from './i18n/dictionaries'
 
@@ -84,44 +95,33 @@ export function createAdminAction(repo: AdminContentRepository) {
     const intent = text(form, 'intent')
     try {
       if (intent === 'create-course') {
-        const created = await repo.createCourse({
-          title: 'Untitled Course',
-          description: 'Describe this learning path.',
-        })
+        const created = await createDraftCourse(repo)
         return { message: 'feedback.courseCreated', createdId: created.id }
       }
       if (intent === 'create-unit' && params.courseId) {
-        const created = await repo.createUnit({
-          courseId: params.courseId,
-          title: 'Untitled Unit',
-          description: 'Describe this Unit.',
-        })
+        const created = await createDraftUnit(repo, params.courseId)
         return { message: 'feedback.unitCreated', createdId: created.id }
       }
       if (intent === 'create-lesson' && params.unitId) {
-        const created = await repo.createLesson({
-          unitId: params.unitId,
-          title: 'Untitled Lesson',
-          type: 'word',
-        })
+        const created = await createDraftLesson(repo, params.unitId)
         return { message: 'feedback.lessonCreated', createdId: created.id }
       }
       if (intent === 'save-course-order') {
         const order = parseOrder(form.get('order'))
         if (!order) return { error: 'error.checkForm' }
-        await repo.saveCourseOrder(order)
+        await saveCourseOrder(repo, order)
         return { message: 'feedback.courseReordered' }
       }
       if (intent === 'save-unit-order' && params.courseId) {
         const order = parseOrder(form.get('order'))
         if (!order) return { error: 'error.checkForm' }
-        await repo.saveUnitOrder(params.courseId, order)
+        await saveUnitOrder(repo, params.courseId, order)
         return { message: 'feedback.unitReordered' }
       }
       if (intent === 'save-lesson-order' && params.unitId) {
         const order = parseOrder(form.get('order'))
         if (!order) return { error: 'error.checkForm' }
-        await repo.saveLessonOrder(params.unitId, order)
+        await saveLessonOrder(repo, params.unitId, order)
         return { message: 'feedback.lessonReordered' }
       }
       const id = text(form, 'id')
@@ -146,7 +146,7 @@ async function courseAction(
   id: string,
   form: FormData,
 ): Promise<AdminActionData> {
-  const course = await repo.getCourseById(id)
+  const course = await getAdminCourse(repo, id)
   if (!course) return { error: 'error.courseNotFound' }
   if (intent === 'save') {
     const result = await saveCourse(repo, {
@@ -182,7 +182,7 @@ async function unitAction(
   id: string,
   form: FormData,
 ): Promise<AdminActionData> {
-  const unit = await repo.getUnitById(id)
+  const unit = await getAdminUnit(repo, id)
   if (!unit) return { error: 'error.unitNotFound' }
   if (intent === 'save') {
     const result = await saveUnit(repo, {
@@ -234,7 +234,7 @@ async function lessonAction(
   id: string,
   form: FormData,
 ): Promise<AdminActionData> {
-  const lesson = await repo.getLessonById(id)
+  const lesson = await getAdminLesson(repo, id)
   if (!lesson) return { error: 'error.lessonNotFound' }
   if (intent === 'save') {
     const exercises = exercisesFromForm(form)

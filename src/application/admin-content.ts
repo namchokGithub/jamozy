@@ -71,6 +71,55 @@ async function conflictsWithPublishedHome(
   )
 }
 
+export function createDraftCourse(repo: AdminContentRepository) {
+  return repo.createCourse({
+    title: 'Untitled Course',
+    description: 'Describe this learning path.',
+  })
+}
+
+export function createDraftUnit(
+  repo: AdminContentRepository,
+  courseId: string,
+) {
+  return repo.createUnit({
+    courseId,
+    title: 'Untitled Unit',
+    description: 'Describe this Unit.',
+  })
+}
+
+export function createDraftLesson(
+  repo: AdminContentRepository,
+  unitId: string,
+) {
+  return repo.createLesson({ unitId, title: 'Untitled Lesson', type: 'word' })
+}
+
+/** Order commands take every sibling ID in its new order (see repository). */
+export function saveCourseOrder(
+  repo: AdminContentRepository,
+  courseIds: string[],
+) {
+  return repo.saveCourseOrder(courseIds)
+}
+
+export function saveUnitOrder(
+  repo: AdminContentRepository,
+  courseId: string,
+  unitIds: string[],
+) {
+  return repo.saveUnitOrder(courseId, unitIds)
+}
+
+export function saveLessonOrder(
+  repo: AdminContentRepository,
+  unitId: string,
+  lessonIds: string[],
+) {
+  return repo.saveLessonOrder(unitId, lessonIds)
+}
+
 export async function saveCourse(
   repo: AdminContentRepository,
   course: Course,

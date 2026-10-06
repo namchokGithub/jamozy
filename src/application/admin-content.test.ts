@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
   archiveCourse,
+  createDraftCourse,
+  createDraftLesson,
+  createDraftUnit,
   publishCourse,
   publishLesson,
   publishLessonWithParents,
@@ -704,4 +707,32 @@ describe('admin content order', () => {
       ])
     },
   )
+})
+
+describe('creating admin content', () => {
+  it('creates a Draft Course, Unit, and Lesson with placeholder text', async () => {
+    const repo = new FakeAdminContentRepository()
+
+    const createdCourse = await createDraftCourse(repo)
+    const createdUnit = await createDraftUnit(repo, createdCourse.id)
+    const createdLesson = await createDraftLesson(repo, createdUnit.id)
+
+    expect(createdCourse).toMatchObject({
+      title: 'Untitled Course',
+      description: 'Describe this learning path.',
+      status: 'draft',
+    })
+    expect(createdUnit).toMatchObject({
+      courseId: createdCourse.id,
+      title: 'Untitled Unit',
+      description: 'Describe this Unit.',
+      status: 'draft',
+    })
+    expect(createdLesson).toMatchObject({
+      unitId: createdUnit.id,
+      title: 'Untitled Lesson',
+      type: 'word',
+      status: 'draft',
+    })
+  })
 })
