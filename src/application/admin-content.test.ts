@@ -4,6 +4,8 @@ import {
   publishCourse,
   publishLesson,
   restoreCourse,
+  restoreLesson,
+  restoreUnit,
   saveCourse,
   saveLesson,
 } from './admin-content'
@@ -358,6 +360,101 @@ describe('admin content lifecycle', () => {
     await archiveCourse(repo, draft)
     await restoreCourse(repo, (await repo.getCourseById('course'))!)
     expect((await repo.getCourseById('course'))?.status).toBe('draft')
+  })
+
+  describe('restoring an archived Published Unit or Lesson', () => {
+    const exercise = {
+      id: 'exercise',
+      targetText: '가',
+      romanization: null,
+      meaningTh: '',
+      meaningEn: '',
+      difficulty: 'easy' as const,
+      hint: null,
+    }
+    const archived = <T extends Unit | Lesson>(item: T): T => ({
+      ...item,
+      status: 'archived',
+      archivedFromStatus: 'published',
+    })
+    const draftCourse = { ...course, status: 'draft' as const }
+    const draftUnit = { ...unit, status: 'draft' as const }
+
+    it('restores a Unit as Published below a Published Course', async () => {
+      const repo = new FakeAdminContentRepository([course], [archived(unit)])
+      await expect(
+        restoreUnit(repo, (await repo.getUnitById('unit'))!),
+      ).resolves.toEqual({ ok: true, status: 'published' })
+      expect((await repo.getUnitById('unit'))?.status).toBe('published')
+    })
+
+    it('restores a Unit as Draft below a non-Published Course', async () => {
+      const repo = new FakeAdminContentRepository(
+        [draftCourse],
+        [archived(unit)],
+      )
+
+      const result = await createAdminAction(repo)({
+        request: lessonSaveRequest({
+          intent: 'restore',
+          kind: 'unit',
+          id: 'unit',
+        }),
+        params: {},
+      } as never)
+
+      expect(result).toEqual({ message: 'feedback.unitRestoredAsDraft' })
+      const restored = await repo.getUnitById('unit')
+      expect(restored?.status).toBe('draft')
+      expect(restored?.archivedFromStatus).toBeUndefined()
+    })
+
+    it('restores a Lesson as Draft below a non-Published Unit', async () => {
+      const repo = new FakeAdminContentRepository(
+        [course],
+        [draftUnit],
+        [archived(lesson([]))],
+      )
+
+      const result = await createAdminAction(repo)({
+        request: lessonSaveRequest({
+          intent: 'restore',
+          kind: 'lesson',
+          id: 'lesson',
+        }),
+        params: {},
+      } as never)
+
+      expect(result).toEqual({ message: 'feedback.lessonRestoredAsDraft' })
+      expect((await repo.getLessonById('lesson'))?.status).toBe('draft')
+    })
+
+    it('restores a valid Lesson as Published below Published parents', async () => {
+      const repo = new FakeAdminContentRepository(
+        [course],
+        [unit],
+        [archived(lesson([exercise]))],
+      )
+      await expect(
+        restoreLesson(repo, (await repo.getLessonById('lesson'))!),
+      ).resolves.toEqual({ ok: true, status: 'published' })
+      expect((await repo.getLessonById('lesson'))?.status).toBe('published')
+    })
+
+    it('blocks restoring a Lesson as Published without an Exercise', async () => {
+      const repo = new FakeAdminContentRepository(
+        [course],
+        [unit],
+        [archived(lesson([]))],
+      )
+      await expect(
+        restoreLesson(repo, (await repo.getLessonById('lesson'))!),
+      ).resolves.toEqual({
+        ok: false,
+        error: 'Add at least one Exercise before publishing.',
+      })
+      expect((await repo.getLessonById('lesson'))?.status).toBe('archived')
+    })
   })
 
   describe('single published Home course (DEC-043)', () => {

@@ -48,7 +48,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-031 | Preserve pre-session learner values as a compatibility baseline                                                                                                   | Accepted                                                                                               | 2026-09-28 |
 | DEC-032 | Lesson Result review action opens the due Review queue                                                                                                            | Accepted                                                                                               | 2026-09-28 |
 | DEC-033 | Intentional Learning Path replays grant 15 EXP                                                                                                                    | Superseded by DEC-046                                                                              | 2026-09-29 |
-| DEC-034 | Admin content is claim-authorized and status-gated                                                                                                                | Accepted (extended by DEC-043:`Course.type`, Home export)                                              | 2026-09-29 |
+| DEC-034 | Admin content is claim-authorized and status-gated                                                                                                                | Accepted (extended by DEC-043:`Course.type`, Home export; restore amended 2026-10-06)                    | 2026-09-29 |
 | DEC-035 | Home one-page player uses browser-local exercise checkpoints                                                                                                      | Superseded by DEC-043                                                                                  | 2026-09-29 |
 | DEC-036 | Jamo SVG steps follow visual jamo for compound medials                                                                                                            | Superseded by DEC-037                                                                                  | 2026-10-01 |
 | DEC-037 | Jamo SVG steps follow typed keys, including compound medials                                                                                                      | Accepted                                                                                               | 2026-10-01 |
@@ -765,6 +765,12 @@ content Published before restrictive Rules deploy. The owner receives the claim
 only through the local Admin SDK script and must refresh their sign-in token.
 Exercises remain embedded and stable: authors may add, edit, and reorder them,
 but retire them by archiving their Lesson instead of hard deletion.
+
+**Amendment (2026-10-06):** Restore returns a Unit or Lesson to Published only
+when every ancestor is Published; otherwise it comes back as Draft and the BO
+says so. Restoring a Lesson to Published also re-runs the Publish checks (at
+least one valid, typeable Exercise), because an archived Lesson stays editable;
+a failing Lesson stays Archived.
 
 ---
 

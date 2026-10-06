@@ -199,8 +199,15 @@ async function unitAction(
     return { message: 'feedback.unitArchived' }
   }
   if (intent === 'restore') {
-    await restoreUnit(repo, unit)
-    return { message: 'feedback.unitRestored' }
+    const result = await restoreUnit(repo, unit)
+    return commandResult(
+      result,
+      result.ok &&
+        result.status === 'draft' &&
+        unit.archivedFromStatus === 'published'
+        ? 'feedback.unitRestoredAsDraft'
+        : 'feedback.unitRestored',
+    )
   }
   return { error: 'error.unknownUnitAction' }
 }
@@ -244,8 +251,15 @@ async function lessonAction(
     return { message: 'feedback.lessonArchived' }
   }
   if (intent === 'restore') {
-    await restoreLesson(repo, lesson)
-    return { message: 'feedback.lessonRestored' }
+    const result = await restoreLesson(repo, lesson)
+    return commandResult(
+      result,
+      result.ok &&
+        result.status === 'draft' &&
+        lesson.archivedFromStatus === 'published'
+        ? 'feedback.lessonRestoredAsDraft'
+        : 'feedback.lessonRestored',
+    )
   }
   return { error: 'error.unknownLessonAction' }
 }

@@ -129,6 +129,10 @@ export const en = {
   'feedback.courseRestored': 'Course restored.',
   'feedback.unitRestored': 'Unit restored.',
   'feedback.lessonRestored': 'Lesson restored.',
+  'feedback.unitRestoredAsDraft':
+    'Unit restored as Draft because its Course is not published.',
+  'feedback.lessonRestoredAsDraft':
+    'Lesson restored as Draft because its Unit or Course is not published.',
   'feedback.courseReordered': 'Course order updated.',
   'feedback.unitReordered': 'Unit order updated.',
   'feedback.lessonReordered': 'Lesson order updated.',
@@ -297,6 +301,10 @@ export const th: Record<AdminMessageKey, string> = {
   'feedback.courseRestored': 'กู้คืนคอร์สแล้ว',
   'feedback.unitRestored': 'กู้คืนยูนิตแล้ว',
   'feedback.lessonRestored': 'กู้คืนบทเรียนแล้ว',
+  'feedback.unitRestoredAsDraft':
+    'กู้คืนยูนิตเป็นฉบับร่าง เพราะคอร์สยังไม่เผยแพร่',
+  'feedback.lessonRestoredAsDraft':
+    'กู้คืนบทเรียนเป็นฉบับร่าง เพราะยูนิตหรือคอร์สยังไม่เผยแพร่',
   'feedback.courseReordered': 'อัปเดตลำดับคอร์สแล้ว',
   'feedback.unitReordered': 'อัปเดตลำดับยูนิตแล้ว',
   'feedback.lessonReordered': 'อัปเดตลำดับบทเรียนแล้ว',

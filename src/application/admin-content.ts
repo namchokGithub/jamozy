@@ -1,5 +1,10 @@
 import { z } from 'zod'
-import { archiveContent, restoreContent } from '../domain/models/content-status'
+import {
+  archiveContent,
+  restoreContent,
+  type ContentStatusFields,
+  type RestorableContentStatus,
+} from '../domain/models/content-status'
 import { courseType, type Course } from '../domain/models/course'
 import type { Lesson, LessonExercise } from '../domain/models/lesson'
 import type { Unit } from '../domain/models/unit'
@@ -21,8 +26,8 @@ const exerciseSchema = z.object({
   hint: z.string().nullable(),
 })
 
-export type AdminCommandResult =
-  { ok: true } | { ok: false; error: string; detail?: string }
+export type AdminCommandResult = { ok: true } | AdminCommandFailure
+type AdminCommandFailure = { ok: false; error: string; detail?: string }
 
 const UNTYPEABLE_TEXT = 'Target text has characters the keyboard cannot type.'
 
@@ -30,7 +35,7 @@ const UNTYPEABLE_TEXT = 'Target text has characters the keyboard cannot type.'
 // cannot start it. Lists each offending Exercise by its 1-based position.
 function untypeableExercises(
   exercises: LessonExercise[],
-): AdminCommandResult | null {
+): AdminCommandFailure | null {
   const problems = exercises.flatMap((exercise, index) => {
     const chars = findUntypeableCharacters(exercise.targetText)
     return chars.length > 0
@@ -42,7 +47,7 @@ function untypeableExercises(
     : null
 }
 
-function validationError(error: z.ZodError): AdminCommandResult {
+function validationError(error: z.ZodError): AdminCommandFailure {
   return {
     ok: false,
     error: error.issues[0]?.message ?? 'Please check the form.',
@@ -166,6 +171,14 @@ export async function publishUnit(
   return { ok: true }
 }
 
+function unpublishableExercises(lesson: Lesson): AdminCommandFailure | null {
+  if (lesson.exercises.length === 0)
+    return { ok: false, error: 'Add at least one Exercise before publishing.' }
+  const parsed = z.array(exerciseSchema).safeParse(lesson.exercises)
+  if (!parsed.success) return validationError(parsed.error)
+  return untypeableExercises(lesson.exercises)
+}
+
 export async function publishLesson(
   repo: AdminContentRepository,
   input: Lesson,
@@ -177,12 +190,8 @@ export async function publishLesson(
   const course = await repo.getCourseById(unit.courseId)
   if (!course || course.status !== 'published')
     return { ok: false, error: 'Publish the parent Course first.' }
-  if (lesson.exercises.length === 0)
-    return { ok: false, error: 'Add at least one Exercise before publishing.' }
-  const parsed = z.array(exerciseSchema).safeParse(lesson.exercises)
-  if (!parsed.success) return validationError(parsed.error)
-  const untypeable = untypeableExercises(lesson.exercises)
-  if (untypeable) return untypeable
+  const invalid = unpublishableExercises(lesson)
+  if (invalid) return invalid
   const { archivedFromStatus: _archivedFromStatus, ...published } = lesson
   void _archivedFromStatus
   await repo.saveLesson({ ...published, status: 'published' })
@@ -207,6 +216,16 @@ export async function restoreCourse(
   await repo.saveCourse(restored)
   return { ok: true }
 }
+export type RestoreResult =
+  { ok: true; status: RestorableContentStatus } | AdminCommandFailure
+
+// Restore returns an item to its pre-archive status (DEC-034), except that a
+// Unit or Lesson whose ancestors are not all Published comes back as Draft.
+function restoredStatus(item: ContentStatusFields): RestorableContentStatus {
+  const { status } = restoreContent(item)
+  return status === 'published' ? 'published' : 'draft'
+}
+
 export async function archiveUnit(
   repo: AdminContentRepository,
   unit: Unit,
@@ -216,10 +235,16 @@ export async function archiveUnit(
 export async function restoreUnit(
   repo: AdminContentRepository,
   unit: Unit,
-): Promise<void> {
+): Promise<RestoreResult> {
   const { archivedFromStatus: _archivedFromStatus, ...restorable } = unit
   void _archivedFromStatus
-  await repo.saveUnit({ ...restorable, ...restoreContent(unit) })
+  let status = restoredStatus(unit)
+  if (status === 'published') {
+    const course = await repo.getCourseById(unit.courseId)
+    if (course?.status !== 'published') status = 'draft'
+  }
+  await repo.saveUnit({ ...restorable, status })
+  return { ok: true, status }
 }
 export async function archiveLesson(
   repo: AdminContentRepository,
@@ -229,11 +254,25 @@ export async function archiveLesson(
 }
 export async function restoreLesson(
   repo: AdminContentRepository,
-  lesson: Lesson,
-): Promise<void> {
+  input: Lesson,
+): Promise<RestoreResult> {
+  const lesson = withTypeableTargetText(input)
   const { archivedFromStatus: _archivedFromStatus, ...restorable } = lesson
   void _archivedFromStatus
-  await repo.saveLesson({ ...restorable, ...restoreContent(lesson) })
+  let status = restoredStatus(lesson)
+  if (status === 'published') {
+    const unit = await repo.getUnitById(lesson.unitId)
+    const course = unit ? await repo.getCourseById(unit.courseId) : null
+    if (unit?.status !== 'published' || course?.status !== 'published')
+      status = 'draft'
+  }
+  if (status === 'published') {
+    // A Lesson edited while archived must still pass the publish checks.
+    const invalid = unpublishableExercises(lesson)
+    if (invalid) return invalid
+  }
+  await repo.saveLesson({ ...restorable, status })
+  return { ok: true, status }
 }
 
 export function makeExercise(id: string): LessonExercise {
