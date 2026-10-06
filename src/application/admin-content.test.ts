@@ -261,6 +261,29 @@ describe('admin content lifecycle', () => {
       ).toEqual(['ㄱㄲ', '가'])
     })
 
+    it('trims surrounding whitespace from pasted target text but keeps inner spaces', async () => {
+      const repo = new FakeAdminContentRepository(
+        [course],
+        [unit],
+        [lesson([])],
+      )
+
+      const result = await saveLesson(
+        repo,
+        lesson([
+          exercise('e1', '\t가려지다 \n'),
+          exercise('e2', '  안녕 하세요  '),
+        ]),
+      )
+
+      expect(result).toEqual({ ok: true })
+      expect(
+        (await repo.getLessonById('lesson'))?.exercises.map(
+          ({ targetText }) => targetText,
+        ),
+      ).toEqual(['가려지다', '안녕 하세요'])
+    })
+
     it('publishes previously saved conjoining jamo as compatibility jamo', async () => {
       const legacy = lesson([exercise('e1', '\u1100')])
       const repo = new FakeAdminContentRepository([course], [unit], [legacy])

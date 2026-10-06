@@ -100,12 +100,14 @@ export async function saveUnit(
 
 // Pasted Hangul is often conjoining jamo (ᄀ U+1100) that looks like the
 // compatibility jamo the keyboard types (ㄱ U+3131); store the typeable form.
+// Surrounding whitespace is dropped too: a trailing space would otherwise
+// become a Space the learner must type.
 function withTypeableTargetText(lesson: Lesson): Lesson {
   return {
     ...lesson,
     exercises: lesson.exercises.map((exercise) => ({
       ...exercise,
-      targetText: normalizeHangulText(exercise.targetText),
+      targetText: normalizeHangulText(exercise.targetText).trim(),
     })),
   }
 }
