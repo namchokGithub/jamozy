@@ -18,6 +18,8 @@ import { LocalGuestMigrationRepository } from '../infrastructure/local/local-gue
 import { LocalOnePageLearningCheckpointRepository } from '../infrastructure/local/local-one-page-learning-checkpoint-repository'
 import { FirebaseAccountMigrationRepository } from '../infrastructure/firebase/repositories/firebase-account-migration-repository'
 import { createLearnerRepositories } from './learner-repositories'
+import { HomeOutbox } from '../application/home-outbox'
+import { LocalHomeSyncJobRepository } from '../infrastructure/local/local-home-sync-job-repository'
 import { FirebaseAuthRepository } from '../infrastructure/firebase/firebase-auth-repository'
 import { FirebaseAdminAuthRepository } from '../infrastructure/firebase/firebase-admin-auth-repository'
 import { FirebaseAdminContentRepository } from '../infrastructure/firebase/repositories/firebase-admin-content-repository'
@@ -105,6 +107,29 @@ const {
   sessionSubmissionRepo,
   getActiveUser,
 } = learners
+
+// Background writer for Home progress (DEC-043). It drains on start, when
+// the browser comes back online, and when the signed-in user changes, since
+// each job runs only for the user who did the work.
+export const homeOutbox = new HomeOutbox({
+  jobs: new LocalHomeSyncJobRepository(),
+  useCases: { progressRepo, userProfileRepo, sessionSubmissionRepo },
+  getActiveUser,
+  schedule: (run, delayMs) => {
+    window.setTimeout(run, delayMs)
+  },
+  onDropped: (job, error) => {
+    if (import.meta.env.DEV)
+      console.warn(
+        '[home-outbox] Dropped a job that cannot succeed.',
+        job,
+        error,
+      )
+  },
+})
+void homeOutbox.drain()
+window.addEventListener('online', () => void homeOutbox.drain())
+sessionManager.onChange(() => void homeOutbox.drain())
 const developmentRoutes = import.meta.env.DEV
   ? [
       { path: '/dev/hangul-guides', Component: HangulGuideTunerPage },

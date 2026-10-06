@@ -19,6 +19,8 @@ import type {
 import type { AdminContentRepository } from '../domain/repositories/admin-content-repository'
 import type { OnePageLearningCheckpoint } from '../domain/models/one-page-learning-checkpoint'
 import type { OnePageLearningCheckpointRepository } from '../domain/repositories/one-page-learning-checkpoint-repository'
+import type { HomeSyncJob } from '../domain/models/home-sync-job'
+import type { HomeSyncJobRepository } from '../domain/repositories/home-sync-job-repository'
 
 export class FakeCourseRepository implements CourseRepository {
   constructor(
@@ -328,5 +330,21 @@ export class FakeOnePageLearningCheckpointRepository implements OnePageLearningC
       completedExerciseIdsByLesson,
       partialLessonResults,
     })
+  }
+}
+
+export class FakeHomeSyncJobRepository implements HomeSyncJobRepository {
+  readonly jobs: HomeSyncJob[] = []
+  async list() {
+    return [...this.jobs].sort((a, b) => a.enqueuedAt.getTime() - b.enqueuedAt.getTime())
+  }
+  async save(job: HomeSyncJob) {
+    const index = this.jobs.findIndex(({ id }) => id === job.id)
+    if (index === -1) this.jobs.push(job)
+    else this.jobs[index] = job
+  }
+  async remove(job: HomeSyncJob) {
+    const index = this.jobs.findIndex(({ id }) => id === job.id)
+    if (index !== -1) this.jobs.splice(index, 1)
   }
 }

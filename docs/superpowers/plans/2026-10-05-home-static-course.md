@@ -100,10 +100,12 @@ Done 2026-10-06 as a sibling of `completeLessonSession`: `home-session-submissio
 
 **Files:** `src/infrastructure/local/home-outbox.ts`, `src/infrastructure/local/guest-database.ts` (new store), `src/app/router.ts` wiring, tests.
 
-- [ ] **Step 1:** Write failing tests: entries persist across instances; processed in order per lesson; failures retry with backoff; a successful entry is removed; replaying an entry is safe because use cases are idempotent.
-- [ ] **Step 2:** Implement the outbox over IndexedDB; drain on app start, after each enqueue, and on `online`.
+- [x] **Step 1:** Write failing tests: entries persist across instances; processed in order per lesson; failures retry with backoff; a successful entry is removed; replaying an entry is safe because use cases are idempotent.
+- [x] **Step 2:** Implement the outbox over IndexedDB; drain on app start, after each enqueue, and on `online`.
 - [ ] **Step 3:** Keep a local Progress cache updated optimistically on enqueue so `n/m` reflects completed exercises immediately.
-- [ ] **Step 4:** `pnpm test`.
+- [x] **Step 4:** `pnpm test`.
+
+Done 2026-10-06: `HomeOutbox` (application) over `HomeSyncJobRepository`; IndexedDB store `homeSyncJobs` (DB version 5). Jobs run only for the active user; a `ValidationError` drops the job; other failures back off 1 s doubling to 5 min and block later jobs to keep order. Drains on start, `online`, and session change. Step 3 moved to Task 7: the outbox exposes `pendingExerciseIds(userId)`, and the UI merges it with cached Progress.
 
 ### Task 6: Home session domain
 

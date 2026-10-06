@@ -1,3 +1,4 @@
+import type { HomeSessionTotals } from '../domain/models/home-sync-job'
 import type { LearningSession } from '../domain/models/learning-session'
 import type { Progress } from '../domain/models/progress'
 import type { SessionSubmissionRepository } from '../domain/repositories/session-submission-repository'
@@ -9,13 +10,7 @@ export interface HomeSessionDeps {
   sessionSubmissionRepo: SessionSubmissionRepository
 }
 
-export interface HomeSessionTotals {
-  startedAtMs: number
-  durationSeconds: number
-  exercisesAttempted: number
-  acceptedKeystrokes: number
-  rejectedKeystrokes: number
-}
+export type { HomeSessionTotals }
 
 export interface HomeSessionOutcome {
   progress: Progress

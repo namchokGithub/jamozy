@@ -1,3 +1,4 @@
+import { ValidationError } from '../domain/errors'
 import type { ExerciseResult } from '../domain/korean/lesson-session'
 import type { HomePartialResult, Progress } from '../domain/models/progress'
 import type { ProgressRepository } from '../domain/repositories/progress-repository'
@@ -40,7 +41,7 @@ export async function recordHomeExercise(
   const { userId, lesson, result } = input
   const now = input.now ?? new Date()
   if (!lesson.exercises.some(({ id }) => id === result.exerciseId))
-    throw new Error(
+    throw new ValidationError(
       `Exercise ${result.exerciseId} does not belong to lesson ${lesson.id}`,
     )
 
