@@ -3,6 +3,7 @@ import { useFetcher, useLoaderData } from 'react-router'
 import type { Lesson, LessonExercise } from '../../domain/models/lesson'
 import type { Unit } from '../../domain/models/unit'
 import type { Course } from '../../domain/models/course'
+import { makeExercise } from '../../application/admin-content'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { Dropdown } from '../../components/ui/Dropdown'
@@ -26,18 +27,6 @@ const lessonTypes: Lesson['type'][] = [
   'sentence',
 ]
 const difficulties: LessonExercise['difficulty'][] = ['easy', 'medium', 'hard']
-
-function newExercise(): LessonExercise {
-  return {
-    id: crypto.randomUUID(),
-    targetText: '',
-    romanization: null,
-    meaningTh: '',
-    meaningEn: '',
-    difficulty: 'easy',
-    hint: null,
-  }
-}
 
 export default function LessonEditorPage() {
   const { lesson, unit, course } = useLoaderData() as {
@@ -312,7 +301,7 @@ export default function LessonEditorPage() {
           <Button
             disabled={isPending}
             onClick={() => {
-              const exercise = newExercise()
+              const exercise = makeExercise(crypto.randomUUID())
               setExercises((items) => [...items, exercise])
               setEditingExerciseId(exercise.id)
             }}
