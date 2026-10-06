@@ -39,34 +39,12 @@ export type AdminActionData = {
   createdId?: string
 }
 
-const commandErrorKeys: Record<string, AdminMessageKey> = {
-  'This field is required.': 'error.fieldRequired',
-  'Please check the form.': 'error.checkForm',
-  'Parent Course was not found.': 'error.parentCourseNotFound',
-  'Parent Unit was not found.': 'error.parentUnitNotFound',
-  'Publish the parent Course first.': 'error.publishCourseFirst',
-  'Publish the parent Unit first.': 'error.publishUnitFirst',
-  'Add at least one Exercise before publishing.': 'error.exerciseRequired',
-  'A published Lesson needs at least one Exercise.':
-    'error.publishedExerciseRequired',
-  'Only one published Home course is allowed.': 'error.oneHomeCourse',
-  'Target text has characters the keyboard cannot type.':
-    'error.untypeableText',
-}
-
-function commandError(error: string): AdminActionData {
-  const key = commandErrorKeys[error]
-  return key
-    ? { error: key }
-    : { error: 'error.actionFailed', errorDetail: error }
-}
-
 function commandResult(
   result: AdminCommandResult,
   message: AdminMessageKey,
 ): AdminActionData {
   if (result.ok) return { message }
-  const data = commandError(result.error)
+  const data: AdminActionData = { error: `error.${result.error}` }
   return result.detail ? { ...data, errorDetail: result.detail } : data
 }
 

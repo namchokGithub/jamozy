@@ -15,7 +15,7 @@ import {
   formatCharacters,
 } from '../domain/korean/target-sequence'
 
-const text = z.string().trim().min(1, 'This field is required.')
+const text = z.string().trim().min(1, 'fieldRequired')
 const exerciseSchema = z.object({
   id: text,
   targetText: text,
@@ -27,9 +27,23 @@ const exerciseSchema = z.object({
 })
 
 export type AdminCommandResult = { ok: true } | AdminCommandFailure
-type AdminCommandFailure = { ok: false; error: string; detail?: string }
-
-const UNTYPEABLE_TEXT = 'Target text has characters the keyboard cannot type.'
+/** Stable failure codes; the Admin BO maps each to a translated message. */
+export type AdminCommandError =
+  | 'fieldRequired'
+  | 'checkForm'
+  | 'parentCourseNotFound'
+  | 'parentUnitNotFound'
+  | 'publishCourseFirst'
+  | 'publishUnitFirst'
+  | 'exerciseRequired'
+  | 'publishedExerciseRequired'
+  | 'oneHomeCourse'
+  | 'untypeableText'
+type AdminCommandFailure = {
+  ok: false
+  error: AdminCommandError
+  detail?: string
+}
 
 // Every Exercise must be typeable on the 2-beolsik keymap, or the player
 // cannot start it. Lists each offending Exercise by its 1-based position.
@@ -43,18 +57,19 @@ function untypeableExercises(
       : []
   })
   return problems.length > 0
-    ? { ok: false, error: UNTYPEABLE_TEXT, detail: problems.join('; ') }
+    ? { ok: false, error: 'untypeableText', detail: problems.join('; ') }
     : null
 }
 
 function validationError(error: z.ZodError): AdminCommandFailure {
   return {
     ok: false,
-    error: error.issues[0]?.message ?? 'Please check the form.',
+    error:
+      error.issues[0]?.message === 'fieldRequired'
+        ? 'fieldRequired'
+        : 'checkForm',
   }
 }
-
-const ONE_HOME_COURSE = 'Only one published Home course is allowed.'
 
 // Home plays exactly one published `home` course (DEC-043).
 async function conflictsWithPublishedHome(
@@ -133,7 +148,7 @@ export async function saveCourse(
     .safeParse(course)
   if (!parsed.success) return validationError(parsed.error)
   if (await conflictsWithPublishedHome(repo, course))
-    return { ok: false, error: ONE_HOME_COURSE }
+    return { ok: false, error: 'oneHomeCourse' }
   await repo.saveCourse(course)
   return { ok: true }
 }
@@ -147,7 +162,7 @@ export async function saveUnit(
     .safeParse(unit)
   if (!parsed.success) return validationError(parsed.error)
   if (!(await repo.getCourseById(unit.courseId)))
-    return { ok: false, error: 'Parent Course was not found.' }
+    return { ok: false, error: 'parentCourseNotFound' }
   await repo.saveUnit(unit)
   return { ok: true }
 }
@@ -184,12 +199,12 @@ export async function saveLesson(
   if (lesson.status === 'published' && lesson.exercises.length === 0)
     return {
       ok: false,
-      error: 'A published Lesson needs at least one Exercise.',
+      error: 'publishedExerciseRequired',
     }
   const untypeable = untypeableExercises(lesson.exercises)
   if (untypeable) return untypeable
   if (!(await repo.getUnitById(lesson.unitId)))
-    return { ok: false, error: 'Parent Unit was not found.' }
+    return { ok: false, error: 'parentUnitNotFound' }
   await repo.saveLesson(lesson)
   return { ok: true }
 }
@@ -202,7 +217,7 @@ export async function publishCourse(
   void _archivedFromStatus
   const published: Course = { ...saved, status: 'published' }
   if (await conflictsWithPublishedHome(repo, published))
-    return { ok: false, error: ONE_HOME_COURSE }
+    return { ok: false, error: 'oneHomeCourse' }
   await repo.saveCourse(published)
   return { ok: true }
 }
@@ -213,7 +228,7 @@ export async function publishUnit(
 ): Promise<AdminCommandResult> {
   const course = await repo.getCourseById(unit.courseId)
   if (!course || course.status !== 'published')
-    return { ok: false, error: 'Publish the parent Course first.' }
+    return { ok: false, error: 'publishCourseFirst' }
   const { archivedFromStatus: _archivedFromStatus, ...published } = unit
   void _archivedFromStatus
   await repo.saveUnit({ ...published, status: 'published' })
@@ -222,7 +237,7 @@ export async function publishUnit(
 
 function unpublishableExercises(lesson: Lesson): AdminCommandFailure | null {
   if (lesson.exercises.length === 0)
-    return { ok: false, error: 'Add at least one Exercise before publishing.' }
+    return { ok: false, error: 'exerciseRequired' }
   const parsed = z.array(exerciseSchema).safeParse(lesson.exercises)
   if (!parsed.success) return validationError(parsed.error)
   return untypeableExercises(lesson.exercises)
@@ -235,10 +250,10 @@ export async function publishLesson(
   const lesson = withTypeableTargetText(input)
   const unit = await repo.getUnitById(lesson.unitId)
   if (!unit || unit.status !== 'published')
-    return { ok: false, error: 'Publish the parent Unit first.' }
+    return { ok: false, error: 'publishUnitFirst' }
   const course = await repo.getCourseById(unit.courseId)
   if (!course || course.status !== 'published')
-    return { ok: false, error: 'Publish the parent Course first.' }
+    return { ok: false, error: 'publishCourseFirst' }
   const invalid = unpublishableExercises(lesson)
   if (invalid) return invalid
   const { archivedFromStatus: _archivedFromStatus, ...published } = lesson
@@ -260,7 +275,7 @@ async function unpublishableCourse(
 ): Promise<AdminCommandFailure | null> {
   if (course.status === 'published') return null
   return (await conflictsWithPublishedHome(repo, asPublished(course)))
-    ? { ok: false, error: ONE_HOME_COURSE }
+    ? { ok: false, error: 'oneHomeCourse' }
     : null
 }
 
@@ -271,7 +286,7 @@ export async function publishUnitWithParents(
   unit: Unit,
 ): Promise<AdminCommandResult> {
   const course = await repo.getCourseById(unit.courseId)
-  if (!course) return { ok: false, error: 'Parent Course was not found.' }
+  if (!course) return { ok: false, error: 'parentCourseNotFound' }
   const blocked = await unpublishableCourse(repo, course)
   if (blocked) return blocked
   if (course.status !== 'published') await repo.saveCourse(asPublished(course))
@@ -289,9 +304,9 @@ export async function publishLessonWithParents(
   const invalid = unpublishableExercises(lesson)
   if (invalid) return invalid
   const unit = await repo.getUnitById(lesson.unitId)
-  if (!unit) return { ok: false, error: 'Parent Unit was not found.' }
+  if (!unit) return { ok: false, error: 'parentUnitNotFound' }
   const course = await repo.getCourseById(unit.courseId)
-  if (!course) return { ok: false, error: 'Parent Course was not found.' }
+  if (!course) return { ok: false, error: 'parentCourseNotFound' }
   const blocked = await unpublishableCourse(repo, course)
   if (blocked) return blocked
   if (course.status !== 'published') await repo.saveCourse(asPublished(course))
@@ -314,7 +329,7 @@ export async function restoreCourse(
   void _archivedFromStatus
   const restored: Course = { ...restorable, ...restoreContent(course) }
   if (await conflictsWithPublishedHome(repo, restored))
-    return { ok: false, error: ONE_HOME_COURSE }
+    return { ok: false, error: 'oneHomeCourse' }
   await repo.saveCourse(restored)
   return { ok: true }
 }

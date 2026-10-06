@@ -172,7 +172,7 @@ describe('admin content lifecycle', () => {
     const repo = new FakeAdminContentRepository([course], [unit], [lesson([])])
     await expect(publishLesson(repo, lesson([]))).resolves.toEqual({
       ok: false,
-      error: 'Add at least one Exercise before publishing.',
+      error: 'exerciseRequired',
     })
     expect((await repo.getLessonById('lesson'))?.status).toBe('draft')
   })
@@ -236,7 +236,7 @@ describe('admin content lifecycle', () => {
 
       expect(result).toEqual({
         ok: false,
-        error: 'Target text has characters the keyboard cannot type.',
+        error: 'untypeableText',
         detail: 'Exercise 2: "a" U+0061, "\u1140" U+1140',
       })
       expect((await repo.getLessonById('lesson'))?.exercises).toEqual([])
@@ -248,7 +248,7 @@ describe('admin content lifecycle', () => {
 
       expect(await publishLesson(repo, bad)).toEqual({
         ok: false,
-        error: 'Target text has characters the keyboard cannot type.',
+        error: 'untypeableText',
         detail: 'Exercise 1: "a" U+0061, "b" U+0062',
       })
       expect((await repo.getLessonById('lesson'))?.status).toBe('draft')
@@ -356,7 +356,7 @@ describe('admin content lifecycle', () => {
     )
     await expect(
       publishLesson(repo, (await repo.getLessonById('lesson'))!),
-    ).resolves.toEqual({ ok: false, error: 'Publish the parent Course first.' })
+    ).resolves.toEqual({ ok: false, error: 'publishCourseFirst' })
   })
 
   it('restores an archived draft Course as draft', async () => {
@@ -430,7 +430,7 @@ describe('admin content lifecycle', () => {
       await expect(publishLessonWithParents(repo, lesson([]))).resolves.toEqual(
         {
           ok: false,
-          error: 'Add at least one Exercise before publishing.',
+          error: 'exerciseRequired',
         },
       )
       expect((await repo.getCourseById('course'))?.status).toBe('draft')
@@ -448,7 +448,7 @@ describe('admin content lifecycle', () => {
 
       await expect(publishUnitWithParents(repo, draftUnit)).resolves.toEqual({
         ok: false,
-        error: 'Only one published Home course is allowed.',
+        error: 'oneHomeCourse',
       })
       expect((await repo.getCourseById('course'))?.status).toBe('draft')
       expect((await repo.getUnitById('unit'))?.status).toBe('draft')
@@ -544,7 +544,7 @@ describe('admin content lifecycle', () => {
         restoreLesson(repo, (await repo.getLessonById('lesson'))!),
       ).resolves.toEqual({
         ok: false,
-        error: 'Add at least one Exercise before publishing.',
+        error: 'exerciseRequired',
       })
       expect((await repo.getLessonById('lesson'))?.status).toBe('archived')
     })
@@ -571,7 +571,7 @@ describe('admin content lifecycle', () => {
 
       expect(result).toEqual({
         ok: false,
-        error: 'Only one published Home course is allowed.',
+        error: 'oneHomeCourse',
       })
       expect((await repo.getCourseById('home-2'))?.status).toBe('draft')
     })
@@ -626,7 +626,7 @@ describe('admin content lifecycle', () => {
         ...course,
         type: 'quest' as never,
       })
-      expect(result.ok).toBe(false)
+      expect(result).toEqual({ ok: false, error: 'checkForm' })
     })
   })
 })
