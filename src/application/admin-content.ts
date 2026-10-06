@@ -185,7 +185,6 @@ export async function saveLesson(
   repo: AdminContentRepository,
   input: Lesson,
 ): Promise<AdminCommandResult> {
-  const lesson = withTypeableTargetText(input)
   const parsed = z
     .object({
       title: text,
@@ -193,8 +192,11 @@ export async function saveLesson(
       type: z.enum(['character', 'syllable', 'word', 'phrase', 'sentence']),
       exercises: z.array(exerciseSchema),
     })
-    .safeParse(lesson)
+    .safeParse(withTypeableTargetText(input))
   if (!parsed.success) return validationError(parsed.error)
+  // Store the parsed fields: the Exercises come from editor JSON, and parsing
+  // drops any field the schema does not know.
+  const lesson: Lesson = { ...input, ...parsed.data }
   // Saving must not bypass publishLesson's Exercise requirement.
   if (lesson.status === 'published' && lesson.exercises.length === 0)
     return {

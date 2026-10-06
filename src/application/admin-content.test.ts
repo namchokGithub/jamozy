@@ -152,6 +152,34 @@ describe('admin content lifecycle', () => {
     ])
   })
 
+  it('saves only known Exercise fields from the editor form', async () => {
+    const repo = new FakeAdminContentRepository([course], [unit], [lesson([])])
+    const exercise = {
+      id: 'exercise',
+      targetText: '가',
+      romanization: null,
+      meaningTh: '',
+      meaningEn: '',
+      difficulty: 'easy',
+      hint: null,
+    }
+
+    const result = await createAdminAction(repo)({
+      request: lessonSaveRequest({
+        intent: 'save',
+        kind: 'lesson',
+        id: 'lesson',
+        title: 'Lesson',
+        type: 'word',
+        exercises: JSON.stringify([{ ...exercise, unexpected: 'field' }]),
+      }),
+      params: {},
+    } as never)
+
+    expect(result).toEqual({ message: 'feedback.changesSaved' })
+    expect((await repo.getLessonById('lesson'))?.exercises).toEqual([exercise])
+  })
+
   it('archives a lesson without requiring editor form fields', async () => {
     const repo = new FakeAdminContentRepository([course], [unit], [lesson([])])
 
