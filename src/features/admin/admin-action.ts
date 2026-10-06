@@ -73,15 +73,23 @@ export function createAdminAction(repo: AdminContentRepository) {
     const intent = text(form, 'intent')
     try {
       if (intent === 'create-course') {
-        const created = await createDraftCourse(repo)
+        const created = await createDraftCourse(repo, {
+          title: text(form, 'title'),
+          description: text(form, 'description'),
+        })
         return { message: 'feedback.courseCreated', createdId: created.id }
       }
       if (intent === 'create-unit' && params.courseId) {
-        const created = await createDraftUnit(repo, params.courseId)
+        const created = await createDraftUnit(repo, params.courseId, {
+          title: text(form, 'title'),
+          description: text(form, 'description'),
+        })
         return { message: 'feedback.unitCreated', createdId: created.id }
       }
       if (intent === 'create-lesson' && params.unitId) {
-        const created = await createDraftLesson(repo, params.unitId)
+        const created = await createDraftLesson(repo, params.unitId, {
+          title: text(form, 'title'),
+        })
         return { message: 'feedback.lessonCreated', createdId: created.id }
       }
       if (intent === 'save-course-order') {

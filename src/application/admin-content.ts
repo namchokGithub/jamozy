@@ -86,29 +86,50 @@ async function conflictsWithPublishedHome(
   )
 }
 
-export function createDraftCourse(repo: AdminContentRepository) {
+/** Placeholder text from the Admin editor, in the author's interface language. */
+export interface DraftText {
+  title?: string
+  description?: string
+}
+
+// New content stores the editor's translated placeholder; blank text falls
+// back to English so a draft never saves without a title.
+function orDefault(value: string | undefined, fallback: string): string {
+  return value?.trim() || fallback
+}
+
+export function createDraftCourse(
+  repo: AdminContentRepository,
+  text: DraftText = {},
+) {
   return repo.createCourse({
-    title: 'Untitled Course',
-    description: 'Describe this learning path.',
+    title: orDefault(text.title, 'Untitled Course'),
+    description: orDefault(text.description, 'Describe this learning path.'),
   })
 }
 
 export function createDraftUnit(
   repo: AdminContentRepository,
   courseId: string,
+  text: DraftText = {},
 ) {
   return repo.createUnit({
     courseId,
-    title: 'Untitled Unit',
-    description: 'Describe this Unit.',
+    title: orDefault(text.title, 'Untitled Unit'),
+    description: orDefault(text.description, 'Describe this Unit.'),
   })
 }
 
 export function createDraftLesson(
   repo: AdminContentRepository,
   unitId: string,
+  text: Pick<DraftText, 'title'> = {},
 ) {
-  return repo.createLesson({ unitId, title: 'Untitled Lesson', type: 'word' })
+  return repo.createLesson({
+    unitId,
+    title: orDefault(text.title, 'Untitled Lesson'),
+    type: 'word',
+  })
 }
 
 /** Order commands take every sibling ID in its new order (see repository). */

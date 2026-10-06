@@ -99,7 +99,14 @@ export default function AdminDashboardPage() {
           disabled={isCreating}
           onClick={() =>
             !isCreating &&
-            create.submit({ intent: 'create-course' }, { method: 'post' })
+            create.submit(
+              {
+                intent: 'create-course',
+                title: t('draft.courseTitle'),
+                description: t('draft.courseDescription'),
+              },
+              { method: 'post' },
+            )
           }
         >
           {isCreating ? t('action.saving') : t('action.createCourse')}

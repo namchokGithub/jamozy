@@ -105,6 +105,12 @@ export const en = {
   'lesson.exerciseTranslation': 'Translation',
   'lesson.exerciseMetadata': 'Learning metadata',
 
+  'draft.courseTitle': 'Untitled Course',
+  'draft.courseDescription': 'Describe this learning path.',
+  'draft.unitTitle': 'Untitled Unit',
+  'draft.unitDescription': 'Describe this Unit.',
+  'draft.lessonTitle': 'Untitled Lesson',
+
   'field.title': 'Title',
   'field.description': 'Description',
   'field.courseType': 'Course type',
@@ -281,6 +287,12 @@ export const th: Record<AdminMessageKey, string> = {
   'lesson.exerciseContent': 'เนื้อหา',
   'lesson.exerciseTranslation': 'คำแปล',
   'lesson.exerciseMetadata': 'ข้อมูลสำหรับการเรียนรู้',
+
+  'draft.courseTitle': 'คอร์สใหม่',
+  'draft.courseDescription': 'อธิบายเส้นทางการเรียนนี้',
+  'draft.unitTitle': 'ยูนิตใหม่',
+  'draft.unitDescription': 'อธิบายยูนิตนี้',
+  'draft.lessonTitle': 'บทเรียนใหม่',
 
   'field.title': 'ชื่อ',
   'field.description': 'คำอธิบาย',

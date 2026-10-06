@@ -234,7 +234,13 @@ export default function CourseEditorPage() {
           <div className="flex gap-2">
             <Button
               disabled={isPending}
-              onClick={() => submit({ intent: 'create-unit' })}
+              onClick={() =>
+                submit({
+                  intent: 'create-unit',
+                  title: t('draft.unitTitle'),
+                  description: t('draft.unitDescription'),
+                })
+              }
             >
               {isPending ? t('action.saving') : t('action.createUnit')}
             </Button>

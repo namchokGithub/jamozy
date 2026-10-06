@@ -764,3 +764,41 @@ describe('creating admin content', () => {
     })
   })
 })
+
+describe('creating admin content in the editor language', () => {
+  it('stores the placeholder text the editor sends', async () => {
+    const repo = new FakeAdminContentRepository()
+
+    const createdCourse = await createDraftCourse(repo, {
+      title: 'คอร์สใหม่',
+      description: 'อธิบายเส้นทางการเรียนนี้',
+    })
+    const createdUnit = await createDraftUnit(repo, createdCourse.id, {
+      title: 'ยูนิตใหม่',
+      description: 'อธิบายยูนิตนี้',
+    })
+    const createdLesson = await createDraftLesson(repo, createdUnit.id, {
+      title: 'บทเรียนใหม่',
+    })
+
+    expect(createdCourse).toMatchObject({
+      title: 'คอร์สใหม่',
+      description: 'อธิบายเส้นทางการเรียนนี้',
+    })
+    expect(createdUnit).toMatchObject({
+      title: 'ยูนิตใหม่',
+      description: 'อธิบายยูนิตนี้',
+    })
+    expect(createdLesson).toMatchObject({ title: 'บทเรียนใหม่' })
+  })
+
+  it('falls back to English placeholders for blank text', async () => {
+    const repo = new FakeAdminContentRepository()
+    await expect(
+      createDraftCourse(repo, { title: '  ', description: '' }),
+    ).resolves.toMatchObject({
+      title: 'Untitled Course',
+      description: 'Describe this learning path.',
+    })
+  })
+})
