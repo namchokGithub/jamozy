@@ -58,7 +58,8 @@ by every `pnpm build`, so opening Home never waits on Firestore. Units are
 categories; each lesson shows its distinct completed exercises, such as `3/5`.
 
 A lesson session plays all of its exercises once in a fresh shuffled order,
-then moves on to the next lesson (and unit) with a short notice. A lesson
+then moves on to the next lesson (and unit) with a short notice, looping back
+to the first lesson after the last one. A lesson
 completes once every exercise has been typed at least once, across sessions
 and devices: the first completion grants accuracy-based EXP, and a full
 replay of a completed lesson grants 15 EXP. Home lessons create no review

@@ -127,7 +127,7 @@ Done 2026-10-06: `shuffleExercises`, `nextHomeLesson`, `resolveHomeResume`, `hom
 - [x] **Step 4:** Add behavior tests for non-visual logic only: no Firestore call before first render; refresh restarts the lesson with a new shuffle and keeps progress.
 - [x] **Step 5:** `pnpm lint`, `pnpm build`; hand manual UI verification to the user.
 
-Done 2026-10-06. Decisions: writes go through a `HomeServices` React context built in the app layer (`src/app/home-services.ts`), not route actions; after the last lesson Home shows a completed state and waits for a lesson pick; the lesson-complete notice shows for 3 s. The loader streams `homePlayer` (static JSON + device cache + resume + pending outbox IDs) and `homeProgress` (live Progress, cached on read; null on failure). Without Home content the loader and page fall back to the DEC-042 player, so its code stays. Local stores `homeProgressCache` and `homeResume` (DB version 6). Manual UI verification is the user's.
+Done 2026-10-06. Decisions: writes go through a `HomeServices` React context built in the app layer (`src/app/home-services.ts`), not route actions; after the last lesson Home loops back to the first lesson (changed 2026-10-06 from showing a completed state); the lesson-complete notice shows for 3 s. The loader streams `homePlayer` (static JSON + device cache + resume + pending outbox IDs) and `homeProgress` (live Progress, cached on read; null on failure). Without Home content the loader and page fall back to the DEC-042 player, so its code stays. Local stores `homeProgressCache` and `homeResume` (DB version 6). Manual UI verification is the user's.
 
 ### Task 8: Remove superseded code and close out
 

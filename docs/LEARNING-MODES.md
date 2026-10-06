@@ -49,7 +49,7 @@ completed lesson always shows full. Any unit or lesson may be opened; the
 A session shuffles all of the lesson's exercises once and plays each exactly
 once; every new session, including after a refresh, reshuffles. At session
 end Home moves to the next lesson, then the next unit, with a non-blocking
-notice. A lesson completes when its exercises have each been completed at
+notice; after the last lesson it loops back to the first. A lesson completes when its exercises have each been completed at
 least once, across sessions and devices. First completion grants the normal
 accuracy-based EXP; a full session of an already-completed lesson grants 15
 EXP ([[DEC-033]]); an abandoned session grants nothing. Completion is never

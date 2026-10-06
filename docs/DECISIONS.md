@@ -1023,8 +1023,8 @@ total (for example `3/5`). A completed lesson always shows full (`5/5`).
 never repeats an exercise before it has played every exercise. Each new
 session, including after a refresh, shuffles again. When a session ends,
 Home moves automatically to the next lesson, then to the next unit, with a
-short non-blocking notice. After the last unit, the Home course is shown as
-completed and every lesson stays playable.
+short non-blocking notice. After the last lesson of the last unit, Home loops
+back to the first lesson; every lesson stays playable.
 
 *Exercise progress and completion.* `Progress` for a Home lesson also stores
 the distinct `completedExerciseIds` and the raw partial result (accepted and

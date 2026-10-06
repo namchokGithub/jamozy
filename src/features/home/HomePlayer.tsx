@@ -42,12 +42,10 @@ export default function HomePlayer({
     exercises,
     session,
     selectedUnitId,
-    courseComplete,
     notice,
     startLesson,
     pressKey,
     selectUnit,
-    finishCourse,
     showNotice,
   } = useHomePlayerStore()
   const [{ content, initialProgress, initialPending, resume }] = useState(
@@ -157,19 +155,19 @@ export default function HomePlayer({
           lessonId: played.id,
           totals: homeReplayTotals(finishedSession),
         })
+      // After the last lesson, Home loops back to the first one.
       const next = nextHomeLesson(content.units, played.id)
-      if (!next) {
-        finishCourse(
-          'Home course complete. Pick any lesson to keep practicing.',
-        )
-        return
-      }
-      open(next)
+      const target = next ?? resolveHomeResume(content.units, null)
+      if (!target) return
+      open(target)
+      const title = lessonById(target.lessonId)?.title ?? ''
       showNotice(
-        `Lesson complete · Next: ${lessonById(next.lessonId)?.title ?? ''}`,
+        next
+          ? `Lesson complete · Next: ${title}`
+          : `Home course complete · Starting again: ${title}`,
       )
     },
-    [content, finishCourse, lessonById, open, pressKey, services, showNotice],
+    [content, lessonById, open, pressKey, services, showNotice],
   )
 
   useEffect(() => {
@@ -189,8 +187,7 @@ export default function HomePlayer({
   const visibleUnitId = selectedUnitId ?? unitId ?? content.units[0]?.id
   const visibleUnit =
     content.units.find(({ id }) => id === visibleUnitId) ?? content.units[0]
-  const active =
-    session && !courseComplete ? exercises[session.currentIndex] : undefined
+  const active = session ? exercises[session.currentIndex] : undefined
   const nextKey =
     session?.currentSession.expectedKeys[session.currentSession.keyIndex]
   const acceptedKeystrokes = session
@@ -274,7 +271,7 @@ export default function HomePlayer({
               progressByLesson.get(entry.id) ?? null,
               localDone.get(entry.id),
             )
-            const current = entry.id === lesson?.id && !courseComplete
+            const current = entry.id === lesson?.id
             return (
               <button
                 key={entry.id}
@@ -359,9 +356,7 @@ export default function HomePlayer({
         </div>
       ) : (
         <div className="mt-4 rounded-3xl border border-dashed border-[#dfcfc0] bg-white/60 p-6 text-center text-sm text-[#667085]">
-          {courseComplete
-            ? 'You finished every Home lesson. Pick any lesson above to keep practicing.'
-            : 'Pick a lesson above to start.'}
+          Pick a lesson above to start.
         </div>
       )}
     </section>

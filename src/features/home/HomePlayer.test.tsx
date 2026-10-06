@@ -109,7 +109,6 @@ describe('HomePlayer', () => {
       lesson: null,
       unitId: null,
       selectedUnitId: null,
-      courseComplete: false,
       notice: null,
       isReplay: false,
       exercises: [],
@@ -162,7 +161,7 @@ describe('HomePlayer', () => {
     expect(services.recordReplay).not.toHaveBeenCalled()
   })
 
-  it('crosses into the next unit and finishes the course after the last lesson', async () => {
+  it('crosses into the next unit and loops to the first lesson after the last one', async () => {
     setup({ resume: { unitId: 'u1', lessonId: 'l2' } })
     await waitFor(() =>
       expect(useHomePlayerStore.getState().lesson?.id).toBe('l2'),
@@ -173,9 +172,12 @@ describe('HomePlayer', () => {
     type('KeyE')
 
     await waitFor(() =>
-      expect(useHomePlayerStore.getState().courseComplete).toBe(true),
+      expect(useHomePlayerStore.getState().lesson?.id).toBe('l1'),
     )
-    expect(screen.getByText(/finished every Home lesson/)).toBeInTheDocument()
+    expect(useHomePlayerStore.getState().unitId).toBe('u1')
+    expect(screen.getByRole('status').textContent).toContain(
+      'Starting again: First',
+    )
   })
 
   it('submits a replay only for a lesson that was already completed', async () => {
