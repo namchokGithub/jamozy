@@ -171,6 +171,10 @@ export const en = {
   'error.publishedExerciseRequired':
     'A published Lesson needs at least one Exercise.',
   'error.oneHomeCourse': 'Only one published Home course is allowed.',
+  'error.duplicateExerciseId':
+    'Two Exercises share the same ID. Refresh and try again.',
+  'error.exerciseRemoved':
+    'Saved Exercises cannot be removed. Archive the Lesson to retire them.',
   'error.untypeableText':
     'Target text has characters the keyboard cannot type. Retype them with a Korean keyboard:',
   'error.fieldRequired': 'This field is required.',
@@ -358,6 +362,10 @@ export const th: Record<AdminMessageKey, string> = {
   'error.publishedExerciseRequired':
     'บทเรียนที่เผยแพร่แล้วต้องมีแบบฝึกหัดอย่างน้อยหนึ่งข้อ',
   'error.oneHomeCourse': 'เผยแพร่คอร์สหน้า Home ได้เพียงคอร์สเดียว',
+  'error.duplicateExerciseId':
+    'มีแบบฝึกหัดที่ใช้ ID ซ้ำกัน รีเฟรชแล้วลองอีกครั้ง',
+  'error.exerciseRemoved':
+    'ลบแบบฝึกหัดที่บันทึกแล้วไม่ได้ ให้เก็บถาวรบทเรียนแทนหากต้องการเลิกใช้',
   'error.untypeableText':
     'ข้อความเป้าหมายมีตัวอักษรที่พิมพ์ด้วยแป้นไม่ได้ ให้พิมพ์ใหม่ด้วยแป้นภาษาเกาหลี:',
   'error.fieldRequired': 'กรุณากรอกช่องนี้',

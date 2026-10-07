@@ -39,6 +39,8 @@ export type AdminCommandError =
   | 'publishedExerciseRequired'
   | 'oneHomeCourse'
   | 'untypeableText'
+  | 'duplicateExerciseId'
+  | 'exerciseRemoved'
 type AdminCommandFailure = {
   ok: false
   error: AdminCommandError
@@ -224,6 +226,14 @@ export async function saveLesson(
       ok: false,
       error: 'publishedExerciseRequired',
     }
+  // Learner Progress and ReviewItems reference Exercise IDs, so IDs stay
+  // unique and saved Exercises are never removed (DEC-034).
+  const ids = new Set(lesson.exercises.map((exercise) => exercise.id))
+  if (ids.size !== lesson.exercises.length)
+    return { ok: false, error: 'duplicateExerciseId' }
+  const saved = await repo.getLessonById(lesson.id)
+  if (saved?.exercises.some((exercise) => !ids.has(exercise.id)))
+    return { ok: false, error: 'exerciseRemoved' }
   const untypeable = untypeableExercises(lesson.exercises)
   if (untypeable) return untypeable
   if (!(await repo.getUnitById(lesson.unitId)))

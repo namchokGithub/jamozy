@@ -67,7 +67,7 @@ function lessonSaveRequest(fields: Record<string, string>): Request {
 }
 
 describe('admin content lifecycle', () => {
-  it('does not replace an empty lesson exercise list with the saved exercises', async () => {
+  it('blocks removing a saved Exercise, even from a Draft Lesson (DEC-034)', async () => {
     const existingExercise = {
       id: 'exercise',
       targetText: '가',
@@ -95,8 +95,53 @@ describe('admin content lifecycle', () => {
       params: {},
     } as never)
 
-    expect(result).toEqual({ message: 'feedback.changesSaved' })
+    expect(result).toEqual({ error: 'error.exerciseRemoved' })
+    expect((await repo.getLessonById('lesson'))?.exercises).toEqual([
+      existingExercise,
+    ])
+  })
+
+  it('blocks saving two Exercises with the same ID', async () => {
+    const exercise = {
+      id: 'exercise',
+      targetText: '가',
+      romanization: null,
+      meaningTh: '',
+      meaningEn: '',
+      difficulty: 'easy' as const,
+      hint: null,
+    }
+    const repo = new FakeAdminContentRepository([course], [unit], [lesson([])])
+
+    await expect(
+      saveLesson(repo, lesson([exercise, { ...exercise, targetText: '나' }])),
+    ).resolves.toEqual({ ok: false, error: 'duplicateExerciseId' })
     expect((await repo.getLessonById('lesson'))?.exercises).toEqual([])
+  })
+
+  it('saves added and reordered Exercises that keep every saved ID', async () => {
+    const first = {
+      id: 'first',
+      targetText: '가',
+      romanization: null,
+      meaningTh: '',
+      meaningEn: '',
+      difficulty: 'easy' as const,
+      hint: null,
+    }
+    const added = { ...first, id: 'added', targetText: '나' }
+    const repo = new FakeAdminContentRepository(
+      [course],
+      [unit],
+      [lesson([first])],
+    )
+
+    await expect(saveLesson(repo, lesson([added, first]))).resolves.toEqual({
+      ok: true,
+    })
+    expect(
+      (await repo.getLessonById('lesson'))?.exercises.map((item) => item.id),
+    ).toEqual(['added', 'first'])
   })
 
   it('rejects an empty lesson title instead of retaining the saved title', async () => {
