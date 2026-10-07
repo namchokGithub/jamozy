@@ -15,6 +15,7 @@ import { useAdminMutationPending } from './useAdminMutationPending'
 import { AdminTopBar } from './AdminTopBar'
 import { useAdminTranslation } from './i18n/admin-i18n'
 import { AdminSortableList } from './AdminSortableList'
+import { withPendingOrder } from './pending-order'
 
 export default function AdminDashboardPage() {
   const { courses } = useLoaderData() as { courses: Course[] }
@@ -28,16 +29,11 @@ export default function AdminDashboardPage() {
   const isCreating = useAdminMutationPending()
   const [statusFilter, setStatusFilter] = useState('all')
   const [search, setSearch] = useState('')
-  const [orderedCourseIds, setOrderedCourseIds] = useState(() =>
-    courses.map((course) => course.id),
+  const orderedCourses = withPendingOrder(
+    courses,
+    create.formData,
+    'save-course-order',
   )
-  const coursesById = new Map(courses.map((course) => [course.id, course]))
-  const orderedCourses = [
-    ...orderedCourseIds
-      .map((courseId) => coursesById.get(courseId))
-      .filter((course): course is Course => Boolean(course)),
-    ...courses.filter((course) => !orderedCourseIds.includes(course.id)),
-  ]
   const normalizedSearch = search.trim().toLocaleLowerCase()
   const statusCounts = orderedCourses.reduce(
     (counts, course) => {
@@ -73,7 +69,6 @@ export default function AdminDashboardPage() {
     const next = [...orderedCourses]
     const [dragged] = next.splice(currentIndex, 1)
     next.splice(targetIndex, 0, dragged)
-    setOrderedCourseIds(next.map((course) => course.id))
     create.submit(
       {
         intent: 'save-course-order',

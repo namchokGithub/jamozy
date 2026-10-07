@@ -20,6 +20,7 @@ import { AdminTopBar } from './AdminTopBar'
 import { useAdminTranslation } from './i18n/admin-i18n'
 import { useCreatedHighlight } from './useCreatedHighlight'
 import { AdminSortableList } from './AdminSortableList'
+import { withPendingOrder } from './pending-order'
 
 export default function UnitEditorPage() {
   const { unit, course, lessons } = useLoaderData() as {
@@ -33,19 +34,11 @@ export default function UnitEditorPage() {
   const createdHighlight = useCreatedHighlight()
   const [editingDetails, setEditingDetails] = useState(false)
   const [detailsDirty, setDetailsDirty] = useState(false)
-  // Keep only the dragged order locally; lesson data (status after Publish,
-  // Archive, Restore) always comes from the revalidated loader.
-  const [orderedLessonIds, setOrderedLessonIds] = useState(() =>
-    lessons.map((item) => item.id),
+  const orderedLessons = withPendingOrder(
+    lessons,
+    fetcher.formData,
+    'save-lesson-order',
   )
-  const lessonsById = new Map(lessons.map((item) => [item.id, item]))
-  const orderedLessons = [
-    ...orderedLessonIds.flatMap((id) => {
-      const item = lessonsById.get(id)
-      return item ? [item] : []
-    }),
-    ...lessons.filter((item) => !orderedLessonIds.includes(item.id)),
-  ]
   const [lessonSearch, setLessonSearch] = useState('')
   const [lessonStatusFilter, setLessonStatusFilter] = useState('all')
   const isPending = useAdminMutationPending()
@@ -80,7 +73,6 @@ export default function UnitEditorPage() {
     const next = [...orderedLessons]
     const [dragged] = next.splice(currentIndex, 1)
     next.splice(targetIndex, 0, dragged)
-    setOrderedLessonIds(next.map((item) => item.id))
     submit({
       intent: 'save-lesson-order',
       order: JSON.stringify(next.map((item) => item.id)),
