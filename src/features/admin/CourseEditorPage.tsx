@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { Link, useFetcher, useLoaderData, useNavigate } from 'react-router'
+import { useFetcher, useLoaderData, useNavigate } from 'react-router'
 import {
   courseType,
   type Course,
@@ -25,6 +25,7 @@ import { AdminTopBar } from './AdminTopBar'
 import { useAdminTranslation } from './i18n/admin-i18n'
 import { AdminSortableList } from './AdminSortableList'
 import { AdminCreateButton } from './AdminCreateButton'
+import { AdminRenameField } from './AdminRenameField'
 import { withPendingOrder } from './pending-order'
 
 const courseTypes: CourseType[] = ['learning', 'home']
@@ -34,6 +35,7 @@ export default function CourseEditorPage() {
   const fetcher = useFetcher()
   const navigate = useNavigate()
   const [editingDetails, setEditingDetails] = useState(false)
+  const [renamingId, setRenamingId] = useState<string | null>(null)
   const [detailsDirty, setDetailsDirty] = useState(false)
   const [type, setType] = useState(courseType(course))
   const orderedUnits = withPendingOrder(
@@ -229,16 +231,22 @@ export default function CourseEditorPage() {
           className="mt-4 space-y-3"
           items={visibleUnits}
           getId={(unit) => unit.id}
-          disabled={isPending}
+          disabled={isPending || renamingId !== null}
           onMove={moveUnit}
           renderItem={(unit, { handleRef, isDragging, ref }) => (
             <div
               ref={ref}
               role="link"
               tabIndex={0}
-              onClick={() => navigate(`/admin/units/${unit.id}`)}
+              onClick={() =>
+                renamingId !== unit.id && navigate(`/admin/units/${unit.id}`)
+              }
               onKeyDown={(event) => {
-                if (event.target !== event.currentTarget) return
+                if (
+                  event.target !== event.currentTarget ||
+                  renamingId === unit.id
+                )
+                  return
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault()
                   navigate(`/admin/units/${unit.id}`)
@@ -257,19 +265,29 @@ export default function CourseEditorPage() {
                 >
                   ⋮⋮
                 </button>
-                <h3 className="truncate font-bold">{unit.title}</h3>
+                {renamingId === unit.id ? (
+                  <AdminRenameField
+                    id={unit.id}
+                    kind="unit"
+                    title={unit.title}
+                    onDone={() => setRenamingId(null)}
+                  />
+                ) : (
+                  <h3 className="truncate font-bold">{unit.title}</h3>
+                )}
                 <AdminStatusBadge status={unit.status} />
               </div>
               <div
                 className="flex items-center gap-1"
                 onClick={(event) => event.stopPropagation()}
               >
-                <Link
-                  className="rounded-full border border-[#eadfd4] bg-white/90 px-3 py-2 text-sm font-semibold text-[#8d4c43] hover:border-[#d8b3a9] hover:bg-white"
-                  to={`/admin/units/${unit.id}`}
+                <Button
+                  variant="secondary"
+                  disabled={isPending}
+                  onClick={() => setRenamingId(unit.id)}
                 >
                   {t('action.edit')}
-                </Link>
+                </Button>
                 <AdminStatusActions
                   id={unit.id}
                   kind="unit"

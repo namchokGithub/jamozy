@@ -135,6 +135,13 @@ async function courseAction(
 ): Promise<AdminActionData> {
   const course = await getAdminCourse(repo, id)
   if (!course) return { error: 'error.courseNotFound' }
+  if (intent === 'rename') {
+    const result = await saveCourse(repo, {
+      ...course,
+      title: text(form, 'title'),
+    })
+    return commandResult(result, 'feedback.changesSaved')
+  }
   if (intent === 'save') {
     const result = await saveCourse(repo, {
       ...course,
@@ -171,6 +178,10 @@ async function unitAction(
 ): Promise<AdminActionData> {
   const unit = await getAdminUnit(repo, id)
   if (!unit) return { error: 'error.unitNotFound' }
+  if (intent === 'rename') {
+    const result = await saveUnit(repo, { ...unit, title: text(form, 'title') })
+    return commandResult(result, 'feedback.changesSaved')
+  }
   if (intent === 'save') {
     const result = await saveUnit(repo, {
       ...unit,
@@ -223,6 +234,13 @@ async function lessonAction(
 ): Promise<AdminActionData> {
   const lesson = await getAdminLesson(repo, id)
   if (!lesson) return { error: 'error.lessonNotFound' }
+  if (intent === 'rename') {
+    const result = await saveLesson(repo, {
+      ...lesson,
+      title: text(form, 'title'),
+    })
+    return commandResult(result, 'feedback.changesSaved')
+  }
   if (intent === 'save') {
     const exercises = exercisesFromForm(form)
     if (!exercises) return { error: 'error.checkForm' }

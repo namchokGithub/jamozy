@@ -311,6 +311,45 @@ describe('createAdminAction', () => {
     })
   })
 
+  describe('rename intent', () => {
+    it.each([
+      ['course', 'course'],
+      ['unit', 'unit'],
+      ['lesson', 'lesson'],
+    ])('renames a %s and keeps its other fields', async (kind, id) => {
+      const repo = seededRepo()
+
+      await expect(
+        run(repo, { intent: 'rename', kind, id, title: '  Renamed  ' }),
+      ).resolves.toEqual({ message: 'feedback.changesSaved' })
+
+      if (kind === 'course')
+        expect(await repo.getCourseById(id)).toMatchObject({
+          title: 'Renamed',
+          description: course.description,
+        })
+      if (kind === 'unit')
+        expect(await repo.getUnitById(id)).toMatchObject({
+          title: 'Renamed',
+          description: unit.description,
+        })
+      if (kind === 'lesson')
+        expect(await repo.getLessonById(id)).toMatchObject({
+          title: 'Renamed',
+          type: lesson.type,
+          exercises: lesson.exercises,
+        })
+    })
+
+    it('rejects a blank title and keeps the saved one', async () => {
+      const repo = seededRepo()
+      await expect(
+        run(repo, { intent: 'rename', kind: 'unit', id: 'unit', title: ' ' }),
+      ).resolves.toEqual({ error: 'error.fieldRequired' })
+      expect((await repo.getUnitById('unit'))?.title).toBe('Unit')
+    })
+  })
+
   it('reports an unexpected repository failure with its message', async () => {
     const repo = seededRepo()
     repo.saveUnit = async () => {
