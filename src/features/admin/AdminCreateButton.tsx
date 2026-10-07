@@ -1,4 +1,4 @@
-import { useCallback, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { useFetcher } from 'react-router'
 import type { Lesson } from '../../domain/models/lesson'
 import { Button } from '../../components/ui/Button'
@@ -43,6 +43,11 @@ export function AdminCreateButton({ kind }: { kind: CreateKind }) {
   const [description, setDescription] = useState('')
   const [type, setType] = useState<Lesson['type']>('word')
   const { intent, action, ...placeholder } = copy[kind]
+  const titleInput = useRef<HTMLInputElement>(null)
+  // Runs after Modal's own open effect, which focuses the dialog first.
+  useEffect(() => {
+    if (open) titleInput.current?.focus()
+  }, [open])
   const close = useCallback(() => {
     setOpen(false)
     setTitle('')
@@ -85,8 +90,8 @@ export function AdminCreateButton({ kind }: { kind: CreateKind }) {
               </span>
             </span>
             <input
+              ref={titleInput}
               value={title}
-              autoFocus
               aria-required="true"
               placeholder={t(placeholder.title)}
               disabled={isPending}
