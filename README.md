@@ -320,6 +320,34 @@ pnpm build
 pnpm test
 ```
 
+`pnpm build` first runs `pnpm content:export-home`, so it reads Firestore and
+needs the `VITE_FIREBASE_*` variables below (in `.env.local`, or in the CI
+build environment).
+
+### Home course content
+
+Home plays one course of type `home` from a static file instead of Firestore
+([[DEC-043]]). To change what Home shows:
+
+1. In Admin BO, set the course's **Course type** to **Home**, add its units,
+   lessons, and exercises, then publish the course, units, and lessons. Only
+   one Home course can be published.
+2. Export it to `public/content/home.json`:
+
+   ```bash
+   pnpm content:export-home
+   ```
+
+   `pnpm build` runs this automatically, so a deploy always ships the latest
+   published Home content. Run it by hand to see changes in `pnpm dev`.
+3. Redeploy. Learners see the new content after the next deploy.
+
+The export only reads published content and needs no service credential. With
+no published Home course it prints a warning, removes any old
+`home.json`, and Home falls back to the Learning Path player. It fails if more
+than one Home course is published or if an exercise has text the Korean
+keyboard cannot type. `public/content/home.json` is generated and git-ignored.
+
 ## Environment Variables
 
 ```md
