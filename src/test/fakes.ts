@@ -16,7 +16,10 @@ import type {
   SessionSubmissionOutcome,
   SessionSubmissionRepository,
 } from '../domain/repositories/session-submission-repository'
-import type { AdminContentRepository } from '../domain/repositories/admin-content-repository'
+import type {
+  AdminContentChanges,
+  AdminContentRepository,
+} from '../domain/repositories/admin-content-repository'
 import type { OnePageLearningCheckpoint } from '../domain/models/one-page-learning-checkpoint'
 import type { OnePageLearningCheckpointRepository } from '../domain/repositories/one-page-learning-checkpoint-repository'
 import type { HomeSyncJob } from '../domain/models/home-sync-job'
@@ -135,6 +138,13 @@ export class FakeAdminContentRepository implements AdminContentRepository {
   }
   async saveLesson(lesson: Lesson) {
     this.replace(this.lessons, lesson)
+  }
+  async saveContent(changes: AdminContentChanges) {
+    for (const course of changes.courses ?? [])
+      this.replace(this.courses, course)
+    for (const unit of changes.units ?? []) this.replace(this.units, unit)
+    for (const lesson of changes.lessons ?? [])
+      this.replace(this.lessons, lesson)
   }
   async saveCourseOrder(courseIds: string[]) {
     this.saveOrder(await this.getCourses(), courseIds)

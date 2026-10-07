@@ -313,7 +313,7 @@ async function unpublishableCourse(
 }
 
 // Publishes a Unit and, first, its parent Course when that is not Published.
-// Every check runs before the first write, so a rejection changes nothing.
+// Every check runs first, then one atomic batch writes all documents.
 export async function publishUnitWithParents(
   repo: AdminContentRepository,
   unit: Unit,
@@ -322,13 +322,15 @@ export async function publishUnitWithParents(
   if (!course) return { ok: false, error: 'parentCourseNotFound' }
   const blocked = await unpublishableCourse(repo, course)
   if (blocked) return blocked
-  if (course.status !== 'published') await repo.saveCourse(asPublished(course))
-  await repo.saveUnit(asPublished(unit))
+  await repo.saveContent({
+    courses: course.status === 'published' ? [] : [asPublished(course)],
+    units: [asPublished(unit)],
+  })
   return { ok: true }
 }
 
 // Publishes a Lesson and, top-down, its non-Published Unit and Course.
-// Every check runs before the first write, so a rejection changes nothing.
+// Every check runs first, then one atomic batch writes all documents.
 export async function publishLessonWithParents(
   repo: AdminContentRepository,
   input: Lesson,
@@ -342,9 +344,11 @@ export async function publishLessonWithParents(
   if (!course) return { ok: false, error: 'parentCourseNotFound' }
   const blocked = await unpublishableCourse(repo, course)
   if (blocked) return blocked
-  if (course.status !== 'published') await repo.saveCourse(asPublished(course))
-  if (unit.status !== 'published') await repo.saveUnit(asPublished(unit))
-  await repo.saveLesson(asPublished(lesson))
+  await repo.saveContent({
+    courses: course.status === 'published' ? [] : [asPublished(course)],
+    units: unit.status === 'published' ? [] : [asPublished(unit)],
+    lessons: [asPublished(lesson)],
+  })
   return { ok: true }
 }
 

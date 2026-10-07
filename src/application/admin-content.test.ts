@@ -480,6 +480,27 @@ describe('admin content lifecycle', () => {
       expect((await repo.getLessonById('lesson'))?.status).toBe('published')
     })
 
+    it('writes the Course, Unit, and Lesson in one atomic batch', async () => {
+      const repo = new FakeAdminContentRepository(
+        [draftCourse],
+        [draftUnit],
+        [lesson([exercise])],
+      )
+      const singleWrite = async () => {
+        throw new Error('Publish must not write documents one by one.')
+      }
+      repo.saveCourse = singleWrite
+      repo.saveUnit = singleWrite
+      repo.saveLesson = singleWrite
+
+      await expect(
+        publishLessonWithParents(repo, lesson([exercise])),
+      ).resolves.toEqual({ ok: true })
+      expect((await repo.getCourseById('course'))?.status).toBe('published')
+      expect((await repo.getUnitById('unit'))?.status).toBe('published')
+      expect((await repo.getLessonById('lesson'))?.status).toBe('published')
+    })
+
     it('publishes an archived parent Course and clears its archive record', async () => {
       const repo = new FakeAdminContentRepository([archivedCourse], [draftUnit])
 

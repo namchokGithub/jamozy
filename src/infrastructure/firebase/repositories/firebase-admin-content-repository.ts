@@ -8,10 +8,14 @@ import {
   runTransaction,
   setDoc,
   where,
+  writeBatch,
   type DocumentData,
 } from 'firebase/firestore'
 import { db } from '../firebase'
-import type { AdminContentRepository } from '../../../domain/repositories/admin-content-repository'
+import type {
+  AdminContentChanges,
+  AdminContentRepository,
+} from '../../../domain/repositories/admin-content-repository'
 import type { Course, CourseType } from '../../../domain/models/course'
 import type { Lesson } from '../../../domain/models/lesson'
 import type { Unit } from '../../../domain/models/unit'
@@ -216,6 +220,24 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
       doc(db, 'lessons', lesson.id),
       serialize({ ...lesson, updatedAt: new Date() }),
     )
+  }
+
+  async saveContent(changes: AdminContentChanges): Promise<void> {
+    const batch = writeBatch(db)
+    const updatedAt = new Date()
+    for (const course of changes.courses ?? [])
+      batch.set(
+        doc(db, 'courses', course.id),
+        serialize({ ...course, updatedAt }),
+      )
+    for (const unit of changes.units ?? [])
+      batch.set(doc(db, 'units', unit.id), serialize({ ...unit, updatedAt }))
+    for (const lesson of changes.lessons ?? [])
+      batch.set(
+        doc(db, 'lessons', lesson.id),
+        serialize({ ...lesson, updatedAt }),
+      )
+    await batch.commit()
   }
 
   async saveCourseOrder(courseIds: string[]): Promise<void> {
