@@ -272,7 +272,7 @@ export default function LessonEditorPage() {
       ) : (
         <Card className="mt-6 max-w-210 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold">{title}</h2>
+            {/* <h2 className="text-xl font-bold">{title}</h2> */}
             <p className="mt-2 text-sm text-[#667085]">
               {t('lesson.typeValue', { type: t(`lessonType.${type}`) })}
             </p>

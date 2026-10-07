@@ -204,7 +204,7 @@ export default function UnitEditorPage() {
         ) : (
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h2 className="text-xl font-bold">{unit.title}</h2>
+              {/* <h2 className="text-xl font-bold">{unit.title}</h2> */}
               <p className="mt-2 max-w-xl text-sm leading-6 text-[#667085]">
                 {unit.description}
               </p>

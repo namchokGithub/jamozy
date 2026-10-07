@@ -208,7 +208,7 @@ export default function CourseEditorPage() {
         ) : (
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h2 className="text-xl font-bold">{course.title}</h2>
+              {/* <h2 className="text-xl font-bold">{course.title}</h2> */}
               <p className="mt-2 max-w-xl text-sm leading-6 text-[#667085]">
                 {course.description}
               </p>
