@@ -30,12 +30,15 @@ export function AdminStatusActions({
   kind,
   status,
   parents = [],
+  hasUnsavedChanges = false,
 }: {
   id: string
   kind: 'course' | 'unit' | 'lesson'
   status: ContentStatus | undefined
   /** Ancestors top-down; null when the loader could not find one. */
   parents?: (AdminStatusParent | null)[]
+  /** Status actions act on the saved item, so edits must be saved first. */
+  hasUnsavedChanges?: boolean
 }) {
   const fetcher = useFetcher<AdminActionData>()
   const { t } = useAdminTranslation()
@@ -54,13 +57,18 @@ export function AdminStatusActions({
     pendingIntent === 'publish' && unpublishedParents.length > 0
   return (
     <>
+      {hasUnsavedChanges && (
+        <span className="text-xs font-semibold text-[#92703e]">
+          {t('feedback.saveBeforeStatusChange')}
+        </span>
+      )}
       {actions.map((action) => (
         <Button
           key={action}
           type="button"
           variant={action === 'archive' ? 'secondary' : 'primary'}
           className={action === 'archive' ? 'px-3 py-1.5 text-xs' : ''}
-          disabled={isPending}
+          disabled={isPending || hasUnsavedChanges}
           onClick={() => setPendingIntent(action)}
         >
           {t(`action.${action}`)}

@@ -133,6 +133,7 @@ export default function UnitEditorPage() {
             id={unit.id}
             kind="unit"
             status={unit.status}
+            hasUnsavedChanges={detailsDirty}
             parents={[
               course && {
                 kind: 'course',

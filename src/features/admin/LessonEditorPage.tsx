@@ -198,6 +198,7 @@ export default function LessonEditorPage() {
             id={lesson.id}
             kind="lesson"
             status={lesson.status}
+            hasUnsavedChanges={hasUnsavedChanges}
             parents={[
               course && {
                 kind: 'course',

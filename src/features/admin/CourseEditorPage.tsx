@@ -127,6 +127,7 @@ export default function CourseEditorPage() {
             id={course.id}
             kind="course"
             status={course.status}
+            hasUnsavedChanges={detailsDirty}
           />
         </div>
       </header>
