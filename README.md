@@ -395,6 +395,8 @@ verification checklist and post-MVP roadmap.
 ### Next / Post-MVP
 
 - Complete the Home player's manual verification.
+- Deploy the updated Firestore Rules (content delete denied) and manually verify
+  the Admin BO hardening pass.
 - Set up a Cloudflare Pages deployment pipeline and use Preview deployments
   for release checks.
 - Decide whether sound feedback ships or is deferred, then implement the
@@ -428,6 +430,11 @@ Deploy the restrictive Rules only after the migration count is verified. The
 owner must sign out and back in after the claim is granted. The scripts use
 `GOOGLE_APPLICATION_CREDENTIALS` from `.env.local`; do not place a service
 credential in `VITE_*` variables or commit it.
+
+Content is retired by archiving, never hard-deleted: the Rules deny delete on
+`courses`, `units`, and `lessons` ([[DEC-034]]). Deploy Rules changes with
+`firebase deploy --only firestore:rules`. Home course edits reach learners only
+after the next build and deploy ([[DEC-043]]).
 
 Run the Rules authorization suite with `pnpm test:rules`. It starts a local
 Firestore Emulator, never contacts the Firebase project, and requires the
