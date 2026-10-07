@@ -89,6 +89,7 @@ export function createAdminAction(repo: AdminContentRepository) {
       if (intent === 'create-lesson' && params.unitId) {
         const created = await createDraftLesson(repo, params.unitId, {
           title: text(form, 'title'),
+          type: text(form, 'type'),
         })
         return { message: 'feedback.lessonCreated', createdId: created.id }
       }

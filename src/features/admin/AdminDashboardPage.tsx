@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link, useFetcher, useLoaderData, useNavigate } from 'react-router'
 import type { Course } from '../../domain/models/course'
-import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { PageSurface } from '../../components/ui/PageSurface'
 import { AdminContentListToolbar } from './AdminContentListToolbar'
@@ -15,6 +14,7 @@ import { useAdminMutationPending } from './useAdminMutationPending'
 import { AdminTopBar } from './AdminTopBar'
 import { useAdminTranslation } from './i18n/admin-i18n'
 import { AdminSortableList } from './AdminSortableList'
+import { AdminCreateButton } from './AdminCreateButton'
 import { withPendingOrder } from './pending-order'
 
 export default function AdminDashboardPage() {
@@ -22,10 +22,7 @@ export default function AdminDashboardPage() {
   const { locale, t } = useAdminTranslation()
   const create = useFetcher()
   const navigate = useNavigate()
-  useAdminFeedback(create, (data) => {
-    if (data.createdId)
-      navigate(`/admin/courses/${data.createdId}`, { state: { created: true } })
-  })
+  useAdminFeedback(create)
   const isCreating = useAdminMutationPending()
   const [statusFilter, setStatusFilter] = useState('all')
   const [search, setSearch] = useState('')
@@ -90,22 +87,7 @@ export default function AdminDashboardPage() {
             {t('dashboard.subtitle')}
           </p>
         </div>
-        <Button
-          disabled={isCreating}
-          onClick={() =>
-            !isCreating &&
-            create.submit(
-              {
-                intent: 'create-course',
-                title: t('draft.courseTitle'),
-                description: t('draft.courseDescription'),
-              },
-              { method: 'post' },
-            )
-          }
-        >
-          {isCreating ? t('action.saving') : t('action.createCourse')}
-        </Button>
+        <AdminCreateButton kind="course" />
       </header>
       <AdminContentListToolbar
         totalLabel={t('dashboard.totalCourses')}

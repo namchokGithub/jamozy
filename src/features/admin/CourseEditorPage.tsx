@@ -23,8 +23,8 @@ import { AdminUnsavedChangesDialog } from './AdminUnsavedChangesDialog'
 import { useAdminUnsavedChanges } from './useAdminUnsavedChanges'
 import { AdminTopBar } from './AdminTopBar'
 import { useAdminTranslation } from './i18n/admin-i18n'
-import { useCreatedHighlight } from './useCreatedHighlight'
 import { AdminSortableList } from './AdminSortableList'
+import { AdminCreateButton } from './AdminCreateButton'
 import { withPendingOrder } from './pending-order'
 
 const courseTypes: CourseType[] = ['learning', 'home']
@@ -33,7 +33,6 @@ export default function CourseEditorPage() {
   const { t } = useAdminTranslation()
   const fetcher = useFetcher()
   const navigate = useNavigate()
-  const createdHighlight = useCreatedHighlight()
   const [editingDetails, setEditingDetails] = useState(false)
   const [detailsDirty, setDetailsDirty] = useState(false)
   const [type, setType] = useState(courseType(course))
@@ -49,17 +48,12 @@ export default function CourseEditorPage() {
     detailsDirty,
     t('feedback.unsavedChangesWarning'),
   )
-  const handleSuccess = useCallback(
-    (data: { message?: string; createdId?: string }) => {
-      if (data.message === 'feedback.changesSaved') {
-        setEditingDetails(false)
-        setDetailsDirty(false)
-      }
-      if (data.createdId)
-        navigate(`/admin/units/${data.createdId}`, { state: { created: true } })
-    },
-    [navigate],
-  )
+  const handleSuccess = useCallback((data: { message?: string }) => {
+    if (data.message === 'feedback.changesSaved') {
+      setEditingDetails(false)
+      setDetailsDirty(false)
+    }
+  }, [])
   useAdminFeedback(fetcher, handleSuccess)
   const submit = (data: Record<string, string>) => {
     if (!isPending) fetcher.submit(data, { method: 'post' })
@@ -104,15 +98,7 @@ export default function CourseEditorPage() {
       />
       <header className="mt-4 flex flex-wrap justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <h1
-            className={
-              createdHighlight
-                ? 'rounded-xl bg-[#f5faed] px-3 py-2 text-3xl font-bold'
-                : 'truncate text-3xl font-bold'
-            }
-          >
-            {course.title}
-          </h1>
+          <h1 className="truncate text-3xl font-bold">{course.title}</h1>
           <AdminStatusBadge status={course.status} />
         </div>
         <div className="flex items-center gap-2">
@@ -227,18 +213,7 @@ export default function CourseEditorPage() {
             <p className="text-sm text-[#667085]">{t('course.unitsHint')}</p>
           </div>
           <div className="flex gap-2">
-            <Button
-              disabled={isPending}
-              onClick={() =>
-                submit({
-                  intent: 'create-unit',
-                  title: t('draft.unitTitle'),
-                  description: t('draft.unitDescription'),
-                })
-              }
-            >
-              {isPending ? t('action.saving') : t('action.createUnit')}
-            </Button>
+            <AdminCreateButton kind="unit" />
           </div>
         </div>
         <AdminContentListToolbar

@@ -16,6 +16,13 @@ import {
 } from '../domain/korean/target-sequence'
 
 const text = z.string().trim().min(1, 'fieldRequired')
+const lessonType = z.enum([
+  'character',
+  'syllable',
+  'word',
+  'phrase',
+  'sentence',
+])
 const exerciseSchema = z.object({
   id: text,
   targetText: text,
@@ -125,12 +132,13 @@ export function createDraftUnit(
 export function createDraftLesson(
   repo: AdminContentRepository,
   unitId: string,
-  text: Pick<DraftText, 'title'> = {},
+  text: Pick<DraftText, 'title'> & { type?: string } = {},
 ) {
+  const type = lessonType.safeParse(text.type)
   return repo.createLesson({
     unitId,
     title: orDefault(text.title, 'Untitled Lesson'),
-    type: 'word',
+    type: type.success ? type.data : 'word',
   })
 }
 
@@ -212,7 +220,7 @@ export async function saveLesson(
     .object({
       title: text,
       unitId: text,
-      type: z.enum(['character', 'syllable', 'word', 'phrase', 'sentence']),
+      type: lessonType,
       exercises: z.array(exerciseSchema),
     })
     .safeParse(withTypeableTargetText(input))

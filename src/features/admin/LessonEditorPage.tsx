@@ -17,16 +17,9 @@ import { AdminUnsavedChangesDialog } from './AdminUnsavedChangesDialog'
 import { useAdminUnsavedChanges } from './useAdminUnsavedChanges'
 import { AdminTopBar } from './AdminTopBar'
 import { useAdminTranslation } from './i18n/admin-i18n'
-import { useCreatedHighlight } from './useCreatedHighlight'
 import { AdminSortableList } from './AdminSortableList'
+import { lessonTypes } from './lesson-types'
 
-const lessonTypes: Lesson['type'][] = [
-  'character',
-  'syllable',
-  'word',
-  'phrase',
-  'sentence',
-]
 const difficulties: LessonExercise['difficulty'][] = ['easy', 'medium', 'hard']
 
 export default function LessonEditorPage() {
@@ -37,7 +30,6 @@ export default function LessonEditorPage() {
   }
   const { t } = useAdminTranslation()
   const fetcher = useFetcher()
-  const createdHighlight = useCreatedHighlight()
   const [title, setTitle] = useState(lesson.title)
   const [type, setType] = useState(lesson.type)
   const [exercises, setExercises] = useState(lesson.exercises)
@@ -183,15 +175,7 @@ export default function LessonEditorPage() {
       />
       <header className="mt-4 flex flex-wrap justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <h1
-            className={
-              createdHighlight
-                ? 'rounded-xl bg-[#f5faed] px-3 py-2 text-3xl font-bold'
-                : 'truncate text-3xl font-bold'
-            }
-          >
-            {title}
-          </h1>
+          <h1 className="truncate text-3xl font-bold">{title}</h1>
           <AdminStatusBadge status={lesson.status} />
         </div>
         <div className="flex items-center gap-2">

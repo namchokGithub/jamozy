@@ -105,6 +105,31 @@ describe('createAdminAction', () => {
       expect((await repo.getLessonById(result.createdId!))?.unitId).toBe('unit')
     })
 
+    it('creates a Lesson with the chosen type', async () => {
+      const repo = seededRepo()
+      const result = await run(
+        repo,
+        { intent: 'create-lesson', title: 'Greetings', type: 'sentence' },
+        { unitId: 'unit' },
+      )
+
+      expect(await repo.getLessonById(result.createdId!)).toMatchObject({
+        title: 'Greetings',
+        type: 'sentence',
+      })
+    })
+
+    it('creates a word Lesson when the type is unknown', async () => {
+      const repo = seededRepo()
+      const result = await run(
+        repo,
+        { intent: 'create-lesson', title: 'Greetings', type: 'essay' },
+        { unitId: 'unit' },
+      )
+
+      expect((await repo.getLessonById(result.createdId!))?.type).toBe('word')
+    })
+
     it('does not create a child without its parent route param', async () => {
       const repo = seededRepo()
       await expect(run(repo, { intent: 'create-unit' })).resolves.toEqual({

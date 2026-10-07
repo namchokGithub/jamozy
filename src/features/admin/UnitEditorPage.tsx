@@ -19,8 +19,8 @@ import { AdminUnsavedChangesDialog } from './AdminUnsavedChangesDialog'
 import { useAdminUnsavedChanges } from './useAdminUnsavedChanges'
 import { AdminTopBar } from './AdminTopBar'
 import { useAdminTranslation } from './i18n/admin-i18n'
-import { useCreatedHighlight } from './useCreatedHighlight'
 import { AdminSortableList } from './AdminSortableList'
+import { AdminCreateButton } from './AdminCreateButton'
 import { withPendingOrder } from './pending-order'
 
 export default function UnitEditorPage() {
@@ -32,7 +32,6 @@ export default function UnitEditorPage() {
   const { t } = useAdminTranslation()
   const fetcher = useFetcher()
   const navigate = useNavigate()
-  const createdHighlight = useCreatedHighlight()
   const [editingDetails, setEditingDetails] = useState(false)
   const [detailsDirty, setDetailsDirty] = useState(false)
   const orderedLessons = withPendingOrder(
@@ -47,19 +46,12 @@ export default function UnitEditorPage() {
     detailsDirty,
     t('feedback.unsavedChangesWarning'),
   )
-  const handleSuccess = useCallback(
-    (data: { message?: string; createdId?: string }) => {
-      if (data.message === 'feedback.changesSaved') {
-        setEditingDetails(false)
-        setDetailsDirty(false)
-      }
-      if (data.createdId)
-        navigate(`/admin/lessons/${data.createdId}`, {
-          state: { created: true },
-        })
-    },
-    [navigate],
-  )
+  const handleSuccess = useCallback((data: { message?: string }) => {
+    if (data.message === 'feedback.changesSaved') {
+      setEditingDetails(false)
+      setDetailsDirty(false)
+    }
+  }, [])
   useAdminFeedback(fetcher, handleSuccess)
   const submit = (data: Record<string, string>) => {
     if (!isPending) fetcher.submit(data, { method: 'post' })
@@ -110,15 +102,7 @@ export default function UnitEditorPage() {
       />
       <header className="mt-4 flex flex-wrap justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <h1
-            className={
-              createdHighlight
-                ? 'rounded-xl bg-[#f5faed] px-3 py-2 text-3xl font-bold'
-                : 'truncate text-3xl font-bold'
-            }
-          >
-            {unit.title}
-          </h1>
+          <h1 className="truncate text-3xl font-bold">{unit.title}</h1>
           <AdminStatusBadge status={unit.status} />
         </div>
         <div className="flex items-center gap-2">
@@ -220,17 +204,7 @@ export default function UnitEditorPage() {
             <p className="text-sm text-[#667085]">{t('unit.lessonsHint')}</p>
           </div>
           <div className="flex gap-2">
-            <Button
-              disabled={isPending}
-              onClick={() =>
-                submit({
-                  intent: 'create-lesson',
-                  title: t('draft.lessonTitle'),
-                })
-              }
-            >
-              {isPending ? t('action.saving') : t('action.createLesson')}
-            </Button>
+            <AdminCreateButton kind="lesson" />
           </div>
         </div>
         <AdminContentListToolbar
