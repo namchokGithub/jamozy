@@ -16,7 +16,9 @@ service cloud.firestore {
 
     match /courses/{courseId} {
       allow read: if isAdmin() || resource.data.status == 'published';
-      allow create, update, delete: if isAdmin();
+      allow create, update: if isAdmin();
+      // Content is retired by archiving, never hard-deleted (DEC-034).
+      allow delete: if false;
     }
 
     match /units/{unitId} {
@@ -24,7 +26,9 @@ service cloud.firestore {
         resource.data.status == 'published' &&
         isPublishedCourse(resource.data.courseId)
       );
-      allow create, update, delete: if isAdmin();
+      allow create, update: if isAdmin();
+      // Content is retired by archiving, never hard-deleted (DEC-034).
+      allow delete: if false;
     }
 
     match /lessons/{lessonId} {
@@ -33,7 +37,9 @@ service cloud.firestore {
         isPublishedUnit(resource.data.unitId) &&
         isPublishedCourse(get(/databases/$(database)/documents/units/$(resource.data.unitId)).data.courseId)
       );
-      allow create, update, delete: if isAdmin();
+      allow create, update: if isAdmin();
+      // Content is retired by archiving, never hard-deleted (DEC-034).
+      allow delete: if false;
     }
 
     // Per-user data. Only the owning user may read or write their own doc

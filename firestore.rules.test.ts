@@ -6,7 +6,7 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing'
-import { doc, getDoc, setDoc, writeBatch } from 'firebase/firestore'
+import { deleteDoc, doc, getDoc, setDoc, writeBatch } from 'firebase/firestore'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, it } from 'vitest'
 
 const projectId = 'jamozy-rules-test'
@@ -188,5 +188,15 @@ describeWithFirestoreEmulator('Firestore content Rules', () => {
     await assertSucceeds(
       setDoc(doc(db, 'courses', 'draft-course'), { status: 'archived' }, { merge: true }),
     )
+  })
+
+  it('denies hard-deleting content, even for an admin (DEC-034)', async () => {
+    const db = testEnvironment
+      .authenticatedContext('admin-1', { admin: true })
+      .firestore()
+
+    await assertFails(deleteDoc(doc(db, 'courses', 'draft-course')))
+    await assertFails(deleteDoc(doc(db, 'units', 'draft-unit')))
+    await assertFails(deleteDoc(doc(db, 'lessons', 'draft-lesson')))
   })
 })
