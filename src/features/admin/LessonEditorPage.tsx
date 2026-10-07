@@ -10,6 +10,7 @@ import { Dropdown } from '../../components/ui/Dropdown'
 import { PageSurface } from '../../components/ui/PageSurface'
 import { AdminStatusActions } from './AdminStatusActions'
 import { AdminStatusBadge } from './AdminStatusBadge'
+import { AdminHomeDeployNotice } from './AdminHomeDeployNotice'
 import { useAdminFeedback } from './useAdminFeedback'
 import { useAdminMutationPending } from './useAdminMutationPending'
 import { AdminUnsavedChangesDialog } from './AdminUnsavedChangesDialog'
@@ -210,6 +211,7 @@ export default function LessonEditorPage() {
           />
         </div>
       </header>
+      <AdminHomeDeployNotice course={course} />
       {hasUnsavedChanges && (
         <div className="mt-4 rounded-xl bg-[#fff1d8] px-4 py-3 text-sm font-semibold text-[#92703e]">
           {t('feedback.unsavedChanges')}

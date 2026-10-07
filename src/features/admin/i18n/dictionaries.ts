@@ -152,6 +152,8 @@ export const en = {
   'feedback.unsavedChangesWarning': 'You have unsaved changes. Leave anyway?',
   'feedback.saveBeforeStatusChange':
     'Save your changes before changing status.',
+  'notice.homeDeploy':
+    'This is the Home course. Learners see changes here only after the next build and deploy.',
 
   'error.missingTarget': 'Missing content target.',
   'error.unknownTarget': 'Unknown content target.',
@@ -335,6 +337,8 @@ export const th: Record<AdminMessageKey, string> = {
   'feedback.contentUpdated': 'อัปเดตเนื้อหาแล้ว',
   'feedback.unsavedChanges': 'มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก',
   'feedback.saveBeforeStatusChange': 'บันทึกการเปลี่ยนแปลงก่อนเปลี่ยนสถานะ',
+  'notice.homeDeploy':
+    'นี่คือคอร์สหน้า Home ผู้เรียนจะเห็นการเปลี่ยนแปลงหลังจาก build และ deploy ครั้งถัดไปเท่านั้น',
   'feedback.unsavedChangesWarning':
     'มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก ต้องการออกจากหน้านี้หรือไม่?',
 

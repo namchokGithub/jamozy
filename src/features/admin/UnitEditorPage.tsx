@@ -11,6 +11,7 @@ import {
   AdminStatusActionsPreview,
 } from './AdminStatusActions'
 import { AdminStatusBadge } from './AdminStatusBadge'
+import { AdminHomeDeployNotice } from './AdminHomeDeployNotice'
 import { AdminContentListToolbar } from './AdminContentListToolbar'
 import { useAdminFeedback } from './useAdminFeedback'
 import { useAdminMutationPending } from './useAdminMutationPending'
@@ -136,6 +137,7 @@ export default function UnitEditorPage() {
           />
         </div>
       </header>
+      <AdminHomeDeployNotice course={course} />
       {detailsDirty && (
         <div className="mt-4 rounded-xl bg-[#fff1d8] px-4 py-3 text-sm font-semibold text-[#92703e]">
           {t('feedback.unsavedChanges')}
