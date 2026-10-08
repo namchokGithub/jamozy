@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useFetcher } from 'react-router'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
 import {
@@ -9,6 +9,7 @@ import { isKoreanJamoKey } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
 import FingerPlacementGuide from '../home/FingerPlacementGuide'
+import { useKeyboardFeedback } from '../typing/keyboard-feedback'
 import type { ReviewItem } from '../../domain/models/review-item'
 import type { SubmitReviewSessionOutcome } from '../../application/submit-review-session'
 import type { UserSettings } from '../../domain/models/user-profile'
@@ -38,6 +39,7 @@ export default function ReviewTypingSession({
   const { session, start, pressKey, generation, submissionId } =
     useLessonSessionStore()
   const fetcher = useFetcher<SubmitReviewSessionOutcome>()
+  const { feedback, recordAttempt } = useKeyboardFeedback()
   const hasStarted = useRef(false)
   const hasSubmitted = useRef(false)
   // See LessonTypingSession.tsx / DEC-018 for why this needs to be a
@@ -55,6 +57,19 @@ export default function ReviewTypingSession({
     )
   }, [items, start])
 
+  const handleKeyPress = useCallback(
+    (code: string, shiftKey: boolean) => {
+      const currentSession = useLessonSessionStore.getState().session?.currentSession
+      recordAttempt(
+        currentSession?.expectedKeys[currentSession.keyIndex],
+        code,
+        shiftKey,
+      )
+      pressKey(code, shiftKey)
+    },
+    [pressKey, recordAttempt],
+  )
+
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.metaKey || event.ctrlKey || event.altKey) return
@@ -63,12 +78,12 @@ export default function ReviewTypingSession({
         return
       }
       event.preventDefault()
-      pressKey(event.code, event.shiftKey)
+      handleKeyPress(event.code, event.shiftKey)
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [pressKey])
+  }, [handleKeyPress])
 
   useEffect(() => {
     if (generation !== myGenerationRef.current) {
@@ -133,9 +148,10 @@ export default function ReviewTypingSession({
         <>
           <VirtualKeyboard
             nextKey={nextKey}
+            feedback={feedback}
             showEnglishKeys={keyboardSettings.showEnglishKeys}
             opacity={keyboardSettings.keyboardOpacity}
-            onKeyPress={pressKey}
+            onKeyPress={handleKeyPress}
           />
           <FingerPlacementGuide nextKey={nextKey} />
         </>

@@ -10,6 +10,7 @@ import type { CourseListLoaderData } from '../course/CourseListPage.loader'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
 import FingerPlacementGuide from './FingerPlacementGuide'
+import { useKeyboardFeedback } from '../typing/keyboard-feedback'
 import { useOnePagePlayerStore } from './one-page-player-store'
 
 interface OnePageLearningPlayerProps {
@@ -58,6 +59,7 @@ export default function OnePageLearningPlayer({
   const handledRefill = useRef(refill.data)
   const [checkpointVersion, setCheckpointVersion] = useState(0)
   const [nowMs, setNowMs] = useState(0)
+  const { feedback, recordAttempt } = useKeyboardFeedback()
   const sessionStartedAtMs = session?.startedAt.getTime()
 
   useEffect(() => {
@@ -84,6 +86,12 @@ export default function OnePageLearningPlayer({
 
   const handleKeyPress = useCallback(
     (code: string, shiftKey: boolean) => {
+      const currentSession = useOnePagePlayerStore.getState().session?.currentSession
+      recordAttempt(
+        currentSession?.expectedKeys[currentSession.keyIndex],
+        code,
+        shiftKey,
+      )
       const completed = pressKey(code, shiftKey)
       if (!completed || !courseId) return
       pendingCheckpoints.current.push({
@@ -94,7 +102,7 @@ export default function OnePageLearningPlayer({
       })
       setCheckpointVersion((version) => version + 1)
     },
-    [courseId, pressKey],
+    [courseId, pressKey, recordAttempt],
   )
 
   useEffect(() => {
@@ -284,6 +292,7 @@ export default function OnePageLearningPlayer({
           </div>
           <VirtualKeyboard
             nextKey={nextKey}
+            feedback={feedback}
             showEnglishKeys
             opacity={1}
             onKeyPress={handleKeyPress}

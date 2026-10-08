@@ -12,6 +12,7 @@ import type { Progress } from '../../domain/models/progress'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
 import FingerPlacementGuide from './FingerPlacementGuide'
+import { useKeyboardFeedback } from '../typing/keyboard-feedback'
 import { useHomePlayerStore } from './home-player-store'
 import { useHomeServices } from './home-services'
 
@@ -65,6 +66,7 @@ export default function HomePlayer({
   // Exercises completed on this device that the outbox may not have written.
   const [localDone, setLocalDone] = useState(initialPending)
   const [nowMs, setNowMs] = useState(0)
+  const { feedback, recordAttempt } = useKeyboardFeedback()
 
   useEffect(() => {
     let active = true
@@ -136,6 +138,12 @@ export default function HomePlayer({
   const handleKeyPress = useCallback(
     (code: string, shiftKey: boolean) => {
       const current = useHomePlayerStore.getState()
+      const currentSession = current.session?.currentSession
+      recordAttempt(
+        currentSession?.expectedKeys[currentSession.keyIndex],
+        code,
+        shiftKey,
+      )
       const { result, finished } = pressKey(code, shiftKey)
       if (!result || !current.lesson) return
       const played = current.lesson
@@ -167,7 +175,7 @@ export default function HomePlayer({
           : `Home course complete · Starting again: ${title}`,
       )
     },
-    [content, lessonById, open, pressKey, services, showNotice],
+    [content, lessonById, open, pressKey, recordAttempt, services, showNotice],
   )
 
   useEffect(() => {
@@ -348,6 +356,7 @@ export default function HomePlayer({
           </div>
           <VirtualKeyboard
             nextKey={nextKey}
+            feedback={feedback}
             showEnglishKeys
             opacity={1}
             onKeyPress={handleKeyPress}

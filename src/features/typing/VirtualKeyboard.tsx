@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { isKoreanJamoKey, KEY_TO_JAMO } from '../../domain/korean/keymap'
+import type { KeyboardFeedback } from './keyboard-feedback'
 
 type KeyboardKey = {
   code: string
@@ -78,6 +79,7 @@ function keyWidth(wide: KeyboardKey['wide']): string {
 
 interface VirtualKeyboardProps {
   nextKey?: { code: string; shift: boolean }
+  feedback?: KeyboardFeedback
   showEnglishKeys: boolean
   opacity: number
   onKeyPress?: (code: string, shiftKey: boolean) => void

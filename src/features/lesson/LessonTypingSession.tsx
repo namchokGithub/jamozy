@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useFetcher } from 'react-router'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
 import {
@@ -10,6 +10,7 @@ import { isKoreanJamoKey } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
 import FingerPlacementGuide from '../home/FingerPlacementGuide'
+import { useKeyboardFeedback } from '../typing/keyboard-feedback'
 import type { Lesson } from '../../domain/models/lesson'
 import type { CompleteLessonOutcome } from '../../application/complete-lesson'
 import type { UserSettings } from '../../domain/models/user-profile'
@@ -41,6 +42,7 @@ export default function LessonTypingSession({
   const hasStarted = useRef(false)
   const hasSubmitted = useRef(false)
   const completedResult = useRef<LessonResult | null>(null)
+  const { feedback, recordAttempt } = useKeyboardFeedback()
   // useLessonSessionStore is a module-level singleton, so `session`/`generation`
   // may still belong to a previous lesson's mount (possibly already completed)
   // until this mount's own start() call lands. myGenerationRef pins the exact
@@ -62,6 +64,19 @@ export default function LessonTypingSession({
     )
   }, [lesson, start])
 
+  const handleKeyPress = useCallback(
+    (code: string, shiftKey: boolean) => {
+      const currentSession = useLessonSessionStore.getState().session?.currentSession
+      recordAttempt(
+        currentSession?.expectedKeys[currentSession.keyIndex],
+        code,
+        shiftKey,
+      )
+      pressKey(code, shiftKey)
+    },
+    [pressKey, recordAttempt],
+  )
+
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.metaKey || event.ctrlKey || event.altKey) return
@@ -70,12 +85,12 @@ export default function LessonTypingSession({
         return
       }
       event.preventDefault()
-      pressKey(event.code, event.shiftKey)
+      handleKeyPress(event.code, event.shiftKey)
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [pressKey])
+  }, [handleKeyPress])
 
   useEffect(() => {
     if (generation !== myGenerationRef.current) {
@@ -139,9 +154,10 @@ export default function LessonTypingSession({
         <>
           <VirtualKeyboard
             nextKey={nextKey}
+            feedback={feedback}
             showEnglishKeys={keyboardSettings.showEnglishKeys}
             opacity={keyboardSettings.keyboardOpacity}
-            onKeyPress={pressKey}
+            onKeyPress={handleKeyPress}
           />
           <FingerPlacementGuide nextKey={nextKey} />
         </>
