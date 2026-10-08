@@ -78,9 +78,9 @@
 
 **Files:** `scripts/backfill-content-counts.ts`, `.test.ts`; `package.json` `content:backfill-counts`.
 
-- [ ] **Failing unit test** with a fake Admin Firestore: computes counts from `courses`/`units`/`lessons`; dry-run reports `{ scanned, changed }` without writing; write mode updates only documents whose stored counters differ; arguments follow `parseMigrationArgs` (`--dry-run`, then `--write --after-dry-run`).
-- [ ] Implement; run `pnpm test scripts/backfill-content-counts.test.ts` — PASS.
-- [ ] Do not run it against Firebase in this task.
+- [x] **Failing unit test** with a fake Admin Firestore: computes counts from `courses`/`units`/`lessons`; dry-run reports `{ scanned, changes: [{ path, from, to }] }` without writing; write mode updates only documents whose stored counters differ and a second run changes nothing; arguments follow `parseMigrationArgs` (`--dry-run`, then `--write --after-dry-run`).
+- [x] Implement; `pnpm vitest run scripts` — 7 passed. The CLI prints each change (`path: from -> to`) for review. Run it while nobody edits content: an increment between its read and write would be overwritten.
+- [x] Not run against Firebase (the no-argument guard was checked only).
 
 ### Task 7: Show the counts (UI only)
 

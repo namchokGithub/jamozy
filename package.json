@@ -15,6 +15,7 @@
     "content:export-home": "tsx scripts/export-home-content.ts",
     "admin:grant": "tsx scripts/set-admin-claim.ts",
     "content:migrate-status": "tsx scripts/migrate-content-status.ts",
+    "content:backfill-counts": "tsx scripts/backfill-content-counts.ts",
     "jamo-svg:seed": "tsx scripts/generate-jamo-svg-tagger-data.ts",
     "jamo-svg:migrate-reviews": "tsx scripts/migrate-jamo-svg-reviews.ts",
     "jamo-svg:migrate-step-algorithm": "tsx scripts/migrate-jamo-svg-step-algorithm.ts",
