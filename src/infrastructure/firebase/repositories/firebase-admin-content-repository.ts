@@ -14,6 +14,7 @@ import {
   writeBatch,
   type DocumentData,
   type Firestore,
+  type Transaction,
 } from 'firebase/firestore'
 import { db } from '../firebase'
 import type {
@@ -131,7 +132,26 @@ function unitUpdate(unit: Unit, updatedAt: Date): DocumentData {
   }
 }
 
-function statusUpdate(item: Course | Unit): DocumentData {
+// Lesson saves also skip `order` and `unitId`, and store exerciseCount so
+// parents can be counted without reading Exercises.
+function lessonUpdate(lesson: Lesson, updatedAt: Date): DocumentData {
+  return {
+    title: lesson.title,
+    type: lesson.type,
+    exercises: lesson.exercises,
+    exerciseCount: lesson.exercises.length,
+    ...statusUpdate(lesson),
+    updatedAt,
+  }
+}
+
+interface LessonWrite {
+  lesson: Lesson
+  delta: number
+  courseId: string | null
+}
+
+function statusUpdate(item: Course | Unit | Lesson): DocumentData {
   return {
     status: item.status ?? 'draft',
     archivedFromStatus: item.archivedFromStatus ?? deleteField(),
@@ -291,31 +311,76 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
   }
 
   async saveLesson(lesson: Lesson): Promise<void> {
-    await setDoc(
-      doc(this.firestore, 'lessons', lesson.id),
-      serialize({ ...lesson, updatedAt: new Date() }),
-    )
+    await runTransaction(this.firestore, async (transaction) => {
+      const writes = await this.readLessonWrites(transaction, [lesson])
+      this.writeLessons(transaction, writes, new Date())
+    })
   }
 
   async saveContent(changes: AdminContentChanges): Promise<void> {
-    const batch = writeBatch(this.firestore)
-    const updatedAt = new Date()
-    for (const course of changes.courses ?? [])
-      batch.update(
-        doc(this.firestore, 'courses', course.id),
-        courseUpdate(course, updatedAt),
+    // A transaction, not a batch: Lesson Exercise deltas need a read first.
+    await runTransaction(this.firestore, async (transaction) => {
+      const writes = await this.readLessonWrites(
+        transaction,
+        changes.lessons ?? [],
       )
-    for (const unit of changes.units ?? [])
-      batch.update(
-        doc(this.firestore, 'units', unit.id),
-        unitUpdate(unit, updatedAt),
-      )
-    for (const lesson of changes.lessons ?? [])
-      batch.set(
+      const updatedAt = new Date()
+      for (const course of changes.courses ?? [])
+        transaction.update(
+          doc(this.firestore, 'courses', course.id),
+          courseUpdate(course, updatedAt),
+        )
+      for (const unit of changes.units ?? [])
+        transaction.update(
+          doc(this.firestore, 'units', unit.id),
+          unitUpdate(unit, updatedAt),
+        )
+      this.writeLessons(transaction, writes, updatedAt)
+    })
+  }
+
+  // Reads each saved Lesson to find how many Exercises it gains, and its
+  // Course when the count changes. All reads happen before any write.
+  private async readLessonWrites(
+    transaction: Transaction,
+    lessons: Lesson[],
+  ): Promise<LessonWrite[]> {
+    return Promise.all(
+      lessons.map(async (lesson) => {
+        const saved = await transaction.get(
+          doc(this.firestore, 'lessons', lesson.id),
+        )
+        if (!saved.exists()) throw new Error('Lesson was not found.')
+        const savedExercises: unknown[] = saved.data().exercises ?? []
+        const delta = lesson.exercises.length - savedExercises.length
+        if (delta === 0) return { lesson, delta, courseId: null }
+        const unit = await transaction.get(
+          doc(this.firestore, 'units', lesson.unitId),
+        )
+        if (!unit.exists()) throw new Error('Parent Unit was not found.')
+        return { lesson, delta, courseId: unit.data().courseId as string }
+      }),
+    )
+  }
+
+  private writeLessons(
+    transaction: Transaction,
+    writes: LessonWrite[],
+    updatedAt: Date,
+  ): void {
+    for (const { lesson, delta, courseId } of writes) {
+      transaction.update(
         doc(this.firestore, 'lessons', lesson.id),
-        serialize({ ...lesson, updatedAt }),
+        lessonUpdate(lesson, updatedAt),
       )
-    await batch.commit()
+      if (delta === 0 || !courseId) continue
+      transaction.update(doc(this.firestore, 'units', lesson.unitId), {
+        exerciseCount: increment(delta),
+      })
+      transaction.update(doc(this.firestore, 'courses', courseId), {
+        exerciseCount: increment(delta),
+      })
+    }
   }
 
   async saveCourseOrder(courseIds: string[]): Promise<void> {

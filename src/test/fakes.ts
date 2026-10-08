@@ -148,14 +148,14 @@ export class FakeAdminContentRepository implements AdminContentRepository {
     return item
   }
   async saveLesson(lesson: Lesson) {
-    this.replace(this.lessons, lesson)
+    this.writeLesson(lesson)
   }
   async saveContent(changes: AdminContentChanges) {
     for (const course of changes.courses ?? [])
-      this.replace(this.courses, course)
-    for (const unit of changes.units ?? []) this.replace(this.units, unit)
-    for (const lesson of changes.lessons ?? [])
-      this.replace(this.lessons, lesson)
+      this.replace(this.courses, this.keepStored(this.courses, course))
+    for (const unit of changes.units ?? [])
+      this.replace(this.units, this.keepStored(this.units, unit))
+    for (const lesson of changes.lessons ?? []) this.writeLesson(lesson)
   }
   async saveCourseOrder(courseIds: string[]) {
     this.saveOrder(await this.getCourses(), courseIds)
@@ -176,6 +176,21 @@ export class FakeAdminContentRepository implements AdminContentRepository {
     const item = items.find((candidate) => candidate.id === id) as
       (T & Record<typeof field, number | undefined>) | undefined
     if (item) item[field] = (item[field] ?? 0) + by
+  }
+  // Like the Firebase adapter: keeps order, stores exerciseCount, and adds
+  // the Exercises the Lesson gains to its Unit and Course.
+  private writeLesson(lesson: Lesson) {
+    const saved = this.lessons.find((item) => item.id === lesson.id)
+    const delta = lesson.exercises.length - (saved?.exercises.length ?? 0)
+    this.replace(this.lessons, {
+      ...lesson,
+      order: saved?.order ?? lesson.order,
+      exerciseCount: lesson.exercises.length,
+    })
+    if (delta === 0) return
+    const unit = this.units.find((item) => item.id === lesson.unitId)
+    this.bump(this.units, lesson.unitId, 'exerciseCount', delta)
+    if (unit) this.bump(this.courses, unit.courseId, 'exerciseCount', delta)
   }
   private keepStored<T extends Course | Unit>(items: T[], next: T): T {
     const saved = items.find((item) => item.id === next.id)

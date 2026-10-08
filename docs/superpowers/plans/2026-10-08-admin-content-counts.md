@@ -69,10 +69,10 @@
 
 ### Task 5: Lesson writes apply the Exercise delta
 
-- [ ] **Failing emulator tests:** saving a Lesson from 1 to 3 Exercises sets `lesson.exerciseCount = 3` and adds 2 to its Unit and Course; publish/archive of the same Lesson leaves counts unchanged; `saveContent` with a Lesson behaves the same.
-- [ ] Implement `saveLesson` as `runTransaction`: read saved Lesson (and its Unit for `courseId`), write the Lesson with `exerciseCount: exercises.length`, then `increment(delta)` on Unit and Course when `delta !== 0`.
-- [ ] Switch `saveContent` from `writeBatch` to `runTransaction` so Lesson entries apply the same delta; keep all reads before writes.
-- [ ] Fake repository mirrors the delta. Use-case test: `saveLesson` adding Exercises raises Unit/Course `exerciseCount`.
+- [x] **Failing emulator tests:** saving a Lesson from 1 to 3 Exercises sets `lesson.exerciseCount = 3`, adds 2 to its Unit and Course, and keeps the stored `order`; a status-only save leaves counts unchanged; `saveContent` with a Lesson applies the same delta.
+- [x] Implement `saveLesson` as `runTransaction`: read the saved Lesson (delta from its stored `exercises`, not a possibly absent counter), read the Unit for `courseId` only when the delta is non-zero, update only editable Lesson fields (`title`, `type`, `exercises`, `exerciseCount`, `status`, `archivedFromStatus`, `updatedAt`; never `order`/`unitId`), then `increment(delta)` on Unit and Course.
+- [x] Switch `saveContent` from `writeBatch` to `runTransaction` so Lesson entries apply the same delta; all reads before writes.
+- [x] Fake repository mirrors the delta and keeps Lesson `order`. Use-case test: `saveLesson` adding Exercises raises Unit/Course `exerciseCount`. `pnpm test:rules` — 14 passed.
 
 ### Task 6: Backfill and repair script
 

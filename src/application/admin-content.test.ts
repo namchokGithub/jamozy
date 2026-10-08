@@ -851,6 +851,37 @@ describe('creating admin content updates parent counts', () => {
   })
 })
 
+describe('saving Exercises updates parent counts', () => {
+  it('adds new Exercises to the Unit and Course counts', async () => {
+    const first = {
+      id: 'first',
+      targetText: '가',
+      romanization: null,
+      meaningTh: '',
+      meaningEn: '',
+      difficulty: 'easy' as const,
+      hint: null,
+    }
+    const repo = new FakeAdminContentRepository(
+      [{ ...course, exerciseCount: 1 }],
+      [{ ...unit, exerciseCount: 1 }],
+      [{ ...lesson([first]), exerciseCount: 1 }],
+    )
+
+    await expect(
+      saveLesson(repo, {
+        ...lesson([first, { ...first, id: 'second', targetText: '나' }]),
+        order: 9,
+      }),
+    ).resolves.toEqual({ ok: true })
+
+    expect((await repo.getLessonById('lesson'))?.exerciseCount).toBe(2)
+    expect((await repo.getLessonById('lesson'))?.order).toBe(0)
+    expect((await repo.getUnitById('unit'))?.exerciseCount).toBe(2)
+    expect((await repo.getCourseById('course'))?.exerciseCount).toBe(2)
+  })
+})
+
 describe('creating admin content in the editor language', () => {
   it('stores the placeholder text the editor sends', async () => {
     const repo = new FakeAdminContentRepository()

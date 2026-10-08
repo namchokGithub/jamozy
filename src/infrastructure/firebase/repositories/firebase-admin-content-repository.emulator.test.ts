@@ -148,6 +148,109 @@ describeWithFirestoreEmulator('FirebaseAdminContentRepository counters', () => {
     })
   })
 
+  describe('lesson writes apply the Exercise delta', () => {
+    const base = { description: 'Description', createdAt: now, updatedAt: now }
+    const exercise = (id: string) => ({
+      id,
+      targetText: '가',
+      romanization: null,
+      meaningTh: '',
+      meaningEn: '',
+      difficulty: 'easy' as const,
+      hint: null,
+    })
+
+    async function seed(firestore: Firestore) {
+      await setDoc(doc(firestore, 'courses', 'course'), {
+        ...base,
+        title: 'Course',
+        order: 0,
+        status: 'draft',
+        exerciseCount: 1,
+      })
+      await setDoc(doc(firestore, 'units', 'unit'), {
+        ...base,
+        courseId: 'course',
+        title: 'Unit',
+        order: 0,
+        status: 'draft',
+        exerciseCount: 1,
+      })
+      await setDoc(doc(firestore, 'lessons', 'lesson'), {
+        unitId: 'unit',
+        title: 'Lesson',
+        type: 'word',
+        order: 5,
+        status: 'draft',
+        exercises: [exercise('a')],
+        createdAt: now,
+        updatedAt: now,
+      })
+    }
+
+    async function counts(firestore: Firestore) {
+      const read = async (path: string, id: string) =>
+        (await getDoc(doc(firestore, path, id))).data()?.exerciseCount
+      return {
+        lesson: await read('lessons', 'lesson'),
+        unit: await read('units', 'unit'),
+        course: await read('courses', 'course'),
+      }
+    }
+
+    it('adds the new Exercises to the Unit and Course and keeps order', async () => {
+      const { firestore, repo } = adminRepository()
+      await seed(firestore)
+      const lesson = (await repo.getLessonById('lesson'))!
+
+      await repo.saveLesson({
+        ...lesson,
+        order: 0,
+        exercises: [exercise('a'), exercise('b'), exercise('c')],
+      })
+
+      expect(await counts(firestore)).toEqual({ lesson: 3, unit: 3, course: 3 })
+      expect(
+        (await getDoc(doc(firestore, 'lessons', 'lesson'))).data()?.order,
+      ).toBe(5)
+    })
+
+    it('leaves parents unchanged when the Exercises do not change', async () => {
+      const { firestore, repo } = adminRepository()
+      await seed(firestore)
+      const lesson = (await repo.getLessonById('lesson'))!
+
+      await repo.saveLesson({ ...lesson, status: 'archived' })
+
+      expect(await counts(firestore)).toEqual({ lesson: 1, unit: 1, course: 1 })
+    })
+
+    it('applies the delta for Lessons written through saveContent', async () => {
+      const { firestore, repo } = adminRepository()
+      await seed(firestore)
+      const course = (await repo.getCourseById('course'))!
+      const unit = (await repo.getUnitById('unit'))!
+      const lesson = (await repo.getLessonById('lesson'))!
+
+      await repo.saveContent({
+        courses: [{ ...course, status: 'published' }],
+        units: [{ ...unit, status: 'published' }],
+        lessons: [
+          {
+            ...lesson,
+            status: 'published',
+            exercises: [exercise('a'), exercise('b')],
+          },
+        ],
+      })
+
+      expect(await counts(firestore)).toEqual({ lesson: 2, unit: 2, course: 2 })
+      expect(
+        (await getDoc(doc(firestore, 'courses', 'course'))).data()?.status,
+      ).toBe('published')
+    })
+  })
+
   describe('content saves never overwrite counters', () => {
     const base = { description: 'Description', createdAt: now, updatedAt: now }
 
