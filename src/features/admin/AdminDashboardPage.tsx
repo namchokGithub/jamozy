@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useFetcher, useLoaderData, useNavigate } from 'react-router'
-import type { Course } from '../../domain/models/course'
+import { courseCounts, type Course } from '../../domain/models/course'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { PageSurface } from '../../components/ui/PageSurface'
@@ -35,6 +35,17 @@ export default function AdminDashboardPage() {
     'save-course-order',
   )
   const normalizedSearch = search.trim().toLocaleLowerCase()
+  const totals = courses.reduce(
+    (sum, course) => {
+      const counts = courseCounts(course)
+      return {
+        units: sum.units + counts.units,
+        lessons: sum.lessons + counts.lessons,
+        exercises: sum.exercises + counts.exercises,
+      }
+    },
+    { units: 0, lessons: 0, exercises: 0 },
+  )
   const statusCounts = orderedCourses.reduce(
     (counts, course) => {
       if (course.status === 'draft') counts.draft += 1
@@ -95,6 +106,11 @@ export default function AdminDashboardPage() {
       <AdminContentListToolbar
         totalLabel={t('dashboard.totalCourses')}
         total={orderedCourses.length}
+        descendants={[
+          { label: t('count.units'), value: totals.units },
+          { label: t('count.lessons'), value: totals.lessons },
+          { label: t('count.exercises'), value: totals.exercises },
+        ]}
         counts={statusCounts}
         search={search}
         onSearch={setSearch}

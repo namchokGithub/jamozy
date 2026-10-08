@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 import { useFetcher, useLoaderData, useNavigate } from 'react-router'
 import type { Course } from '../../domain/models/course'
 import type { Lesson } from '../../domain/models/lesson'
-import type { Unit } from '../../domain/models/unit'
+import { unitCounts, type Unit } from '../../domain/models/unit'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { PageSurface } from '../../components/ui/PageSurface'
@@ -212,6 +212,9 @@ export default function UnitEditorPage() {
         <AdminContentListToolbar
           totalLabel={t('unit.lessonsHeading')}
           total={orderedLessons.length}
+          descendants={[
+            { label: t('count.exercises'), value: unitCounts(unit).exercises },
+          ]}
           counts={lessonStatusCounts}
           search={lessonSearch}
           onSearch={setLessonSearch}
@@ -268,6 +271,11 @@ export default function UnitEditorPage() {
                   <h3 className="truncate font-bold">{lesson.title}</h3>
                 )}
                 <AdminStatusBadge status={lesson.status} />
+                <span className="shrink-0 text-xs text-[#8b7d72]">
+                  {t('count.lessonSummary', {
+                    exercises: lesson.exercises.length,
+                  })}
+                </span>
               </div>
               <div
                 className="flex items-center gap-1"

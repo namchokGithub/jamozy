@@ -84,10 +84,10 @@
 
 ### Task 7: Show the counts (UI only)
 
-- [ ] Dashboard: Units, Lessons, Exercises totals summed from Courses, beside the existing status cards.
-- [ ] Course page: Course Lessons and Exercises totals; per-Unit-row "n Lessons · m Exercises".
-- [ ] Unit page: Unit Exercises total; per-Lesson-row "m Exercises".
-- [ ] EN/TH dictionary keys. Run `tsc -b`, `lint`; hand off manual check.
+- [x] Dashboard: Units, Lessons, Exercises totals summed from Courses, in a second card row (`AdminContentListToolbar` `descendants` prop).
+- [x] Course page: Course Lessons and Exercises totals; per-Unit-row "n Lessons · m Exercises".
+- [x] Unit page: Unit Exercises total; per-Lesson-row "m Exercises" (from `exercises.length`, exact even before the backfill).
+- [x] EN/TH `count.*` dictionary keys. `tsc -b`, `lint` pass; manual check handed off.
 
 ### Task 8: Docs
 
