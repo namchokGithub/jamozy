@@ -281,16 +281,15 @@ export default function OnePageLearningPlayer({
                 />
               </div>
             </div>
-            <p
-              className={`max-w-full truncate text-xs text-[#98a2b3] ${meaning ? '' : 'invisible'}`}
-            >
-              {meaning}
-            </p>
-            <p
-              className={`max-w-full truncate text-xs italic text-[#a293bd] ${active.exercise.romanization ? '' : 'invisible'}`}
-            >
-              {active.exercise.romanization}
-            </p>
+            <div className="mt-5 grid h-9 grid-rows-2">
+              <div className="h-4 max-w-full truncate text-xs text-[#98a2b3]">
+                {meaning || null}
+              </div>
+
+              <div className="h-4 max-w-full truncate text-xs italic text-[#a293bd]">
+                {active.exercise.romanization}
+              </div>
+            </div>
             {/* <p className="mt-4 text-xs text-[#98a2b3]">Typed: {getComposedText(session.currentSession)}</p> */}
           </div>
           <VirtualKeyboard

@@ -330,14 +330,14 @@ export default function HomePlayer({
                 />
               </div>
             </div>
-            {meaning && (
-              <p className="mt-5 text-xs text-[#98a2b3]">{meaning}</p>
-            )}
-            {active.romanization && (
-              <p className="mt-1 text-xs italic text-[#a293bd]">
+            <div className="mt-5 grid h-9 grid-rows-2">
+              <div className="h-4 max-w-full truncate text-xs text-[#98a2b3]">
+                {meaning}
+              </div>
+              <div className="h-4 max-w-full truncate text-xs italic text-[#a293bd]">
                 {active.romanization}
-              </p>
-            )}
+              </div>
+            </div>
           </div>
           <VirtualKeyboard
             nextKey={nextKey}
