@@ -251,6 +251,75 @@ describeWithFirestoreEmulator('FirebaseAdminContentRepository counters', () => {
     })
   })
 
+  describe('creates take the order after the last sibling', () => {
+    const base = { description: 'Description', createdAt: now, updatedAt: now }
+
+    it('places a new Course, Unit, and Lesson after the highest order', async () => {
+      const { firestore, repo } = adminRepository()
+      await setDoc(doc(firestore, 'courses', 'a'), {
+        ...base,
+        title: 'A',
+        order: 0,
+        status: 'draft',
+      })
+      await setDoc(doc(firestore, 'courses', 'b'), {
+        ...base,
+        title: 'B',
+        order: 4,
+        status: 'draft',
+      })
+      await setDoc(doc(firestore, 'units', 'unit'), {
+        ...base,
+        courseId: 'a',
+        title: 'Unit',
+        order: 7,
+        status: 'draft',
+      })
+      await setDoc(doc(firestore, 'units', 'elsewhere'), {
+        ...base,
+        courseId: 'b',
+        title: 'Other course',
+        order: 30,
+        status: 'draft',
+      })
+      await setDoc(doc(firestore, 'lessons', 'lesson'), {
+        unitId: 'unit',
+        title: 'Lesson',
+        type: 'word',
+        order: 2,
+        status: 'draft',
+        exercises: [],
+        createdAt: now,
+        updatedAt: now,
+      })
+
+      const course = await repo.createCourse({
+        title: 'C',
+        description: 'Description',
+      })
+      const unit = await repo.createUnit({
+        courseId: 'a',
+        title: 'Unit 2',
+        description: 'Description',
+      })
+      const lesson = await repo.createLesson({
+        unitId: 'unit',
+        title: 'Lesson 2',
+        type: 'word',
+      })
+      const firstLesson = await repo.createLesson({
+        unitId: unit.id,
+        title: 'First',
+        type: 'word',
+      })
+
+      expect(course.order).toBe(5)
+      expect(unit.order).toBe(8)
+      expect(lesson.order).toBe(3)
+      expect(firstLesson.order).toBe(0)
+    })
+  })
+
   describe('content saves never overwrite counters', () => {
     const base = { description: 'Description', createdAt: now, updatedAt: now }
 

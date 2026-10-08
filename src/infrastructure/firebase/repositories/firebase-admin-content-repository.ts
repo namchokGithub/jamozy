@@ -5,6 +5,7 @@ import {
   getDoc,
   getDocs,
   increment,
+  limit,
   orderBy,
   query,
   runTransaction,
@@ -222,12 +223,12 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
     input: Pick<Course, 'title' | 'description'>,
   ): Promise<Course> {
     const reference = doc(collection(this.firestore, 'courses'))
-    const siblings = await this.getCourses()
+    const order = await this.nextOrder('courses')
     const now = new Date()
     const course: Course = {
       id: reference.id,
       ...input,
-      order: (siblings.at(-1)?.order ?? -1) + 1,
+      order,
       status: 'draft',
       unitCount: 0,
       lessonCount: 0,
@@ -250,12 +251,12 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
     input: Pick<Unit, 'courseId' | 'title' | 'description'>,
   ): Promise<Unit> {
     const reference = doc(collection(this.firestore, 'units'))
-    const siblings = await this.getUnitsByCourseId(input.courseId)
+    const order = await this.nextOrder('units', 'courseId', input.courseId)
     const now = new Date()
     const unit: Unit = {
       id: reference.id,
       ...input,
-      order: (siblings.at(-1)?.order ?? -1) + 1,
+      order,
       status: 'draft',
       lessonCount: 0,
       exerciseCount: 0,
@@ -286,12 +287,12 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
     const reference = doc(collection(this.firestore, 'lessons'))
     const parent = await this.getUnitById(input.unitId)
     if (!parent) throw new Error('Parent Unit was not found.')
-    const siblings = await this.getLessonsByUnitId(input.unitId)
+    const order = await this.nextOrder('lessons', 'unitId', input.unitId)
     const now = new Date()
     const lesson: Lesson = {
       id: reference.id,
       ...input,
-      order: (siblings.at(-1)?.order ?? -1) + 1,
+      order,
       exercises: [],
       exerciseCount: 0,
       status: 'draft',
@@ -405,6 +406,25 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
 
   // Rewrites every sibling's order in one transaction, and refuses an order
   // that is not exactly the current siblings or that changed since it was read.
+  // Reads only the last sibling (1 document) instead of every sibling.
+  // The parent filter needs the `order` DESC composite indexes.
+  private async nextOrder(
+    collectionName: 'courses' | 'units' | 'lessons',
+    parentField?: 'courseId' | 'unitId',
+    parentId?: string,
+  ): Promise<number> {
+    const snapshot = await getDocs(
+      query(
+        collection(this.firestore, collectionName),
+        ...(parentField ? [where(parentField, '==', parentId)] : []),
+        orderBy('order', 'desc'),
+        limit(1),
+      ),
+    )
+    const last: unknown = snapshot.docs[0]?.data().order
+    return typeof last === 'number' ? last + 1 : 0
+  }
+
   private async saveOrder(
     collectionName: 'courses' | 'units' | 'lessons',
     siblings: { id: string; order: number }[],

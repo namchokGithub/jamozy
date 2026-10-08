@@ -426,6 +426,8 @@ verification checklist and post-MVP roadmap.
 - Complete the Home player's manual verification.
 - Deploy the updated Firestore Rules (content delete denied) and manually verify
   the Admin BO hardening pass.
+- Deploy `firestore.indexes.json` (new `order` DESC indexes for Units and
+  Lessons) before the Admin code that creates content with them.
 - Deploy the content-counter code, then run `pnpm content:backfill-counts`
   ([[DEC-047]]).
 - Set up a Cloudflare Pages deployment pipeline and use Preview deployments
