@@ -831,6 +831,26 @@ describe('creating admin content', () => {
   })
 })
 
+describe('creating admin content updates parent counts', () => {
+  it('counts a new Unit on its Course and a new Lesson on its Unit and Course', async () => {
+    const repo = new FakeAdminContentRepository()
+    const createdCourse = await createDraftCourse(repo)
+    const createdUnit = await createDraftUnit(repo, createdCourse.id)
+    await createDraftLesson(repo, createdUnit.id)
+    await createDraftLesson(repo, createdUnit.id)
+
+    expect(await repo.getCourseById(createdCourse.id)).toMatchObject({
+      unitCount: 1,
+      lessonCount: 2,
+      exerciseCount: 0,
+    })
+    expect(await repo.getUnitById(createdUnit.id)).toMatchObject({
+      lessonCount: 2,
+      exerciseCount: 0,
+    })
+  })
+})
+
 describe('creating admin content in the editor language', () => {
   it('stores the placeholder text the editor sends', async () => {
     const repo = new FakeAdminContentRepository()

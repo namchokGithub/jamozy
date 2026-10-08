@@ -99,14 +99,18 @@ export class FakeAdminContentRepository implements AdminContentRepository {
       ...input,
       order: this.courses.length,
       status: 'draft',
+      unitCount: 0,
+      lessonCount: 0,
+      exerciseCount: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     }
     this.courses.push(item)
     return item
   }
+  // Like the Firebase adapter, saves keep stored counters and order.
   async saveCourse(course: Course) {
-    this.replace(this.courses, course)
+    this.replace(this.courses, this.keepStored(this.courses, course))
   }
   async createUnit(input: Pick<Unit, 'courseId' | 'title' | 'description'>) {
     const item: Unit = {
@@ -114,14 +118,17 @@ export class FakeAdminContentRepository implements AdminContentRepository {
       ...input,
       order: (await this.getUnitsByCourseId(input.courseId)).length,
       status: 'draft',
+      lessonCount: 0,
+      exerciseCount: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     }
     this.units.push(item)
+    this.bump(this.courses, input.courseId, 'unitCount', 1)
     return item
   }
   async saveUnit(unit: Unit) {
-    this.replace(this.units, unit)
+    this.replace(this.units, this.keepStored(this.units, unit))
   }
   async createLesson(input: Pick<Lesson, 'unitId' | 'title' | 'type'>) {
     const item: Lesson = {
@@ -129,11 +136,15 @@ export class FakeAdminContentRepository implements AdminContentRepository {
       ...input,
       order: (await this.getLessonsByUnitId(input.unitId)).length,
       exercises: [],
+      exerciseCount: 0,
       status: 'draft',
       createdAt: new Date(),
       updatedAt: new Date(),
     }
     this.lessons.push(item)
+    const unit = await this.getUnitById(input.unitId)
+    this.bump(this.units, input.unitId, 'lessonCount', 1)
+    if (unit) this.bump(this.courses, unit.courseId, 'lessonCount', 1)
     return item
   }
   async saveLesson(lesson: Lesson) {
@@ -156,6 +167,32 @@ export class FakeAdminContentRepository implements AdminContentRepository {
     this.saveOrder(await this.getLessonsByUnitId(unitId), lessonIds)
   }
 
+  private bump<T extends { id: string }>(
+    items: T[],
+    id: string,
+    field: 'unitCount' | 'lessonCount' | 'exerciseCount',
+    by: number,
+  ) {
+    const item = items.find((candidate) => candidate.id === id) as
+      (T & Record<typeof field, number | undefined>) | undefined
+    if (item) item[field] = (item[field] ?? 0) + by
+  }
+  private keepStored<T extends Course | Unit>(items: T[], next: T): T {
+    const saved = items.find((item) => item.id === next.id)
+    if (!saved) return next
+    const kept = {
+      order: saved.order,
+      unitCount: (saved as Course).unitCount,
+      lessonCount: saved.lessonCount,
+      exerciseCount: saved.exerciseCount,
+    }
+    return {
+      ...next,
+      ...Object.fromEntries(
+        Object.entries(kept).filter(([, value]) => value !== undefined),
+      ),
+    }
+  }
   private replace<T extends { id: string }>(items: T[], next: T) {
     const index = items.findIndex((item) => item.id === next.id)
     if (index >= 0) items[index] = next

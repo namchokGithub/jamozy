@@ -4,6 +4,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  increment,
   orderBy,
   query,
   runTransaction,
@@ -208,6 +209,9 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
       ...input,
       order: (siblings.at(-1)?.order ?? -1) + 1,
       status: 'draft',
+      unitCount: 0,
+      lessonCount: 0,
+      exerciseCount: 0,
       createdAt: now,
       updatedAt: now,
     }
@@ -233,10 +237,19 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
       ...input,
       order: (siblings.at(-1)?.order ?? -1) + 1,
       status: 'draft',
+      lessonCount: 0,
+      exerciseCount: 0,
       createdAt: now,
       updatedAt: now,
     }
-    await setDoc(reference, serialize(unit))
+    // One batch: the Unit and its Course's count land together. The update
+    // fails when the Course is missing, so no orphan Unit is created.
+    const batch = writeBatch(this.firestore)
+    batch.set(reference, serialize(unit))
+    batch.update(doc(this.firestore, 'courses', input.courseId), {
+      unitCount: increment(1),
+    })
+    await batch.commit()
     return unit
   }
 
@@ -251,6 +264,8 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
     input: Pick<Lesson, 'unitId' | 'title' | 'type'>,
   ): Promise<Lesson> {
     const reference = doc(collection(this.firestore, 'lessons'))
+    const parent = await this.getUnitById(input.unitId)
+    if (!parent) throw new Error('Parent Unit was not found.')
     const siblings = await this.getLessonsByUnitId(input.unitId)
     const now = new Date()
     const lesson: Lesson = {
@@ -258,11 +273,20 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
       ...input,
       order: (siblings.at(-1)?.order ?? -1) + 1,
       exercises: [],
+      exerciseCount: 0,
       status: 'draft',
       createdAt: now,
       updatedAt: now,
     }
-    await setDoc(reference, serialize(lesson))
+    const batch = writeBatch(this.firestore)
+    batch.set(reference, serialize(lesson))
+    batch.update(doc(this.firestore, 'units', input.unitId), {
+      lessonCount: increment(1),
+    })
+    batch.update(doc(this.firestore, 'courses', parent.courseId), {
+      lessonCount: increment(1),
+    })
+    await batch.commit()
     return lesson
   }
 

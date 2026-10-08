@@ -79,6 +79,75 @@ describeWithFirestoreEmulator('FirebaseAdminContentRepository counters', () => {
     })
   })
 
+  describe('creates count their new child', () => {
+    it('starts a new Course at zero', async () => {
+      const { firestore, repo } = adminRepository()
+      const created = await repo.createCourse({
+        title: 'New',
+        description: 'Description',
+      })
+
+      expect(
+        (await getDoc(doc(firestore, 'courses', created.id))).data(),
+      ).toMatchObject({ unitCount: 0, lessonCount: 0, exerciseCount: 0 })
+    })
+
+    it('counts a new Unit on its Course', async () => {
+      const { firestore, repo } = adminRepository()
+      const course = await repo.createCourse({
+        title: 'Course',
+        description: 'Description',
+      })
+
+      const unit = await repo.createUnit({
+        courseId: course.id,
+        title: 'Unit',
+        description: 'Description',
+      })
+
+      expect(
+        (await getDoc(doc(firestore, 'units', unit.id))).data(),
+      ).toMatchObject({ lessonCount: 0, exerciseCount: 0 })
+      expect(
+        (await getDoc(doc(firestore, 'courses', course.id))).data(),
+      ).toMatchObject({ unitCount: 1, lessonCount: 0 })
+    })
+
+    it('counts a new Lesson on its Unit and Course', async () => {
+      const { firestore, repo } = adminRepository()
+      const course = await repo.createCourse({
+        title: 'Course',
+        description: 'Description',
+      })
+      const unit = await repo.createUnit({
+        courseId: course.id,
+        title: 'Unit',
+        description: 'Description',
+      })
+
+      const lesson = await repo.createLesson({
+        unitId: unit.id,
+        title: 'Lesson',
+        type: 'word',
+      })
+      await repo.createLesson({
+        unitId: unit.id,
+        title: 'Lesson 2',
+        type: 'word',
+      })
+
+      expect(
+        (await getDoc(doc(firestore, 'lessons', lesson.id))).data(),
+      ).toMatchObject({ exerciseCount: 0 })
+      expect(
+        (await getDoc(doc(firestore, 'units', unit.id))).data(),
+      ).toMatchObject({ lessonCount: 2 })
+      expect(
+        (await getDoc(doc(firestore, 'courses', course.id))).data(),
+      ).toMatchObject({ unitCount: 1, lessonCount: 2 })
+    })
+  })
+
   describe('content saves never overwrite counters', () => {
     const base = { description: 'Description', createdAt: now, updatedAt: now }
 

@@ -26,15 +26,15 @@
 
 ## File Structure
 
-| File | Responsibility |
-| --- | --- |
-| `src/domain/models/{course,unit,lesson}.ts` | Optional counter fields. |
-| `src/infrastructure/firebase/repositories/firebase-admin-content-repository.ts` | Injectable Firestore; field-only saves; counter maintenance. |
-| `src/infrastructure/firebase/repositories/firebase-admin-content-repository.emulator.test.ts` | Emulator tests for counters. |
-| `src/test/fakes.ts` | Fake repository mirrors counter rules. |
-| `scripts/backfill-content-counts.ts` (+ `.test.ts`) | Recompute and repair counters. |
-| `src/features/admin/*Page.tsx`, `AdminContentListToolbar.tsx`, `i18n/dictionaries.ts` | Show totals. |
-| `docs/DOMAIN-MODEL.md`, `docs/DECISIONS.md`, `README.md`, `docs/PROGRESS.md`, `docs/log/2026-10.md` | Docs upkeep. |
+| File                                                                                                | Responsibility                                               |
+| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `src/domain/models/{course,unit,lesson}.ts`                                                         | Optional counter fields.                                     |
+| `src/infrastructure/firebase/repositories/firebase-admin-content-repository.ts`                     | Injectable Firestore; field-only saves; counter maintenance. |
+| `src/infrastructure/firebase/repositories/firebase-admin-content-repository.emulator.test.ts`       | Emulator tests for counters.                                 |
+| `src/test/fakes.ts`                                                                                 | Fake repository mirrors counter rules.                       |
+| `scripts/backfill-content-counts.ts` (+ `.test.ts`)                                                 | Recompute and repair counters.                               |
+| `src/features/admin/*Page.tsx`, `AdminContentListToolbar.tsx`, `i18n/dictionaries.ts`               | Show totals.                                                 |
+| `docs/DOMAIN-MODEL.md`, `docs/DECISIONS.md`, `README.md`, `docs/PROGRESS.md`, `docs/log/2026-10.md` | Docs upkeep.                                                 |
 
 ---
 
@@ -63,9 +63,9 @@
 
 ### Task 4: Create counters
 
-- [ ] **Failing emulator tests:** `createUnit` adds 1 to `course.unitCount`; `createLesson` adds 1 to `unit.lessonCount` and `course.lessonCount`; new documents start at `0`.
-- [ ] Implement with `writeBatch`: `set` the new document (counters `0`) plus `update(parent, { …: increment(1) })`. `createLesson` reads the Unit for `courseId` first.
-- [ ] Fake repository: same increments. Add a use-case test (`createDraftUnit`, `createDraftLesson`) asserting parent counts.
+- [x] **Failing emulator tests:** `createUnit` adds 1 to `course.unitCount`; `createLesson` adds 1 to `unit.lessonCount` and `course.lessonCount`; new documents start at `0`.
+- [x] Implement with `writeBatch`: `set` the new document (counters `0`) plus `update(parent, { …: increment(1) })`. `createLesson` reads the Unit for `courseId` first and throws when it is missing; a missing parent also fails the batch, so no orphan is created.
+- [x] Fake repository: same increments, and saves keep stored counters and `order` (mirrors Task 3). Use-case test (`createDraftUnit`, `createDraftLesson`) asserts parent counts. `pnpm test:rules` — 11 passed.
 
 ### Task 5: Lesson writes apply the Exercise delta
 
