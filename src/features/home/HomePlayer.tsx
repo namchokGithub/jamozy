@@ -11,12 +11,11 @@ import { isKoreanJamoKey } from '../../domain/korean/keymap'
 import type { Progress } from '../../domain/models/progress'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
+import { useSnackbar } from '../../components/ui/SnackbarProvider'
 import FingerPlacementGuide from './FingerPlacementGuide'
 import { useKeyboardFeedback } from '../typing/keyboard-feedback'
 import { useHomePlayerStore } from './home-player-store'
 import { useHomeServices } from './home-services'
-
-const NOTICE_MS = 3000
 
 interface HomePlayerProps {
   data: HomePlayerData
@@ -43,12 +42,11 @@ export default function HomePlayer({
     exercises,
     session,
     selectedUnitId,
-    notice,
     startLesson,
     pressKey,
     selectUnit,
-    showNotice,
   } = useHomePlayerStore()
+  const { showSuccess } = useSnackbar()
   const [{ content, initialProgress, initialPending, resume }] = useState(
     () => ({
       content: data.content,
@@ -120,12 +118,6 @@ export default function HomePlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  useEffect(() => {
-    if (!notice) return
-    const timer = window.setTimeout(() => showNotice(null), NOTICE_MS)
-    return () => window.clearTimeout(timer)
-  }, [notice, showNotice])
-
   const sessionStartedAtMs = session?.startedAt.getTime()
   useEffect(() => {
     if (sessionStartedAtMs === undefined) return
@@ -169,13 +161,13 @@ export default function HomePlayer({
       if (!target) return
       open(target)
       const title = lessonById(target.lessonId)?.title ?? ''
-      showNotice(
+      showSuccess(
         next
           ? `Lesson complete · Next: ${title}`
           : `Home course complete · Starting again: ${title}`,
       )
     },
-    [content, lessonById, open, pressKey, recordAttempt, services, showNotice],
+    [content, lessonById, open, pressKey, recordAttempt, services, showSuccess],
   )
 
   useEffect(() => {
@@ -301,14 +293,6 @@ export default function HomePlayer({
           })}
         </nav>
       )}
-
-      <p
-        role="status"
-        aria-live="polite"
-        className={`mt-3 min-h-5 text-sm font-semibold text-[#4f7a35] transition-opacity ${notice ? 'opacity-100' : 'opacity-0'}`}
-      >
-        {notice}
-      </p>
 
       {active && session && lesson ? (
         <div className="mt-1">

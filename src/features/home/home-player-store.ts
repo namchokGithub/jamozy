@@ -19,9 +19,7 @@ interface HomePlayerStore {
   isReplay: boolean
   // Transient UI state; loader data stays out of this store.
   selectedUnitId: string | null
-  notice: string | null
   selectUnit: (unitId: string) => void
-  showNotice: (notice: string | null) => void
   startLesson: (
     unitId: string,
     lesson: HomeLesson,
@@ -40,9 +38,7 @@ export const useHomePlayerStore = create<HomePlayerStore>((set, get) => ({
   session: null,
   isReplay: false,
   selectedUnitId: null,
-  notice: null,
   selectUnit: (selectedUnitId) => set({ selectedUnitId }),
-  showNotice: (notice) => set({ notice }),
   startLesson: (unitId, lesson, { isReplay, random }) => {
     const exercises = shuffleExercises(lesson.exercises, random)
     set({
