@@ -196,6 +196,7 @@ export default function VirtualKey({
     previousFeedback,
   )
   const isActiveShift = isShiftKey && (nextKey?.shift || virtualShiftActive)
+  const isVirtualShiftSelected = isShiftKey && virtualShiftActive
   const shouldPulseShift = isShiftKey && nextKey?.shift === true
   const shouldPulseTarget = visualState === 'target' && !isShiftKey
   const keyVisualClass = isActiveShift
@@ -285,12 +286,15 @@ export default function VirtualKey({
               ? { scale: 0.96, y: 2 }
               : { scale: 1, y: 0 }
           }
+          whileTap={
+            canPress && !shouldReduceMotion ? { scale: 0.96, y: 2 } : undefined
+          }
           transition={{
             scale: { type: 'spring', stiffness: 600, damping: 30 },
             y: { type: 'spring', stiffness: 600, damping: 30 },
           }}
           style={focusStyle}
-          className={`relative flex h-12 w-full flex-col items-center justify-center rounded-lg border px-1 text-sm transition-[background-color,border-color,color,box-shadow] duration-200 sm:h-13 ${keyVisualClass} ${canPress ? 'cursor-pointer touch-manipulation' : 'cursor-default'}`}
+          className={`relative flex h-12 w-full flex-col items-center justify-center rounded-lg border px-1 text-sm transition-[background-color,border-color,color,box-shadow] duration-200 sm:h-13 ${keyVisualClass} ${isVirtualShiftSelected ? 'ring-2 ring-inset ring-[#c98950] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.65)]' : ''} ${canPress ? 'cursor-pointer touch-manipulation' : 'cursor-default'}`}
           aria-label={displayLabel}
           aria-pressed={isShiftKey ? virtualShiftActive : undefined}
           disabled={!canPress}
