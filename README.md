@@ -340,6 +340,7 @@ Home plays one course of type `home` from a static file instead of Firestore
 
    `pnpm build` runs this automatically, so a deploy always ships the latest
    published Home content. Run it by hand to see changes in `pnpm dev`.
+
 3. Redeploy. Learners see the new content after the next deploy.
 
 The export only reads published content and needs no service credential. With
@@ -425,6 +426,8 @@ verification checklist and post-MVP roadmap.
 - Complete the Home player's manual verification.
 - Deploy the updated Firestore Rules (content delete denied) and manually verify
   the Admin BO hardening pass.
+- Deploy the content-counter code, then run `pnpm content:backfill-counts`
+  ([[DEC-047]]).
 - Set up a Cloudflare Pages deployment pipeline and use Preview deployments
   for release checks.
 - Decide whether sound feedback ships or is deferred, then implement the
@@ -463,6 +466,17 @@ Content is retired by archiving, never hard-deleted: the Rules deny delete on
 `courses`, `units`, and `lessons` ([[DEC-034]]). Deploy Rules changes with
 `firebase deploy --only firestore:rules`. Home course edits reach learners only
 after the next build and deploy ([[DEC-043]]).
+
+Content documents store descendant counts ([[DEC-047]]). After deploying the
+code that maintains them, backfill or repair them while nobody edits content:
+
+```bash
+pnpm content:backfill-counts -- --dry-run
+pnpm content:backfill-counts -- --write --after-dry-run
+```
+
+The dry-run prints each document it would change; re-run it after the write to
+confirm `0` changes.
 
 Run the Rules authorization suite with `pnpm test:rules`. It starts a local
 Firestore Emulator, never contacts the Firebase project, and requires the

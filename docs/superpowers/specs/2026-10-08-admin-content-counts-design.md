@@ -1,7 +1,7 @@
 # Admin Content Counts — Design
 
 **Date:** 2026-10-08
-**Status:** Proposed (to be recorded as DEC-047 when accepted)
+**Status:** Accepted as [[DEC-047]]
 **Related:** [[DEC-034]] (status gating, no hard deletion, stable Exercise IDs), [[DEC-043]] (Home course)
 
 ## Problem
@@ -18,11 +18,11 @@ Store descendant counts on each content document and maintain them on every
 write that can change them. Pages read totals from documents they already
 load; no extra queries.
 
-| Model    | New fields (non-negative integers)              |
-| -------- | ----------------------------------------------- |
-| `Course` | `unitCount`, `lessonCount`, `exerciseCount`     |
-| `Unit`   | `lessonCount`, `exerciseCount`                  |
-| `Lesson` | `exerciseCount` (always `exercises.length`)     |
+| Model    | New fields (non-negative integers)          |
+| -------- | ------------------------------------------- |
+| `Course` | `unitCount`, `lessonCount`, `exerciseCount` |
+| `Unit`   | `lessonCount`, `exerciseCount`              |
+| `Lesson` | `exerciseCount` (always `exercises.length`) |
 
 - Counts include every status (Draft, Published, Archived). Status changes
   never touch counters. Learner-facing published-only counts are out of scope
@@ -38,10 +38,10 @@ Only three operations change a count, because content is never deleted
 (Rules deny delete), never moves to another parent, and saved Exercises are
 never removed (`exerciseRemoved`):
 
-| Operation     | Counter writes (same atomic commit as the content write)                         |
-| ------------- | -------------------------------------------------------------------------------- |
-| Create Unit   | `course.unitCount += 1`                                                          |
-| Create Lesson | `unit.lessonCount += 1`, `course.lessonCount += 1` (Course found through the Unit) |
+| Operation     | Counter writes (same atomic commit as the content write)                                                                                   |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Create Unit   | `course.unitCount += 1`                                                                                                                    |
+| Create Lesson | `unit.lessonCount += 1`, `course.lessonCount += 1` (Course found through the Unit)                                                         |
 | Write Lesson  | `delta = new exercises − saved exercises`; `lesson.exerciseCount = length`; `unit.exerciseCount += delta`; `course.exerciseCount += delta` |
 
 "Write Lesson" covers every Lesson write (save, publish, publish-with-parents,

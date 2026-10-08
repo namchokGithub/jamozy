@@ -91,10 +91,10 @@
 
 ### Task 8: Docs
 
-- [ ] `DOMAIN-MODEL.md`: counter fields on Course, Unit, Lesson.
-- [ ] `DECISIONS.md`: DEC-047 entry and index row.
-- [ ] `README.md` Admin operator checklist: backfill commands and rollout order.
-- [ ] `PROGRESS.md` and `docs/log/2026-10.md` entries.
+- [x] `DOMAIN-MODEL.md`: counter fields on Course, Unit, Lesson.
+- [x] `DECISIONS.md`: DEC-047 entry and index row.
+- [x] `README.md` Admin operator checklist: backfill commands and rollout order.
+- [x] `PROGRESS.md` and `docs/log/2026-10.md` entries.
 
 ## Rollout (user-owned)
 

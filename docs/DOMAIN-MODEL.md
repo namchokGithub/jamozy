@@ -20,6 +20,9 @@ Conventions: document-backed cloud entities (`Course`, `Unit`, `Lesson`, `Vocabu
 | type               | `'learning' \| 'home'` \| absent       | absent reads as`learning`; exactly one published `home` course ([[DEC-043]]) |
 | status             | `'draft' \| 'published' \| 'archived'` | learner visibility state ([[DEC-034]])                                       |
 | archivedFromStatus | `'draft' \| 'published'` \| absent     | recorded on Archive and used by Restore                                      |
+| unitCount          | number \| absent                       | Units in every status ([[DEC-047]]); absent until backfilled, read as 0      |
+| lessonCount        | number \| absent                       | Lessons in every status across its Units ([[DEC-047]])                       |
+| exerciseCount      | number \| absent                       | Exercises across its Lessons ([[DEC-047]])                                   |
 | createdAt          | Date                                   |                                                                              |
 | updatedAt          | Date                                   |                                                                              |
 
@@ -46,6 +49,8 @@ the Learning Path global order, frontier, and unlock rules ([[DEC-043]]).
 | order              | number                                 | canonical display/unlock order within the course; unique within`courseId` |
 | status             | `'draft' \| 'published' \| 'archived'` | learner visibility also requires published Course ([[DEC-034]])           |
 | archivedFromStatus | `'draft' \| 'published'` \| absent     | recorded on Archive and used by Restore                                   |
+| lessonCount        | number \| absent                       | Lessons in every status ([[DEC-047]]); absent until backfilled, read as 0 |
+| exerciseCount      | number \| absent                       | Exercises across its Lessons ([[DEC-047]])                                |
 | createdAt          | Date                                   |                                                                           |
 | updatedAt          | Date                                   |                                                                           |
 
@@ -68,6 +73,7 @@ Relationships: a `Lesson` belongs to a `Unit` via `Lesson.unitId`.
 | status             | `'draft' \| 'published' \| 'archived'`                          | learner visibility also requires published Unit and Course ([[DEC-034]]) |
 | archivedFromStatus | `'draft' \| 'published'` \| absent                              | recorded on Archive and used by Restore                                  |
 | exercises          | `LessonExercise[]`                                              | ordered typing prompts for this lesson                                   |
+| exerciseCount      | number \| absent                                                | always `exercises.length` once written ([[DEC-047]])                     |
 | createdAt          | Date                                                            |                                                                          |
 | updatedAt          | Date                                                            |                                                                          |
 

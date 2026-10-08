@@ -47,8 +47,8 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-030 | Guest-to-account migration merge policy                                                                                                                           | Accepted (Home exercise-progress merge: DEC-043)                                                       | 2026-09-28 |
 | DEC-031 | Preserve pre-session learner values as a compatibility baseline                                                                                                   | Accepted                                                                                               | 2026-09-28 |
 | DEC-032 | Lesson Result review action opens the due Review queue                                                                                                            | Accepted                                                                                               | 2026-09-28 |
-| DEC-033 | Intentional Learning Path replays grant 15 EXP                                                                                                                    | Superseded by DEC-046                                                                              | 2026-09-29 |
-| DEC-034 | Admin content is claim-authorized and status-gated                                                                                                                | Accepted (extended by DEC-043:`Course.type`, Home export; restore amended 2026-10-06)                    | 2026-09-29 |
+| DEC-033 | Intentional Learning Path replays grant 15 EXP                                                                                                                    | Superseded by DEC-046                                                                                  | 2026-09-29 |
+| DEC-034 | Admin content is claim-authorized and status-gated                                                                                                                | Accepted (extended by DEC-043:`Course.type`, Home export; restore amended 2026-10-06)                  | 2026-09-29 |
 | DEC-035 | Home one-page player uses browser-local exercise checkpoints                                                                                                      | Superseded by DEC-043                                                                                  | 2026-09-29 |
 | DEC-036 | Jamo SVG steps follow visual jamo for compound medials                                                                                                            | Superseded by DEC-037                                                                                  | 2026-10-01 |
 | DEC-037 | Jamo SVG steps follow typed keys, including compound medials                                                                                                      | Accepted                                                                                               | 2026-10-01 |
@@ -60,7 +60,8 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-043 | Home plays one static-exported course with synced exercise progress                                                                                               | Accepted                                                                                               | 2026-10-05 |
 | DEC-044 | Jamo SVG renderer enabled in Production without a Preview gate                                                                                                    | Accepted                                                                                               | 2026-10-06 |
 | DEC-045 | Difficulty-based EXP rewards and bonus calculation                                                                                                                | Accepted                                                                                               | 2026-10-06 |
-| DEC-046 | Difficulty-based EXP rewards for completed-lesson replays                                                                                                        | Accepted                                                                                               | 2026-10-06 |
+| DEC-046 | Difficulty-based EXP rewards for completed-lesson replays                                                                                                         | Accepted                                                                                               | 2026-10-06 |
+| DEC-047 | Content documents store descendant counts, kept by atomic writes                                                                                                  | Accepted                                                                                               | 2026-10-08 |
 
 ---
 
@@ -1173,3 +1174,33 @@ changes lesson completion, unlocks, or first-completion review effects. The
 replay session receipt records the final total and its per-exercise reward
 inputs so a retry cannot duplicate or recalculate the reward. Existing code
 continues to award flat 15 EXP until a separately scoped implementation ships.
+
+---
+
+## DEC-047 — Content documents store descendant counts, kept by atomic writes
+
+**Date:** 2026-10-08
+**Status:** Accepted
+
+**Decision:** `Course` stores `unitCount`, `lessonCount`, and `exerciseCount`;
+`Unit` stores `lessonCount` and `exerciseCount`; `Lesson` stores
+`exerciseCount`. Counts include every status. The Firebase adapter keeps them
+in the same atomic commit as the content write: creating a Unit or Lesson
+increments its parents, and every Lesson write adds its Exercise-count delta
+to its Unit and Course. Course, Unit, and Lesson saves update only
+author-editable fields, never counters or `order`.
+`pnpm content:backfill-counts` recomputes and repairs them.
+
+**Why:** Admin pages need totals for every level below the current one
+without reading every Unit and Lesson as content grows. Counters stay exact
+because content is never deleted ([[DEC-034]]), never moves between parents,
+and saved Exercises are never removed. Summing Course counters avoids a
+global counter document that every create would contend on. Aggregation
+queries were rejected: Lessons would need a denormalized `courseId`, and each
+Dashboard load would run three queries per Course.
+
+**Consequences:** Deploy the counter-maintaining code before running the
+backfill, because older code overwrote whole documents. Run the backfill while
+nobody edits content. Published-only counts for learners are out of scope and
+would be separate fields. See
+`docs/superpowers/specs/2026-10-08-admin-content-counts-design.md`.
