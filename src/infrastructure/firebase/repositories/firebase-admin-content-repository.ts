@@ -47,6 +47,19 @@ function statusFields(data: DocumentData) {
   }
 }
 
+// Copies only stored counters: an absent counter stays absent, because
+// writing a guessed 0 back would look like a real count before the backfill.
+function counterFields<K extends string>(
+  data: DocumentData,
+  keys: readonly K[],
+): Partial<Record<K, number>> {
+  return Object.fromEntries(
+    keys
+      .filter((key) => typeof data[key] === 'number')
+      .map((key) => [key, data[key] as number]),
+  ) as Partial<Record<K, number>>
+}
+
 function toCourse(id: string, data: DocumentData): Course {
   return {
     id,
@@ -56,6 +69,7 @@ function toCourse(id: string, data: DocumentData): Course {
     ...(data.type === 'home' || data.type === 'learning'
       ? { type: data.type as CourseType }
       : {}),
+    ...counterFields(data, ['unitCount', 'lessonCount', 'exerciseCount']),
     createdAt: date(data.createdAt),
     updatedAt: date(data.updatedAt),
     ...statusFields(data),
@@ -69,6 +83,7 @@ function toUnit(id: string, data: DocumentData): Unit {
     title: data.title,
     description: data.description,
     order: data.order,
+    ...counterFields(data, ['lessonCount', 'exerciseCount']),
     createdAt: date(data.createdAt),
     updatedAt: date(data.updatedAt),
     ...statusFields(data),
@@ -83,6 +98,7 @@ function toLesson(id: string, data: DocumentData): Lesson {
     type: data.type,
     order: data.order,
     exercises: data.exercises ?? [],
+    ...counterFields(data, ['exerciseCount']),
     createdAt: date(data.createdAt),
     updatedAt: date(data.updatedAt),
     ...statusFields(data),

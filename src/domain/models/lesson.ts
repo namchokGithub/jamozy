@@ -22,6 +22,9 @@ export interface Lesson extends ContentStatusFields {
   type: LessonType
   order: number
   exercises: LessonExercise[]
+  // Stored copy of exercises.length so parents can be counted without
+  // reading Exercises; the persistence adapter keeps it equal.
+  exerciseCount?: number
   createdAt: Date
   updatedAt: Date
 }
