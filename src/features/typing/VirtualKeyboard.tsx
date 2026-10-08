@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { KeyboardFeedback } from './keyboard-feedback'
 import KeyboardRow from './KeyboardRow'
-import type { KeyboardKey } from './VirtualKey'
+import type { KeyboardKey, KeyFocusLevel } from './VirtualKey'
 
 const ROW_1: KeyboardKey[] = [
   { code: 'Tab', label: 'Tab', wide: 'tab' },
@@ -61,6 +61,66 @@ const VIRTUAL_KEY_CODES = new Set(
   [...ROW_1, ...ROW_2, ...ROW_3].map(({ code }) => code),
 )
 
+const KEYBOARD_ROWS = [ROW_1, ROW_2, ROW_3]
+
+function closestCodeInRow(
+  index: number,
+  sourceLength: number,
+  row: KeyboardKey[],
+): string | undefined {
+  const position = index / Math.max(sourceLength - 1, 1)
+  let closestCode: string | undefined
+  let closestDistance = Infinity
+  row.forEach(({ code }, candidateIndex) => {
+    const candidatePosition = candidateIndex / Math.max(row.length - 1, 1)
+    const distance = Math.abs(position - candidatePosition)
+    if (distance < closestDistance) {
+      closestCode = code
+      closestDistance = distance
+    }
+  })
+  return closestCode
+}
+
+function nearbyCodes(code: string): Set<string> {
+  const rowIndex = KEYBOARD_ROWS.findIndex((row) =>
+    row.some((key) => key.code === code),
+  )
+  if (rowIndex === -1) return new Set()
+  const row = KEYBOARD_ROWS[rowIndex]
+  const index = row.findIndex((key) => key.code === code)
+  const nearby = new Set<string>()
+  if (row[index - 1]) nearby.add(row[index - 1].code)
+  if (row[index + 1]) nearby.add(row[index + 1].code)
+  const above = KEYBOARD_ROWS[rowIndex - 1]
+  const below = KEYBOARD_ROWS[rowIndex + 1]
+  const aboveCode = above && closestCodeInRow(index, row.length, above)
+  const belowCode = below && closestCodeInRow(index, row.length, below)
+  if (aboveCode) nearby.add(aboveCode)
+  if (belowCode) nearby.add(belowCode)
+  return nearby
+}
+
+function focusLevelsFor(
+  nextKey: VirtualKeyboardProps['nextKey'],
+): ReadonlyMap<string, KeyFocusLevel> {
+  const levels = new Map<string, KeyFocusLevel>()
+  if (!nextKey) {
+    for (const code of VIRTUAL_KEY_CODES) levels.set(code, 'target')
+    return levels
+  }
+  for (const code of VIRTUAL_KEY_CODES) levels.set(code, 'other')
+  levels.set(nextKey.code, 'target')
+  if (nextKey.shift) {
+    levels.set('ShiftLeft', 'target')
+    levels.set('ShiftRight', 'target')
+  }
+  for (const code of nearbyCodes(nextKey.code)) {
+    if (levels.get(code) !== 'target') levels.set(code, 'nearby')
+  }
+  return levels
+}
+
 interface VirtualKeyboardProps {
   nextKey?: { code: string; shift: boolean }
   feedback?: KeyboardFeedback
@@ -82,6 +142,7 @@ export default function VirtualKeyboard({
   const [pressedCodes, setPressedCodes] = useState<ReadonlySet<string>>(
     () => new Set(),
   )
+  const focusLevels = useMemo(() => focusLevelsFor(nextKey), [nextKey])
 
   useEffect(() => {
     const setPressed = (code: string, pressed: boolean) => {
@@ -130,6 +191,7 @@ export default function VirtualKeyboard({
             showEnglishKeys={showEnglishKeys}
             virtualShiftActive={virtualShiftActive}
             pressedCodes={pressedCodes}
+            focusLevels={focusLevels}
             onKeyPress={onKeyPress}
             onVirtualShiftChange={setVirtualShiftActive}
           />

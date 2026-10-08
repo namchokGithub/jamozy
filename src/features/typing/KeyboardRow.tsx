@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react'
 import type { KeyboardFeedback } from './keyboard-feedback'
-import VirtualKey, { type KeyboardKey } from './VirtualKey'
+import VirtualKey, { type KeyboardKey, type KeyFocusLevel } from './VirtualKey'
 
 interface KeyboardRowProps {
   keys: KeyboardKey[]
@@ -10,6 +10,7 @@ interface KeyboardRowProps {
   showEnglishKeys: boolean
   virtualShiftActive: boolean
   pressedCodes: ReadonlySet<string>
+  focusLevels: ReadonlyMap<string, KeyFocusLevel>
   onKeyPress?: (code: string, shiftKey: boolean) => void
   onVirtualShiftChange: Dispatch<SetStateAction<boolean>>
 }
@@ -22,6 +23,7 @@ export default function KeyboardRow({
   showEnglishKeys,
   virtualShiftActive,
   pressedCodes,
+  focusLevels,
   onKeyPress,
   onVirtualShiftChange,
 }: KeyboardRowProps) {
@@ -37,6 +39,7 @@ export default function KeyboardRow({
           showEnglishKeys={showEnglishKeys}
           virtualShiftActive={virtualShiftActive}
           isPressed={pressedCodes.has(keyboardKey.code)}
+          focusLevel={focusLevels.get(keyboardKey.code) ?? 'target'}
           canInteract={Boolean(onKeyPress)}
           onPress={(code, shiftKey) => {
             onKeyPress?.(code, shiftKey)

@@ -11,6 +11,14 @@ import type { KeyboardFeedback } from './keyboard-feedback'
 export type KeyVisualState =
   'idle' | 'target' | 'active' | 'previous' | 'wrong' | 'dimmed'
 
+export type KeyFocusLevel = 'target' | 'nearby' | 'other'
+
+const focusOpacity: Record<KeyFocusLevel, number> = {
+  target: 1,
+  nearby: 0.75,
+  other: 0.55,
+}
+
 export type KeyboardKey = {
   code: string
   label?: string
@@ -25,6 +33,7 @@ interface VirtualKeyProps {
   showEnglishKeys: boolean
   virtualShiftActive: boolean
   isPressed: boolean
+  focusLevel: KeyFocusLevel
   canInteract: boolean
   onPress: (code: string, shiftKey: boolean) => void
   onShiftToggle: () => void
@@ -145,6 +154,7 @@ export default function VirtualKey({
   showEnglishKeys,
   virtualShiftActive,
   isPressed,
+  focusLevel,
   canInteract,
   onPress,
   onShiftToggle,
@@ -179,6 +189,13 @@ export default function VirtualKey({
     feedback?.outcome === 'wrong' && feedback.code === code
       ? feedback.id
       : undefined
+  const keepsFullFocus =
+    isPressed ||
+    isActiveShift ||
+    visualState === 'active' ||
+    visualState === 'wrong' ||
+    visualState === 'previous'
+  const keyOpacity = keepsFullFocus ? 1 : focusOpacity[focusLevel]
 
   useEffect(() => {
     if (wrongFeedbackId === undefined || shouldReduceMotion) return
@@ -210,22 +227,22 @@ export default function VirtualKey({
               ],
             }
           : shouldPulseTarget && !shouldReduceMotion && !isPressed
-          ? {
-              scale: [1, 1.04, 1],
-              boxShadow: [
-                '0 3px 10px -5px rgba(35, 109, 86, 0.45)',
-                '0 0 14px rgba(159, 216, 189, 0.55)',
-                '0 3px 10px -5px rgba(35, 109, 86, 0.45)',
-              ],
-            }
-          : { scale: 1, boxShadow: 'none' }
+            ? {
+                scale: [1, 1.04, 1],
+                boxShadow: [
+                  '0 3px 10px -5px rgba(35, 109, 86, 0.45)',
+                  '0 0 14px rgba(159, 216, 189, 0.55)',
+                  '0 3px 10px -5px rgba(35, 109, 86, 0.45)',
+                ],
+              }
+            : { scale: 1, boxShadow: 'none' }
       }
       transition={
         shouldPulseShift && !shouldReduceMotion && !isPressed
           ? { duration: 1.2, repeat: Infinity, ease: 'easeInOut' }
           : shouldPulseTarget && !shouldReduceMotion && !isPressed
-          ? { duration: 1.5, repeat: Infinity, ease: 'easeInOut' }
-          : { duration: 0.1 }
+            ? { duration: 1.5, repeat: Infinity, ease: 'easeInOut' }
+            : { duration: 0.1 }
       }
       className={`relative ${keyWidth(wide)}`}
     >
@@ -235,43 +252,49 @@ export default function VirtualKey({
           data-state={visualState}
           animate={
             isPressed && !shouldReduceMotion
-              ? { scale: 0.96, y: 2 }
-              : { scale: 1, y: 0 }
+              ? { scale: 0.96, y: 2, opacity: keyOpacity }
+              : { scale: 1, y: 0, opacity: keyOpacity }
           }
-          transition={{ type: 'spring', stiffness: 600, damping: 30 }}
+          transition={{
+            scale: { type: 'spring', stiffness: 600, damping: 30 },
+            y: { type: 'spring', stiffness: 600, damping: 30 },
+            opacity: shouldReduceMotion
+              ? { duration: 0 }
+              : { duration: 0.18, ease: 'easeOut' },
+          }}
           className={`relative flex h-12 w-full flex-col items-center justify-center rounded-lg border px-1 text-sm transition-[background-color,border-color,color,box-shadow] duration-200 sm:h-13 ${keyVisualClass} ${canPress ? 'cursor-pointer touch-manipulation' : 'cursor-default'}`}
           aria-label={displayLabel}
           aria-pressed={isShiftKey ? virtualShiftActive : undefined}
           disabled={!canPress}
           onClick={handleClick}
         >
-        {jamo ? (
-          <>
-            {jamo.shift && (
-              <span className="absolute top-1 right-1 text-[10px] leading-none text-[#a85d4e]">
-                {jamo.shift}
-              </span>
-            )}
-            <span className="text-base leading-4">{jamo.base}</span>
-            {showEnglishKeys && (
-              <span
-                className={`mt-0.5 text-[10px] leading-3 text-slate-400 ${hasHomeRowMarker ? 'mb-1.5' : ''}`}
-              >
-                {englishLabel(code)}
-              </span>
-            )}
-            {hasHomeRowMarker && (
-              <span
-                aria-hidden="true"
-                className="absolute bottom-1 h-0.5 w-5 rounded-full bg-gray-300/50 sm:bottom-1.5 sm:h-px sm:w-4"
-              />
-            )}
-          </>
-        ) : (
-          <span className="text-[11px] font-semibold text-[#667085]">
-            {displayLabel}
-          </span>
-        )}
+          {jamo ? (
+            <>
+              {jamo.shift && (
+                <span className="absolute top-1 right-1 text-[10px] leading-none text-[#a85d4e]">
+                  {jamo.shift}
+                </span>
+              )}
+              <span className="text-base leading-4">{jamo.base}</span>
+              {showEnglishKeys && (
+                <span
+                  className={`mt-0.5 text-[10px] leading-3 text-slate-400 ${hasHomeRowMarker ? 'mb-1.5' : ''}`}
+                >
+                  {englishLabel(code)}
+                </span>
+              )}
+              {hasHomeRowMarker && (
+                <span
+                  aria-hidden="true"
+                  className="absolute bottom-1 h-0.5 w-5 rounded-full bg-gray-300/50 sm:bottom-1.5 sm:h-px sm:w-4"
+                />
+              )}
+            </>
+          ) : (
+            <span className="text-[11px] font-semibold text-[#667085]">
+              {displayLabel}
+            </span>
+          )}
           <AnimatePresence initial={false}>
             {correctFeedbackId !== undefined && !shouldReduceMotion && (
               <CorrectKeyFeedback key={correctFeedbackId} />
