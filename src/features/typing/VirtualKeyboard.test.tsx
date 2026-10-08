@@ -35,6 +35,30 @@ describe('VirtualKeyboard', () => {
     expect(screen.getByLabelText('r')).not.toHaveClass('bg-[#fff0d8]')
   })
 
+  it('keeps the desktop key labels when mobileStyle is off', () => {
+    render(<VirtualKeyboard showEnglishKeys opacity={1} />)
+    expect(screen.getByLabelText('Tab')).toHaveTextContent(/^Tab$/)
+    expect(screen.getByLabelText('q')).toHaveTextContent(/^ㅃㅂq$/)
+  })
+
+  it('adds a phone-style label set when mobileStyle is on', () => {
+    render(<VirtualKeyboard showEnglishKeys opacity={1} mobileStyle />)
+    expect(screen.getByLabelText('Tab')).toHaveTextContent(/^⇥Tab$/)
+    expect(screen.getByLabelText('q')).toHaveTextContent(/^ㅃㅂㅂq$/)
+  })
+
+  it('shows shifted jamo on the phone-style label when Shift is needed', () => {
+    render(
+      <VirtualKeyboard
+        nextKey={{ code: 'KeyQ', shift: true }}
+        showEnglishKeys
+        opacity={1}
+        mobileStyle
+      />,
+    )
+    expect(screen.getByLabelText('q')).toHaveTextContent(/^ㅃㅃㅂq$/)
+  })
+
   it('hides English key labels when showEnglishKeys is false', () => {
     render(<VirtualKeyboard showEnglishKeys={false} opacity={1} />)
 

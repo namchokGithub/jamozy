@@ -57,6 +57,8 @@ interface VirtualKeyProps {
   canInteract: boolean
   onPress: (code: string, shiftKey: boolean) => void
   onShiftToggle: () => void
+  // Below `sm`, draws the key like a phone keyboard; `sm` and up is unchanged.
+  mobileStyle?: boolean
 }
 
 function englishLabel(code: string): string {
@@ -64,6 +66,14 @@ function englishLabel(code: string): string {
   if (code === 'Period') return '.'
   if (code === 'Slash') return '/'
   return code.replace('Key', '').toLowerCase()
+}
+
+const MOBILE_UTILITY_LABELS: Record<string, string> = {
+  Tab: '⇥',
+  CapsLock: '⇪',
+  Enter: '↵',
+  ShiftLeft: '⇧',
+  ShiftRight: '⇧',
 }
 
 function keyWidth(wide: KeyboardKey['wide']): string {
@@ -178,6 +188,7 @@ export default function VirtualKey({
   canInteract,
   onPress,
   onShiftToggle,
+  mobileStyle = false,
 }: VirtualKeyProps) {
   const { code, label, wide } = keyboardKey
   const jamo = KEY_TO_JAMO[code]
@@ -224,6 +235,16 @@ export default function VirtualKey({
     'Backspace',
     'Space',
   ].includes(code)
+
+  // Like a phone keyboard, a held Shift shows each key's shifted jamo.
+  const mobileJamo =
+    jamo && (virtualShiftActive || nextKey?.shift)
+      ? (jamo.shift ?? jamo.base)
+      : jamo?.base
+  const desktopOnly = mobileStyle ? 'hidden sm:inline' : ''
+  const keyShapeClass = mobileStyle
+    ? 'h-11 rounded-md px-0 sm:h-13 sm:rounded-lg sm:px-1'
+    : 'h-12 rounded-lg px-1 sm:h-13'
 
   const focusStyle =
     hasSemanticStyle || isUtilityKey ? undefined : focusStyles[focusLevel]
@@ -294,7 +315,7 @@ export default function VirtualKey({
             y: { type: 'spring', stiffness: 600, damping: 30 },
           }}
           style={focusStyle}
-          className={`relative flex h-12 w-full flex-col items-center justify-center rounded-lg border px-1 text-sm transition-[background-color,border-color,color,box-shadow] duration-200 sm:h-13 ${keyVisualClass} ${isVirtualShiftSelected ? 'ring-2 ring-inset ring-[#c98950] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.65)]' : ''} ${canPress ? 'cursor-pointer touch-manipulation' : 'cursor-default'}`}
+          className={`relative flex w-full flex-col items-center justify-center border text-sm transition-[background-color,border-color,color,box-shadow] duration-200 ${keyShapeClass} ${keyVisualClass} ${isVirtualShiftSelected ? 'ring-2 ring-inset ring-[#c98950] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.65)]' : ''} ${canPress ? 'cursor-pointer touch-manipulation' : 'cursor-default'}`}
           aria-label={displayLabel}
           aria-pressed={isShiftKey ? virtualShiftActive : undefined}
           disabled={!canPress}
@@ -303,14 +324,23 @@ export default function VirtualKey({
           {jamo ? (
             <>
               {jamo.shift && (
-                <span className="absolute top-1 right-1 text-[10px] leading-none text-[#a85d4e]">
+                <span
+                  className={`absolute top-1 right-1 text-[10px] leading-none text-[#a85d4e] ${desktopOnly}`}
+                >
                   {jamo.shift}
                 </span>
               )}
-              <span className="text-base leading-4">{jamo.base}</span>
+              {mobileStyle && (
+                <span className="text-[15px] leading-5 sm:hidden">
+                  {mobileJamo}
+                </span>
+              )}
+              <span className={`text-base leading-4 ${desktopOnly}`}>
+                {jamo.base}
+              </span>
               {showEnglishKeys && (
                 <span
-                  className={`mt-0.5 text-[10px] leading-3 text-slate-400 ${hasHomeRowMarker ? 'mb-1.5' : ''}`}
+                  className={`mt-0.5 text-[10px] leading-3 text-slate-400 ${hasHomeRowMarker ? 'mb-1.5' : ''} ${desktopOnly}`}
                 >
                   {englishLabel(code)}
                 </span>
@@ -323,9 +353,18 @@ export default function VirtualKey({
               )}
             </>
           ) : (
-            <span className="text-[11px] font-semibold text-[#667085]">
-              {displayLabel}
-            </span>
+            <>
+              {mobileStyle && (
+                <span className="text-xs font-semibold text-[#667085] sm:hidden">
+                  {MOBILE_UTILITY_LABELS[code] ?? displayLabel}
+                </span>
+              )}
+              <span
+                className={`text-[11px] font-semibold text-[#667085] ${desktopOnly}`}
+              >
+                {displayLabel}
+              </span>
+            </>
           )}
           <AnimatePresence initial={false}>
             {correctFeedbackId !== undefined && !shouldReduceMotion && (

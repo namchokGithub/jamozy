@@ -245,7 +245,7 @@ export default function HomePlayer({
 
   return (
     <section
-      className="mt-5 rounded-4xl border border-[#d9d1ed] bg-[#fffdf9] p-5 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:p-7 select-none!"
+      className="mt-5 rounded-4xl border border-[#d9d1ed] bg-[#fffdf9] p-3 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:p-7 select-none!"
       aria-labelledby="home-player-heading"
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -264,7 +264,7 @@ export default function HomePlayer({
 
       {active && session && lesson ? (
         <div className="mt-1">
-          <div className="mt-2 rounded-3xl bg-[#fffaf6] p-4 text-center shadow-[0_0_30px_-20px_rgba(87,65,45,0.35)]">
+          <div className="mt-2 rounded-3xl bg-[#fffaf6] p-3 text-center sm:p-4 shadow-[0_0_30px_-20px_rgba(87,65,45,0.35)]">
             <div className="flex h-5 justify-end gap-1.5">
               <span className="rounded-lg border border-[#eadfd4] bg-[#fffdf9] px-2 py-0.5 text-[10px] font-semibold text-[#98a2b3]">
                 WPM <strong className="ml-0.5 text-[#667085]">{wpm}</strong>
@@ -283,9 +283,10 @@ export default function HomePlayer({
             </div>
             <HangulTarget
               session={session.currentSession}
-              className="mt-3 origin-center scale-160 text-6xl font-bold tracking-wide sm:text-7xl"
+              className="mt-3 origin-center text-6xl font-bold tracking-wide sm:scale-160 sm:text-7xl"
+              compact
             />
-            <div className="mx-auto mt-10 max-w-44">
+            <div className="mx-auto mt-4 max-w-44 sm:mt-10">
               <p className="text-[10px] font-semibold text-[#98a2b3]">
                 {completedSteps} / {totalSteps} steps
               </p>
@@ -324,8 +325,14 @@ export default function HomePlayer({
             opacity={1}
             onKeyPress={handleKeyPress}
             pressedCodes={pressedCodes}
+            mobileStyle
           />
-          <FingerPlacementGuide nextKey={nextKey} pressedCodes={pressedCodes} />
+          <div className="hidden sm:block">
+            <FingerPlacementGuide
+              nextKey={nextKey}
+              pressedCodes={pressedCodes}
+            />
+          </div>
         </div>
       ) : opened || !hasLessons ? (
         <div className="mt-4 rounded-3xl border border-dashed border-[#dfcfc0] bg-white/60 p-6 text-center text-sm text-[#667085]">
@@ -334,14 +341,17 @@ export default function HomePlayer({
       ) : null}
 
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <nav className="mt-5 flex flex-wrap gap-2" aria-label="Choose unit">
+        <nav
+          className="mt-5 flex max-w-full gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible"
+          aria-label="Choose unit"
+        >
           {content.units.map((unit) => (
             <button
               key={unit.id}
               type="button"
               aria-pressed={unit.id === visibleUnit?.id}
               onClick={() => selectUnit(unit.id)}
-              className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${unit.id === visibleUnit?.id ? 'border-[#9d8bc8] bg-[#e9e1f8] text-[#5c4b88]' : 'border-[#eadfd4] bg-white text-[#667085] hover:border-[#c8b9e7]'}`}
+              className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-2 text-sm font-semibold transition sm:shrink sm:whitespace-normal ${unit.id === visibleUnit?.id ? 'border-[#9d8bc8] bg-[#e9e1f8] text-[#5c4b88]' : 'border-[#eadfd4] bg-white text-[#667085] hover:border-[#c8b9e7]'}`}
             >
               {unit.title}
             </button>
@@ -351,7 +361,7 @@ export default function HomePlayer({
 
       {visibleUnit && (
         <nav
-          className="mt-3 flex flex-wrap gap-2"
+          className="mt-3 flex gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible"
           aria-label={`Lessons in ${visibleUnit.title}`}
         >
           {visibleUnit.lessons.map((entry) => {
@@ -369,7 +379,7 @@ export default function HomePlayer({
                 onClick={() =>
                   open({ unitId: visibleUnit.id, lessonId: entry.id })
                 }
-                className={`flex items-center gap-2 rounded-2xl border px-3 py-1.5 text-sm font-semibold transition ${current ? 'border-[#c84f82] bg-[#fdf0f5] text-[#a8396a]' : 'border-[#eadfd4] bg-white text-[#667085] hover:border-[#e3b3c7]'}`}
+                className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl border px-3 py-1.5 text-sm font-semibold transition sm:shrink sm:whitespace-normal ${current ? 'border-[#c84f82] bg-[#fdf0f5] text-[#a8396a]' : 'border-[#eadfd4] bg-white text-[#667085] hover:border-[#e3b3c7]'}`}
               >
                 {entry.title}
                 <span

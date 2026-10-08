@@ -6,10 +6,17 @@ const COLORS = {
   current: '#c84f82',
   pending: '#c7c3bc',
 }
-const TILE_CLASS =
-  'h-26 w-26 rounded-md border border-[#f0eaff] bg-[#f9f8ff] shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)]'
+const TILE_LOOK =
+  'rounded-md border border-[#f0eaff] bg-[#f9f8ff] shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)]'
 
-const SPACE_CLASS = 'flex h-26 w-8 items-end pb-3'
+// `compact` shrinks tiles below `sm` so phone-width targets fit on one line.
+const tileSizeClass = (compact: boolean) =>
+  compact ? 'h-16 w-16 sm:h-26 sm:w-26' : 'h-26 w-26'
+
+const tileClass = (compact: boolean) => `${tileSizeClass(compact)} ${TILE_LOOK}`
+
+const spaceClass = (compact: boolean) =>
+  `flex items-end ${compact ? 'h-16 w-5 pb-2 sm:h-26 sm:w-8 sm:pb-3' : 'h-26 w-8 pb-3'}`
 
 function stateFor(index: number, keyIndex: number) {
   if (index < keyIndex) return 'correct'
@@ -26,6 +33,7 @@ interface JamoSvgHangulTargetProps {
   glyphs: Map<string, RuntimeJamoSvgGlyph>
   unitsPerEm: number
   className?: string
+  compact?: boolean
 }
 
 /** Renders each syllable as Pretendard SVG paths, one per typed key. */
@@ -34,6 +42,7 @@ export default function JamoSvgHangulTarget({
   glyphs,
   unitsPerEm,
   className = '',
+  compact = false,
 }: JamoSvgHangulTargetProps) {
   const characters = Array.from(session.targetText)
   const keyIndexes = new Map<number, number[]>()
@@ -57,7 +66,7 @@ export default function JamoSvgHangulTarget({
           return (
             <span
               key={syllableIndex}
-              className={SPACE_CLASS}
+              className={spaceClass(compact)}
               data-testid="space-step"
               data-state={state}
               aria-hidden="true"
@@ -75,7 +84,7 @@ export default function JamoSvgHangulTarget({
           <svg
             key={syllableIndex}
             viewBox={`0 0 ${glyph.width} ${unitsPerEm}`}
-            className={`${TILE_CLASS} p-1.5`}
+            className={`${tileClass(compact)} p-1.5`}
             data-syllable={syllable}
             aria-hidden="true"
           >
@@ -98,11 +107,13 @@ export function PendingHangulTiles({
   spaces,
   label,
   className = '',
+  compact = false,
 }: {
   /** One entry per typed character; true where it is a space. */
   spaces: boolean[]
   label: string
   className?: string
+  compact?: boolean
 }) {
   return (
     <div
@@ -115,13 +126,13 @@ export function PendingHangulTiles({
         isSpace ? (
           <span
             key={index}
-            className={SPACE_CLASS}
+            className={spaceClass(compact)}
             data-testid="pending-space-tile"
           />
         ) : (
           <div
             key={index}
-            className={TILE_CLASS}
+            className={tileClass(compact)}
             data-testid="pending-hangul-tile"
           />
         ),

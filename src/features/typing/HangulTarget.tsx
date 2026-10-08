@@ -21,6 +21,8 @@ export const JAMO_SVG_LOAD_TIMEOUT_MS = 1500
 interface HangulTargetProps {
   session: TypingSessionState
   className?: string
+  // Shrinks syllable tiles below `sm`; `sm` and up is unchanged.
+  compact?: boolean
 }
 
 function warn(reason: string) {
@@ -32,6 +34,7 @@ function warn(reason: string) {
 export default function HangulTarget({
   session,
   className = '',
+  compact = false,
 }: HangulTargetProps) {
   const [enabled] = useState(isJamoSvgRendererEnabled)
   const { targetText, expectedKeys } = session
@@ -92,7 +95,13 @@ export default function HangulTarget({
   }, [cachedChoice, enabled, groups, targetText])
 
   if (!enabled || !groups)
-    return <DecomposedHangulTarget session={session} className={className} />
+    return (
+      <DecomposedHangulTarget
+        session={session}
+        className={className}
+        compact={compact}
+      />
+    )
   const choice =
     cachedChoice ??
     (decision?.targetText === targetText ? decision.choice : undefined)
@@ -102,16 +111,24 @@ export default function HangulTarget({
         spaces={groups.map(isSpaceGroup)}
         label={targetText}
         className={className}
+        compact={compact}
       />
     )
   if (choice.kind === 'canvas')
-    return <DecomposedHangulTarget session={session} className={className} />
+    return (
+      <DecomposedHangulTarget
+        session={session}
+        className={className}
+        compact={compact}
+      />
+    )
   return (
     <JamoSvgHangulTarget
       session={session}
       glyphs={choice.glyphs}
       unitsPerEm={choice.unitsPerEm}
       className={className}
+      compact={compact}
     />
   )
 }

@@ -12,6 +12,7 @@ import {
 interface DecomposedHangulTargetProps {
   session: TypingSessionState
   className?: string
+  compact?: boolean
 }
 
 interface Rect {
@@ -533,10 +534,12 @@ function SyllableCanvas({
   glyph,
   keys,
   keyIndex,
+  compact,
 }: {
   glyph: string
   keys: PositionedKey[]
   keyIndex: number
+  compact: boolean
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
@@ -555,7 +558,7 @@ function SyllableCanvas({
       ref={canvasRef}
       width={TILE_SIZE}
       height={TILE_SIZE}
-      className="h-26 w-26 rounded-md border border-[#D9CFF5] bg-[#FFFCF7] shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)]"
+      className={`${compact ? 'h-16 w-16 sm:h-26 sm:w-26' : 'h-26 w-26'} rounded-md border border-[#D9CFF5] bg-[#FFFCF7] shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)]`}
       aria-hidden="true"
     />
   )
@@ -565,6 +568,7 @@ function SyllableCanvas({
 export default function DecomposedHangulTarget({
   session,
   className = '',
+  compact = false,
 }: DecomposedHangulTargetProps) {
   const syllables = new Map<number, PositionedKey[]>()
   const characters = Array.from(session.targetText)
@@ -586,6 +590,7 @@ export default function DecomposedHangulTarget({
           glyph={characters[syllableIndex] ?? ''}
           keys={keys}
           keyIndex={session.keyIndex}
+          compact={compact}
         />
       ))}
     </div>

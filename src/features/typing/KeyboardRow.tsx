@@ -13,6 +13,7 @@ interface KeyboardRowProps {
   focusLevels: ReadonlyMap<string, KeyFocusLevel>
   onKeyPress?: (code: string, shiftKey: boolean) => void
   onVirtualShiftChange: Dispatch<SetStateAction<boolean>>
+  mobileStyle?: boolean
 }
 
 export default function KeyboardRow({
@@ -26,9 +27,10 @@ export default function KeyboardRow({
   focusLevels,
   onKeyPress,
   onVirtualShiftChange,
+  mobileStyle = false,
 }: KeyboardRowProps) {
   return (
-    <div className="flex gap-1.5">
+    <div className={`flex ${mobileStyle ? 'gap-[3px] sm:gap-1.5' : 'gap-1.5'}`}>
       {keys.map((keyboardKey) => (
         <VirtualKey
           key={keyboardKey.code}
@@ -46,6 +48,7 @@ export default function KeyboardRow({
             onVirtualShiftChange(() => false)
           }}
           onShiftToggle={() => onVirtualShiftChange((current) => !current)}
+          mobileStyle={mobileStyle}
         />
       ))}
     </div>

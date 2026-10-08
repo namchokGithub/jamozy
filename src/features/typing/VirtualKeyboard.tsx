@@ -161,6 +161,8 @@ interface VirtualKeyboardProps {
   opacity: number
   onKeyPress?: (code: string, shiftKey: boolean) => void
   pressedCodes?: ReadonlySet<string>
+  // Below `sm`, draws the keyboard like a phone keyboard; `sm` and up is unchanged.
+  mobileStyle?: boolean
 }
 
 export default function VirtualKeyboard({
@@ -171,17 +173,20 @@ export default function VirtualKeyboard({
   opacity,
   onKeyPress,
   pressedCodes = new Set(),
+  mobileStyle = false,
 }: VirtualKeyboardProps) {
   const [virtualShiftActive, setVirtualShiftActive] = useState(false)
   const focusLevels = useMemo(() => focusLevelsFor(nextKey), [nextKey])
 
   return (
     <div
-      className="mt-6 rounded-2xl bg-[#FFF8EF] p-4 shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)] select-none sm:p-5"
+      className={`rounded-2xl shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)] select-none sm:p-5 ${mobileStyle ? 'mt-4 bg-[#EFE8DD] px-1 py-2 sm:mt-6 sm:bg-[#FFF8EF]' : 'mt-6 bg-[#FFF8EF] p-4'}`}
       aria-label="Virtual Korean keyboard"
       style={{ opacity }}
     >
-      <div className="mx-auto max-w-5xl space-y-2 sm:space-y-3">
+      <div
+        className={`mx-auto max-w-5xl sm:space-y-3 ${mobileStyle ? 'space-y-1.5' : 'space-y-2'}`}
+      >
         {[ROW_1, ROW_2, ROW_3].map((keys) => (
           <KeyboardRow
             key={keys[0].code}
@@ -195,6 +200,7 @@ export default function VirtualKeyboard({
             focusLevels={focusLevels}
             onKeyPress={onKeyPress}
             onVirtualShiftChange={setVirtualShiftActive}
+            mobileStyle={mobileStyle}
           />
         ))}
       </div>

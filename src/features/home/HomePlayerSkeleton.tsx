@@ -2,7 +2,7 @@
 export default function HomePlayerSkeleton() {
   return (
     <section
-      className="mt-7 rounded-4xl border border-[#d9d1ed] bg-[#fffdf9] p-5 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:p-7"
+      className="mt-7 rounded-4xl border border-[#d9d1ed] bg-[#fffdf9] p-3 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:p-7"
       aria-label="Loading your practice room"
       aria-busy="true"
     >

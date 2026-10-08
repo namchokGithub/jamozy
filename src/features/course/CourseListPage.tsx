@@ -50,7 +50,7 @@ export default function CourseListPage() {
             <img
               src="/templates/jamozy-hanguk-180x180.png"
               alt=""
-              className="h-15 w-15 object-contain"
+              className="h-11 w-11 object-contain sm:h-15 sm:w-15"
             />
             <span className="text-xl font-bold tracking-tight">Jamozy</span>
           </Link>
@@ -168,7 +168,7 @@ function AccountNav({
   return (
     <>
       <nav
-        className="flex items-center gap-2 select-none!"
+        className="flex items-center gap-1.5 select-none! sm:gap-2"
         aria-label="Account navigation"
       >
         {!isAuthenticated &&
@@ -201,7 +201,7 @@ function AccountNav({
               }}
               className="flex items-center gap-1 rounded-full border border-[#eadfd4] bg-white/80 px-3 py-2 text-sm shadow-sm"
             >
-              {name}
+              <span className="hidden sm:inline">{name}</span>
               <Pencil aria-hidden="true" size={14} />
             </button>
           ))}
@@ -237,7 +237,7 @@ function AccountNav({
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#f2edf9] text-[#7863a8]">
                 <UserRound aria-hidden="true" size={13} />
               </span>
-              <span className="max-w-32 truncate">{name}</span>
+              <span className="hidden max-w-32 truncate sm:inline">{name}</span>
               <ChevronDown
                 aria-hidden="true"
                 size={15}
