@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { KeyboardFeedback } from './keyboard-feedback'
 import KeyboardRow from './KeyboardRow'
 import type { KeyboardKey } from './VirtualKey'
@@ -57,6 +57,10 @@ const ROW_3: KeyboardKey[] = [
   { code: 'ShiftRight', label: 'Shift ⇧', wide: 'shift' },
 ]
 
+const VIRTUAL_KEY_CODES = new Set(
+  [...ROW_1, ...ROW_2, ...ROW_3].map(({ code }) => code),
+)
+
 interface VirtualKeyboardProps {
   nextKey?: { code: string; shift: boolean }
   feedback?: KeyboardFeedback
@@ -75,6 +79,39 @@ export default function VirtualKeyboard({
   onKeyPress,
 }: VirtualKeyboardProps) {
   const [virtualShiftActive, setVirtualShiftActive] = useState(false)
+  const [pressedCodes, setPressedCodes] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  )
+
+  useEffect(() => {
+    const setPressed = (code: string, pressed: boolean) => {
+      if (!VIRTUAL_KEY_CODES.has(code)) return
+      setPressedCodes((current) => {
+        if (current.has(code) === pressed) return current
+        const next = new Set(current)
+        if (pressed) next.add(code)
+        else next.delete(code)
+        return next
+      })
+    }
+    const clearPressed = () => setPressedCodes(new Set())
+    const handleKeyDown = (event: KeyboardEvent) => setPressed(event.code, true)
+    const handleKeyUp = (event: KeyboardEvent) => setPressed(event.code, false)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') clearPressed()
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+    window.addEventListener('blur', clearPressed)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+      window.removeEventListener('blur', clearPressed)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [])
 
   return (
     <div
@@ -92,6 +129,7 @@ export default function VirtualKeyboard({
             previousFeedback={previousFeedback}
             showEnglishKeys={showEnglishKeys}
             virtualShiftActive={virtualShiftActive}
+            pressedCodes={pressedCodes}
             onKeyPress={onKeyPress}
             onVirtualShiftChange={setVirtualShiftActive}
           />

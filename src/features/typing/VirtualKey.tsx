@@ -24,6 +24,7 @@ interface VirtualKeyProps {
   previousFeedback?: KeyboardFeedback
   showEnglishKeys: boolean
   virtualShiftActive: boolean
+  isPressed: boolean
   canInteract: boolean
   onPress: (code: string, shiftKey: boolean) => void
   onShiftToggle: () => void
@@ -143,6 +144,7 @@ export default function VirtualKey({
   previousFeedback,
   showEnglishKeys,
   virtualShiftActive,
+  isPressed,
   canInteract,
   onPress,
   onShiftToggle,
@@ -153,7 +155,7 @@ export default function VirtualKey({
   const isJamoKey = isKoreanJamoKey(code)
   const displayLabel = label ?? englishLabel(code)
   const hasHomeRowMarker = code === 'KeyF' || code === 'KeyJ'
-  const keyAnimation = useAnimationControls()
+  const wrongAnimation = useAnimationControls()
   const shouldReduceMotion = useReducedMotion()
   const canPress = canInteract && (isJamoKey || isShiftKey)
   const visualState = getVisualState(
@@ -179,38 +181,12 @@ export default function VirtualKey({
       : undefined
 
   useEffect(() => {
-    if (!isShiftKey) return
-    if (!shouldPulseShift || shouldReduceMotion) {
-      keyAnimation.stop()
-      keyAnimation.set({ scale: 1, boxShadow: 'none' })
-      return
-    }
-    void keyAnimation.start({
-      scale: [1, 1.04, 1],
-      boxShadow: [
-        '0 0 0px rgba(227, 173, 115, 0)',
-        '0 0 12px rgba(227, 173, 115, 0.45)',
-        '0 0 0px rgba(227, 173, 115, 0)',
-      ],
-      transition: { duration: 1.5, repeat: Infinity, ease: 'easeInOut' },
-    })
-  }, [isShiftKey, keyAnimation, shouldPulseShift, shouldReduceMotion])
-
-  useEffect(() => {
-    if (correctFeedbackId === undefined || shouldReduceMotion) return
-    void keyAnimation.start({
-      scale: [1, 1.08, 0.98, 1],
-      transition: { duration: 0.21, ease: 'easeOut', times: [0, 0.35, 0.7, 1] },
-    })
-  }, [correctFeedbackId, keyAnimation, shouldReduceMotion])
-
-  useEffect(() => {
     if (wrongFeedbackId === undefined || shouldReduceMotion) return
-    void keyAnimation.start({
+    void wrongAnimation.start({
       x: [0, -3, 3, -2, 0],
       transition: { duration: 0.22, ease: 'easeOut' },
     })
-  }, [keyAnimation, shouldReduceMotion, wrongFeedbackId])
+  }, [shouldReduceMotion, wrongAnimation, wrongFeedbackId])
 
   const handleClick = () => {
     if (!canInteract) return
@@ -224,7 +200,16 @@ export default function VirtualKey({
   return (
     <motion.div
       animate={
-        shouldPulseTarget && !shouldReduceMotion
+        shouldPulseShift && !shouldReduceMotion && !isPressed
+          ? {
+              scale: [1, 1.04, 1],
+              boxShadow: [
+                '0 0 0px rgba(227, 173, 115, 0)',
+                '0 0 12px rgba(227, 173, 115, 0.45)',
+                '0 0 0px rgba(227, 173, 115, 0)',
+              ],
+            }
+          : shouldPulseTarget && !shouldReduceMotion && !isPressed
           ? {
               scale: [1, 1.04, 1],
               boxShadow: [
@@ -236,22 +221,30 @@ export default function VirtualKey({
           : { scale: 1, boxShadow: 'none' }
       }
       transition={
-        shouldPulseTarget && !shouldReduceMotion
+        shouldPulseShift && !shouldReduceMotion && !isPressed
+          ? { duration: 1.2, repeat: Infinity, ease: 'easeInOut' }
+          : shouldPulseTarget && !shouldReduceMotion && !isPressed
           ? { duration: 1.5, repeat: Infinity, ease: 'easeInOut' }
           : { duration: 0.1 }
       }
       className={`relative ${keyWidth(wide)}`}
     >
-      <motion.button
-        type="button"
-        data-state={visualState}
-        animate={keyAnimation}
-        className={`relative flex h-12 w-full flex-col items-center justify-center rounded-lg border px-1 text-sm transition-[background-color,border-color,color,box-shadow] duration-200 sm:h-13 ${keyVisualClass} ${canPress ? 'cursor-pointer touch-manipulation' : 'cursor-default'}`}
-        aria-label={displayLabel}
-        aria-pressed={isShiftKey ? virtualShiftActive : undefined}
-        disabled={!canPress}
-        onClick={handleClick}
-      >
+      <motion.div animate={wrongAnimation} className="h-full w-full">
+        <motion.button
+          type="button"
+          data-state={visualState}
+          animate={
+            isPressed && !shouldReduceMotion
+              ? { scale: 0.96, y: 2 }
+              : { scale: 1, y: 0 }
+          }
+          transition={{ type: 'spring', stiffness: 600, damping: 30 }}
+          className={`relative flex h-12 w-full flex-col items-center justify-center rounded-lg border px-1 text-sm transition-[background-color,border-color,color,box-shadow] duration-200 sm:h-13 ${keyVisualClass} ${canPress ? 'cursor-pointer touch-manipulation' : 'cursor-default'}`}
+          aria-label={displayLabel}
+          aria-pressed={isShiftKey ? virtualShiftActive : undefined}
+          disabled={!canPress}
+          onClick={handleClick}
+        >
         {jamo ? (
           <>
             {jamo.shift && (
@@ -279,15 +272,16 @@ export default function VirtualKey({
             {displayLabel}
           </span>
         )}
-        <AnimatePresence initial={false}>
-          {correctFeedbackId !== undefined && !shouldReduceMotion && (
-            <CorrectKeyFeedback key={correctFeedbackId} />
-          )}
-          {wrongFeedbackId !== undefined && !shouldReduceMotion && (
-            <WrongKeyFeedback key={wrongFeedbackId} />
-          )}
-        </AnimatePresence>
-      </motion.button>
+          <AnimatePresence initial={false}>
+            {correctFeedbackId !== undefined && !shouldReduceMotion && (
+              <CorrectKeyFeedback key={correctFeedbackId} />
+            )}
+            {wrongFeedbackId !== undefined && !shouldReduceMotion && (
+              <WrongKeyFeedback key={wrongFeedbackId} />
+            )}
+          </AnimatePresence>
+        </motion.button>
+      </motion.div>
     </motion.div>
   )
 }

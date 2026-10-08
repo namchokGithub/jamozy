@@ -9,6 +9,7 @@ interface KeyboardRowProps {
   previousFeedback?: KeyboardFeedback
   showEnglishKeys: boolean
   virtualShiftActive: boolean
+  pressedCodes: ReadonlySet<string>
   onKeyPress?: (code: string, shiftKey: boolean) => void
   onVirtualShiftChange: Dispatch<SetStateAction<boolean>>
 }
@@ -20,6 +21,7 @@ export default function KeyboardRow({
   previousFeedback,
   showEnglishKeys,
   virtualShiftActive,
+  pressedCodes,
   onKeyPress,
   onVirtualShiftChange,
 }: KeyboardRowProps) {
@@ -34,6 +36,7 @@ export default function KeyboardRow({
           previousFeedback={previousFeedback}
           showEnglishKeys={showEnglishKeys}
           virtualShiftActive={virtualShiftActive}
+          isPressed={pressedCodes.has(keyboardKey.code)}
           canInteract={Boolean(onKeyPress)}
           onPress={(code, shiftKey) => {
             onKeyPress?.(code, shiftKey)
