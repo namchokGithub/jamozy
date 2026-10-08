@@ -14,6 +14,7 @@ import { useKeyboardFeedback } from '../typing/keyboard-feedback'
 import type { Lesson } from '../../domain/models/lesson'
 import type { CompleteLessonOutcome } from '../../application/complete-lesson'
 import type { UserSettings } from '../../domain/models/user-profile'
+import { usePressedKeyCodes } from '../typing/usePressedKeyCodes'
 
 type KeyboardSettings = Pick<
   UserSettings,
@@ -36,6 +37,7 @@ export default function LessonTypingSession({
   onComplete,
   keyboardSettings,
 }: LessonTypingSessionProps) {
+  const pressedCodes = usePressedKeyCodes()
   const { session, start, pressKey, generation, submissionId } =
     useLessonSessionStore()
   const fetcher = useFetcher<CompleteLessonOutcome>()
@@ -161,8 +163,9 @@ export default function LessonTypingSession({
             showEnglishKeys={keyboardSettings.showEnglishKeys}
             opacity={keyboardSettings.keyboardOpacity}
             onKeyPress={handleKeyPress}
+            pressedCodes={pressedCodes}
           />
-          <FingerPlacementGuide nextKey={nextKey} />
+          <FingerPlacementGuide nextKey={nextKey} pressedCodes={pressedCodes} />
         </>
       )}
     </div>

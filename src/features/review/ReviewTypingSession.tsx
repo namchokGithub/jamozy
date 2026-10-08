@@ -13,6 +13,7 @@ import { useKeyboardFeedback } from '../typing/keyboard-feedback'
 import type { ReviewItem } from '../../domain/models/review-item'
 import type { SubmitReviewSessionOutcome } from '../../application/submit-review-session'
 import type { UserSettings } from '../../domain/models/user-profile'
+import { usePressedKeyCodes } from '../typing/usePressedKeyCodes'
 
 type KeyboardSettings = Pick<
   UserSettings,
@@ -36,6 +37,7 @@ export default function ReviewTypingSession({
   onComplete,
   keyboardSettings = defaultKeyboardSettings,
 }: ReviewTypingSessionProps) {
+  const pressedCodes = usePressedKeyCodes()
   const { session, start, pressKey, generation, submissionId } =
     useLessonSessionStore()
   const fetcher = useFetcher<SubmitReviewSessionOutcome>()
@@ -155,8 +157,9 @@ export default function ReviewTypingSession({
             showEnglishKeys={keyboardSettings.showEnglishKeys}
             opacity={keyboardSettings.keyboardOpacity}
             onKeyPress={handleKeyPress}
+            pressedCodes={pressedCodes}
           />
-          <FingerPlacementGuide nextKey={nextKey} />
+          <FingerPlacementGuide nextKey={nextKey} pressedCodes={pressedCodes} />
         </>
       )}
     </div>

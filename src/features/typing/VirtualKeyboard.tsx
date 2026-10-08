@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { KeyboardFeedback } from './keyboard-feedback'
 import KeyboardRow from './KeyboardRow'
 import type { KeyboardKey, KeyFocusLevel } from './VirtualKey'
@@ -160,6 +160,7 @@ interface VirtualKeyboardProps {
   showEnglishKeys: boolean
   opacity: number
   onKeyPress?: (code: string, shiftKey: boolean) => void
+  pressedCodes?: ReadonlySet<string>
 }
 
 export default function VirtualKeyboard({
@@ -169,42 +170,10 @@ export default function VirtualKeyboard({
   showEnglishKeys,
   opacity,
   onKeyPress,
+  pressedCodes = new Set(),
 }: VirtualKeyboardProps) {
   const [virtualShiftActive, setVirtualShiftActive] = useState(false)
-  const [pressedCodes, setPressedCodes] = useState<ReadonlySet<string>>(
-    () => new Set(),
-  )
   const focusLevels = useMemo(() => focusLevelsFor(nextKey), [nextKey])
-
-  useEffect(() => {
-    const setPressed = (code: string, pressed: boolean) => {
-      if (!VIRTUAL_KEY_CODES.has(code)) return
-      setPressedCodes((current) => {
-        if (current.has(code) === pressed) return current
-        const next = new Set(current)
-        if (pressed) next.add(code)
-        else next.delete(code)
-        return next
-      })
-    }
-    const clearPressed = () => setPressedCodes(new Set())
-    const handleKeyDown = (event: KeyboardEvent) => setPressed(event.code, true)
-    const handleKeyUp = (event: KeyboardEvent) => setPressed(event.code, false)
-    const handleVisibilityChange = () => {
-      if (document.visibilityState !== 'visible') clearPressed()
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    window.addEventListener('keyup', handleKeyUp)
-    window.addEventListener('blur', clearPressed)
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-      window.removeEventListener('keyup', handleKeyUp)
-      window.removeEventListener('blur', clearPressed)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-    }
-  }, [])
 
   return (
     <div

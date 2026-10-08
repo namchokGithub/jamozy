@@ -1,4 +1,5 @@
 import { Info } from 'lucide-react'
+import { motion } from 'motion/react'
 
 type Finger = 'Pinky' | 'Ring' | 'Middle' | 'Index' | 'Thumb'
 
@@ -58,6 +59,7 @@ const FINGERS: Finger[] = ['Pinky', 'Ring', 'Middle', 'Index', 'Thumb']
 
 interface FingerPlacementGuideProps {
   nextKey?: { code: string; shift: boolean }
+  pressedCodes: ReadonlySet<string>
 }
 
 function activeFingerFor(
@@ -72,13 +74,42 @@ function activeFingerFor(
 function HandSilhouette({
   side,
   nextKey,
+  pressedCodes,
 }: {
   side: 'left' | 'right'
   nextKey?: FingerPlacementGuideProps['nextKey']
+  pressedCodes: ReadonlySet<string>
 }) {
   const activeFinger = activeFingerFor(side, nextKey)
-  const fingerClass = (finger: Finger) =>
-    finger === activeFinger ? 'fill-[#78bca6]' : 'fill-[#dce4f1]'
+  const fingerMotion = (finger: Finger) => {
+    const isHighlighted =
+      finger === activeFinger || (nextKey?.shift === true && finger === 'Pinky')
+    const isPressed = fingerCodes[side][finger].some((code) =>
+      pressedCodes.has(code),
+    )
+
+    return {
+      animate: {
+        fill: isHighlighted ? '#78bca6' : '#dce4f1',
+        y: isPressed ? 4 : 0,
+        scaleY: isPressed ? 0.94 : 1,
+        opacity: isHighlighted && !isPressed ? [1, 0.84, 1] : 1,
+      },
+      transition: {
+        fill: { duration: 0.18, ease: 'easeOut' as const },
+        y: { type: 'spring' as const, stiffness: 500, damping: 25 },
+        scaleY: { type: 'spring' as const, stiffness: 500, damping: 25 },
+        opacity:
+          isHighlighted && !isPressed
+            ? { duration: 1.5, repeat: Infinity, ease: 'easeInOut' as const }
+            : { duration: 0.18, ease: 'easeOut' as const },
+      },
+      style: {
+        transformBox: 'fill-box' as const,
+        transformOrigin: 'bottom center',
+      },
+    }
+  }
   return (
     <div className="flex min-w-24 flex-col items-center gap-1.5">
       <svg
@@ -97,21 +128,21 @@ function HandSilhouette({
               className="fill-[#dce4f1]"
               d="M17 67 H76 L79 82 L90 64 C94 57 100 55 105 59 C110 63 110 69 106 74 L81 106 C77 112 72 114 65 114 H43 C29 114 19 105 17 91 Z"
             />
-            <g className={fingerClass('Thumb')}>
+            <motion.g {...fingerMotion('Thumb')}>
               <path d="M73 82 L90 61 C95 55 101 54 106 59 C111 63 110 69 106 74 L82 104 C79 108 73 107 70 102 L66 94 Z" />
-            </g>
-            <g className={fingerClass('Pinky')}>
+            </motion.g>
+            <motion.g {...fingerMotion('Pinky')}>
               <path d="M15 41 C15 36 18 33 22 33 C26 33 29 36 29 41 L31 79 L17 82 Z" />
-            </g>
-            <g className={fingerClass('Ring')}>
+            </motion.g>
+            <motion.g {...fingerMotion('Ring')}>
               <path d="M30 27 C30 22 33 19 37 19 C41 19 44 22 44 27 L45 79 H31 Z" />
-            </g>
-            <g className={fingerClass('Middle')}>
+            </motion.g>
+            <motion.g {...fingerMotion('Middle')}>
               <path d="M45 19 C45 14 48 11 52 11 C56 11 59 14 59 19 L60 79 H45 Z" />
-            </g>
-            <g className={fingerClass('Index')}>
+            </motion.g>
+            <motion.g {...fingerMotion('Index')}>
               <path d="M61 19 C61 14 64 11 68 11 C72 11 75 14 75 19 L76 79 H61 Z" />
-            </g>
+            </motion.g>
           </g>
         </g>
       </svg>
@@ -129,6 +160,7 @@ function HandSilhouette({
 
 export default function FingerPlacementGuide({
   nextKey,
+  pressedCodes,
 }: FingerPlacementGuideProps) {
   return (
     <section
@@ -136,8 +168,16 @@ export default function FingerPlacementGuide({
       aria-label="Finger placement guide"
     >
       <div className="flex items-start justify-center gap-12 sm:gap-24">
-        <HandSilhouette side="left" nextKey={nextKey} />
-        <HandSilhouette side="right" nextKey={nextKey} />
+        <HandSilhouette
+          side="left"
+          nextKey={nextKey}
+          pressedCodes={pressedCodes}
+        />
+        <HandSilhouette
+          side="right"
+          nextKey={nextKey}
+          pressedCodes={pressedCodes}
+        />
       </div>
       <div className="group absolute right-3 top-3">
         <button

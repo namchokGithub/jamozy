@@ -12,6 +12,7 @@ import HangulTarget from '../typing/HangulTarget'
 import FingerPlacementGuide from './FingerPlacementGuide'
 import { useKeyboardFeedback } from '../typing/keyboard-feedback'
 import { useOnePagePlayerStore } from './one-page-player-store'
+import { usePressedKeyCodes } from '../typing/usePressedKeyCodes'
 
 interface OnePageLearningPlayerProps {
   learningPath: OnePageLearningPath
@@ -33,6 +34,7 @@ const REFILL_THRESHOLD = 3
 export default function OnePageLearningPlayer({
   learningPath,
 }: OnePageLearningPlayerProps) {
+  const pressedCodes = usePressedKeyCodes()
   const {
     entries,
     session,
@@ -302,8 +304,9 @@ export default function OnePageLearningPlayer({
             showEnglishKeys
             opacity={1}
             onKeyPress={handleKeyPress}
+            pressedCodes={pressedCodes}
           />
-          <FingerPlacementGuide nextKey={nextKey} />
+          <FingerPlacementGuide nextKey={nextKey} pressedCodes={pressedCodes} />
         </div>
       ) : (
         <div className="mt-6 rounded-3xl border border-dashed border-[#dfcfc0] bg-white/60 p-6 text-center text-sm text-[#667085]">

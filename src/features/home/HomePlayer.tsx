@@ -17,6 +17,7 @@ import { useKeyboardFeedback } from '../typing/keyboard-feedback'
 import { useHomePlayerStore } from './home-player-store'
 import { useHomeServices } from './home-services'
 import { prefetchHangulTargets } from '../typing/prefetch-hangul-targets'
+import { usePressedKeyCodes } from '../typing/usePressedKeyCodes'
 
 interface HomePlayerProps {
   data: HomePlayerData
@@ -49,6 +50,7 @@ export default function HomePlayer({
     selectUnit,
   } = useHomePlayerStore()
   const { showSuccess } = useSnackbar()
+  const pressedCodes = usePressedKeyCodes()
   // A session left in the store by an earlier visit is not shown; this
   // mount shows only the lesson it opens.
   const [mountGeneration] = useState(
@@ -321,8 +323,9 @@ export default function HomePlayer({
             showEnglishKeys
             opacity={1}
             onKeyPress={handleKeyPress}
+            pressedCodes={pressedCodes}
           />
-          <FingerPlacementGuide nextKey={nextKey} />
+          <FingerPlacementGuide nextKey={nextKey} pressedCodes={pressedCodes} />
         </div>
       ) : opened || !hasLessons ? (
         <div className="mt-4 rounded-3xl border border-dashed border-[#dfcfc0] bg-white/60 p-6 text-center text-sm text-[#667085]">
