@@ -330,7 +330,7 @@ function LearningPathSection({
       )}
 
       <section
-        className="mt-10  select-none!"
+        className="mt-10  select-none! hidden!"
         aria-labelledby="learning-path-heading"
       >
         <div className="flex items-end justify-between gap-4">
