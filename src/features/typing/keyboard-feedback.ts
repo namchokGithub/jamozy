@@ -8,9 +8,8 @@ export interface KeyboardFeedback {
   outcome: 'correct' | 'wrong'
 }
 
-const ACTIVE_CORRECT_MS = 140
-const PREVIOUS_VISIBLE_MS = 420
-const PREVIOUS_FADE_MS = 260
+const ACTIVE_CORRECT_MS = 210
+const PREVIOUS_VISIBLE_MS = 210
 const WRONG_VISIBLE_MS = 420
 
 export function createKeyboardFeedback(
@@ -38,29 +37,21 @@ export function useKeyboardFeedback() {
   const [previousFeedback, setPreviousFeedback] = useState<
     KeyboardFeedback | undefined
   >()
-  const [isPreviousFading, setIsPreviousFading] = useState(false)
   const nextFeedbackId = useRef(0)
   const activeTimer = useRef<number | undefined>(undefined)
-  const previousFadeTimer = useRef<number | undefined>(undefined)
   const previousClearTimer = useRef<number | undefined>(undefined)
-  const wrongFadeTimer = useRef<number | undefined>(undefined)
   const wrongClearTimer = useRef<number | undefined>(undefined)
-  const [isFeedbackFading, setIsFeedbackFading] = useState(false)
 
-  const clearCorrectTimers = useCallback(() => {
+  const clearFeedbackTimers = useCallback(() => {
     if (activeTimer.current !== undefined)
       window.clearTimeout(activeTimer.current)
-    if (previousFadeTimer.current !== undefined)
-      window.clearTimeout(previousFadeTimer.current)
     if (previousClearTimer.current !== undefined)
       window.clearTimeout(previousClearTimer.current)
-    if (wrongFadeTimer.current !== undefined)
-      window.clearTimeout(wrongFadeTimer.current)
     if (wrongClearTimer.current !== undefined)
       window.clearTimeout(wrongClearTimer.current)
   }, [])
 
-  useEffect(() => clearCorrectTimers, [clearCorrectTimers])
+  useEffect(() => clearFeedbackTimers, [clearFeedbackTimers])
 
   const recordAttempt = useCallback(
     (expectedKey: ExpectedKey | undefined, code: string, shift: boolean) => {
@@ -71,22 +62,16 @@ export function useKeyboardFeedback() {
         nextFeedbackId.current + 1,
       )
       if (!next) return
-      clearCorrectTimers()
+      clearFeedbackTimers()
       nextFeedbackId.current = next.id
       setPreviousFeedback(undefined)
-      setIsPreviousFading(false)
-      setIsFeedbackFading(false)
       setFeedback(next)
 
       if (next.outcome === 'wrong') {
-        wrongFadeTimer.current = window.setTimeout(() => {
-          setIsFeedbackFading(true)
-          wrongClearTimer.current = window.setTimeout(() => {
-            setFeedback((current) =>
-              current?.id === next.id ? undefined : current,
-            )
-            setIsFeedbackFading(false)
-          }, PREVIOUS_FADE_MS)
+        wrongClearTimer.current = window.setTimeout(() => {
+          setFeedback((current) =>
+            current?.id === next.id ? undefined : current,
+          )
         }, WRONG_VISIBLE_MS)
         return
       }
@@ -96,25 +81,19 @@ export function useKeyboardFeedback() {
           current?.id === next.id ? undefined : current,
         )
         setPreviousFeedback(next)
-        previousFadeTimer.current = window.setTimeout(() => {
-          setIsPreviousFading(true)
-          previousClearTimer.current = window.setTimeout(() => {
-            setPreviousFeedback((current) =>
-              current?.id === next.id ? undefined : current,
-            )
-            setIsPreviousFading(false)
-          }, PREVIOUS_FADE_MS)
+        previousClearTimer.current = window.setTimeout(() => {
+          setPreviousFeedback((current) =>
+            current?.id === next.id ? undefined : current,
+          )
         }, PREVIOUS_VISIBLE_MS)
       }, ACTIVE_CORRECT_MS)
     },
-    [clearCorrectTimers],
+    [clearFeedbackTimers],
   )
 
   return {
     feedback,
     previousFeedback,
-    isPreviousFading,
-    isFeedbackFading,
     recordAttempt,
   }
 }

@@ -7,8 +7,6 @@ interface KeyboardRowProps {
   nextKey?: { code: string; shift: boolean }
   feedback?: KeyboardFeedback
   previousFeedback?: KeyboardFeedback
-  isPreviousFading: boolean
-  isFeedbackFading: boolean
   showEnglishKeys: boolean
   virtualShiftActive: boolean
   onKeyPress?: (code: string, shiftKey: boolean) => void
@@ -20,8 +18,6 @@ export default function KeyboardRow({
   nextKey,
   feedback,
   previousFeedback,
-  isPreviousFading,
-  isFeedbackFading,
   showEnglishKeys,
   virtualShiftActive,
   onKeyPress,
@@ -36,8 +32,6 @@ export default function KeyboardRow({
           nextKey={nextKey}
           feedback={feedback}
           previousFeedback={previousFeedback}
-          isPreviousFading={isPreviousFading}
-          isFeedbackFading={isFeedbackFading}
           showEnglishKeys={showEnglishKeys}
           virtualShiftActive={virtualShiftActive}
           canInteract={Boolean(onKeyPress)}

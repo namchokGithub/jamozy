@@ -15,8 +15,6 @@ interface VirtualKeyProps {
   nextKey?: { code: string; shift: boolean }
   feedback?: KeyboardFeedback
   previousFeedback?: KeyboardFeedback
-  isPreviousFading: boolean
-  isFeedbackFading: boolean
   showEnglishKeys: boolean
   virtualShiftActive: boolean
   canInteract: boolean
@@ -76,8 +74,6 @@ export default function VirtualKey({
   nextKey,
   feedback,
   previousFeedback,
-  isPreviousFading,
-  isFeedbackFading,
   showEnglishKeys,
   virtualShiftActive,
   canInteract,
@@ -116,7 +112,7 @@ export default function VirtualKey({
     <button
       type="button"
       data-state={visualState}
-      className={`relative flex h-12 ${keyWidth(wide)} flex-col items-center justify-center rounded-lg border px-1 text-sm transition-[background-color,border-color,color,box-shadow,opacity] duration-200 sm:h-13 ${keyVisualClass} ${(visualState === 'previous' && isPreviousFading) || (visualState === 'wrong' && isFeedbackFading) ? 'opacity-0' : 'opacity-100'} ${canPress ? 'cursor-pointer touch-manipulation' : 'cursor-default'}`}
+      className={`relative flex h-12 ${keyWidth(wide)} flex-col items-center justify-center rounded-lg border px-1 text-sm transition-[background-color,border-color,color,box-shadow] duration-200 sm:h-13 ${keyVisualClass} ${canPress ? 'cursor-pointer touch-manipulation' : 'cursor-default'}`}
       aria-label={displayLabel}
       aria-pressed={isShiftKey ? virtualShiftActive : undefined}
       disabled={!canPress}

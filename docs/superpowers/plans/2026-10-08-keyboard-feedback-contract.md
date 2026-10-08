@@ -12,7 +12,7 @@
 - Match `typing-session.ts` semantics: only `strictShift` expected keys require an exact Shift match.
 - Ignore an attempt when no current expected key exists.
 - Add tests only for the pure correctness mapper; do not add animation or presentation assertions.
-- Feedback timing and static colour treatment were added later: correct attempts show soft blue briefly, then lavender and fade; wrong attempts show coral briefly and fade. Motion-library effects remain deferred.
+- Feedback timing and static colour treatment were added later: correct attempts show soft blue briefly, then lavender before returning to their current base state; wrong attempts show coral briefly, then return to their current base state. Motion-library effects remain deferred.
 - Final-key feedback presentation is deferred: Lesson/Review replace the keyboard with Saving immediately, so the later animation scope must decide whether completion waits briefly or feedback moves to the completion UI.
 
 ### Task 1: Add a tested feedback mapper and hook

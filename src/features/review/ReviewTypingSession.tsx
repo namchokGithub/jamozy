@@ -39,13 +39,8 @@ export default function ReviewTypingSession({
   const { session, start, pressKey, generation, submissionId } =
     useLessonSessionStore()
   const fetcher = useFetcher<SubmitReviewSessionOutcome>()
-  const {
-    feedback,
-    previousFeedback,
-    isPreviousFading,
-    isFeedbackFading,
-    recordAttempt,
-  } = useKeyboardFeedback()
+  const { feedback, previousFeedback, recordAttempt } =
+    useKeyboardFeedback()
   const hasStarted = useRef(false)
   const hasSubmitted = useRef(false)
   // See LessonTypingSession.tsx / DEC-018 for why this needs to be a
@@ -157,8 +152,6 @@ export default function ReviewTypingSession({
             nextKey={nextKey}
             feedback={feedback}
             previousFeedback={previousFeedback}
-            isPreviousFading={isPreviousFading}
-            isFeedbackFading={isFeedbackFading}
             showEnglishKeys={keyboardSettings.showEnglishKeys}
             opacity={keyboardSettings.keyboardOpacity}
             onKeyPress={handleKeyPress}

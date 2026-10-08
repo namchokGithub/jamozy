@@ -42,13 +42,8 @@ export default function LessonTypingSession({
   const hasStarted = useRef(false)
   const hasSubmitted = useRef(false)
   const completedResult = useRef<LessonResult | null>(null)
-  const {
-    feedback,
-    previousFeedback,
-    isPreviousFading,
-    isFeedbackFading,
-    recordAttempt,
-  } = useKeyboardFeedback()
+  const { feedback, previousFeedback, recordAttempt } =
+    useKeyboardFeedback()
   // useLessonSessionStore is a module-level singleton, so `session`/`generation`
   // may still belong to a previous lesson's mount (possibly already completed)
   // until this mount's own start() call lands. myGenerationRef pins the exact
@@ -163,8 +158,6 @@ export default function LessonTypingSession({
             nextKey={nextKey}
             feedback={feedback}
             previousFeedback={previousFeedback}
-            isPreviousFading={isPreviousFading}
-            isFeedbackFading={isFeedbackFading}
             showEnglishKeys={keyboardSettings.showEnglishKeys}
             opacity={keyboardSettings.keyboardOpacity}
             onKeyPress={handleKeyPress}

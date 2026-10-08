@@ -59,13 +59,7 @@ export default function OnePageLearningPlayer({
   const handledRefill = useRef(refill.data)
   const [checkpointVersion, setCheckpointVersion] = useState(0)
   const [nowMs, setNowMs] = useState(0)
-  const {
-    feedback,
-    previousFeedback,
-    isPreviousFading,
-    isFeedbackFading,
-    recordAttempt,
-  } = useKeyboardFeedback()
+  const { feedback, previousFeedback, recordAttempt } = useKeyboardFeedback()
   const sessionStartedAtMs = session?.startedAt.getTime()
 
   useEffect(() => {
@@ -212,6 +206,9 @@ export default function OnePageLearningPlayer({
   const totalSteps = session?.currentSession.expectedKeys.length ?? 0
   const progressPercent =
     totalSteps === 0 ? 0 : (completedSteps / totalSteps) * 100
+  const meaning = [active?.exercise.meaningTh, active?.exercise.meaningEn]
+    .filter((value): value is string => Boolean(value?.trim()))
+    .join(' : ')
 
   return (
     <section
@@ -284,25 +281,22 @@ export default function OnePageLearningPlayer({
                 />
               </div>
             </div>
-            <p className="mt-5 text-xs text-[#98a2b3]">
-              {active.exercise.meaningTh} : {active.exercise.meaningEn}
+            <p
+              className={`max-w-full truncate text-xs text-[#98a2b3] ${meaning ? '' : 'invisible'}`}
+            >
+              {meaning}
             </p>
-            {/* <p className="mt-1 text-sm text-[#667085]">
-              {active.exercise.meaningEn}
-            </p> */}
-            {active.exercise.romanization && (
-              <p className="mt-1 text-xs italic text-[#a293bd]">
-                {active.exercise.romanization}
-              </p>
-            )}
+            <p
+              className={`max-w-full truncate text-xs italic text-[#a293bd] ${active.exercise.romanization ? '' : 'invisible'}`}
+            >
+              {active.exercise.romanization}
+            </p>
             {/* <p className="mt-4 text-xs text-[#98a2b3]">Typed: {getComposedText(session.currentSession)}</p> */}
           </div>
           <VirtualKeyboard
             nextKey={nextKey}
             feedback={feedback}
             previousFeedback={previousFeedback}
-            isPreviousFading={isPreviousFading}
-            isFeedbackFading={isFeedbackFading}
             showEnglishKeys
             opacity={1}
             onKeyPress={handleKeyPress}

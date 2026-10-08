@@ -64,13 +64,8 @@ export default function HomePlayer({
   // Exercises completed on this device that the outbox may not have written.
   const [localDone, setLocalDone] = useState(initialPending)
   const [nowMs, setNowMs] = useState(0)
-  const {
-    feedback,
-    previousFeedback,
-    isPreviousFading,
-    isFeedbackFading,
-    recordAttempt,
-  } = useKeyboardFeedback()
+  const { feedback, previousFeedback, recordAttempt } =
+    useKeyboardFeedback()
 
   useEffect(() => {
     let active = true
@@ -348,8 +343,6 @@ export default function HomePlayer({
             nextKey={nextKey}
             feedback={feedback}
             previousFeedback={previousFeedback}
-            isPreviousFading={isPreviousFading}
-            isFeedbackFading={isFeedbackFading}
             showEnglishKeys
             opacity={1}
             onKeyPress={handleKeyPress}
