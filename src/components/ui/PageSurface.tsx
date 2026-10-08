@@ -1,4 +1,5 @@
 import type { PropsWithChildren } from 'react'
+import { SiteFooter } from './SiteFooter'
 
 interface PageSurfaceProps extends PropsWithChildren {
   className?: string
@@ -23,6 +24,7 @@ export function PageSurface({
       </div>
       <div className={`relative z-10 mx-auto w-full ${contentClassName}`}>
         {children}
+        <SiteFooter />
       </div>
     </main>
   )

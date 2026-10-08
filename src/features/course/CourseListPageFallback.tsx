@@ -1,6 +1,8 @@
 // Shown only until the Home loader knows the user (page data and the Home
 // player stream in afterwards), so a refresh shows the page frame instead of
 // a blank screen.
+import { SiteFooter } from '../../components/ui/SiteFooter'
+
 export default function CourseListPageFallback() {
   return (
     <main
@@ -30,6 +32,7 @@ export default function CourseListPageFallback() {
             <div className="h-10 w-10 animate-pulse rounded-full bg-[#f2edf9]" />
           </div>
         </header>
+        <SiteFooter />
       </div>
     </main>
   )

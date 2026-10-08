@@ -19,6 +19,7 @@ import { useSnackbar } from '../../components/ui/SnackbarProvider'
 import OnePageLearningPlayer from '../home/OnePageLearningPlayer'
 import HomePlayer from '../home/HomePlayer'
 import HomePlayerSkeleton from '../home/HomePlayerSkeleton'
+import { SiteFooter } from '../../components/ui/SiteFooter'
 
 type CourseListActionData = {
   displayName?: string
@@ -134,6 +135,7 @@ export default function CourseListPage() {
             )}
           </Await>
         </Suspense>
+        <SiteFooter />
       </div>
     </main>
   )
