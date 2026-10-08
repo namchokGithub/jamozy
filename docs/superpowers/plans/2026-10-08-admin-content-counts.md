@@ -57,9 +57,9 @@
 
 ### Task 3: Saves never overwrite counters
 
-- [ ] **Failing emulator test:** seed a Course with `unitCount: 3`; `saveCourse({ ...course, title: 'New' })` with the domain object read before the counter changed (e.g. `unitCount: 0`); expect stored `unitCount` still `3`. Same for `saveUnit` and `saveContent`.
-- [ ] Implement `saveCourse`/`saveUnit` and `saveContent` Course/Unit writes as `update()` of `title`, `description`, `type` (Course), `courseId` (Unit, unchanged), `status`, `archivedFromStatus` (`deleteField()` when absent), `updatedAt`.
-- [ ] Run `pnpm test:rules` — PASS; existing `pnpm test` stays green.
+- [x] **Failing emulator tests:** `saveCourse`, `saveUnit`, and `saveContent` with stale counters and `order` keep the stored values; a restored item loses `archivedFromStatus`.
+- [x] Implement `saveCourse`/`saveUnit` and `saveContent` Course/Unit writes as `update()` of `title`, `description`, `type` (Course; `deleteField()` when absent), `status`, `archivedFromStatus` (`deleteField()` when absent), `updatedAt`. `order` and `courseId` are no longer written by saves (order commands own `order`; a Unit never changes Course).
+- [x] `pnpm test:rules` — 8 passed; unit suite green.
 
 ### Task 4: Create counters
 

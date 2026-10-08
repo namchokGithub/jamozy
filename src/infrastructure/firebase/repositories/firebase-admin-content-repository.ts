@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteField,
   doc,
   getDoc,
   getDocs,
@@ -7,6 +8,7 @@ import {
   query,
   runTransaction,
   setDoc,
+  updateDoc,
   where,
   writeBatch,
   type DocumentData,
@@ -106,6 +108,35 @@ function toLesson(id: string, data: DocumentData): Lesson {
   }
 }
 
+// Course and Unit saves write only what an author can change. Counters are
+// kept by their own increments and order by the order commands, so writing
+// the values read before the save could overwrite newer ones.
+function courseUpdate(course: Course, updatedAt: Date): DocumentData {
+  return {
+    title: course.title,
+    description: course.description,
+    type: course.type ?? deleteField(),
+    ...statusUpdate(course),
+    updatedAt,
+  }
+}
+
+function unitUpdate(unit: Unit, updatedAt: Date): DocumentData {
+  return {
+    title: unit.title,
+    description: unit.description,
+    ...statusUpdate(unit),
+    updatedAt,
+  }
+}
+
+function statusUpdate(item: Course | Unit): DocumentData {
+  return {
+    status: item.status ?? 'draft',
+    archivedFromStatus: item.archivedFromStatus ?? deleteField(),
+  }
+}
+
 function serialize<T extends { id: string; createdAt: Date; updatedAt: Date }>(
   value: T,
 ): Omit<T, 'id'> {
@@ -185,9 +216,9 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
   }
 
   async saveCourse(course: Course): Promise<void> {
-    await setDoc(
+    await updateDoc(
       doc(this.firestore, 'courses', course.id),
-      serialize({ ...course, updatedAt: new Date() }),
+      courseUpdate(course, new Date()),
     )
   }
 
@@ -210,9 +241,9 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
   }
 
   async saveUnit(unit: Unit): Promise<void> {
-    await setDoc(
+    await updateDoc(
       doc(this.firestore, 'units', unit.id),
-      serialize({ ...unit, updatedAt: new Date() }),
+      unitUpdate(unit, new Date()),
     )
   }
 
@@ -246,14 +277,14 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
     const batch = writeBatch(this.firestore)
     const updatedAt = new Date()
     for (const course of changes.courses ?? [])
-      batch.set(
+      batch.update(
         doc(this.firestore, 'courses', course.id),
-        serialize({ ...course, updatedAt }),
+        courseUpdate(course, updatedAt),
       )
     for (const unit of changes.units ?? [])
-      batch.set(
+      batch.update(
         doc(this.firestore, 'units', unit.id),
-        serialize({ ...unit, updatedAt }),
+        unitUpdate(unit, updatedAt),
       )
     for (const lesson of changes.lessons ?? [])
       batch.set(

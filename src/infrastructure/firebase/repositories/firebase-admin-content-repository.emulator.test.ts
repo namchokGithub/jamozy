@@ -2,7 +2,7 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing'
-import { doc, setDoc, type Firestore } from 'firebase/firestore'
+import { doc, getDoc, setDoc, type Firestore } from 'firebase/firestore'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { courseCounts } from '../../../domain/models/course'
 import { FirebaseAdminContentRepository } from './firebase-admin-content-repository'
@@ -76,6 +76,111 @@ describeWithFirestoreEmulator('FirebaseAdminContentRepository counters', () => {
       units: 2,
       lessons: 5,
       exercises: 40,
+    })
+  })
+
+  describe('content saves never overwrite counters', () => {
+    const base = { description: 'Description', createdAt: now, updatedAt: now }
+
+    it('saveCourse writes only editable fields', async () => {
+      const { firestore, repo } = adminRepository()
+      await setDoc(doc(firestore, 'courses', 'course'), {
+        ...base,
+        title: 'Old',
+        order: 7,
+        status: 'archived',
+        archivedFromStatus: 'published',
+        unitCount: 3,
+        lessonCount: 9,
+        exerciseCount: 50,
+      })
+      const stale = (await repo.getCourseById('course'))!
+
+      await repo.saveCourse({
+        ...stale,
+        title: 'New',
+        order: 0,
+        unitCount: 0,
+        lessonCount: 0,
+        exerciseCount: 0,
+        status: 'published',
+        archivedFromStatus: undefined,
+      })
+
+      const stored = (await getDoc(doc(firestore, 'courses', 'course'))).data()
+      expect(stored).toMatchObject({
+        title: 'New',
+        status: 'published',
+        order: 7,
+        unitCount: 3,
+        lessonCount: 9,
+        exerciseCount: 50,
+      })
+      expect(stored).not.toHaveProperty('archivedFromStatus')
+    })
+
+    it('saveUnit writes only editable fields', async () => {
+      const { firestore, repo } = adminRepository()
+      await setDoc(doc(firestore, 'units', 'unit'), {
+        ...base,
+        courseId: 'course',
+        title: 'Old',
+        order: 4,
+        status: 'draft',
+        lessonCount: 2,
+        exerciseCount: 12,
+      })
+      const stale = (await repo.getUnitById('unit'))!
+
+      await repo.saveUnit({
+        ...stale,
+        title: 'New',
+        order: 0,
+        lessonCount: 0,
+        exerciseCount: 0,
+      })
+
+      expect(
+        (await getDoc(doc(firestore, 'units', 'unit'))).data(),
+      ).toMatchObject({
+        title: 'New',
+        order: 4,
+        lessonCount: 2,
+        exerciseCount: 12,
+      })
+    })
+
+    it('saveContent keeps Course and Unit counters', async () => {
+      const { firestore, repo } = adminRepository()
+      await setDoc(doc(firestore, 'courses', 'course'), {
+        ...base,
+        title: 'Course',
+        order: 0,
+        status: 'draft',
+        unitCount: 1,
+      })
+      await setDoc(doc(firestore, 'units', 'unit'), {
+        ...base,
+        courseId: 'course',
+        title: 'Unit',
+        order: 0,
+        status: 'draft',
+        lessonCount: 2,
+      })
+      const course = (await repo.getCourseById('course'))!
+      const unit = (await repo.getUnitById('unit'))!
+
+      await repo.saveContent({
+        courses: [{ ...course, status: 'published', unitCount: 0 }],
+        units: [{ ...unit, status: 'published', lessonCount: 0 }],
+      })
+
+      expect(
+        (await getDoc(doc(firestore, 'courses', 'course'))).data(),
+      ).toMatchObject({ status: 'published', unitCount: 1 })
+      expect(
+        (await getDoc(doc(firestore, 'units', 'unit'))).data(),
+      ).toMatchObject({ status: 'published', lessonCount: 2 })
     })
   })
 })
