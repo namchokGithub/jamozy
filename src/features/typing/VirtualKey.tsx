@@ -159,6 +159,7 @@ export default function VirtualKey({
     previousFeedback,
   )
   const isActiveShift = isShiftKey && (nextKey?.shift || virtualShiftActive)
+  const shouldPulseShift = isShiftKey && nextKey?.shift === true
   const keyVisualClass = isActiveShift
     ? 'border-[#e3ad73] bg-[#fff0d8] text-[#8b6035]'
     : visualStateClass(visualState)
@@ -170,6 +171,24 @@ export default function VirtualKey({
     feedback?.outcome === 'wrong' && feedback.code === code
       ? feedback.id
       : undefined
+
+  useEffect(() => {
+    if (!isShiftKey) return
+    if (!shouldPulseShift || shouldReduceMotion) {
+      keyAnimation.stop()
+      keyAnimation.set({ scale: 1, boxShadow: 'none' })
+      return
+    }
+    void keyAnimation.start({
+      scale: [1, 1.04, 1],
+      boxShadow: [
+        '0 0 0px rgba(227, 173, 115, 0)',
+        '0 0 12px rgba(227, 173, 115, 0.45)',
+        '0 0 0px rgba(227, 173, 115, 0)',
+      ],
+      transition: { duration: 1.2, repeat: Infinity, ease: 'easeInOut' },
+    })
+  }, [isShiftKey, keyAnimation, shouldPulseShift, shouldReduceMotion])
 
   useEffect(() => {
     if (correctFeedbackId === undefined || shouldReduceMotion) return
