@@ -166,5 +166,5 @@ Apply flat bonuses before percentage bonuses, then round once:
 `round((Base EXP + Flat Bonus) × (1 + Total EXP Bonus))`. Bonus sources and
 values are defined in [[DEC-045]] and `docs/LEVELING.md`; bonuses the learner
 has not earned or that are not available contribute zero. EXP is global player
-progression; it is not curriculum progression. The flat 100 EXP Level curve
-remains in effect until separately decided ([[DEC-006]], [[DEC-045]]).
+progression; it is not curriculum progression. Level is derived with the
+LEVELING.md curve ([[DEC-048]]).

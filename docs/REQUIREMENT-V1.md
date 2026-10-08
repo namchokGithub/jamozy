@@ -126,6 +126,7 @@
    - Level ไม่ต้องปลด stat หรือ skill
    - ใช้เพื่อแสดง progression เท่านั้น
    - **[[DEC-006]] สูตร: `level = 1 + floor(exp / 100)` (flat 100 EXP ต่อ level, ไม่ใช่ curve เพิ่มขึ้นเรื่อยๆ), `level` ไม่ถูก store เก็บแต่ `exp` แล้ว derive ตอน read**
+   - **หมายเหตุ 2026-10-08: [[DEC-048]] เปลี่ยนเป็น curve ตาม `docs/LEVELING.md` (soft cap ตั้งแต่ Lv.100 + rebirth multiplier) `level` ยัง derive ไม่ store**
    - เช่น (exp = 650):
 
      ```text

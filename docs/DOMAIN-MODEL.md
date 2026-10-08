@@ -348,19 +348,19 @@ qualify an item. No experience owns a separate review queue.
 **Authenticated path:** `users/{userId}` (the parent doc of `lessonProgress`/`reviewItems` subcollections)
 **File:** `domain/models/user-profile.ts`
 
-Not in README's original domain file list, but required to home EXP/Level and Settings ([[DEC-006]], [[DEC-007]]).
+Not in README's original domain file list, but required to home EXP/Level and Settings ([[DEC-048]], [[DEC-007]]).
 
 | Field       | Type           | Notes                                                                                                |
 | ----------- | -------------- | ---------------------------------------------------------------------------------------------------- |
 | id          | string         | Firebase Auth UID for an authenticated user; locally generated`guestId` for a Guest                  |
 | displayName | string         | required player-facing name; never auth identity                                                     |
-| exp         | number         | accumulated EXP awarded under[[DEC-045]]; only stored progression value — `level` is never persisted |
+| exp         | number         | accumulated EXP awarded under[[DEC-045]]; `level` is never persisted ([[DEC-048]])                  |
 | settings    | `UserSettings` | see below                                                                                            |
 | stats       | `UserStats`    | see below ([[DEC-011]])                                                                              |
 | createdAt   | Date           |                                                                                                      |
 | updatedAt   | Date           | set with`createdAt` on creation; changed on every persisted profile mutation ([[DEC-023]])           |
 
-**Level formula ([[DEC-006]], [[DEC-024]], [[DEC-045]]):** `level` is derived, not stored: `level = 1 + floor(exp / 100)`. Lives as a pure function (`levelFromExp(exp)`) next to `UserProfile` in `domain/models/user-profile.ts`. The MVP retains this flat curve; [[DEC-045]] changes how EXP is earned but does not adopt LEVELING.md's rebirth-based curve or its additional progression state. Changing the curve needs no data migration while `exp` remains the only persisted progression value.
+**Level formula ([[DEC-048]]):** `level` is derived, not stored. It uses the LEVELING.md curve: the EXP to go from `level` to `level + 1` is `round(50 × level^1.2 × (1 + 0.15 × rebirthCount) × softCap)`, where `softCap` is `1` below Level 100 and `3^(floor((level − 100) / 10) + 1)` from Level 100. `levelFromExp(cycleExp, rebirthCount)` returns the highest level whose cumulative requirement from Level 1 is no greater than `cycleExp`. Until rebirth state exists, `rebirthCount` is `0` and `exp` is the cycle EXP. Lives as a pure function next to `UserProfile` in `domain/models/user-profile.ts`; the current code still uses the former flat `1 + floor(exp / 100)` rule pending implementation. Changing the curve needs no data migration because no level value is persisted.
 
 **Cross-checked against `docs/requirement.md`:** that doc's own example ("Level 7, 430/600 EXP") implies an increasing per-level curve (~`level × 100` to reach the next level), not this flat formula, and separately lists "Level" as something to save (implying a stored field). Both reaffirmed against the flat, derived-only formula — 2026-09-23. Revisit the curve shape later if game-design balance needs it; the derived approach means no migration either way.
 
@@ -402,7 +402,7 @@ averageSpeedWpm = (totalAcceptedKeystrokes / 5) / (totalTypingTimeSeconds / 60)
 
 Return `0` for either value when its denominator is zero. WPM uses the existing keyboard-engine convention of five accepted physical keystrokes per word; it is not a count of Korean whitespace-delimited words. All counters change only when a session is submitted, never per keystroke.
 
-`currentLevel` (requirement.md #9) is intentionally not stored here — it's `levelFromExp(exp)`, computed on read (see [[DEC-006]]).
+`currentLevel` (requirement.md #9) is intentionally not stored here — it's derived from progression state on read (see [[DEC-048]]).
 
 `updatedAt` is an audit timestamp, not an activity timestamp: it changes when settings, EXP, or stats are persisted, but not for reads or session activation alone. Guest retention uses the separate local `GuestSession.lastActiveAt` field in `docs/AUTH-AND-PERSISTENCE.md`.
 
@@ -427,7 +427,7 @@ receipt-gated.
 
 Previously open, now decided — see `docs/DECISIONS.md` for full rationale:
 
-1. **EXP/Level** ([[DEC-006]]) — `level` derived from `exp` via `level = 1 + floor(exp / 100)`, never stored. Reaffirmed against `docs/requirement.md`.
+1. **EXP/Level** ([[DEC-048]], superseding [[DEC-006]]) — `level` derived, never stored; curve from LEVELING.md (soft cap from Level 100, rebirth multiplier). Replaces the original flat `1 + floor(exp / 100)`.
 2. **Settings location** ([[DEC-007]], [[DEC-027]]) — embedded in `UserProfile`, whether that profile is stored in Guest IndexedDB or authenticated Firestore; never a separate settings collection.
 3. **Review scheduling and identity** ([[DEC-008]], [[DEC-022]]) — Leitner-style spaced repetition, `box` + `nextReviewAt`, no `resolved` state; vocabulary-backed items are deduplicated by `vocabularyId`, other items by lesson/exercise identity.
 4. **Unlock rule** ([[DEC-009]], [[DEC-025]]) — next lesson unlocks when the previous lesson's Progress becomes `'completed'`; a missing document represents locked, while persisted states are `'unlocked'/'completed'`.

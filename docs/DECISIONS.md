@@ -8,19 +8,23 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 
 - Read this index first. Open only the entries you need by searching for
   their heading (`## DEC-0NN`); do not read the whole file.
+- The Index lists decisions that are in force, including ones superseded
+  only in part. Do not open entries in the Superseded index unless the user
+  asks to trace history; when a link points to a superseded decision, open
+  its replacement instead.
 - When adding a decision, append the entry at the bottom and add its row
-  here. When a decision is superseded, update its status in both places.
+  to the Index. When a decision is fully superseded, update its entry status
+  and move its row to the Superseded index; a partial supersession stays in
+  the Index with the detail in its status.
 
 ## Index
 
 | DEC     | Decision                                                                                                                                                          | Status                                                                                                 | Date       |
 | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------- |
-| DEC-001 | Firebase Anonymous Auth for identity, no traditional sign-up                                                                                                      | Superseded by DEC-027                                                                                  | 2026-09-23 |
 | DEC-002 | Layered architecture: domain / application / infrastructure / features                                                                                            | Accepted                                                                                               | 2026-09-23 |
 | DEC-003 | Keystroke-level state stays client-side; Firestore writes only at checkpoints                                                                                     | Accepted (Home exercise-completion checkpoint: DEC-043)                                                | 2026-09-23 |
 | DEC-004 | MVP excludes multiplayer, leaderboards, and social/competitive features                                                                                           | Accepted                                                                                               | 2026-09-23 |
 | DEC-005 | Pin`@vitejs/plugin-react` to 5.2.0, not latest                                                                                                                    | Accepted                                                                                               | 2026-09-23 |
-| DEC-006 | Level is derived from EXP, never stored                                                                                                                           | Accepted (EXP award policy updated by DEC-045)                                                         | 2026-09-23 |
 | DEC-007 | Settings live as a field on the user doc                                                                                                                          | Accepted                                                                                               | 2026-09-23 |
 | DEC-008 | Spaced repetition (Leitner boxes) for review scheduling                                                                                                           | Accepted                                                                                               | 2026-09-23 |
 | DEC-009 | Sequential unlock: previous lesson completed unlocks the next                                                                                                     | Accepted (creation/ordering details superseded by DEC-023; Progress-state shape superseded by DEC-025) | 2026-09-23 |
@@ -29,7 +33,6 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-012 | `ReviewItem.reason` field added                                                                                                                                   | Accepted                                                                                               | 2026-09-23 |
 | DEC-013 | `UserSettings` expanded to the full requirement.md list                                                                                                           | Accepted (field shape superseded in part by DEC-027)                                                   | 2026-09-23 |
 | DEC-014 | Application-layer additions found necessary while building the use cases                                                                                          | Accepted                                                                                               | 2026-09-23 |
-| DEC-015 | Firestore content-write security boundary                                                                                                                         | Superseded — client content writes locked before launch                                                | 2026-09-23 |
 | DEC-016 | Composite Firestore indexes, and`ensureUser` injected into loaders (not imported)                                                                                 | Accepted                                                                                               | 2026-09-23 |
 | DEC-017 | Korean typing engine: own 2-beolsik composition, not the OS IME; jamo-level blocking; progressive partial-compound display                                        | Accepted                                                                                               | 2026-09-24 |
 | DEC-018 | Lesson typing session: accuracy scale boundary, deterministic`ReviewItem` id, and a store `generation` counter to survive React StrictMode                        | Accepted                                                                                               | 2026-09-24 |
@@ -38,7 +41,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-021 | Profile Dashboard: display-only rounding of running-average stats                                                                                                 | Accepted                                                                                               | 2026-09-25 |
 | DEC-022 | Vocabulary-backed review identity and raw aggregate typing counters                                                                                               | Accepted                                                                                               | 2026-09-27 |
 | DEC-023 | Lazy Progress creation, canonical progression ordering, and profile update timestamp                                                                              | Accepted (Home course excluded from global order: DEC-043)                                             | 2026-09-27 |
-| DEC-024 | ID conventions, bounded lessons, deterministic review reasons, and deferred level balancing                                                                       | Accepted                                                                                               | 2026-09-27 |
+| DEC-024 | ID conventions, bounded lessons, deterministic review reasons, and deferred level balancing                                                                       | Accepted (level curve set by DEC-048)                                                                  | 2026-09-27 |
 | DEC-025 | Vocabulary import identity and nullable meanings; simplify persisted Progress states                                                                              | Accepted                                                                                               | 2026-09-27 |
 | DEC-026 | Learning Modes, shared learner state, and contiguous progression frontier                                                                                         | Accepted (Home course exception: DEC-043)                                                              | 2026-09-27 |
 | DEC-027 | Guest local persistence and migration to authenticated accounts                                                                                                   | Accepted                                                                                               | 2026-09-27 |
@@ -47,10 +50,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-030 | Guest-to-account migration merge policy                                                                                                                           | Accepted (Home exercise-progress merge: DEC-043)                                                       | 2026-09-28 |
 | DEC-031 | Preserve pre-session learner values as a compatibility baseline                                                                                                   | Accepted                                                                                               | 2026-09-28 |
 | DEC-032 | Lesson Result review action opens the due Review queue                                                                                                            | Accepted                                                                                               | 2026-09-28 |
-| DEC-033 | Intentional Learning Path replays grant 15 EXP                                                                                                                    | Superseded by DEC-046                                                                                  | 2026-09-29 |
 | DEC-034 | Admin content is claim-authorized and status-gated                                                                                                                | Accepted (extended by DEC-043:`Course.type`, Home export; restore amended 2026-10-06)                  | 2026-09-29 |
-| DEC-035 | Home one-page player uses browser-local exercise checkpoints                                                                                                      | Superseded by DEC-043                                                                                  | 2026-09-29 |
-| DEC-036 | Jamo SVG steps follow visual jamo for compound medials                                                                                                            | Superseded by DEC-037                                                                                  | 2026-10-01 |
 | DEC-037 | Jamo SVG steps follow typed keys, including compound medials                                                                                                      | Accepted                                                                                               | 2026-10-01 |
 | DEC-038 | Split recipes may partition an enclosed counter with its outline                                                                                                  | Accepted                                                                                               | 2026-10-01 |
 | DEC-039 | Jamo SVG runtime: committed choseong shards behind a flag                                                                                                         | Accepted (rollout gate replaced by DEC-044)                                                            | 2026-10-03 |
@@ -59,9 +59,21 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-042 | Home player owns a continuous client queue; loader only refills                                                                                                   | Accepted (cross-lesson queue superseded by DEC-043)                                                    | 2026-10-05 |
 | DEC-043 | Home plays one static-exported course with synced exercise progress                                                                                               | Accepted                                                                                               | 2026-10-05 |
 | DEC-044 | Jamo SVG renderer enabled in Production without a Preview gate                                                                                                    | Accepted                                                                                               | 2026-10-06 |
-| DEC-045 | Difficulty-based EXP rewards and bonus calculation                                                                                                                | Accepted                                                                                               | 2026-10-06 |
+| DEC-045 | Difficulty-based EXP rewards and bonus calculation                                                                                                                | Accepted (level curve set by DEC-048)                                                                  | 2026-10-06 |
 | DEC-046 | Difficulty-based EXP rewards for completed-lesson replays                                                                                                         | Accepted                                                                                               | 2026-10-06 |
 | DEC-047 | Content documents store descendant counts, kept by atomic writes                                                                                                  | Accepted                                                                                               | 2026-10-08 |
+| DEC-048 | Level is derived, never stored, using the LEVELING.md curve                                                                                                       | Accepted                                                                                               | 2026-10-08 |
+
+## Superseded index (history only)
+
+| DEC     | Decision                                                     | Replaced by                                    | Date       |
+| ------- | ------------------------------------------------------------ | ---------------------------------------------- | ---------- |
+| DEC-001 | Firebase Anonymous Auth for identity, no traditional sign-up | DEC-027                                        | 2026-09-23 |
+| DEC-006 | Level is derived from EXP, never stored                      | DEC-048                                        | 2026-09-23 |
+| DEC-015 | Firestore content-write security boundary                    | — (client content writes locked before launch) | 2026-09-23 |
+| DEC-033 | Intentional Learning Path replays grant 15 EXP               | DEC-046                                        | 2026-09-29 |
+| DEC-035 | Home one-page player uses browser-local exercise checkpoints | DEC-043                                        | 2026-09-29 |
+| DEC-036 | Jamo SVG steps follow visual jamo for compound medials       | DEC-037                                        | 2026-10-01 |
 
 ---
 
@@ -137,7 +149,8 @@ implementation context only, not the target architecture.
 ## DEC-006 — Level is derived from EXP, never stored
 
 **Date:** 2026-09-23
-**Status:** Accepted
+**Superseded by:** [[DEC-048]]
+**Status:** Superseded by [[DEC-048]]
 
 **Decision:** `UserProfile.level` is not a stored field. It's computed from `exp` via `level = 1 + floor(exp / 100)`.
 
@@ -448,7 +461,7 @@ Add `UserProfile.updatedAt`. It equals `createdAt` on initial creation and chang
 
 `Lesson.exercises` is a non-empty, ordered array. MVP content should normally have 5–12 exercises and cannot exceed 20; authors split larger content into another lesson. If a submitted exercise qualifies for several review triggers, `ReviewItem.reason` chooses `mistake` over `low-accuracy` over `slow`; that creation reason is retained on later triggers.
 
-The flat EXP curve remains in place and is deferred for future game-balance work. No level field is persisted, so a later curve change requires no data migration.
+The flat EXP curve remains in place and is deferred for future game-balance work. No level field is persisted, so a later curve change requires no data migration. (The curve was later set by [[DEC-048]].)
 
 **Why:** Explicit identity rules prevent accidental duplication of document IDs or misuse of embedded IDs. A bounded exercise count preserves a focused lesson session. A deterministic reason preserves one meaningful value when trigger rules overlap. Deferring the level curve avoids speculative balance work before there is real learning data.
 
@@ -1134,7 +1147,8 @@ must be idempotent at the submitted activity checkpoint.
 
 This decision updates the MVP EXP award policy. The derived Level formula
 remains the flat 100 EXP per level from [[DEC-006]] until a separate decision
-adopts LEVELING.md's rebirth-based curve and associated profile state. Rank,
+adopts LEVELING.md's rebirth-based curve and associated profile state
+(adopted by [[DEC-048]] on 2026-10-08). Rank,
 Rebirth, Perks, achievements, and the expanded daily/lifetime stat collections
 remain design proposals and are not authorized domain-model changes here.
 
@@ -1204,3 +1218,53 @@ backfill, because older code overwrote whole documents. Run the backfill while
 nobody edits content. Published-only counts for learners are out of scope and
 would be separate fields. See
 `docs/superpowers/specs/2026-10-08-admin-content-counts-design.md`.
+
+---
+
+## DEC-048 — Level is derived, never stored, using the LEVELING.md curve
+
+**Date:** 2026-10-08
+**Status:** Accepted
+**Supersedes:** [[DEC-006]]
+
+**Decision:** `UserProfile.level` is not a stored field. It is computed on
+read from persisted progression state, using the curve in `docs/LEVELING.md`
+instead of [[DEC-006]]'s flat `level = 1 + floor(exp / 100)`. The EXP needed
+to go from `level` to `level + 1` in the current rebirth cycle is:
+
+```ts
+function expRequiredForNextLevel(level: number, rebirthCount: number): number {
+  const baseExp = 50 * level ** 1.2
+  const rebirthMultiplier = 1 + 0.15 * rebirthCount
+  const softCapMultiplier = level < 100
+    ? 1
+    : 3 ** (Math.floor((level - 100) / 10) + 1)
+
+  return Math.round(baseExp * rebirthMultiplier * softCapMultiplier)
+}
+```
+
+The soft cap is intentional: the multiplier is ×3 from Level 100 itself, so the
+cost jumps from about 12,410 EXP (Level 99) to about 37,678 EXP (Level 100), and
+it triples again every ten levels after that. `levelFromExp(cycleExp,
+rebirthCount)` returns the highest level whose cumulative requirement, starting
+at Level 1, is no greater than `cycleExp`. Level, EXP into the level, and EXP
+to the next level stay derived and are never persisted. Until rebirth state
+exists, `rebirthCount` is `0` and the persisted `exp` is the cycle EXP.
+
+**Why:** A derived value cannot drift from its source, and the curve can be
+retuned later without a data migration. A flat curve makes late levels as
+quick as early ones. The rising
+curve and soft cap make late levels slow on purpose; Perks from Rebirth
+([[DEC-045]] bonus sources) offset that grind.
+
+**Consequences:** Level depends on two persisted inputs (cycle EXP and
+`rebirthCount`), not `exp` alone. Recomputing with the new curve lowers the
+displayed Level of existing learners; their EXP and session history are not
+rewritten. This decision changes documentation only: `levelFromExp()` in
+`domain/models/user-profile.ts` and the Profile progress bar (`exp % 100` in
+`features/profile/ProfilePage.tsx`) still use the flat rule until a separate
+implementation. Rebirth, Rank, Perk, and `ProgressionState` schema remain
+scoped by `docs/superpowers/specs/2026-10-06-player-progression-models-design.md`
+and are not adopted here. Alternative considered: starting the soft cap at
+Level 110; rejected, the Level 100 wall is intended.
