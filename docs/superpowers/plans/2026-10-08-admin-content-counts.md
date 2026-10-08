@@ -50,10 +50,10 @@
 
 **Files:** adapter constructor; new emulator test; `package.json`.
 
-- [ ] Constructor `new FirebaseAdminContentRepository(firestore = db)`; replace module `db` uses with `this.firestore`.
-- [ ] Emulator test file using `initializeTestEnvironment` with `firestore.rules`, an admin context (`{ admin: true }`), skipped without `FIRESTORE_EMULATOR_HOST` (same guard as `firestore.rules.test.ts`).
-- [ ] Extend `test:rules` (or add `test:emulator`) to run both emulator files.
-- [ ] First test: `getCourses()` reads a seeded Course with no counters as zeros. Run: `pnpm test:rules` — PASS.
+- [x] Constructor `new FirebaseAdminContentRepository(firestore = db)`; replace module `db` uses with `this.firestore`.
+- [x] Emulator test file using `initializeTestEnvironment` with `firestore.rules` (loaded via `?raw`; `src` has no Node types), an admin context (`{ admin: true }`, cast from the compat type), skipped without `FIRESTORE_EMULATOR_HOST`. It uses its own project ID, `jamozy-repository-test`, because Vitest runs it in parallel with `firestore.rules.test.ts`, which seeds and clears `jamozy-rules-test`.
+- [x] Extend `test:rules` to run both emulator files.
+- [x] First test: `getCourses()` reads a Course with no counters as zeros and keeps stored counters. `pnpm test:rules` — 5 passed.
 
 ### Task 3: Saves never overwrite counters
 
