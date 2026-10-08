@@ -16,6 +16,7 @@ import FingerPlacementGuide from './FingerPlacementGuide'
 import { useKeyboardFeedback } from '../typing/keyboard-feedback'
 import { useHomePlayerStore } from './home-player-store'
 import { useHomeServices } from './home-services'
+import { prefetchHangulTargets } from '../typing/prefetch-hangul-targets'
 
 interface HomePlayerProps {
   data: HomePlayerData
@@ -42,11 +43,18 @@ export default function HomePlayer({
     exercises,
     session,
     selectedUnitId,
+    generation,
     startLesson,
     pressKey,
     selectUnit,
   } = useHomePlayerStore()
   const { showSuccess } = useSnackbar()
+  // A session left in the store by an earlier visit is not shown; this
+  // mount shows only the lesson it opens.
+  const [mountGeneration] = useState(
+    () => useHomePlayerStore.getState().generation,
+  )
+  const opened = generation > mountGeneration
   const [{ content, initialProgress, initialPending, resume }] = useState(
     () => ({
       content: data.content,
@@ -107,8 +115,17 @@ export default function HomePlayer({
         random,
       })
       services.saveResume(ref)
+      // Warm the typing renderer for the lesson that follows this one.
+      const following =
+        nextHomeLesson(content.units, ref.lessonId) ??
+        resolveHomeResume(content.units, null)
+      const followingLesson = following && lessonById(following.lessonId)
+      if (followingLesson)
+        prefetchHangulTargets(
+          followingLesson.exercises.map(({ targetText }) => targetText),
+        )
     },
-    [isCompleted, lessonById, random, services, startLesson],
+    [content, isCompleted, lessonById, random, services, startLesson],
   )
 
   useEffect(() => {
@@ -184,10 +201,13 @@ export default function HomePlayer({
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [handleKeyPress])
 
-  const visibleUnitId = selectedUnitId ?? unitId ?? content.units[0]?.id
+  const visibleUnitId = opened
+    ? (selectedUnitId ?? unitId ?? content.units[0]?.id)
+    : resolveHomeResume(content.units, resume)?.unitId
   const visibleUnit =
     content.units.find(({ id }) => id === visibleUnitId) ?? content.units[0]
-  const active = session ? exercises[session.currentIndex] : undefined
+  const active = opened && session ? exercises[session.currentIndex] : undefined
+  const hasLessons = content.units.some(({ lessons }) => lessons.length > 0)
   const nextKey =
     session?.currentSession.expectedKeys[session.currentSession.keyIndex]
   const acceptedKeystrokes = session
@@ -304,11 +324,11 @@ export default function HomePlayer({
           />
           <FingerPlacementGuide nextKey={nextKey} />
         </div>
-      ) : (
+      ) : opened || !hasLessons ? (
         <div className="mt-4 rounded-3xl border border-dashed border-[#dfcfc0] bg-white/60 p-6 text-center text-sm text-[#667085]">
           Pick a lesson above to start.
         </div>
-      )}
+      ) : null}
 
       <div className="flex flex-wrap items-end justify-between gap-3">
         <nav className="mt-5 flex flex-wrap gap-2" aria-label="Choose unit">
@@ -337,7 +357,7 @@ export default function HomePlayer({
               progressByLesson.get(entry.id) ?? null,
               localDone.get(entry.id),
             )
-            const current = entry.id === lesson?.id
+            const current = opened && entry.id === lesson?.id
             return (
               <button
                 key={entry.id}

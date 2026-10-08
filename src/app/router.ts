@@ -23,6 +23,7 @@ import { LocalHomeSyncJobRepository } from '../infrastructure/local/local-home-s
 import { LocalHomeStateRepository } from '../infrastructure/local/local-home-state-repository'
 import { StaticHomeContentRepository } from '../infrastructure/static/static-home-content-repository'
 import { createHomeServices } from './home-services'
+import { prefetchHangulTargets } from '../features/typing/prefetch-hangul-targets'
 import { FirebaseAuthRepository } from '../infrastructure/firebase/firebase-auth-repository'
 import { FirebaseAdminAuthRepository } from '../infrastructure/firebase/firebase-admin-auth-repository'
 import { FirebaseAdminContentRepository } from '../infrastructure/firebase/repositories/firebase-admin-content-repository'
@@ -232,6 +233,7 @@ export const router = createBrowserRouter([
         contentRepo: new StaticHomeContentRepository(),
         localState: homeLocalState,
         pendingExerciseIds: (userId) => homeOutbox.pendingExerciseIds(userId),
+        prefetchTargets: prefetchHangulTargets,
       },
       ensureUser: getActiveUser,
       getSession: () => sessionManager.getActiveSession(),

@@ -243,4 +243,34 @@ describe('HomePlayer', () => {
 
     expect(useHomePlayerStore.getState().session).toBe(session)
   })
+
+  it('never shows a session left in the store by an earlier visit', async () => {
+    useHomePlayerStore
+      .getState()
+      .startLesson('u1', content.units[0].lessons[0], { isReplay: false })
+    const services: HomeServices = {
+      recordExercise: vi.fn(),
+      recordReplay: vi.fn(),
+      saveResume: vi.fn(),
+    }
+
+    render(
+      <HomeServicesProvider value={services}>
+        <HomePlayer
+          data={{
+            content: { ...content, units: [] },
+            progress: [],
+            pendingExerciseIds: {},
+            resume: null,
+          }}
+          liveProgress={Promise.resolve(null)}
+        />
+      </HomeServicesProvider>,
+    )
+
+    expect(
+      screen.getByText('Pick a lesson above to start.'),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
+  })
 })
