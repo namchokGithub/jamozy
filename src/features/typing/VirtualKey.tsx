@@ -1,3 +1,5 @@
+import { AnimatePresence, motion, useAnimationControls, useReducedMotion } from 'motion/react'
+import { useEffect } from 'react'
 import { isKoreanJamoKey, KEY_TO_JAMO } from '../../domain/korean/keymap'
 import type { KeyboardFeedback } from './keyboard-feedback'
 
@@ -69,6 +71,50 @@ function visualStateClass(state: KeyVisualState): string {
   }
 }
 
+function CorrectKeyFeedback() {
+  return (
+    <motion.span
+      aria-hidden="true"
+      initial={{ boxShadow: '0 0 0px rgba(32, 185, 129, 0)' }}
+      animate={{
+        boxShadow: [
+          '0 0 0px rgba(32, 185, 129, 0)',
+          '0 0 16px rgba(32, 185, 129, 0.58)',
+          '0 0 6px rgba(32, 185, 129, 0)',
+        ],
+      }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.21, ease: 'easeOut', times: [0, 0.38, 1] }}
+      className="pointer-events-none absolute -inset-1 rounded-xl"
+    >
+      <CorrectSparkle x={-8} y={-10} delay={0} />
+      <CorrectSparkle x={12} y={-4} delay={0.025} />
+      <CorrectSparkle x={8} y={12} delay={0.05} />
+    </motion.span>
+  )
+}
+
+function CorrectSparkle({
+  x,
+  y,
+  delay,
+}: {
+  x: number
+  y: number
+  delay: number
+}) {
+  return (
+    <motion.span
+      initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+      animate={{ opacity: [0, 1, 0], scale: [0, 1, 0.5], x, y }}
+      transition={{ duration: 0.16, delay, ease: 'easeOut' }}
+      className="absolute right-0 top-0 text-xs text-[#e8b85c]"
+    >
+      ✦
+    </motion.span>
+  )
+}
+
 export default function VirtualKey({
   keyboardKey,
   nextKey,
@@ -86,6 +132,8 @@ export default function VirtualKey({
   const isJamoKey = isKoreanJamoKey(code)
   const displayLabel = label ?? englishLabel(code)
   const hasHomeRowMarker = code === 'KeyF' || code === 'KeyJ'
+  const keyAnimation = useAnimationControls()
+  const shouldReduceMotion = useReducedMotion()
   const canPress = canInteract && (isJamoKey || isShiftKey)
   const visualState = getVisualState(
     code,
@@ -98,6 +146,18 @@ export default function VirtualKey({
   const keyVisualClass = isActiveShift
     ? 'border-[#e3ad73] bg-[#fff0d8] text-[#8b6035]'
     : visualStateClass(visualState)
+  const correctFeedbackId =
+    feedback?.outcome === 'correct' && feedback.code === code
+      ? feedback.id
+      : undefined
+
+  useEffect(() => {
+    if (correctFeedbackId === undefined || shouldReduceMotion) return
+    void keyAnimation.start({
+      scale: [1, 1.08, 0.98, 1],
+      transition: { duration: 0.21, ease: 'easeOut', times: [0, 0.35, 0.7, 1] },
+    })
+  }, [correctFeedbackId, keyAnimation, shouldReduceMotion])
 
   const handleClick = () => {
     if (!canInteract) return
@@ -109,9 +169,10 @@ export default function VirtualKey({
   }
 
   return (
-    <button
+    <motion.button
       type="button"
       data-state={visualState}
+      animate={keyAnimation}
       className={`relative flex h-12 ${keyWidth(wide)} flex-col items-center justify-center rounded-lg border px-1 text-sm transition-[background-color,border-color,color,box-shadow] duration-200 sm:h-13 ${keyVisualClass} ${canPress ? 'cursor-pointer touch-manipulation' : 'cursor-default'}`}
       aria-label={displayLabel}
       aria-pressed={isShiftKey ? virtualShiftActive : undefined}
@@ -145,6 +206,11 @@ export default function VirtualKey({
           {displayLabel}
         </span>
       )}
-    </button>
+      <AnimatePresence initial={false}>
+        {correctFeedbackId !== undefined && !shouldReduceMotion && (
+          <CorrectKeyFeedback key={correctFeedbackId} />
+        )}
+      </AnimatePresence>
+    </motion.button>
   )
 }
