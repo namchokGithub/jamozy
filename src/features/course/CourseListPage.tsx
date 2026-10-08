@@ -31,7 +31,7 @@ export default function CourseListPage() {
     useLoaderData() as CourseListLoaderData
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#fffaf1] px-4 py-5 text-[#253247] sm:px-6 sm:py-8">
+    <main className="min-h-screen overflow-hidden bg-[#fffaf1] px-4 py-5 text-[#253247] sm:px-6 sm:py-8 select-none!">
       <div
         className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
         aria-hidden="true"
@@ -98,7 +98,7 @@ export default function CourseListPage() {
           </Await>
         </Suspense>
 
-        <section className="relative mt-8 overflow-hidden rounded-4xl border border-[#f0dfd1] bg-[#fffdf9] px-6 py-8 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:px-10 sm:py-11">
+        <section className="relative mt-8 overflow-hidden rounded-4xl border border-[#f0dfd1] bg-[#fffdf9] px-6 py-8 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:px-10 sm:py-11 select-none!">
           <div
             className="absolute -right-10 -top-12 h-52 w-52 rounded-full bg-[#f5dfb7]/50"
             aria-hidden="true"
@@ -166,7 +166,7 @@ function AccountNav({
   return (
     <>
       <nav
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 select-none!"
         aria-label="Account navigation"
       >
         {!isAuthenticated &&
@@ -216,7 +216,11 @@ function AccountNav({
           <div
             className="relative"
             onBlur={(event) => {
-              if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+              if (
+                !event.currentTarget.contains(
+                  event.relatedTarget as Node | null,
+                )
+              ) {
                 setUserMenuOpen(false)
               }
             }}
@@ -315,7 +319,7 @@ function LearningPathSection({
           to="/review"
           className="mt-5 flex items-center justify-between gap-4 rounded-2xl border border-[#f1d5af] bg-[#fff1dc] px-5 py-4 text-[#7f5632] transition hover:-translate-y-0.5 hover:bg-[#ffe9c7] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bc6c5d]"
         >
-          <span className="flex items-center gap-3 text-sm font-semibold">
+          <span className="flex items-center gap-3 text-sm font-semibold select-none!">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/70">
               <BookOpen aria-hidden="true" size={18} />
             </span>
@@ -325,7 +329,10 @@ function LearningPathSection({
         </Link>
       )}
 
-      <section className="mt-10" aria-labelledby="learning-path-heading">
+      <section
+        className="mt-10  select-none!"
+        aria-labelledby="learning-path-heading"
+      >
         <div className="flex items-end justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-[#a85d4e]">
@@ -400,7 +407,10 @@ function LearningPathSection({
 
 function LearningPathPlaceholder() {
   return (
-    <div className="mt-10 grid gap-4 sm:grid-cols-2" aria-hidden="true">
+    <div
+      className="mt-10 grid gap-4 sm:grid-cols-2 select-none!"
+      aria-hidden="true"
+    >
       <div className="h-48 animate-pulse rounded-3xl bg-white/70" />
       <div className="h-48 animate-pulse rounded-3xl bg-white/70" />
     </div>

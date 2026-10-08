@@ -6,41 +6,20 @@ const hands = [
   {
     title: 'Left hand',
     fingers: [
-      ['Pinky', ['~', '1', 'Q', 'A', 'Z', 'Tab', 'Caps', 'Shift']],
-      ['Ring', ['2', 'W', 'S', 'X']],
-      ['Middle', ['3', 'E', 'D', 'C']],
-      ['Index', ['4', '5', 'R', 'T', 'F', 'G', 'V', 'B']],
+      ['Pinky', ['Q', 'A', 'Z', 'Shift']],
+      ['Ring', ['W', 'S', 'X']],
+      ['Middle', ['E', 'D', 'C']],
+      ['Index', ['R', 'T', 'F', 'G', 'V', 'B']],
       ['Thumb', ['Space']],
     ],
   },
   {
     title: 'Right hand',
     fingers: [
-      [
-        'Pinky',
-        [
-          '=',
-          '-',
-          '0',
-          ')',
-          'P',
-          ';',
-          ':',
-          '/',
-          '?',
-          "'",
-          '"',
-          '[',
-          '{',
-          ']',
-          '}',
-          'Enter',
-          'Shift',
-        ],
-      ],
-      ['Ring', ['9', 'O', 'L', '.', '>']],
-      ['Middle', ['8', 'I', 'K', ',', '<']],
-      ['Index', ['6', '7', 'Y', 'U', 'J', 'H', 'N', 'M']],
+      ['Pinky', ['P', 'Enter', 'Shift']],
+      ['Ring', ['O', 'L']],
+      ['Middle', ['I', 'K']],
+      ['Index', ['Y', 'U', 'J', 'H', 'N', 'M']],
       ['Thumb', ['Space']],
     ],
   },
@@ -108,7 +87,11 @@ function HandSilhouette({
         aria-label={`${side} hand finger guide`}
         role="img"
       >
-        <g transform={side === 'right' ? 'translate(121 0) scale(-1 1)' : undefined}>
+        <g
+          transform={
+            side === 'right' ? 'translate(121 0) scale(-1 1)' : undefined
+          }
+        >
           <g transform="translate(4 4)">
             <path
               className="fill-[#dce4f1]"

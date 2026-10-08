@@ -47,7 +47,7 @@ export default function OnePageLearningPlayer({
   const fetcher = useFetcher<{ onePageCheckpointed?: boolean }>()
   const refill = useFetcher<CourseListLoaderData>()
   // The player owns its queue from mount on; later loader data for the same
-  // course (revalidations) never restarts it. The parent keys the player by
+  // course (revalidation) never restarts it. The parent keys the player by
   // course, so a course change mounts a fresh player.
   const [initialPath] = useState(learningPath)
   const courseId = initialPath.selectedCourseId
@@ -215,7 +215,7 @@ export default function OnePageLearningPlayer({
 
   return (
     <section
-      className="mt-7 rounded-4xl border border-[#d9d1ed] bg-[#fffdf9] p-5 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:p-7"
+      className="mt-7 rounded-4xl border border-[#d9d1ed] bg-[#fffdf9] p-5 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] select-none! sm:p-7"
       aria-labelledby="one-page-player-heading"
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
