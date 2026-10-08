@@ -1,4 +1,9 @@
-import { AnimatePresence, motion, useAnimationControls, useReducedMotion } from 'motion/react'
+import {
+  AnimatePresence,
+  motion,
+  useAnimationControls,
+  useReducedMotion,
+} from 'motion/react'
 import { useEffect } from 'react'
 import { isKoreanJamoKey, KEY_TO_JAMO } from '../../domain/korean/keymap'
 import type { KeyboardFeedback } from './keyboard-feedback'
@@ -160,6 +165,7 @@ export default function VirtualKey({
   )
   const isActiveShift = isShiftKey && (nextKey?.shift || virtualShiftActive)
   const shouldPulseShift = isShiftKey && nextKey?.shift === true
+  const shouldPulseTarget = visualState === 'target' && !isShiftKey
   const keyVisualClass = isActiveShift
     ? 'border-[#e3ad73] bg-[#fff0d8] text-[#8b6035]'
     : visualStateClass(visualState)
@@ -186,7 +192,7 @@ export default function VirtualKey({
         '0 0 12px rgba(227, 173, 115, 0.45)',
         '0 0 0px rgba(227, 173, 115, 0)',
       ],
-      transition: { duration: 1.2, repeat: Infinity, ease: 'easeInOut' },
+      transition: { duration: 1.5, repeat: Infinity, ease: 'easeInOut' },
     })
   }, [isShiftKey, keyAnimation, shouldPulseShift, shouldReduceMotion])
 
@@ -216,51 +222,72 @@ export default function VirtualKey({
   }
 
   return (
-    <motion.button
-      type="button"
-      data-state={visualState}
-      animate={keyAnimation}
-      className={`relative flex h-12 ${keyWidth(wide)} flex-col items-center justify-center rounded-lg border px-1 text-sm transition-[background-color,border-color,color,box-shadow] duration-200 sm:h-13 ${keyVisualClass} ${canPress ? 'cursor-pointer touch-manipulation' : 'cursor-default'}`}
-      aria-label={displayLabel}
-      aria-pressed={isShiftKey ? virtualShiftActive : undefined}
-      disabled={!canPress}
-      onClick={handleClick}
+    <motion.div
+      animate={
+        shouldPulseTarget && !shouldReduceMotion
+          ? {
+              scale: [1, 1.04, 1],
+              boxShadow: [
+                '0 3px 10px -5px rgba(35, 109, 86, 0.45)',
+                '0 0 14px rgba(159, 216, 189, 0.55)',
+                '0 3px 10px -5px rgba(35, 109, 86, 0.45)',
+              ],
+            }
+          : { scale: 1, boxShadow: 'none' }
+      }
+      transition={
+        shouldPulseTarget && !shouldReduceMotion
+          ? { duration: 1.5, repeat: Infinity, ease: 'easeInOut' }
+          : { duration: 0.1 }
+      }
+      className={`relative ${keyWidth(wide)}`}
     >
-      {jamo ? (
-        <>
-          {jamo.shift && (
-            <span className="absolute top-1 right-1 text-[10px] leading-none text-[#a85d4e]">
-              {jamo.shift}
-            </span>
-          )}
-          <span className="text-base leading-4">{jamo.base}</span>
-          {showEnglishKeys && (
-            <span
-              className={`mt-0.5 text-[10px] leading-3 text-slate-400 ${hasHomeRowMarker ? 'mb-1.5' : ''}`}
-            >
-              {englishLabel(code)}
-            </span>
-          )}
-          {hasHomeRowMarker && (
-            <span
-              aria-hidden="true"
-              className="absolute bottom-1 h-0.5 w-5 rounded-full bg-gray-300/50 sm:bottom-1.5 sm:h-px sm:w-4"
-            />
-          )}
-        </>
-      ) : (
-        <span className="text-[11px] font-semibold text-[#667085]">
-          {displayLabel}
-        </span>
-      )}
-      <AnimatePresence initial={false}>
-        {correctFeedbackId !== undefined && !shouldReduceMotion && (
-          <CorrectKeyFeedback key={correctFeedbackId} />
+      <motion.button
+        type="button"
+        data-state={visualState}
+        animate={keyAnimation}
+        className={`relative flex h-12 w-full flex-col items-center justify-center rounded-lg border px-1 text-sm transition-[background-color,border-color,color,box-shadow] duration-200 sm:h-13 ${keyVisualClass} ${canPress ? 'cursor-pointer touch-manipulation' : 'cursor-default'}`}
+        aria-label={displayLabel}
+        aria-pressed={isShiftKey ? virtualShiftActive : undefined}
+        disabled={!canPress}
+        onClick={handleClick}
+      >
+        {jamo ? (
+          <>
+            {jamo.shift && (
+              <span className="absolute top-1 right-1 text-[10px] leading-none text-[#a85d4e]">
+                {jamo.shift}
+              </span>
+            )}
+            <span className="text-base leading-4">{jamo.base}</span>
+            {showEnglishKeys && (
+              <span
+                className={`mt-0.5 text-[10px] leading-3 text-slate-400 ${hasHomeRowMarker ? 'mb-1.5' : ''}`}
+              >
+                {englishLabel(code)}
+              </span>
+            )}
+            {hasHomeRowMarker && (
+              <span
+                aria-hidden="true"
+                className="absolute bottom-1 h-0.5 w-5 rounded-full bg-gray-300/50 sm:bottom-1.5 sm:h-px sm:w-4"
+              />
+            )}
+          </>
+        ) : (
+          <span className="text-[11px] font-semibold text-[#667085]">
+            {displayLabel}
+          </span>
         )}
-        {wrongFeedbackId !== undefined && !shouldReduceMotion && (
-          <WrongKeyFeedback key={wrongFeedbackId} />
-        )}
-      </AnimatePresence>
-    </motion.button>
+        <AnimatePresence initial={false}>
+          {correctFeedbackId !== undefined && !shouldReduceMotion && (
+            <CorrectKeyFeedback key={correctFeedbackId} />
+          )}
+          {wrongFeedbackId !== undefined && !shouldReduceMotion && (
+            <WrongKeyFeedback key={wrongFeedbackId} />
+          )}
+        </AnimatePresence>
+      </motion.button>
+    </motion.div>
   )
 }
