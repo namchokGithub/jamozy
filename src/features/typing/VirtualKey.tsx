@@ -115,6 +115,22 @@ function CorrectSparkle({
   )
 }
 
+function WrongKeyFeedback() {
+  return (
+    <motion.span
+      aria-hidden="true"
+      initial={{ opacity: 0 }}
+      animate={{
+        opacity: [0, 0.42, 0],
+        backgroundColor: ['#fde5e1', '#f8cec7', '#fde5e1'],
+      }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.22, ease: 'easeOut' }}
+      className="pointer-events-none absolute inset-0 rounded-lg"
+    />
+  )
+}
+
 export default function VirtualKey({
   keyboardKey,
   nextKey,
@@ -150,6 +166,10 @@ export default function VirtualKey({
     feedback?.outcome === 'correct' && feedback.code === code
       ? feedback.id
       : undefined
+  const wrongFeedbackId =
+    feedback?.outcome === 'wrong' && feedback.code === code
+      ? feedback.id
+      : undefined
 
   useEffect(() => {
     if (correctFeedbackId === undefined || shouldReduceMotion) return
@@ -158,6 +178,14 @@ export default function VirtualKey({
       transition: { duration: 0.21, ease: 'easeOut', times: [0, 0.35, 0.7, 1] },
     })
   }, [correctFeedbackId, keyAnimation, shouldReduceMotion])
+
+  useEffect(() => {
+    if (wrongFeedbackId === undefined || shouldReduceMotion) return
+    void keyAnimation.start({
+      x: [0, -3, 3, -2, 0],
+      transition: { duration: 0.22, ease: 'easeOut' },
+    })
+  }, [keyAnimation, shouldReduceMotion, wrongFeedbackId])
 
   const handleClick = () => {
     if (!canInteract) return
@@ -209,6 +237,9 @@ export default function VirtualKey({
       <AnimatePresence initial={false}>
         {correctFeedbackId !== undefined && !shouldReduceMotion && (
           <CorrectKeyFeedback key={correctFeedbackId} />
+        )}
+        {wrongFeedbackId !== undefined && !shouldReduceMotion && (
+          <WrongKeyFeedback key={wrongFeedbackId} />
         )}
       </AnimatePresence>
     </motion.button>
