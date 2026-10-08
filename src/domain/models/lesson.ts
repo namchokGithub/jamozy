@@ -28,3 +28,10 @@ export interface Lesson extends ContentStatusFields {
   createdAt: Date
   updatedAt: Date
 }
+
+/** Stored Exercise count (DEC-047), or the loaded Exercises before it exists. */
+export function lessonExerciseCount(
+  lesson: Pick<Lesson, 'exerciseCount' | 'exercises'>,
+): number {
+  return lesson.exerciseCount ?? lesson.exercises.length
+}

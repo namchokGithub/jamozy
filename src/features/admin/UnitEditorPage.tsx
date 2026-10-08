@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useFetcher, useLoaderData, useNavigate } from 'react-router'
 import type { Course } from '../../domain/models/course'
-import type { Lesson } from '../../domain/models/lesson'
+import { lessonExerciseCount, type Lesson } from '../../domain/models/lesson'
 import { unitCounts, type Unit } from '../../domain/models/unit'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
@@ -273,7 +273,7 @@ export default function UnitEditorPage() {
                 <AdminStatusBadge status={lesson.status} />
                 <span className="shrink-0 text-xs text-[#8b7d72]">
                   {t('count.lessonSummary', {
-                    exercises: lesson.exercises.length,
+                    exercises: lessonExerciseCount(lesson),
                   })}
                 </span>
               </div>
