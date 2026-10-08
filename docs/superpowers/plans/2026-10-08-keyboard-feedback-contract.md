@@ -12,12 +12,13 @@
 - Match `typing-session.ts` semantics: only `strictShift` expected keys require an exact Shift match.
 - Ignore an attempt when no current expected key exists.
 - Add tests only for the pure correctness mapper; do not add animation or presentation assertions.
-- Do not add Motion, timers, dependencies, or visual effects in this task.
+- Feedback timing and static colour treatment were added later: correct attempts show soft blue briefly, then lavender and fade; wrong attempts show coral briefly and fade. Motion-library effects remain deferred.
 - Final-key feedback presentation is deferred: Lesson/Review replace the keyboard with Saving immediately, so the later animation scope must decide whether completion waits briefly or feedback moves to the completion UI.
 
 ### Task 1: Add a tested feedback mapper and hook
 
 **Files:**
+
 - Create: `src/features/typing/keyboard-feedback.ts`
 - Create: `src/features/typing/keyboard-feedback.test.ts`
 
@@ -28,6 +29,7 @@
 ### Task 2: Wire feedback through all typing input paths
 
 **Files:**
+
 - Modify: `src/features/typing/VirtualKeyboard.tsx`
 - Modify: `src/features/lesson/LessonTypingSession.tsx`
 - Modify: `src/features/review/ReviewTypingSession.tsx`
@@ -44,6 +46,7 @@
 ### Task 3: Record status
 
 **Files:**
+
 - Modify: `docs/PROGRESS.md`
 - Modify: this plan
 

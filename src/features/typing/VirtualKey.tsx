@@ -1,7 +1,8 @@
 import { isKoreanJamoKey, KEY_TO_JAMO } from '../../domain/korean/keymap'
 import type { KeyboardFeedback } from './keyboard-feedback'
 
-export type KeyVisualState = 'idle' | 'target' | 'correct' | 'wrong' | 'dimmed'
+export type KeyVisualState =
+  'idle' | 'target' | 'active' | 'previous' | 'wrong' | 'dimmed'
 
 export type KeyboardKey = {
   code: string
@@ -13,6 +14,9 @@ interface VirtualKeyProps {
   keyboardKey: KeyboardKey
   nextKey?: { code: string; shift: boolean }
   feedback?: KeyboardFeedback
+  previousFeedback?: KeyboardFeedback
+  isPreviousFading: boolean
+  isFeedbackFading: boolean
   showEnglishKeys: boolean
   virtualShiftActive: boolean
   canInteract: boolean
@@ -40,9 +44,12 @@ function getVisualState(
   isJamoKey: boolean,
   nextKey: VirtualKeyProps['nextKey'],
   feedback: KeyboardFeedback | undefined,
+  previousFeedback: KeyboardFeedback | undefined,
 ): KeyVisualState {
-  if (feedback?.code === code) return feedback.outcome
+  if (feedback?.code === code)
+    return feedback.outcome === 'correct' ? 'active' : 'wrong'
   if (nextKey?.code === code) return 'target'
+  if (previousFeedback?.code === code) return 'previous'
   if (isJamoKey && nextKey) return 'dimmed'
   return 'idle'
 }
@@ -50,8 +57,11 @@ function getVisualState(
 function visualStateClass(state: KeyVisualState): string {
   switch (state) {
     case 'target':
-    case 'correct':
       return 'border-[#78bca6] bg-[#ddf5e9] text-[#194d41] shadow-[0_3px_10px_-5px_rgba(35,109,86,0.45)]'
+    case 'active':
+      return 'border-[#8db7f4] bg-[#e8f1ff] text-[#3f6fae] shadow-[0_3px_10px_-5px_rgba(63,111,174,0.35)]'
+    case 'previous':
+      return 'border-[#d8d0ec] bg-[#f3f0fa] text-[#746b8f]'
     case 'wrong':
       return 'border-[#e5a196] bg-[#fde5e1] text-[#8d4c43] shadow-[0_3px_10px_-5px_rgba(169,74,61,0.35)]'
     case 'dimmed':
@@ -65,6 +75,9 @@ export default function VirtualKey({
   keyboardKey,
   nextKey,
   feedback,
+  previousFeedback,
+  isPreviousFading,
+  isFeedbackFading,
   showEnglishKeys,
   virtualShiftActive,
   canInteract,
@@ -78,7 +91,13 @@ export default function VirtualKey({
   const displayLabel = label ?? englishLabel(code)
   const hasHomeRowMarker = code === 'KeyF' || code === 'KeyJ'
   const canPress = canInteract && (isJamoKey || isShiftKey)
-  const visualState = getVisualState(code, isJamoKey, nextKey, feedback)
+  const visualState = getVisualState(
+    code,
+    isJamoKey,
+    nextKey,
+    feedback,
+    previousFeedback,
+  )
   const isActiveShift = isShiftKey && (nextKey?.shift || virtualShiftActive)
   const keyVisualClass = isActiveShift
     ? 'border-[#e3ad73] bg-[#fff0d8] text-[#8b6035]'
@@ -97,7 +116,7 @@ export default function VirtualKey({
     <button
       type="button"
       data-state={visualState}
-      className={`relative flex h-12 ${keyWidth(wide)} flex-col items-center justify-center rounded-lg border px-1 text-sm sm:h-13 ${keyVisualClass} ${canPress ? 'cursor-pointer touch-manipulation' : 'cursor-default'}`}
+      className={`relative flex h-12 ${keyWidth(wide)} flex-col items-center justify-center rounded-lg border px-1 text-sm transition-[background-color,border-color,color,box-shadow,opacity] duration-200 sm:h-13 ${keyVisualClass} ${(visualState === 'previous' && isPreviousFading) || (visualState === 'wrong' && isFeedbackFading) ? 'opacity-0' : 'opacity-100'} ${canPress ? 'cursor-pointer touch-manipulation' : 'cursor-default'}`}
       aria-label={displayLabel}
       aria-pressed={isShiftKey ? virtualShiftActive : undefined}
       disabled={!canPress}

@@ -59,7 +59,13 @@ export default function OnePageLearningPlayer({
   const handledRefill = useRef(refill.data)
   const [checkpointVersion, setCheckpointVersion] = useState(0)
   const [nowMs, setNowMs] = useState(0)
-  const { feedback, recordAttempt } = useKeyboardFeedback()
+  const {
+    feedback,
+    previousFeedback,
+    isPreviousFading,
+    isFeedbackFading,
+    recordAttempt,
+  } = useKeyboardFeedback()
   const sessionStartedAtMs = session?.startedAt.getTime()
 
   useEffect(() => {
@@ -86,7 +92,8 @@ export default function OnePageLearningPlayer({
 
   const handleKeyPress = useCallback(
     (code: string, shiftKey: boolean) => {
-      const currentSession = useOnePagePlayerStore.getState().session?.currentSession
+      const currentSession =
+        useOnePagePlayerStore.getState().session?.currentSession
       recordAttempt(
         currentSession?.expectedKeys[currentSession.keyIndex],
         code,
@@ -293,6 +300,9 @@ export default function OnePageLearningPlayer({
           <VirtualKeyboard
             nextKey={nextKey}
             feedback={feedback}
+            previousFeedback={previousFeedback}
+            isPreviousFading={isPreviousFading}
+            isFeedbackFading={isFeedbackFading}
             showEnglishKeys
             opacity={1}
             onKeyPress={handleKeyPress}

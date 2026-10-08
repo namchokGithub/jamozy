@@ -42,7 +42,13 @@ export default function LessonTypingSession({
   const hasStarted = useRef(false)
   const hasSubmitted = useRef(false)
   const completedResult = useRef<LessonResult | null>(null)
-  const { feedback, recordAttempt } = useKeyboardFeedback()
+  const {
+    feedback,
+    previousFeedback,
+    isPreviousFading,
+    isFeedbackFading,
+    recordAttempt,
+  } = useKeyboardFeedback()
   // useLessonSessionStore is a module-level singleton, so `session`/`generation`
   // may still belong to a previous lesson's mount (possibly already completed)
   // until this mount's own start() call lands. myGenerationRef pins the exact
@@ -66,7 +72,8 @@ export default function LessonTypingSession({
 
   const handleKeyPress = useCallback(
     (code: string, shiftKey: boolean) => {
-      const currentSession = useLessonSessionStore.getState().session?.currentSession
+      const currentSession =
+        useLessonSessionStore.getState().session?.currentSession
       recordAttempt(
         currentSession?.expectedKeys[currentSession.keyIndex],
         code,
@@ -155,6 +162,9 @@ export default function LessonTypingSession({
           <VirtualKeyboard
             nextKey={nextKey}
             feedback={feedback}
+            previousFeedback={previousFeedback}
+            isPreviousFading={isPreviousFading}
+            isFeedbackFading={isFeedbackFading}
             showEnglishKeys={keyboardSettings.showEnglishKeys}
             opacity={keyboardSettings.keyboardOpacity}
             onKeyPress={handleKeyPress}
