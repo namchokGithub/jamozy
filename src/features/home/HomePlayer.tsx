@@ -64,8 +64,7 @@ export default function HomePlayer({
   // Exercises completed on this device that the outbox may not have written.
   const [localDone, setLocalDone] = useState(initialPending)
   const [nowMs, setNowMs] = useState(0)
-  const { feedback, previousFeedback, recordAttempt } =
-    useKeyboardFeedback()
+  const { feedback, previousFeedback, recordAttempt } = useKeyboardFeedback()
 
   useEffect(() => {
     let active = true
@@ -224,7 +223,7 @@ export default function HomePlayer({
 
   return (
     <section
-      className="mt-7 rounded-4xl border border-[#d9d1ed] bg-[#fffdf9] p-5 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:p-7 select-none!"
+      className="mt-5 rounded-4xl border border-[#d9d1ed] bg-[#fffdf9] p-5 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:p-7 select-none!"
       aria-labelledby="home-player-heading"
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -239,27 +238,93 @@ export default function HomePlayer({
             {content.course.title}
           </h2>
         </div>
-        {session && lesson && (
-          <p className="rounded-full bg-[#f2edf9] px-3 py-1.5 text-sm font-semibold text-[#7863a8]">
-            {Math.min(session.currentIndex + 1, exercises.length)} /{' '}
-            {exercises.length}
-          </p>
-        )}
       </div>
 
-      <nav className="mt-5 flex flex-wrap gap-2" aria-label="Choose unit">
-        {content.units.map((unit) => (
-          <button
-            key={unit.id}
-            type="button"
-            aria-pressed={unit.id === visibleUnit?.id}
-            onClick={() => selectUnit(unit.id)}
-            className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${unit.id === visibleUnit?.id ? 'border-[#9d8bc8] bg-[#e9e1f8] text-[#5c4b88]' : 'border-[#eadfd4] bg-white text-[#667085] hover:border-[#c8b9e7]'}`}
-          >
-            {unit.title}
-          </button>
-        ))}
-      </nav>
+      {active && session && lesson ? (
+        <div className="mt-1">
+          <div className="mt-2 rounded-3xl bg-[#fffaf6] p-4 text-center shadow-[0_0_30px_-20px_rgba(87,65,45,0.35)]">
+            <div className="flex h-5 justify-end gap-1.5">
+              <span className="rounded-lg border border-[#eadfd4] bg-[#fffdf9] px-2 py-0.5 text-[10px] font-semibold text-[#98a2b3]">
+                WPM <strong className="ml-0.5 text-[#667085]">{wpm}</strong>
+              </span>
+              <span className="rounded-lg border border-[#eadfd4] bg-[#fffdf9] px-2 py-0.5 text-[10px] font-semibold text-[#98a2b3]">
+                ACC{' '}
+                <strong className="ml-0.5 text-[#667085]">{accuracy}%</strong>
+              </span>
+
+              {session && lesson && (
+                <span className="rounded-lg border border-[#eadfd4] bg-[#f2edf9] px-2 py-0.5 text-[10px] font-semibold text-[#7863a8]!">
+                  {Math.min(session.currentIndex + 1, exercises.length)} /{' '}
+                  {exercises.length}
+                </span>
+              )}
+            </div>
+            <HangulTarget
+              session={session.currentSession}
+              className="mt-3 origin-center scale-160 text-6xl font-bold tracking-wide sm:text-7xl"
+            />
+            <div className="mx-auto mt-10 max-w-44">
+              <p className="text-[10px] font-semibold text-[#98a2b3]">
+                {completedSteps} / {totalSteps} steps
+              </p>
+              <div
+                className="mt-1 h-1 overflow-hidden rounded-full bg-[#f2edf9]"
+                role="progressbar"
+                aria-label="Typing progress"
+                aria-valuemin={0}
+                aria-valuemax={totalSteps}
+                aria-valuenow={completedSteps}
+              >
+                <div
+                  className="h-full rounded-full bg-[#c84f82] transition-[width] duration-150"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            </div>
+            <div className="mt-5 grid h-9 grid-rows-2">
+              <div className="h-4 max-w-full truncate text-xs text-[#98a2b3]">
+                {meaning || (
+                  <span className="italic text-[#e4e2df]">No meaning</span>
+                )}
+              </div>
+              <div className="h-4 max-w-full truncate text-xs italic text-[#a293bd]">
+                {active.romanization || (
+                  <span className="italic text-[#e4e2df]">No meaning</span>
+                )}
+              </div>
+            </div>
+          </div>
+          <VirtualKeyboard
+            nextKey={nextKey}
+            feedback={feedback}
+            previousFeedback={previousFeedback}
+            showEnglishKeys
+            opacity={1}
+            onKeyPress={handleKeyPress}
+          />
+          <FingerPlacementGuide nextKey={nextKey} />
+        </div>
+      ) : (
+        <div className="mt-4 rounded-3xl border border-dashed border-[#dfcfc0] bg-white/60 p-6 text-center text-sm text-[#667085]">
+          Pick a lesson above to start.
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <nav className="mt-5 flex flex-wrap gap-2" aria-label="Choose unit">
+          {content.units.map((unit) => (
+            <button
+              key={unit.id}
+              type="button"
+              aria-pressed={unit.id === visibleUnit?.id}
+              onClick={() => selectUnit(unit.id)}
+              className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${unit.id === visibleUnit?.id ? 'border-[#9d8bc8] bg-[#e9e1f8] text-[#5c4b88]' : 'border-[#eadfd4] bg-white text-[#667085] hover:border-[#c8b9e7]'}`}
+            >
+              {unit.title}
+            </button>
+          ))}
+        </nav>
+      </div>
 
       {visibleUnit && (
         <nav
@@ -293,66 +358,6 @@ export default function HomePlayer({
             )
           })}
         </nav>
-      )}
-
-      {active && session && lesson ? (
-        <div className="mt-1">
-          <p className="text-sm font-semibold text-[#a85d4e]">{lesson.title}</p>
-          <div className="mt-2 rounded-3xl bg-[#fffaf6] p-4 text-center shadow-[0_0_30px_-20px_rgba(87,65,45,0.35)]">
-            <div className="flex h-5 justify-end gap-1.5">
-              <span className="rounded-lg border border-[#eadfd4] bg-[#fffdf9] px-2 py-0.5 text-[10px] font-semibold text-[#98a2b3]">
-                WPM <strong className="ml-0.5 text-[#667085]">{wpm}</strong>
-              </span>
-              <span className="rounded-lg border border-[#eadfd4] bg-[#fffdf9] px-2 py-0.5 text-[10px] font-semibold text-[#98a2b3]">
-                ACC{' '}
-                <strong className="ml-0.5 text-[#667085]">{accuracy}%</strong>
-              </span>
-            </div>
-            <HangulTarget
-              session={session.currentSession}
-              className="mt-1 origin-center scale-120 text-4xl font-bold tracking-wide sm:text-5xl"
-            />
-            <div className="mx-auto mt-3 max-w-44">
-              <p className="text-[10px] font-semibold text-[#98a2b3]">
-                {completedSteps} / {totalSteps} steps
-              </p>
-              <div
-                className="mt-1 h-1 overflow-hidden rounded-full bg-[#f2edf9]"
-                role="progressbar"
-                aria-label="Typing progress"
-                aria-valuemin={0}
-                aria-valuemax={totalSteps}
-                aria-valuenow={completedSteps}
-              >
-                <div
-                  className="h-full rounded-full bg-[#c84f82] transition-[width] duration-150"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-            </div>
-            <div className="mt-5 grid h-9 grid-rows-2">
-              <div className="h-4 max-w-full truncate text-xs text-[#98a2b3]">
-                {meaning}
-              </div>
-              <div className="h-4 max-w-full truncate text-xs italic text-[#a293bd]">
-                {active.romanization}
-              </div>
-            </div>
-          </div>
-          <VirtualKeyboard
-            nextKey={nextKey}
-            feedback={feedback}
-            previousFeedback={previousFeedback}
-            showEnglishKeys
-            opacity={1}
-            onKeyPress={handleKeyPress}
-          />
-          <FingerPlacementGuide nextKey={nextKey} />
-        </div>
-      ) : (
-        <div className="mt-4 rounded-3xl border border-dashed border-[#dfcfc0] bg-white/60 p-6 text-center text-sm text-[#667085]">
-          Pick a lesson above to start.
-        </div>
       )}
     </section>
   )

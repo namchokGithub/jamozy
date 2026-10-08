@@ -6,7 +6,8 @@ const COLORS = {
   current: '#c84f82',
   pending: '#c7c3bc',
 }
-const TILE_CLASS = 'h-26 w-26 rounded-md border border-[#bfd7fb] bg-[#fafcff]'
+const TILE_CLASS =
+  'h-26 w-26 rounded-md border border-[#f0eaff] bg-[#f9f8ff] shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)]'
 
 const SPACE_CLASS = 'flex h-26 w-8 items-end pb-3'
 

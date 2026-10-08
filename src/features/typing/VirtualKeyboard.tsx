@@ -78,11 +78,11 @@ export default function VirtualKeyboard({
 
   return (
     <div
-      className="mt-6 rounded-2xl bg-[#fffaf3] p-4 shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)] select-none sm:p-5"
+      className="mt-6 rounded-2xl bg-[#FFF8EF] p-4 shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)] select-none sm:p-5"
       aria-label="Virtual Korean keyboard"
       style={{ opacity }}
     >
-      <div className="mx-auto max-w-4xl space-y-1.5">
+      <div className="mx-auto max-w-5xl space-y-2 sm:space-y-3">
         {[ROW_1, ROW_2, ROW_3].map((keys) => (
           <KeyboardRow
             key={keys[0].code}

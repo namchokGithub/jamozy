@@ -98,7 +98,7 @@ export default function CourseListPage() {
           </Await>
         </Suspense>
 
-        <section className="relative mt-8 overflow-hidden rounded-4xl border border-[#f0dfd1] bg-[#fffdf9] px-6 py-8 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:px-10 sm:py-11 select-none!">
+        <section className="relative mt-5 overflow-hidden rounded-4xl border border-[#f0dfd1] bg-[#fffdf9] px-6 py-8 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:px-10 sm:py-11 select-none!">
           <div
             className="absolute -right-10 -top-12 h-52 w-52 rounded-full bg-[#f5dfb7]/50"
             aria-hidden="true"

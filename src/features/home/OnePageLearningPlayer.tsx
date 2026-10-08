@@ -212,7 +212,7 @@ export default function OnePageLearningPlayer({
 
   return (
     <section
-      className="mt-7 rounded-4xl border border-[#d9d1ed] bg-[#fffdf9] p-5 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] select-none! sm:p-7"
+      className="mt-2 rounded-4xl border border-[#d9d1ed] bg-[#fffdf9] p-5 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] select-none! sm:p-7"
       aria-labelledby="one-page-player-heading"
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -283,11 +283,14 @@ export default function OnePageLearningPlayer({
             </div>
             <div className="mt-5 grid h-9 grid-rows-2">
               <div className="h-4 max-w-full truncate text-xs text-[#98a2b3]">
-                {meaning || null}
+                {meaning || (
+                  <span className="italic text-[#e4e2df]">No meaning</span>
+                )}
               </div>
-
               <div className="h-4 max-w-full truncate text-xs italic text-[#a293bd]">
-                {active.exercise.romanization}
+                {active.exercise.romanization || (
+                  <span className="italic text-[#e4e2df]">No romanization</span>
+                )}
               </div>
             </div>
             {/* <p className="mt-4 text-xs text-[#98a2b3]">Typed: {getComposedText(session.currentSession)}</p> */}

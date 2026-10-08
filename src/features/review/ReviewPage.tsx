@@ -75,8 +75,10 @@ export default function ReviewPage() {
                       {exercise.romanization}
                     </div>
                   )}
-                  {meaning && (
+                  {(meaning && (
                     <div className="mt-1 text-sm text-slate-700">{meaning}</div>
+                  )) || (
+                    <span className="italic text-[#e4e2df]">No meaning</span>
                   )}
                 </li>
               )

@@ -78,7 +78,7 @@ function GuideCanvas({
   return (
     <img
       src={imageUrl}
-      className="h-26 w-26 rounded-md border border-[#bfd7fb] bg-[#fafcff]"
+      className="h-26 w-26 rounded-md border border-[#f0eaff] bg-[#f9f8ff] shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)]"
       aria-label={`${glyph} ${mode} inspection`}
     />
   )
@@ -126,14 +126,21 @@ function OperationEditor({
             className="mt-1 block rounded border border-[#d8e3f2] bg-white px-2 py-1 text-sm text-[#39465b]"
             value={operation.shape}
             onChange={(event) =>
-              onChange({ ...operation, shape: event.target.value as GuideShape })
+              onChange({
+                ...operation,
+                shape: event.target.value as GuideShape,
+              })
             }
           >
             <option value="rect">Rectangle</option>
             <option value="ellipse">Ellipse</option>
           </select>
         </label>
-        <Button variant="ghost" className="self-end px-2 py-1" onClick={onRemove}>
+        <Button
+          variant="ghost"
+          className="self-end px-2 py-1"
+          onClick={onRemove}
+        >
           Remove
         </Button>
       </div>
@@ -193,12 +200,19 @@ export default function HangulGuideTunerPage() {
       steps: current.steps.map((step, index) =>
         index !== stepIndex
           ? step
-          : { ...step, ops: step.ops.filter((_, opIndex) => opIndex !== operationIndex) },
+          : {
+              ...step,
+              ops: step.ops.filter((_, opIndex) => opIndex !== operationIndex),
+            },
       ),
     }))
   }
 
-  const addOperation = (stepIndex: number, mode: GuideMode, shape: GuideShape) => {
+  const addOperation = (
+    stepIndex: number,
+    mode: GuideMode,
+    shape: GuideShape,
+  ) => {
     setGuide((current) => ({
       steps: current.steps.map((step, index) =>
         index !== stepIndex
@@ -207,7 +221,11 @@ export default function HangulGuideTunerPage() {
               ...step,
               ops: [
                 ...step.ops,
-                { mode, shape, normRect: { x: 0.25, y: 0.25, w: 0.25, h: 0.25 } },
+                {
+                  mode,
+                  shape,
+                  normRect: { x: 0.25, y: 0.25, w: 0.25, h: 0.25 },
+                },
               ],
             },
       ),
@@ -219,20 +237,30 @@ export default function HangulGuideTunerPage() {
   }, [])
 
   const copyJson = async () => {
-    await navigator.clipboard.writeText(JSON.stringify({ [glyph]: guide }, null, 2))
+    await navigator.clipboard.writeText(
+      JSON.stringify({ [glyph]: guide }, null, 2),
+    )
   }
 
   return (
     <PageSurface contentClassName="max-w-6xl">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase text-[#a85d4e]">Development only</p>
-          <h1 className="mt-1 text-3xl font-bold text-[#39465b]">Hangul guide tuner</h1>
+          <p className="text-sm font-semibold uppercase text-[#a85d4e]">
+            Development only
+          </p>
+          <h1 className="mt-1 text-3xl font-bold text-[#39465b]">
+            Hangul guide tuner
+          </h1>
           <p className="mt-2 max-w-2xl text-sm text-[#667085]">
-            Edit normalized guide operations and inspect the exact pixel ownership used by the learner renderer.
+            Edit normalized guide operations and inspect the exact pixel
+            ownership used by the learner renderer.
           </p>
         </div>
-        <Link className="text-sm font-semibold text-[#8d4c43] hover:underline" to="/">
+        <Link
+          className="text-sm font-semibold text-[#8d4c43] hover:underline"
+          to="/"
+        >
           Back to learner
         </Link>
       </header>
@@ -270,14 +298,19 @@ export default function HangulGuideTunerPage() {
                 expectedKeys={expectedKeys}
                 keyIndex={keyIndex}
                 mode={mode}
-                onDiagnostics={mode === 'colored' ? reportDiagnostics : undefined}
+                onDiagnostics={
+                  mode === 'colored' ? reportDiagnostics : undefined
+                }
               />
-              <figcaption className="text-center text-xs font-semibold text-[#667085]">{label}</figcaption>
+              <figcaption className="text-center text-xs font-semibold text-[#667085]">
+                {label}
+              </figcaption>
             </figure>
           ))}
         </div>
         <p className="mt-4 text-xs text-[#667085]">
-          Ownership colors identify typing steps. Red pixels identify the relevant exception in each diagnostic view.
+          Ownership colors identify typing steps. Red pixels identify the
+          relevant exception in each diagnostic view.
         </p>
       </Card>
 
@@ -286,13 +319,41 @@ export default function HangulGuideTunerPage() {
         <div className="mt-3 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
           {[
             ['Ink pixels', diagnostics?.inkPixels ?? 0, ''],
-            ['Unassigned', diagnostics?.unassignedPixels ?? 0, percent(diagnostics?.unassignedPixels ?? 0, diagnostics?.inkPixels ?? 0)],
-            ['Overlapping', diagnostics?.overlappingPixels ?? 0, percent(diagnostics?.overlappingPixels ?? 0, diagnostics?.inkPixels ?? 0)],
-            ['Fallback', diagnostics?.fallbackPixels ?? 0, percent(diagnostics?.fallbackPixels ?? 0, diagnostics?.inkPixels ?? 0)],
+            [
+              'Unassigned',
+              diagnostics?.unassignedPixels ?? 0,
+              percent(
+                diagnostics?.unassignedPixels ?? 0,
+                diagnostics?.inkPixels ?? 0,
+              ),
+            ],
+            [
+              'Overlapping',
+              diagnostics?.overlappingPixels ?? 0,
+              percent(
+                diagnostics?.overlappingPixels ?? 0,
+                diagnostics?.inkPixels ?? 0,
+              ),
+            ],
+            [
+              'Fallback',
+              diagnostics?.fallbackPixels ?? 0,
+              percent(
+                diagnostics?.fallbackPixels ?? 0,
+                diagnostics?.inkPixels ?? 0,
+              ),
+            ],
           ].map(([label, count, share]) => (
             <div key={label as string} className="rounded-lg bg-[#f7f8fb] p-3">
-              <p className="text-xs font-semibold uppercase text-[#667085]">{label}</p>
-              <p className="mt-1 text-lg font-bold text-[#39465b]">{count} {share && <span className="text-sm font-medium">({share})</span>}</p>
+              <p className="text-xs font-semibold uppercase text-[#667085]">
+                {label}
+              </p>
+              <p className="mt-1 text-lg font-bold text-[#39465b]">
+                {count}{' '}
+                {share && (
+                  <span className="text-sm font-medium">({share})</span>
+                )}
+              </p>
             </div>
           ))}
         </div>
@@ -302,21 +363,63 @@ export default function HangulGuideTunerPage() {
         <Card>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-bold text-[#39465b]">Guide operations</h2>
-              <p className="mt-1 text-sm text-[#667085]">All coordinates are normalized to the glyph ink bounds.</p>
+              <h2 className="text-lg font-bold text-[#39465b]">
+                Guide operations
+              </h2>
+              <p className="mt-1 text-sm text-[#667085]">
+                All coordinates are normalized to the glyph ink bounds.
+              </p>
             </div>
-            <Button variant="secondary" onClick={() => setGuide(copyGuide(SYLLABLE_GUIDES[glyph]))}>Reset guide</Button>
+            <Button
+              variant="secondary"
+              onClick={() => setGuide(copyGuide(SYLLABLE_GUIDES[glyph]))}
+            >
+              Reset guide
+            </Button>
           </div>
           <div className="mt-4 space-y-4">
             {guide.steps.map((step, stepIndex) => (
-              <section key={`${step.order}-${step.key}`} className="rounded-xl border border-[#d8e3f2] p-3">
+              <section
+                key={`${step.order}-${step.key}`}
+                className="rounded-xl border border-[#d8e3f2] p-3"
+              >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="font-bold text-[#39465b]">Step {step.order + 1}: {step.key}</h3>
+                  <h3 className="font-bold text-[#39465b]">
+                    Step {step.order + 1}: {step.key}
+                  </h3>
                   <div className="flex flex-wrap gap-1">
-                    <Button variant="ghost" className="px-2 py-1" onClick={() => addOperation(stepIndex, 'add', 'rect')}>Add rect</Button>
-                    <Button variant="ghost" className="px-2 py-1" onClick={() => addOperation(stepIndex, 'add', 'ellipse')}>Add ellipse</Button>
-                    <Button variant="ghost" className="px-2 py-1" onClick={() => addOperation(stepIndex, 'subtract', 'rect')}>Subtract rect</Button>
-                    <Button variant="ghost" className="px-2 py-1" onClick={() => addOperation(stepIndex, 'subtract', 'ellipse')}>Subtract ellipse</Button>
+                    <Button
+                      variant="ghost"
+                      className="px-2 py-1"
+                      onClick={() => addOperation(stepIndex, 'add', 'rect')}
+                    >
+                      Add rect
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="px-2 py-1"
+                      onClick={() => addOperation(stepIndex, 'add', 'ellipse')}
+                    >
+                      Add ellipse
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="px-2 py-1"
+                      onClick={() =>
+                        addOperation(stepIndex, 'subtract', 'rect')
+                      }
+                    >
+                      Subtract rect
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="px-2 py-1"
+                      onClick={() =>
+                        addOperation(stepIndex, 'subtract', 'ellipse')
+                      }
+                    >
+                      Subtract ellipse
+                    </Button>
                   </div>
                 </div>
                 <div className="mt-3 space-y-2">
@@ -324,8 +427,12 @@ export default function HangulGuideTunerPage() {
                     <OperationEditor
                       key={operationIndex}
                       operation={operation}
-                      onChange={(next) => replaceOperation(stepIndex, operationIndex, next)}
-                      onRemove={() => removeOperation(stepIndex, operationIndex)}
+                      onChange={(next) =>
+                        replaceOperation(stepIndex, operationIndex, next)
+                      }
+                      onRemove={() =>
+                        removeOperation(stepIndex, operationIndex)
+                      }
                     />
                   ))}
                 </div>
@@ -335,9 +442,16 @@ export default function HangulGuideTunerPage() {
         </Card>
         <Card className="h-fit">
           <h2 className="text-lg font-bold text-[#39465b]">Export</h2>
-          <p className="mt-2 text-sm text-[#667085]">Copy the tuned guide to place into the guide dataset after visual review.</p>
-          <Button className="mt-4 w-full" onClick={() => void copyJson()}>Copy guide JSON</Button>
-          <pre className="mt-4 max-h-96 overflow-auto rounded-lg bg-[#1f2937] p-3 text-xs text-[#f8fafc]">{JSON.stringify({ [glyph]: guide }, null, 2)}</pre>
+          <p className="mt-2 text-sm text-[#667085]">
+            Copy the tuned guide to place into the guide dataset after visual
+            review.
+          </p>
+          <Button className="mt-4 w-full" onClick={() => void copyJson()}>
+            Copy guide JSON
+          </Button>
+          <pre className="mt-4 max-h-96 overflow-auto rounded-lg bg-[#1f2937] p-3 text-xs text-[#f8fafc]">
+            {JSON.stringify({ [glyph]: guide }, null, 2)}
+          </pre>
         </Card>
       </section>
     </PageSurface>

@@ -36,9 +36,18 @@ function LessonDetailContent({
     return (
       <LessonResult
         completion={completion}
-        onRetry={() => { setCompletion(null); setStarted(true) }}
+        onRetry={() => {
+          setCompletion(null)
+          setStarted(true)
+        }}
         onReview={() => navigate('/review')}
-        onContinue={() => navigate(completion.outcome.unlockedNextLessonId ? `/lessons/${completion.outcome.unlockedNextLessonId}` : `/courses/${courseId}`)}
+        onContinue={() =>
+          navigate(
+            completion.outcome.unlockedNextLessonId
+              ? `/lessons/${completion.outcome.unlockedNextLessonId}`
+              : `/courses/${courseId}`,
+          )
+        }
       />
     )
   }
@@ -84,8 +93,10 @@ function LessonDetailContent({
                       {exercise.romanization}
                     </div>
                   )}
-                  {meaning && (
+                  {(meaning && (
                     <div className="mt-2 text-sm text-slate-700">{meaning}</div>
+                  )) || (
+                    <span className="italic text-[#e4e2df]">No meaning</span>
                   )}
                 </li>
               )
