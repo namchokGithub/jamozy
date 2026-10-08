@@ -86,18 +86,50 @@ function nearbyCodes(code: string): Set<string> {
   const rowIndex = KEYBOARD_ROWS.findIndex((row) =>
     row.some((key) => key.code === code),
   )
+
   if (rowIndex === -1) return new Set()
+
   const row = KEYBOARD_ROWS[rowIndex]
   const index = row.findIndex((key) => key.code === code)
   const nearby = new Set<string>()
-  if (row[index - 1]) nearby.add(row[index - 1].code)
-  if (row[index + 1]) nearby.add(row[index + 1].code)
-  const above = KEYBOARD_ROWS[rowIndex - 1]
-  const below = KEYBOARD_ROWS[rowIndex + 1]
-  const aboveCode = above && closestCodeInRow(index, row.length, above)
-  const belowCode = below && closestCodeInRow(index, row.length, below)
-  if (aboveCode) nearby.add(aboveCode)
-  if (belowCode) nearby.add(belowCode)
+
+  const spread = 2
+
+  // ซ้าย / ขวา {{spread}} ปุ่ม
+  for (let offset = 1; offset <= spread; offset++) {
+    if (row[index - offset]) nearby.add(row[index - offset].code)
+    if (row[index + offset]) nearby.add(row[index + offset].code)
+  }
+
+  // if (row[index - 1]) nearby.add(row[index - 1].code)
+  // if (row[index + 1]) nearby.add(row[index + 1].code)
+
+  // แถวบน / ล่าง
+  // const above = KEYBOARD_ROWS[rowIndex - 1]
+  // const below = KEYBOARD_ROWS[rowIndex + 1]
+
+  // const aboveCode = above && closestCodeInRow(index, row.length, above)
+  // const belowCode = below && closestCodeInRow(index, row.length, below)
+
+  // if (aboveCode) nearby.add(aboveCode)
+  // if (belowCode) nearby.add(belowCode)
+
+  // แถวบน / ล่าง + แนวทะแยง
+  for (const otherRow of [
+    KEYBOARD_ROWS[rowIndex - 1],
+    KEYBOARD_ROWS[rowIndex + 1],
+  ]) {
+    if (!otherRow) continue
+
+    const centerCode = closestCodeInRow(index, row.length, otherRow)
+    const centerIndex = otherRow.findIndex((key) => key.code === centerCode)
+
+    for (let offset = -spread; offset <= spread; offset++) {
+      const key = otherRow[centerIndex + offset]
+      if (key) nearby.add(key.code)
+    }
+  }
+
   return nearby
 }
 
@@ -106,7 +138,7 @@ function focusLevelsFor(
 ): ReadonlyMap<string, KeyFocusLevel> {
   const levels = new Map<string, KeyFocusLevel>()
   if (!nextKey) {
-    for (const code of VIRTUAL_KEY_CODES) levels.set(code, 'target')
+    for (const code of VIRTUAL_KEY_CODES) levels.set(code, 'nearby')
     return levels
   }
   for (const code of VIRTUAL_KEY_CODES) levels.set(code, 'other')

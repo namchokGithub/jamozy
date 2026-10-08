@@ -13,10 +13,30 @@ export type KeyVisualState =
 
 export type KeyFocusLevel = 'target' | 'nearby' | 'other'
 
-const focusOpacity: Record<KeyFocusLevel, number> = {
-  target: 1,
-  nearby: 0.75,
-  other: 0.55,
+type FocusStyle = {
+  backgroundColor: string
+  borderColor: string
+  color: string
+  opacity?: number
+}
+
+const focusStyles: Record<KeyFocusLevel, FocusStyle> = {
+  target: {
+    backgroundColor: '#ddf5e9',
+    borderColor: '#78bca6',
+    color: '#194d41',
+  },
+  nearby: {
+    backgroundColor: '#fffdf9',
+    borderColor: '#d8e8e3',
+    color: '#39465b',
+  },
+  other: {
+    backgroundColor: '#F7F4EC',
+    borderColor: '#CBDCD7',
+    color: '#39465b',
+    opacity: 0.9,
+  },
 }
 
 export type KeyboardKey = {
@@ -189,13 +209,23 @@ export default function VirtualKey({
     feedback?.outcome === 'wrong' && feedback.code === code
       ? feedback.id
       : undefined
-  const keepsFullFocus =
-    isPressed ||
+  const hasSemanticStyle =
     isActiveShift ||
     visualState === 'active' ||
     visualState === 'wrong' ||
     visualState === 'previous'
-  const keyOpacity = keepsFullFocus ? 1 : focusOpacity[focusLevel]
+  const isUtilityKey = [
+    'Tab',
+    'CapsLock',
+    'ShiftLeft',
+    'ShiftRight',
+    'Enter',
+    'Backspace',
+    'Space',
+  ].includes(code)
+
+  const focusStyle =
+    hasSemanticStyle || isUtilityKey ? undefined : focusStyles[focusLevel]
 
   useEffect(() => {
     if (wrongFeedbackId === undefined || shouldReduceMotion) return
@@ -252,16 +282,14 @@ export default function VirtualKey({
           data-state={visualState}
           animate={
             isPressed && !shouldReduceMotion
-              ? { scale: 0.96, y: 2, opacity: keyOpacity }
-              : { scale: 1, y: 0, opacity: keyOpacity }
+              ? { scale: 0.96, y: 2 }
+              : { scale: 1, y: 0 }
           }
           transition={{
             scale: { type: 'spring', stiffness: 600, damping: 30 },
             y: { type: 'spring', stiffness: 600, damping: 30 },
-            opacity: shouldReduceMotion
-              ? { duration: 0 }
-              : { duration: 0.18, ease: 'easeOut' },
           }}
+          style={focusStyle}
           className={`relative flex h-12 w-full flex-col items-center justify-center rounded-lg border px-1 text-sm transition-[background-color,border-color,color,box-shadow] duration-200 sm:h-13 ${keyVisualClass} ${canPress ? 'cursor-pointer touch-manipulation' : 'cursor-default'}`}
           aria-label={displayLabel}
           aria-pressed={isShiftKey ? virtualShiftActive : undefined}
