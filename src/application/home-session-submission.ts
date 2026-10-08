@@ -3,7 +3,11 @@ import type { LearningSession } from '../domain/models/learning-session'
 import type { Progress } from '../domain/models/progress'
 import type { SessionSubmissionRepository } from '../domain/repositories/session-submission-repository'
 import type { UserProfileRepository } from '../domain/repositories/user-profile-repository'
-import { defaultUserProfile, levelFromExp } from '../domain/models/user-profile'
+import {
+  defaultUserProfile,
+  levelFromExp,
+  totalExp,
+} from '../domain/models/user-profile'
 
 export interface HomeSessionDeps {
   userProfileRepo: UserProfileRepository
@@ -69,7 +73,11 @@ export async function submitHomeSession(
   return {
     progress: submission.effects.progress[0] ?? input.progress,
     expGained: submission.session.expGained,
-    level: levelFromExp(profile.exp + submission.session.expGained),
+    // A duplicate's EXP is already in the profile's session aggregate.
+    level: levelFromExp(
+      totalExp(profile) +
+        (submission.wasDuplicate ? 0 : submission.session.expGained),
+    ),
   }
 }
 

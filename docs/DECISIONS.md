@@ -1261,10 +1261,10 @@ curve and soft cap make late levels slow on purpose; Perks from Rebirth
 **Consequences:** Level depends on two persisted inputs (cycle EXP and
 `rebirthCount`), not `exp` alone. Recomputing with the new curve lowers the
 displayed Level of existing learners; their EXP and session history are not
-rewritten. This decision changes documentation only: `levelFromExp()` in
-`domain/models/user-profile.ts` and the Profile progress bar (`exp % 100` in
-`features/profile/ProfilePage.tsx`) still use the flat rule until a separate
-implementation. Rebirth, Rank, Perk, and `ProgressionState` schema remain
+rewritten. Implemented 2026-10-08 in `domain/models/user-profile.ts`
+(`expRequiredForNextLevel`, `levelProgress`, `levelFromExp`); the Profile
+progress bar shows `expIntoLevel / expToNextLevel`, and level outcomes count
+legacy plus session-tracked EXP (`totalExp`). Rebirth, Rank, Perk, and `ProgressionState` schema remain
 scoped by `docs/superpowers/specs/2026-10-06-player-progression-models-design.md`
 and are not adopted here. Alternative considered: starting the soft cap at
 Level 110; rejected, the Level 100 wall is intended.
