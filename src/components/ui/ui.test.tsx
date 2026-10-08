@@ -23,6 +23,29 @@ describe('shared UI primitives', () => {
     expect(onClose).toHaveBeenCalledOnce()
   })
 
+  it('keeps focus in its content when re-rendered with a new onClose', () => {
+    const first = vi.fn()
+    const latest = vi.fn()
+    const view = render(
+      <Modal open title="Create" onClose={first}>
+        <input aria-label="Title" />
+      </Modal>,
+    )
+    const input = screen.getByRole('textbox', { name: 'Title' })
+    input.focus()
+
+    view.rerender(
+      <Modal open title="Create" onClose={latest}>
+        <input aria-label="Title" />
+      </Modal>,
+    )
+    expect(input).toHaveFocus()
+
+    fireEvent.keyDown(window, { key: 'Escape' })
+    expect(latest).toHaveBeenCalledOnce()
+    expect(first).not.toHaveBeenCalled()
+  })
+
   it('does not render a closed modal into the accessibility tree', () => {
     render(
       <Modal open={false} title="Sign in" onClose={() => undefined}>

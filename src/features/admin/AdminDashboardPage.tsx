@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useFetcher, useLoaderData, useNavigate } from 'react-router'
-import type { Course } from '../../domain/models/course'
+import { courseCounts, type Course } from '../../domain/models/course'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { PageSurface } from '../../components/ui/PageSurface'
@@ -15,30 +15,37 @@ import { useAdminMutationPending } from './useAdminMutationPending'
 import { AdminTopBar } from './AdminTopBar'
 import { useAdminTranslation } from './i18n/admin-i18n'
 import { AdminSortableList } from './AdminSortableList'
+import { AdminCreateButton } from './AdminCreateButton'
+import { AdminRenameField } from './AdminRenameField'
+import { withPendingOrder } from './pending-order'
 
 export default function AdminDashboardPage() {
   const { courses } = useLoaderData() as { courses: Course[] }
   const { locale, t } = useAdminTranslation()
   const create = useFetcher()
   const navigate = useNavigate()
-  useAdminFeedback(create, (data) => {
-    if (data.createdId)
-      navigate(`/admin/courses/${data.createdId}`, { state: { created: true } })
-  })
+  useAdminFeedback(create)
   const isCreating = useAdminMutationPending()
   const [statusFilter, setStatusFilter] = useState('all')
+  const [renamingId, setRenamingId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
-  const [orderedCourseIds, setOrderedCourseIds] = useState(() =>
-    courses.map((course) => course.id),
+  const orderedCourses = withPendingOrder(
+    courses,
+    create.formData,
+    'save-course-order',
   )
-  const coursesById = new Map(courses.map((course) => [course.id, course]))
-  const orderedCourses = [
-    ...orderedCourseIds
-      .map((courseId) => coursesById.get(courseId))
-      .filter((course): course is Course => Boolean(course)),
-    ...courses.filter((course) => !orderedCourseIds.includes(course.id)),
-  ]
   const normalizedSearch = search.trim().toLocaleLowerCase()
+  const totals = courses.reduce(
+    (sum, course) => {
+      const counts = courseCounts(course)
+      return {
+        units: sum.units + counts.units,
+        lessons: sum.lessons + counts.lessons,
+        exercises: sum.exercises + counts.exercises,
+      }
+    },
+    { units: 0, lessons: 0, exercises: 0 },
+  )
   const statusCounts = orderedCourses.reduce(
     (counts, course) => {
       if (course.status === 'draft') counts.draft += 1
@@ -73,7 +80,6 @@ export default function AdminDashboardPage() {
     const next = [...orderedCourses]
     const [dragged] = next.splice(currentIndex, 1)
     next.splice(targetIndex, 0, dragged)
-    setOrderedCourseIds(next.map((course) => course.id))
     create.submit(
       {
         intent: 'save-course-order',
@@ -95,19 +101,16 @@ export default function AdminDashboardPage() {
             {t('dashboard.subtitle')}
           </p>
         </div>
-        <Button
-          disabled={isCreating}
-          onClick={() =>
-            !isCreating &&
-            create.submit({ intent: 'create-course' }, { method: 'post' })
-          }
-        >
-          {isCreating ? t('action.saving') : t('action.createCourse')}
-        </Button>
+        <AdminCreateButton kind="course" />
       </header>
       <AdminContentListToolbar
         totalLabel={t('dashboard.totalCourses')}
         total={orderedCourses.length}
+        descendants={[
+          { label: t('count.units'), value: totals.units },
+          { label: t('count.lessons'), value: totals.lessons },
+          { label: t('count.exercises'), value: totals.exercises },
+        ]}
         counts={statusCounts}
         search={search}
         onSearch={setSearch}
@@ -118,16 +121,23 @@ export default function AdminDashboardPage() {
         className="mt-4 grid gap-3"
         items={visibleCourses}
         getId={(course) => course.id}
-        disabled={isCreating}
+        disabled={isCreating || renamingId !== null}
         onMove={moveCourse}
         renderItem={(course, { handleRef, isDragging, ref }) => (
           <div ref={ref} className={isDragging ? 'opacity-50' : undefined}>
             <Card
               role="link"
               tabIndex={0}
-              onClick={() => navigate(`/admin/courses/${course.id}`)}
+              onClick={() =>
+                renamingId !== course.id &&
+                navigate(`/admin/courses/${course.id}`)
+              }
               onKeyDown={(event) => {
-                if (event.target !== event.currentTarget) return
+                if (
+                  event.target !== event.currentTarget ||
+                  renamingId === course.id
+                )
+                  return
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault()
                   navigate(`/admin/courses/${course.id}`)
@@ -148,9 +158,18 @@ export default function AdminDashboardPage() {
                 </button>
                 <div className="min-w-0">
                   <div className="flex items-center gap-3">
-                    <h2 className="truncate text-lg font-bold">
-                      {course.title}
-                    </h2>
+                    {renamingId === course.id ? (
+                      <AdminRenameField
+                        id={course.id}
+                        kind="course"
+                        title={course.title}
+                        onDone={() => setRenamingId(null)}
+                      />
+                    ) : (
+                      <h2 className="truncate text-lg font-bold">
+                        {course.title}
+                      </h2>
+                    )}
                     <AdminStatusBadge status={course.status} />
                   </div>
                   <p className="mt-1 text-sm text-[#667085]">
@@ -167,12 +186,13 @@ export default function AdminDashboardPage() {
                 className="flex gap-2"
                 onClick={(event) => event.stopPropagation()}
               >
-                <Link
-                  className="rounded-full border border-[#eadfd4] bg-white/90 px-4 py-2 text-sm font-semibold text-[#8d4c43] hover:border-[#d8b3a9] hover:bg-white"
-                  to={`/admin/courses/${course.id}`}
+                <Button
+                  variant="secondary"
+                  disabled={isCreating}
+                  onClick={() => setRenamingId(course.id)}
                 >
                   {t('action.edit')}
-                </Link>
+                </Button>
                 <AdminStatusActions
                   id={course.id}
                   kind="course"

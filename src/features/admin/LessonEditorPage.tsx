@@ -3,40 +3,24 @@ import { useFetcher, useLoaderData } from 'react-router'
 import type { Lesson, LessonExercise } from '../../domain/models/lesson'
 import type { Unit } from '../../domain/models/unit'
 import type { Course } from '../../domain/models/course'
+import { makeExercise } from '../../application/admin-content'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { Dropdown } from '../../components/ui/Dropdown'
 import { PageSurface } from '../../components/ui/PageSurface'
 import { AdminStatusActions } from './AdminStatusActions'
 import { AdminStatusBadge } from './AdminStatusBadge'
+import { AdminHomeDeployNotice } from './AdminHomeDeployNotice'
 import { useAdminFeedback } from './useAdminFeedback'
 import { useAdminMutationPending } from './useAdminMutationPending'
+import { AdminUnsavedChangesDialog } from './AdminUnsavedChangesDialog'
 import { useAdminUnsavedChanges } from './useAdminUnsavedChanges'
 import { AdminTopBar } from './AdminTopBar'
 import { useAdminTranslation } from './i18n/admin-i18n'
-import { useCreatedHighlight } from './useCreatedHighlight'
 import { AdminSortableList } from './AdminSortableList'
+import { lessonTypes } from './lesson-types'
 
-const lessonTypes: Lesson['type'][] = [
-  'character',
-  'syllable',
-  'word',
-  'phrase',
-  'sentence',
-]
 const difficulties: LessonExercise['difficulty'][] = ['easy', 'medium', 'hard']
-
-function newExercise(): LessonExercise {
-  return {
-    id: crypto.randomUUID(),
-    targetText: '',
-    romanization: null,
-    meaningTh: '',
-    meaningEn: '',
-    difficulty: 'easy',
-    hint: null,
-  }
-}
 
 export default function LessonEditorPage() {
   const { lesson, unit, course } = useLoaderData() as {
@@ -46,7 +30,6 @@ export default function LessonEditorPage() {
   }
   const { t } = useAdminTranslation()
   const fetcher = useFetcher()
-  const createdHighlight = useCreatedHighlight()
   const [title, setTitle] = useState(lesson.title)
   const [type, setType] = useState(lesson.type)
   const [exercises, setExercises] = useState(lesson.exercises)
@@ -66,14 +49,25 @@ export default function LessonEditorPage() {
     title !== lesson.title ||
     type !== lesson.type ||
     JSON.stringify(exercises) !== JSON.stringify(lesson.exercises)
-  useAdminUnsavedChanges(hasUnsavedChanges, t('feedback.unsavedChangesWarning'))
-  const handleSuccess = useCallback((data: { message?: string }) => {
-    if (data.message === 'feedback.changesSaved') {
-      setEditingDetails(false)
-      setEditingExerciseId(null)
-      setHasPendingExerciseOrder(false)
-    }
-  }, [])
+  const unsavedChangesBlocker = useAdminUnsavedChanges(
+    hasUnsavedChanges,
+    t('feedback.unsavedChangesWarning'),
+  )
+  const handleSuccess = useCallback(
+    (data: { message?: string }) => {
+      if (data.message === 'feedback.changesSaved') {
+        // Adopt the revalidated Lesson: the server trims and normalizes text,
+        // so keeping the typed values would leave the editor marked dirty.
+        setTitle(lesson.title)
+        setType(lesson.type)
+        setExercises(lesson.exercises)
+        setEditingDetails(false)
+        setEditingExerciseId(null)
+        setHasPendingExerciseOrder(false)
+      }
+    },
+    [lesson],
+  )
   useAdminFeedback(fetcher, handleSuccess)
   const validate = () => {
     const firstInvalidExercise = exercises.find(
@@ -164,6 +158,7 @@ export default function LessonEditorPage() {
   )
   return (
     <PageSurface className="px-6 lg:px-8" contentClassName="max-w-[1200px]">
+      <AdminUnsavedChangesDialog blocker={unsavedChangesBlocker} />
       <AdminTopBar
         breadcrumb={[
           { label: t('breadcrumb.admin'), to: '/admin' },
@@ -180,15 +175,7 @@ export default function LessonEditorPage() {
       />
       <header className="mt-4 flex flex-wrap justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <h1
-            className={
-              createdHighlight
-                ? 'rounded-xl bg-[#f5faed] px-3 py-2 text-3xl font-bold'
-                : 'truncate text-3xl font-bold'
-            }
-          >
-            {title}
-          </h1>
+          <h1 className="truncate text-3xl font-bold">{title}</h1>
           <AdminStatusBadge status={lesson.status} />
         </div>
         <div className="flex items-center gap-2">
@@ -196,9 +183,19 @@ export default function LessonEditorPage() {
             id={lesson.id}
             kind="lesson"
             status={lesson.status}
+            hasUnsavedChanges={hasUnsavedChanges}
+            parents={[
+              course && {
+                kind: 'course',
+                title: course.title,
+                status: course.status,
+              },
+              unit && { kind: 'unit', title: unit.title, status: unit.status },
+            ]}
           />
         </div>
       </header>
+      <AdminHomeDeployNotice course={course} />
       {hasUnsavedChanges && (
         <div className="mt-4 rounded-xl bg-[#fff1d8] px-4 py-3 text-sm font-semibold text-[#92703e]">
           {t('feedback.unsavedChanges')}
@@ -261,7 +258,7 @@ export default function LessonEditorPage() {
       ) : (
         <Card className="mt-6 max-w-210 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold">{title}</h2>
+            {/* <h2 className="text-xl font-bold">{title}</h2> */}
             <p className="mt-2 text-sm text-[#667085]">
               {t('lesson.typeValue', { type: t(`lessonType.${type}`) })}
             </p>
@@ -291,7 +288,7 @@ export default function LessonEditorPage() {
           <Button
             disabled={isPending}
             onClick={() => {
-              const exercise = newExercise()
+              const exercise = makeExercise(crypto.randomUUID())
               setExercises((items) => [...items, exercise])
               setEditingExerciseId(exercise.id)
             }}

@@ -50,9 +50,12 @@ A session shuffles all of the lesson's exercises once and plays each exactly
 once; every new session, including after a refresh, reshuffles. At session
 end Home moves to the next lesson, then the next unit, with a non-blocking
 notice; after the last lesson it loops back to the first. A lesson completes when its exercises have each been completed at
-least once, across sessions and devices. First completion grants the normal
-accuracy-based EXP; a full session of an already-completed lesson grants 15
-EXP ([[DEC-033]]); an abandoned session grants nothing. Completion is never
+least once, across sessions and devices. First completion grants the sum of
+the difficulty-based first-completion rewards for its exercises, including
+eligible perfect-exercise bonuses ([[DEC-045]]); a full session of an
+already-completed lesson awards each replayed exercise by difficulty
+([[DEC-046]]); an abandoned session
+grants nothing. Completion is never
 reset, and Home never creates ReviewItems. All Home persistence runs in the
 background through a retrying local outbox.
 
@@ -83,8 +86,9 @@ It presents 10 vocabulary items and reuses the same set when reloaded on the
 same day. It contributes to shared learner state and may update ReviewItems,
 but never completes or unlocks a Learning Path lesson.
 
-Daily Quest awards EXP at most once per quest. Its `dateKey` timezone policy is
-an explicit pre-implementation decision; no timezone-handling design is fixed
+Daily Quest awards the sum of its completed items' difficulty-based rewards
+at most once per quest ([[DEC-045]]). Its `dateKey` timezone policy is an
+explicit pre-implementation decision; no timezone-handling design is fixed
 here.
 
 ## Shared Content
@@ -152,12 +156,15 @@ concrete timezone policy remains undecided.
 
 | Experience | MVP EXP policy | Unlocks Learning Path? |
 | --- | --- | --- |
-| Learning Path | Existing lesson-completion rule | Yes, through the contiguous frontier |
-| Home | First completion by accuracy; full replay session 15 EXP | No |
-| Daily Quest | Once per daily quest | No |
-| Topic | No EXP | No |
-| Keyboard Position | No EXP | No |
-| Random Practice | No EXP | No |
-| Review | No EXP | No |
+| Learning Path | First-completed exercise: Easy 15, Medium 25, Hard 30 EXP; perfect exercise +5; replayed exercise: Easy 3, Medium 5, Hard 10 EXP | Yes, through the contiguous frontier |
+| Home | Same first-completed exercise reward; replayed exercise: Easy 3, Medium 5, Hard 10 EXP | No |
+| Daily Quest | Sum of item rewards once per quest: Easy 5, Medium 10, Hard 15 EXP | No |
+| Topic / Keyboard Position / Random Practice | Per completed item: Easy 3, Medium 5, Hard 10 EXP | No |
+| Review | Per completed item: Easy 3, Medium 5, Hard 10 EXP | No |
 
-EXP is global player progression; it is not curriculum progression.
+Apply flat bonuses before percentage bonuses, then round once:
+`round((Base EXP + Flat Bonus) × (1 + Total EXP Bonus))`. Bonus sources and
+values are defined in [[DEC-045]] and `docs/LEVELING.md`; bonuses the learner
+has not earned or that are not available contribute zero. EXP is global player
+progression; it is not curriculum progression. Level is derived with the
+LEVELING.md curve ([[DEC-048]]).

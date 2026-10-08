@@ -11,17 +11,20 @@ Conventions: document-backed cloud entities (`Course`, `Unit`, `Lesson`, `Vocabu
 **Path:** `courses/{courseId}`
 **File:** `domain/models/course.ts`
 
-| Field       | Type   | Notes                              |
-| ----------- | ------ | ---------------------------------- |
-| id          | string | Firestore doc ID                   |
-| title       | string | e.g. "Hangul Basics"               |
-| description | string | short summary shown on course list |
-| order       | number | canonical display/unlock order among courses; unique globally |
-| type        | `'learning' \| 'home'` \| absent | absent reads as `learning`; exactly one published `home` course ([[DEC-043]]) |
-| status      | `'draft' \| 'published' \| 'archived'` | learner visibility state ([[DEC-034]]) |
-| archivedFromStatus | `'draft' \| 'published'` \| absent | recorded on Archive and used by Restore |
-| createdAt   | Date   |                                    |
-| updatedAt   | Date   |                                    |
+| Field              | Type                                   | Notes                                                                        |
+| ------------------ | -------------------------------------- | ---------------------------------------------------------------------------- |
+| id                 | string                                 | Firestore doc ID                                                             |
+| title              | string                                 | e.g. "Hangul Basics"                                                         |
+| description        | string                                 | short summary shown on course list                                           |
+| order              | number                                 | canonical display/unlock order among courses; unique globally                |
+| type               | `'learning' \| 'home'` \| absent       | absent reads as`learning`; exactly one published `home` course ([[DEC-043]]) |
+| status             | `'draft' \| 'published' \| 'archived'` | learner visibility state ([[DEC-034]])                                       |
+| archivedFromStatus | `'draft' \| 'published'` \| absent     | recorded on Archive and used by Restore                                      |
+| unitCount          | number \| absent                       | Units in every status ([[DEC-047]]); absent until backfilled, read as 0      |
+| lessonCount        | number \| absent                       | Lessons in every status across its Units ([[DEC-047]])                       |
+| exerciseCount      | number \| absent                       | Exercises across its Lessons ([[DEC-047]])                                   |
+| createdAt          | Date                                   |                                                                              |
+| updatedAt          | Date                                   |                                                                              |
 
 Relationships: a `Unit` belongs to a `Course` via `Unit.courseId`. No nested subcollection — flat top-level collections per README.
 
@@ -37,17 +40,19 @@ the Learning Path global order, frontier, and unlock rules ([[DEC-043]]).
 **Path:** `units/{unitId}`
 **File:** `domain/models/unit.ts`
 
-| Field       | Type   | Notes                                  |
-| ----------- | ------ | -------------------------------------- |
-| id          | string | Firestore doc ID                       |
-| courseId    | string | parent`Course.id`                      |
-| title       | string | e.g. "Basic Vowels"                    |
-| description | string |                                        |
-| order       | number | canonical display/unlock order within the course; unique within `courseId` |
-| status      | `'draft' \| 'published' \| 'archived'` | learner visibility also requires published Course ([[DEC-034]]) |
-| archivedFromStatus | `'draft' \| 'published'` \| absent | recorded on Archive and used by Restore |
-| createdAt   | Date   |                                        |
-| updatedAt   | Date   |                                        |
+| Field              | Type                                   | Notes                                                                     |
+| ------------------ | -------------------------------------- | ------------------------------------------------------------------------- |
+| id                 | string                                 | Firestore doc ID                                                          |
+| courseId           | string                                 | parent`Course.id`                                                         |
+| title              | string                                 | e.g. "Basic Vowels"                                                       |
+| description        | string                                 |                                                                           |
+| order              | number                                 | canonical display/unlock order within the course; unique within`courseId` |
+| status             | `'draft' \| 'published' \| 'archived'` | learner visibility also requires published Course ([[DEC-034]])           |
+| archivedFromStatus | `'draft' \| 'published'` \| absent     | recorded on Archive and used by Restore                                   |
+| lessonCount        | number \| absent                       | Lessons in every status ([[DEC-047]]); absent until backfilled, read as 0 |
+| exerciseCount      | number \| absent                       | Exercises across its Lessons ([[DEC-047]])                                |
+| createdAt          | Date                                   |                                                                           |
+| updatedAt          | Date                                   |                                                                           |
 
 Relationships: a `Lesson` belongs to a `Unit` via `Lesson.unitId`.
 
@@ -58,31 +63,32 @@ Relationships: a `Lesson` belongs to a `Unit` via `Lesson.unitId`.
 **Path:** `lessons/{lessonId}`
 **File:** `domain/models/lesson.ts`
 
-| Field     | Type                                                            | Notes                                      |
-| --------- | --------------------------------------------------------------- | ------------------------------------------ |
-| id        | string                                                          | Firestore doc ID                           |
-| unitId    | string                                                          | parent`Unit.id`                            |
-| title     | string                                                          |                                            |
-| type      | `'character' \| 'syllable' \| 'word' \| 'phrase' \| 'sentence'` | matches README's progressive learning flow |
-| order     | number                                                          | canonical display/unlock order within the unit; unique within `unitId` |
-| status    | `'draft' \| 'published' \| 'archived'`                         | learner visibility also requires published Unit and Course ([[DEC-034]]) |
-| archivedFromStatus | `'draft' \| 'published'` \| absent | recorded on Archive and used by Restore |
-| exercises | `LessonExercise[]`                                              | ordered typing prompts for this lesson     |
-| createdAt | Date                                                            |                                            |
-| updatedAt | Date                                                            |                                            |
+| Field              | Type                                                            | Notes                                                                    |
+| ------------------ | --------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| id                 | string                                                          | Firestore doc ID                                                         |
+| unitId             | string                                                          | parent`Unit.id`                                                          |
+| title              | string                                                          |                                                                          |
+| type               | `'character' \| 'syllable' \| 'word' \| 'phrase' \| 'sentence'` | matches README's progressive learning flow                               |
+| order              | number                                                          | canonical display/unlock order within the unit; unique within`unitId`    |
+| status             | `'draft' \| 'published' \| 'archived'`                          | learner visibility also requires published Unit and Course ([[DEC-034]]) |
+| archivedFromStatus | `'draft' \| 'published'` \| absent                              | recorded on Archive and used by Restore                                  |
+| exercises          | `LessonExercise[]`                                              | ordered typing prompts for this lesson                                   |
+| exerciseCount      | number \| absent                                                | always `exercises.length` once written ([[DEC-047]])                     |
+| createdAt          | Date                                                            |                                                                          |
+| updatedAt          | Date                                                            |                                                                          |
 
 `LessonExercise` (embedded, not a separate collection):
 
-| Field        | Type                          | Notes                                              |
-| ------------ | ----------------------------- | --------------------------------------------------- |
-| id           | string                        | stable ID within the lesson (for review linking)   |
-| vocabularyId | string\| null                 | linked `VocabularyEntry.id` for reusable vocabulary; `null` for characters, syllables, phrases, sentences, or lesson-specific content |
-| targetText   | string                        | the Korean text the learner must type              |
-| romanization | string\| null                 | optional pronunciation hint                        |
-| meaningTh    | string\| null                 | Thai meaning ([[DEC-025]])                         |
-| meaningEn    | string\| null                 | English meaning ([[DEC-025]])                      |
-| difficulty   | `'easy' \| 'medium' \| 'hard'` | used by Practice Mode filtering ([[DEC-010]])      |
-| hint         | string\| null                 | optional extra hint (not meaning — see `meaningTh`/`meaningEn`) |
+| Field        | Type                           | Notes                                                                                                                                |
+| ------------ | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| id           | string                         | stable ID within the lesson (for review linking)                                                                                     |
+| vocabularyId | string\| null                  | linked`VocabularyEntry.id` for reusable vocabulary; `null` for characters, syllables, phrases, sentences, or lesson-specific content |
+| targetText   | string                         | the Korean text the learner must type                                                                                                |
+| romanization | string\| null                  | optional pronunciation hint                                                                                                          |
+| meaningTh    | string\| null                  | Thai meaning ([[DEC-025]])                                                                                                           |
+| meaningEn    | string\| null                  | English meaning ([[DEC-025]])                                                                                                        |
+| difficulty   | `'easy' \| 'medium' \| 'hard'` | used by Practice Mode filtering ([[DEC-010]])                                                                                        |
+| hint         | string\| null                  | optional extra hint (not meaning — see`meaningTh`/`meaningEn`)                                                                       |
 
 Content authoring creates Course, Unit, and Lesson records as Draft. A Lesson
 can publish only with a published Course and Unit plus at least one valid
@@ -107,22 +113,22 @@ When `vocabularyId` is present, `targetText`, romanization, meanings, and diffic
 
 Vocabulary is a reusable learning target, not a replacement for every `LessonExercise`. Characters, syllables, phrases, sentences, and one-off prompts remain lesson-owned.
 
-| Field        | Type                          | Notes                                      |
-| ------------ | ----------------------------- | ------------------------------------------ |
-| id           | string                        | Firestore doc ID                           |
-| korean       | string                        | canonical Korean spelling                  |
-| partOfSpeech | `VocabularyPartOfSpeech`\| null | grammatical category; `null` only when the source does not provide it |
-| senseKey     | string                        | required stable sense identifier; use `'default'` for a primary sense |
-| romanization | string\| null                 | optional pronunciation hint                |
-| meaningTh    | string\| null                 | Thai meaning                               |
-| meaningEn    | string\| null                 | English meaning                            |
-| frequencyRank | number\| null                | positive integer rank from the imported source; not globally unique |
-| difficulty   | `'easy' \| 'medium' \| 'hard'` | default content difficulty               |
-| topicIds     | string[]                      | IDs of Topic metadata that groups this shared vocabulary |
-| sourceId     | string                        | key into `docs/CREDITS.md`'s source registry |
-| sourceUrl    | string\| null                 | source or per-entry reference URL          |
-| createdAt    | Date                          |                                            |
-| updatedAt    | Date                          |                                            |
+| Field         | Type                            | Notes                                                                |
+| ------------- | ------------------------------- | -------------------------------------------------------------------- |
+| id            | string                          | Firestore doc ID                                                     |
+| korean        | string                          | canonical Korean spelling                                            |
+| partOfSpeech  | `VocabularyPartOfSpeech`\| null | grammatical category;`null` only when the source does not provide it |
+| senseKey      | string                          | required stable sense identifier; use`'default'` for a primary sense |
+| romanization  | string\| null                   | optional pronunciation hint                                          |
+| meaningTh     | string\| null                   | Thai meaning                                                         |
+| meaningEn     | string\| null                   | English meaning                                                      |
+| frequencyRank | number\| null                   | positive integer rank from the imported source; not globally unique  |
+| difficulty    | `'easy' \| 'medium' \| 'hard'`  | default content difficulty                                           |
+| topicIds      | string[]                        | IDs of Topic metadata that groups this shared vocabulary             |
+| sourceId      | string                          | key into`docs/CREDITS.md`'s source registry                          |
+| sourceUrl     | string\| null                   | source or per-entry reference URL                                    |
+| createdAt     | Date                            |                                                                      |
+| updatedAt     | Date                            |                                                                      |
 
 `VocabularyPartOfSpeech` is `'noun' | 'verb' | 'adjective' | 'adverb' | 'determiner' | 'pronoun' | 'numeral' | 'particle' | 'interjection' | 'other'`.
 
@@ -139,10 +145,10 @@ Relationships: a `VocabularyEntry` may be referenced by many `LessonExercise`s. 
 **Path:** `topics/{topicId}`
 **Planned file:** `domain/models/topic.ts`
 
-| Field | Type | Notes |
-| --- | --- | --- |
-| id | string | Firestore document ID |
-| title | string | e.g. `Food` |
+| Field | Type   | Notes                      |
+| ----- | ------ | -------------------------- |
+| id    | string | Firestore document ID      |
+| title | string | e.g.`Food`                 |
 | order | number | display order among Topics |
 
 A Topic is metadata only. Its vocabulary membership is held by
@@ -158,17 +164,17 @@ VocabularyProgress. Label this state `Practiced` or `Encountered`, never
 **Path:** `users/{userId}/lessonProgress/{lessonId}`
 **File:** `domain/models/progress.ts`
 
-| Field         | Type                                    | Notes                                                        |
-| ------------- | --------------------------------------- | ------------------------------------------------------------ |
-| lessonId      | string                                  | same as doc ID; also stored as a field for query convenience |
-| status        | `'unlocked' \| 'completed'`              | persisted state; a missing document means locked             |
-| bestAccuracy  | number                                  | 0–100, best across attempts                                  |
-| bestSpeedWpm  | number                                  | best words-per-minute across attempts                        |
-| attempts      | number                                  | total attempt count                                          |
-| lastAttemptAt | Date\| null                             |                                                              |
-| completedAt   | Date\| null                             | set on first`status === 'completed'`                         |
-| completedExerciseIds | string[] \| absent                | Home lessons only: distinct exercises ever completed ([[DEC-043]]) |
-| homePartialResult | `HomePartialResult` \| absent         | Home lessons only: raw totals of those first completions; removed once the lesson completes |
+| Field                | Type                          | Notes                                                                                       |
+| -------------------- | ----------------------------- | ------------------------------------------------------------------------------------------- |
+| lessonId             | string                        | same as doc ID; also stored as a field for query convenience                                |
+| status               | `'unlocked' \| 'completed'`   | persisted state; a missing document means locked                                            |
+| bestAccuracy         | number                        | 0–100, best across attempts                                                                 |
+| bestSpeedWpm         | number                        | best words-per-minute across attempts                                                       |
+| attempts             | number                        | total attempt count                                                                         |
+| lastAttemptAt        | Date\| null                   |                                                                                             |
+| completedAt          | Date\| null                   | set on first`status === 'completed'`                                                        |
+| completedExerciseIds | string[]\| absent             | Home lessons only: distinct exercises ever completed ([[DEC-043]])                          |
+| homePartialResult    | `HomePartialResult` \| absent | Home lessons only: raw totals of those first completions; removed once the lesson completes |
 
 **Cross-checked against `docs/requirement.md`:** that doc lists a 4th `Mastered` state and names `'unlocked'` as `Ready`. The target model keeps only persisted `'unlocked'/'completed'`; locked is represented by a missing document, and no `Mastered` trigger is specified.
 
@@ -202,14 +208,14 @@ not a domain record and is not migrated.
 **Path:** `users/{userId}/vocabularyProgress/{vocabularyId}`
 **Planned file:** `domain/models/vocabulary-progress.ts`
 
-| Field | Type | Notes |
-| --- | --- | --- |
-| vocabularyId | string | document ID and `VocabularyEntry.id` |
-| firstEncounteredAt | Date | first completed exercise using this vocabulary |
-| lastPracticedAt | Date | latest completed exercise using this vocabulary |
-| exercisesAttempted | number | completed exercises across all experiences |
-| acceptedKeystrokes | number | accepted input for this vocabulary |
-| rejectedKeystrokes | number | rejected input for this vocabulary |
+| Field              | Type   | Notes                                           |
+| ------------------ | ------ | ----------------------------------------------- |
+| vocabularyId       | string | document ID and`VocabularyEntry.id`             |
+| firstEncounteredAt | Date   | first completed exercise using this vocabulary  |
+| lastPracticedAt    | Date   | latest completed exercise using this vocabulary |
+| exercisesAttempted | number | completed exercises across all experiences      |
+| acceptedKeystrokes | number | accepted input for this vocabulary              |
+| rejectedKeystrokes | number | rejected input for this vocabulary              |
 
 This is a learner's accumulated history for shared vocabulary, not a review
 queue. Accuracy is derived from the raw counters. No mastery or familiarity
@@ -222,13 +228,13 @@ field exists in MVP.
 **Path:** `users/{userId}/jamoStats/{jamoId}`
 **Planned file:** `domain/models/jamo-stat.ts`
 
-| Field | Type | Notes |
-| --- | --- | --- |
-| jamoId | string | document ID; expected Korean jamo |
-| acceptedKeystrokes | number | incremented for correct input of the expected jamo |
+| Field              | Type   | Notes                                                       |
+| ------------------ | ------ | ----------------------------------------------------------- |
+| jamoId             | string | document ID; expected Korean jamo                           |
+| acceptedKeystrokes | number | incremented for correct input of the expected jamo          |
 | rejectedKeystrokes | number | incremented for rejected input while this jamo was expected |
-| firstPracticedAt | Date | first submitted session containing this expected jamo |
-| lastPracticedAt | Date | latest submitted session containing this expected jamo |
+| firstPracticedAt   | Date   | first submitted session containing this expected jamo       |
+| lastPracticedAt    | Date   | latest submitted session containing this expected jamo      |
 
 Accuracy is derived from the raw counters. Keyboard Position is a view/filter
 over shared jamo and keyboard metadata; it has no separate progress entity.
@@ -247,12 +253,12 @@ Firestore collection in MVP.
 **Path:** `users/{userId}/dailyQuestProgress/{dateKey}`
 **Planned file:** `domain/models/daily-quest-progress.ts`
 
-| Field | Type | Notes |
-| --- | --- | --- |
-| dateKey | string | document ID identifying the quest day; timezone policy is undecided |
-| vocabularyIds | string[] | stable set of exactly 10 `VocabularyEntry.id` values for that quest |
-| completedAt | Date\| null | set once when the learner first completes that date's quest; independent from reward persistence |
-| expAwarded | boolean | true once the quest's one allowed EXP reward has been granted |
+| Field         | Type        | Notes                                                                                            |
+| ------------- | ----------- | ------------------------------------------------------------------------------------------------ |
+| dateKey       | string      | document ID identifying the quest day; timezone policy is undecided                              |
+| vocabularyIds | string[]    | stable set of exactly 10`VocabularyEntry.id` values for that quest                               |
+| completedAt   | Date\| null | set once when the learner first completes that date's quest; independent from reward persistence |
+| expAwarded    | boolean     | true once the quest's one allowed EXP reward has been granted                                    |
 
 Reloading a dateKey reuses its vocabulary set. This entity records Daily Quest
 identity, completion, and idempotent rewards only; it never completes or
@@ -269,17 +275,17 @@ again after `expAwarded` is true.
 supports Learning Path, Home, and Review; other contexts below remain
 target-model work).
 
-| Field | Type | Notes |
-| --- | --- | --- |
-| id | string | document ID, generated when the active session starts; retained when its logical submit retries |
-| context | `LearningSessionContext` | discriminated source/mode context below |
-| startedAt | Date | active session start time |
-| completedAt | Date | submitted completion time |
-| durationSeconds | number | non-negative active-session duration |
-| exercisesAttempted | number | submitted exercises in this activity |
-| acceptedKeystrokes | number | raw accepted input in this activity |
-| rejectedKeystrokes | number | raw rejected input in this activity |
-| expGained | number | EXP actually awarded by this submitted activity; `0` when none is awarded |
+| Field              | Type                     | Notes                                                                                           |
+| ------------------ | ------------------------ | ----------------------------------------------------------------------------------------------- |
+| id                 | string                   | document ID, generated when the active session starts; retained when its logical submit retries |
+| context            | `LearningSessionContext` | discriminated source/mode context below                                                         |
+| startedAt          | Date                     | active session start time                                                                       |
+| completedAt        | Date                     | submitted completion time                                                                       |
+| durationSeconds    | number                   | non-negative active-session duration                                                            |
+| exercisesAttempted | number                   | submitted exercises in this activity                                                            |
+| acceptedKeystrokes | number                   | raw accepted input in this activity                                                             |
+| rejectedKeystrokes | number                   | raw rejected input in this activity                                                             |
+| expGained          | number                   | EXP actually awarded by this submitted activity;`0` when none is awarded                        |
 
 `LearningSessionContext` is a discriminated union, persisted as an embedded
 object:
@@ -292,7 +298,7 @@ type LearningSessionContext =
   | { mode: 'topic'; topicId: string }
   | { mode: 'keyboard-position'; positionId: string }
   | { mode: 'review' }
-  | { mode: 'random' };
+  | { mode: 'random' }
 ```
 
 Accuracy and WPM are derived from the raw counters and duration using the same
@@ -311,18 +317,18 @@ retain the same ID for future account migration. See `docs/SESSION-AND-HISTORY.m
 **Path:** `users/{userId}/reviewItems/{itemId}`
 **File:** `domain/models/review-item.ts`
 
-| Field            | Type    | Notes                                                       |
-| ---------------- | ------- | ----------------------------------------------------------- |
-| id               | string  | Firestore doc ID; deterministic identity, defined below     |
-| sourceLessonId   | string  | `Lesson.id` that first created this item                    |
-| sourceExerciseId | string  | `LessonExercise.id` that first created this item            |
-| vocabularyId     | string\| null | linked `VocabularyEntry.id`; `null` for non-vocabulary content |
-| targetText       | string  | the mistyped Korean text (denormalized for quick review UI) |
-| mistakeCount     | number  | incremented each time it's mistyped again                   |
-| lastMistakeAt    | Date    |                                                             |
-| reason           | `'mistake' \| 'slow' \| 'low-accuracy'` | why this word entered review ([[DEC-012]]) |
-| box              | number  | Leitner box, 1–5 ([[DEC-008]]); starts at 1, +1 on a correct review (capped at 5), resets to 1 on a mistake |
-| nextReviewAt     | Date    | when this item is next due; computed from `box` at write time |
+| Field            | Type                                    | Notes                                                                                                       |
+| ---------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| id               | string                                  | Firestore doc ID; deterministic identity, defined below                                                     |
+| sourceLessonId   | string                                  | `Lesson.id` that first created this item                                                                    |
+| sourceExerciseId | string                                  | `LessonExercise.id` that first created this item                                                            |
+| vocabularyId     | string\| null                           | linked`VocabularyEntry.id`; `null` for non-vocabulary content                                               |
+| targetText       | string                                  | the mistyped Korean text (denormalized for quick review UI)                                                 |
+| mistakeCount     | number                                  | incremented each time it's mistyped again                                                                   |
+| lastMistakeAt    | Date                                    |                                                                                                             |
+| reason           | `'mistake' \| 'slow' \| 'low-accuracy'` | why this word entered review ([[DEC-012]])                                                                  |
+| box              | number                                  | Leitner box, 1–5 ([[DEC-008]]); starts at 1, +1 on a correct review (capped at 5), resets to 1 on a mistake |
+| nextReviewAt     | Date                                    | when this item is next due; computed from`box` at write time                                                |
 
 **Identity and deduplication ([[DEC-022]]):** a vocabulary-backed item has `id === vocabularyId`, yielding one review history per learner per reusable word across all lessons. A non-vocabulary item has `id === \`${sourceLessonId}:${sourceExerciseId}\``, yielding one review history per lesson exercise. Therefore the deduplication rule is one active item per vocabulary entry, or one active item per non-vocabulary exercise.
 
@@ -342,19 +348,19 @@ qualify an item. No experience owns a separate review queue.
 **Authenticated path:** `users/{userId}` (the parent doc of `lessonProgress`/`reviewItems` subcollections)
 **File:** `domain/models/user-profile.ts`
 
-Not in README's original domain file list, but required to home EXP/Level and Settings ([[DEC-006]], [[DEC-007]]).
+Not in README's original domain file list, but required to home EXP/Level and Settings ([[DEC-048]], [[DEC-007]]).
 
-| Field     | Type           | Notes                        |
-| --------- | -------------- | ----------------------------- |
-| id        | string         | Firebase Auth UID for an authenticated user; locally generated `guestId` for a Guest |
-| displayName | string       | required player-facing name; never auth identity |
-| exp       | number         | total accumulated EXP, only stored value — `level` is never persisted |
-| settings  | `UserSettings` | see below                    |
-| stats     | `UserStats`    | see below ([[DEC-011]])      |
-| createdAt | Date           |                               |
-| updatedAt | Date           | set with `createdAt` on creation; changed on every persisted profile mutation ([[DEC-023]]) |
+| Field       | Type           | Notes                                                                                                |
+| ----------- | -------------- | ---------------------------------------------------------------------------------------------------- |
+| id          | string         | Firebase Auth UID for an authenticated user; locally generated`guestId` for a Guest                  |
+| displayName | string         | required player-facing name; never auth identity                                                     |
+| exp         | number         | accumulated EXP awarded under[[DEC-045]]; `level` is never persisted ([[DEC-048]])                  |
+| settings    | `UserSettings` | see below                                                                                            |
+| stats       | `UserStats`    | see below ([[DEC-011]])                                                                              |
+| createdAt   | Date           |                                                                                                      |
+| updatedAt   | Date           | set with`createdAt` on creation; changed on every persisted profile mutation ([[DEC-023]])           |
 
-**Level formula ([[DEC-006]], [[DEC-024]]):** `level` is derived, not stored: `level = 1 + floor(exp / 100)`. Lives as a pure function (`levelFromExp(exp)`) next to `UserProfile` in `domain/models/user-profile.ts`. This flat curve remains the MVP placeholder and is deferred for later game-balance work; changing it needs no data migration, since `exp` is the only persisted value.
+**Level formula ([[DEC-048]]):** `level` is derived, not stored. It uses the LEVELING.md curve: the EXP to go from `level` to `level + 1` is `round(50 × level^1.2 × (1 + 0.15 × rebirthCount) × softCap)`, where `softCap` is `1` below Level 100 and `3^(floor((level − 100) / 10) + 1)` from Level 100. `levelFromExp(cycleExp, rebirthCount)` returns the highest level whose cumulative requirement from Level 1 is no greater than `cycleExp`. Until rebirth state exists, `rebirthCount` is `0` and `exp` is the cycle EXP. Lives as pure functions next to `UserProfile` in `domain/models/user-profile.ts` (`expRequiredForNextLevel`, `levelProgress`, `levelFromExp`); the EXP input is `totalExp(profile)`, legacy `exp` plus `sessionAggregate.exp`. Changing the curve needs no data migration because no level value is persisted.
 
 **Cross-checked against `docs/requirement.md`:** that doc's own example ("Level 7, 430/600 EXP") implies an increasing per-level curve (~`level × 100` to reach the next level), not this flat formula, and separately lists "Level" as something to save (implying a stored field). Both reaffirmed against the flat, derived-only formula — 2026-09-23. Revisit the curve shape later if game-design balance needs it; the derived approach means no migration either way.
 
@@ -365,27 +371,27 @@ are separate from `UserProfile`; do not store `email`, provider details, or
 
 `UserSettings` (embedded in the profile, [[DEC-007]]):
 
-| Field               | Type                     | Notes                                         |
-| ------------------- | ------------------------ | ---------------------------------------------- |
-| soundEnabled        | boolean                  |                                                |
-| showKeyboard         | boolean                  | show/hide the virtual keyboard widget         |
-| keyboardOpacity      | number                   | 0–1                                           |
-| romanizationEnabled  | boolean                  |                                                |
-| meaningLanguage      | `'th' \| 'en' \| 'both'` |                                                |
-| theme                | `'light' \| 'dark'`      |                                                |
+| Field               | Type                     | Notes                                 |
+| ------------------- | ------------------------ | ------------------------------------- |
+| soundEnabled        | boolean                  |                                       |
+| showKeyboard        | boolean                  | show/hide the virtual keyboard widget |
+| keyboardOpacity     | number                   | 0–1                                   |
+| romanizationEnabled | boolean                  |                                       |
+| meaningLanguage     | `'th' \| 'en' \| 'both'` |                                       |
+| theme               | `'light' \| 'dark'`      |                                       |
 
 Replaces the earlier single `keyboardLayoutHint` field with the current settings list. English physical-key labels are always shown alongside Hangul labels, so `showEnglishKeys` is not a user setting ([[DEC-027]]). "Reset Progress" (requirement.md #13) is an action, not a setting — it's a future `application/` use case, not a `UserSettings` field.
 
 `UserStats` (embedded on `UserProfile`, [[DEC-011]]):
 
-| Field                  | Type   | Notes                                    |
-| ---------------------- | ------ | ------------------------------------------ |
-| lessonsCompleted       | number | unique lessons completed; retries do not increment it |
-| exercisesAttempted     | number | total exercises completed in submitted lesson, practice, or review sessions; retries count |
-| totalAcceptedKeystrokes | number | accepted Korean keyboard input events across all submitted sessions |
-| totalRejectedKeystrokes | number | rejected/wrong Korean keyboard input events across all submitted sessions |
-| bestAccuracy           | number | 0–100, best single submitted session across all modes (distinct from `Progress.bestAccuracy`, which is per-lesson) |
-| totalTypingTimeSeconds | number | total active typing duration across all submitted sessions |
+| Field                   | Type   | Notes                                                                                                             |
+| ----------------------- | ------ | ----------------------------------------------------------------------------------------------------------------- |
+| lessonsCompleted        | number | unique lessons completed; retries do not increment it                                                             |
+| exercisesAttempted      | number | total exercises completed in submitted lesson, practice, or review sessions; retries count                        |
+| totalAcceptedKeystrokes | number | accepted Korean keyboard input events across all submitted sessions                                               |
+| totalRejectedKeystrokes | number | rejected/wrong Korean keyboard input events across all submitted sessions                                         |
+| bestAccuracy            | number | 0–100, best single submitted session across all modes (distinct from`Progress.bestAccuracy`, which is per-lesson) |
+| totalTypingTimeSeconds  | number | total active typing duration across all submitted sessions                                                        |
 
 `averageAccuracy` and `averageSpeedWpm` are derived, never stored ([[DEC-022]]):
 
@@ -396,7 +402,7 @@ averageSpeedWpm = (totalAcceptedKeystrokes / 5) / (totalTypingTimeSeconds / 60)
 
 Return `0` for either value when its denominator is zero. WPM uses the existing keyboard-engine convention of five accepted physical keystrokes per word; it is not a count of Korean whitespace-delimited words. All counters change only when a session is submitted, never per keystroke.
 
-`currentLevel` (requirement.md #9) is intentionally not stored here — it's `levelFromExp(exp)`, computed on read (see [[DEC-006]]).
+`currentLevel` (requirement.md #9) is intentionally not stored here — it's derived from progression state on read (see [[DEC-048]]).
 
 `updatedAt` is an audit timestamp, not an activity timestamp: it changes when settings, EXP, or stats are persisted, but not for reads or session activation alone. Guest retention uses the separate local `GuestSession.lastActiveAt` field in `docs/AUTH-AND-PERSISTENCE.md`.
 
@@ -421,7 +427,7 @@ receipt-gated.
 
 Previously open, now decided — see `docs/DECISIONS.md` for full rationale:
 
-1. **EXP/Level** ([[DEC-006]]) — `level` derived from `exp` via `level = 1 + floor(exp / 100)`, never stored. Reaffirmed against `docs/requirement.md`.
+1. **EXP/Level** ([[DEC-048]], superseding [[DEC-006]]) — `level` derived, never stored; curve from LEVELING.md (soft cap from Level 100, rebirth multiplier). Replaces the original flat `1 + floor(exp / 100)`.
 2. **Settings location** ([[DEC-007]], [[DEC-027]]) — embedded in `UserProfile`, whether that profile is stored in Guest IndexedDB or authenticated Firestore; never a separate settings collection.
 3. **Review scheduling and identity** ([[DEC-008]], [[DEC-022]]) — Leitner-style spaced repetition, `box` + `nextReviewAt`, no `resolved` state; vocabulary-backed items are deduplicated by `vocabularyId`, other items by lesson/exercise identity.
 4. **Unlock rule** ([[DEC-009]], [[DEC-025]]) — next lesson unlocks when the previous lesson's Progress becomes `'completed'`; a missing document represents locked, while persisted states are `'unlocked'/'completed'`.

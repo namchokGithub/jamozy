@@ -1,11 +1,12 @@
 import { useCallback, useState } from 'react'
-import { Link, useFetcher, useLoaderData, useNavigate } from 'react-router'
+import { useFetcher, useLoaderData, useNavigate } from 'react-router'
 import {
+  courseCounts,
   courseType,
   type Course,
   type CourseType,
 } from '../../domain/models/course'
-import type { Unit } from '../../domain/models/unit'
+import { unitCounts, type Unit } from '../../domain/models/unit'
 import { Button } from '../../components/ui/Button'
 import { Dropdown } from '../../components/ui/Dropdown'
 import { Card } from '../../components/ui/Card'
@@ -15,14 +16,18 @@ import {
   AdminStatusActionsPreview,
 } from './AdminStatusActions'
 import { AdminStatusBadge } from './AdminStatusBadge'
+import { AdminHomeDeployNotice } from './AdminHomeDeployNotice'
 import { AdminContentListToolbar } from './AdminContentListToolbar'
 import { useAdminFeedback } from './useAdminFeedback'
 import { useAdminMutationPending } from './useAdminMutationPending'
+import { AdminUnsavedChangesDialog } from './AdminUnsavedChangesDialog'
 import { useAdminUnsavedChanges } from './useAdminUnsavedChanges'
 import { AdminTopBar } from './AdminTopBar'
 import { useAdminTranslation } from './i18n/admin-i18n'
-import { useCreatedHighlight } from './useCreatedHighlight'
 import { AdminSortableList } from './AdminSortableList'
+import { AdminCreateButton } from './AdminCreateButton'
+import { AdminRenameField } from './AdminRenameField'
+import { withPendingOrder } from './pending-order'
 
 const courseTypes: CourseType[] = ['learning', 'home']
 export default function CourseEditorPage() {
@@ -30,26 +35,28 @@ export default function CourseEditorPage() {
   const { t } = useAdminTranslation()
   const fetcher = useFetcher()
   const navigate = useNavigate()
-  const createdHighlight = useCreatedHighlight()
   const [editingDetails, setEditingDetails] = useState(false)
+  const [renamingId, setRenamingId] = useState<string | null>(null)
   const [detailsDirty, setDetailsDirty] = useState(false)
   const [type, setType] = useState(courseType(course))
-  const [orderedUnits, setOrderedUnits] = useState(units)
+  const orderedUnits = withPendingOrder(
+    units,
+    fetcher.formData,
+    'save-unit-order',
+  )
   const [unitSearch, setUnitSearch] = useState('')
   const [unitStatusFilter, setUnitStatusFilter] = useState('all')
   const isPending = useAdminMutationPending()
-  useAdminUnsavedChanges(detailsDirty, t('feedback.unsavedChangesWarning'))
-  const handleSuccess = useCallback(
-    (data: { message?: string; createdId?: string }) => {
-      if (data.message === 'feedback.changesSaved') {
-        setEditingDetails(false)
-        setDetailsDirty(false)
-      }
-      if (data.createdId)
-        navigate(`/admin/units/${data.createdId}`, { state: { created: true } })
-    },
-    [navigate],
+  const unsavedChangesBlocker = useAdminUnsavedChanges(
+    detailsDirty,
+    t('feedback.unsavedChangesWarning'),
   )
+  const handleSuccess = useCallback((data: { message?: string }) => {
+    if (data.message === 'feedback.changesSaved') {
+      setEditingDetails(false)
+      setDetailsDirty(false)
+    }
+  }, [])
   useAdminFeedback(fetcher, handleSuccess)
   const submit = (data: Record<string, string>) => {
     if (!isPending) fetcher.submit(data, { method: 'post' })
@@ -62,7 +69,6 @@ export default function CourseEditorPage() {
     const next = [...orderedUnits]
     const [dragged] = next.splice(currentIndex, 1)
     next.splice(targetIndex, 0, dragged)
-    setOrderedUnits(next)
     submit({
       intent: 'save-unit-order',
       order: JSON.stringify(next.map((item) => item.id)),
@@ -86,6 +92,7 @@ export default function CourseEditorPage() {
   )
   return (
     <PageSurface className="px-6 lg:px-8" contentClassName="max-w-[1200px]">
+      <AdminUnsavedChangesDialog blocker={unsavedChangesBlocker} />
       <AdminTopBar
         breadcrumb={[
           { label: t('breadcrumb.admin'), to: '/admin' },
@@ -94,15 +101,7 @@ export default function CourseEditorPage() {
       />
       <header className="mt-4 flex flex-wrap justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <h1
-            className={
-              createdHighlight
-                ? 'rounded-xl bg-[#f5faed] px-3 py-2 text-3xl font-bold'
-                : 'truncate text-3xl font-bold'
-            }
-          >
-            {course.title}
-          </h1>
+          <h1 className="truncate text-3xl font-bold">{course.title}</h1>
           <AdminStatusBadge status={course.status} />
         </div>
         <div className="flex items-center gap-2">
@@ -110,9 +109,11 @@ export default function CourseEditorPage() {
             id={course.id}
             kind="course"
             status={course.status}
+            hasUnsavedChanges={detailsDirty}
           />
         </div>
       </header>
+      <AdminHomeDeployNotice course={course} />
       {detailsDirty && (
         <div className="mt-4 rounded-xl bg-[#fff1d8] px-4 py-3 text-sm font-semibold text-[#92703e]">
           {t('feedback.unsavedChanges')}
@@ -190,7 +191,7 @@ export default function CourseEditorPage() {
         ) : (
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h2 className="text-xl font-bold">{course.title}</h2>
+              {/* <h2 className="text-xl font-bold">{course.title}</h2> */}
               <p className="mt-2 max-w-xl text-sm leading-6 text-[#667085]">
                 {course.description}
               </p>
@@ -215,17 +216,19 @@ export default function CourseEditorPage() {
             <p className="text-sm text-[#667085]">{t('course.unitsHint')}</p>
           </div>
           <div className="flex gap-2">
-            <Button
-              disabled={isPending}
-              onClick={() => submit({ intent: 'create-unit' })}
-            >
-              {isPending ? t('action.saving') : t('action.createUnit')}
-            </Button>
+            <AdminCreateButton kind="unit" />
           </div>
         </div>
         <AdminContentListToolbar
           totalLabel={t('course.unitsHeading')}
           total={orderedUnits.length}
+          descendants={[
+            { label: t('count.lessons'), value: courseCounts(course).lessons },
+            {
+              label: t('count.exercises'),
+              value: courseCounts(course).exercises,
+            },
+          ]}
           counts={unitStatusCounts}
           search={unitSearch}
           onSearch={setUnitSearch}
@@ -236,16 +239,22 @@ export default function CourseEditorPage() {
           className="mt-4 space-y-3"
           items={visibleUnits}
           getId={(unit) => unit.id}
-          disabled={isPending}
+          disabled={isPending || renamingId !== null}
           onMove={moveUnit}
           renderItem={(unit, { handleRef, isDragging, ref }) => (
             <div
               ref={ref}
               role="link"
               tabIndex={0}
-              onClick={() => navigate(`/admin/units/${unit.id}`)}
+              onClick={() =>
+                renamingId !== unit.id && navigate(`/admin/units/${unit.id}`)
+              }
               onKeyDown={(event) => {
-                if (event.target !== event.currentTarget) return
+                if (
+                  event.target !== event.currentTarget ||
+                  renamingId === unit.id
+                )
+                  return
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault()
                   navigate(`/admin/units/${unit.id}`)
@@ -264,23 +273,43 @@ export default function CourseEditorPage() {
                 >
                   ⋮⋮
                 </button>
-                <h3 className="truncate font-bold">{unit.title}</h3>
+                {renamingId === unit.id ? (
+                  <AdminRenameField
+                    id={unit.id}
+                    kind="unit"
+                    title={unit.title}
+                    onDone={() => setRenamingId(null)}
+                  />
+                ) : (
+                  <h3 className="truncate font-bold">{unit.title}</h3>
+                )}
                 <AdminStatusBadge status={unit.status} />
+                <span className="shrink-0 text-xs text-[#8b7d72]">
+                  {t('count.unitSummary', { ...unitCounts(unit) })}
+                </span>
               </div>
               <div
                 className="flex items-center gap-1"
                 onClick={(event) => event.stopPropagation()}
               >
-                <Link
-                  className="rounded-full border border-[#eadfd4] bg-white/90 px-3 py-2 text-sm font-semibold text-[#8d4c43] hover:border-[#d8b3a9] hover:bg-white"
-                  to={`/admin/units/${unit.id}`}
+                <Button
+                  variant="secondary"
+                  disabled={isPending}
+                  onClick={() => setRenamingId(unit.id)}
                 >
                   {t('action.edit')}
-                </Link>
+                </Button>
                 <AdminStatusActions
                   id={unit.id}
                   kind="unit"
                   status={unit.status}
+                  parents={[
+                    {
+                      kind: 'course',
+                      title: course.title,
+                      status: course.status,
+                    },
+                  ]}
                 />
               </div>
             </div>

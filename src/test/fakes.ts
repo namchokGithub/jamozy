@@ -16,7 +16,10 @@ import type {
   SessionSubmissionOutcome,
   SessionSubmissionRepository,
 } from '../domain/repositories/session-submission-repository'
-import type { AdminContentRepository } from '../domain/repositories/admin-content-repository'
+import type {
+  AdminContentChanges,
+  AdminContentRepository,
+} from '../domain/repositories/admin-content-repository'
 import type { OnePageLearningCheckpoint } from '../domain/models/one-page-learning-checkpoint'
 import type { OnePageLearningCheckpointRepository } from '../domain/repositories/one-page-learning-checkpoint-repository'
 import type { HomeSyncJob } from '../domain/models/home-sync-job'
@@ -96,14 +99,18 @@ export class FakeAdminContentRepository implements AdminContentRepository {
       ...input,
       order: this.courses.length,
       status: 'draft',
+      unitCount: 0,
+      lessonCount: 0,
+      exerciseCount: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     }
     this.courses.push(item)
     return item
   }
+  // Like the Firebase adapter, saves keep stored counters and order.
   async saveCourse(course: Course) {
-    this.replace(this.courses, course)
+    this.replace(this.courses, this.keepStored(this.courses, course))
   }
   async createUnit(input: Pick<Unit, 'courseId' | 'title' | 'description'>) {
     const item: Unit = {
@@ -111,14 +118,17 @@ export class FakeAdminContentRepository implements AdminContentRepository {
       ...input,
       order: (await this.getUnitsByCourseId(input.courseId)).length,
       status: 'draft',
+      lessonCount: 0,
+      exerciseCount: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     }
     this.units.push(item)
+    this.bump(this.courses, input.courseId, 'unitCount', 1)
     return item
   }
   async saveUnit(unit: Unit) {
-    this.replace(this.units, unit)
+    this.replace(this.units, this.keepStored(this.units, unit))
   }
   async createLesson(input: Pick<Lesson, 'unitId' | 'title' | 'type'>) {
     const item: Lesson = {
@@ -126,83 +136,92 @@ export class FakeAdminContentRepository implements AdminContentRepository {
       ...input,
       order: (await this.getLessonsByUnitId(input.unitId)).length,
       exercises: [],
+      exerciseCount: 0,
       status: 'draft',
       createdAt: new Date(),
       updatedAt: new Date(),
     }
     this.lessons.push(item)
+    const unit = await this.getUnitById(input.unitId)
+    this.bump(this.units, input.unitId, 'lessonCount', 1)
+    if (unit) this.bump(this.courses, unit.courseId, 'lessonCount', 1)
     return item
   }
   async saveLesson(lesson: Lesson) {
-    this.replace(this.lessons, lesson)
+    this.writeLesson(lesson)
   }
-  async moveUnit(id: string, direction: 'up' | 'down') {
-    await this.move(this.units, id, direction, (item) => item.courseId)
-  }
-  async moveLesson(id: string, direction: 'up' | 'down') {
-    await this.move(this.lessons, id, direction, (item) => item.unitId)
+  async saveContent(changes: AdminContentChanges) {
+    for (const course of changes.courses ?? [])
+      this.replace(this.courses, this.keepStored(this.courses, course))
+    for (const unit of changes.units ?? [])
+      this.replace(this.units, this.keepStored(this.units, unit))
+    for (const lesson of changes.lessons ?? []) this.writeLesson(lesson)
   }
   async saveCourseOrder(courseIds: string[]) {
-    if (
-      courseIds.length !== this.courses.length ||
-      new Set(courseIds).size !== courseIds.length ||
-      courseIds.some((id) => !this.courses.some((course) => course.id === id))
-    )
-      throw new Error('Content order changed. Refresh and try again.')
-    courseIds.forEach((id, order) => {
-      const course = this.courses.find((item) => item.id === id)
-      if (course) course.order = order
-    })
+    this.saveOrder(await this.getCourses(), courseIds)
   }
-  async moveUnitToIndex(id: string, index: number) {
-    await this.moveToIndex(this.units, id, index, (item) => item.courseId)
+  async saveUnitOrder(courseId: string, unitIds: string[]) {
+    this.saveOrder(await this.getUnitsByCourseId(courseId), unitIds)
   }
-  async moveLessonToIndex(id: string, index: number) {
-    await this.moveToIndex(this.lessons, id, index, (item) => item.unitId)
+  async saveLessonOrder(unitId: string, lessonIds: string[]) {
+    this.saveOrder(await this.getLessonsByUnitId(unitId), lessonIds)
   }
 
+  private bump<T extends { id: string }>(
+    items: T[],
+    id: string,
+    field: 'unitCount' | 'lessonCount' | 'exerciseCount',
+    by: number,
+  ) {
+    const item = items.find((candidate) => candidate.id === id) as
+      (T & Record<typeof field, number | undefined>) | undefined
+    if (item) item[field] = (item[field] ?? 0) + by
+  }
+  // Like the Firebase adapter: keeps order, stores exerciseCount, and adds
+  // the Exercises the Lesson gains to its Unit and Course.
+  private writeLesson(lesson: Lesson) {
+    const saved = this.lessons.find((item) => item.id === lesson.id)
+    const delta = lesson.exercises.length - (saved?.exercises.length ?? 0)
+    this.replace(this.lessons, {
+      ...lesson,
+      order: saved?.order ?? lesson.order,
+      exerciseCount: lesson.exercises.length,
+    })
+    if (delta === 0) return
+    const unit = this.units.find((item) => item.id === lesson.unitId)
+    this.bump(this.units, lesson.unitId, 'exerciseCount', delta)
+    if (unit) this.bump(this.courses, unit.courseId, 'exerciseCount', delta)
+  }
+  private keepStored<T extends Course | Unit>(items: T[], next: T): T {
+    const saved = items.find((item) => item.id === next.id)
+    if (!saved) return next
+    const kept = {
+      order: saved.order,
+      unitCount: (saved as Course).unitCount,
+      lessonCount: saved.lessonCount,
+      exerciseCount: saved.exerciseCount,
+    }
+    return {
+      ...next,
+      ...Object.fromEntries(
+        Object.entries(kept).filter(([, value]) => value !== undefined),
+      ),
+    }
+  }
   private replace<T extends { id: string }>(items: T[], next: T) {
     const index = items.findIndex((item) => item.id === next.id)
     if (index >= 0) items[index] = next
   }
-  private async move<T extends { id: string; order: number }>(
-    items: T[],
-    id: string,
-    direction: 'up' | 'down',
-    key: (item: T) => string,
-  ) {
-    const current = items.find((item) => item.id === id)
-    if (!current) return
-    const siblings = items
-      .filter((item) => key(item) === key(current))
-      .sort((a, b) => a.order - b.order)
-    const neighbor =
-      siblings[
-        siblings.findIndex((item) => item.id === id) +
-          (direction === 'up' ? -1 : 1)
-      ]
-    if (!neighbor) return
-    const order = current.order
-    current.order = neighbor.order
-    neighbor.order = order
-  }
-  private async moveToIndex<T extends { id: string; order: number }>(
-    items: T[],
-    id: string,
-    index: number,
-    key: (item: T) => string,
-  ) {
-    const current = items.find((item) => item.id === id)
-    if (!current) return
-    const siblings = items
-      .filter((item) => key(item) === key(current))
-      .sort((a, b) => a.order - b.order)
-    const currentIndex = siblings.findIndex((item) => item.id === id)
-    if (currentIndex < 0 || index < 0 || index >= siblings.length) return
-    siblings.splice(currentIndex, 1)
-    siblings.splice(index, 0, current)
-    siblings.forEach((item, order) => {
-      item.order = order
+  private saveOrder(siblings: { id: string; order: number }[], ids: string[]) {
+    if (
+      ids.length !== siblings.length ||
+      new Set(ids).size !== ids.length ||
+      ids.some((id) => !siblings.some((item) => item.id === id))
+    )
+      throw new Error('Content order changed. Refresh and try again.')
+    ids.forEach((id, order) => {
+      const item = siblings.find((sibling) => sibling.id === id)
+      if (item) item.order = order
     })
   }
 }
@@ -336,7 +355,9 @@ export class FakeOnePageLearningCheckpointRepository implements OnePageLearningC
 export class FakeHomeSyncJobRepository implements HomeSyncJobRepository {
   readonly jobs: HomeSyncJob[] = []
   async list() {
-    return [...this.jobs].sort((a, b) => a.enqueuedAt.getTime() - b.enqueuedAt.getTime())
+    return [...this.jobs].sort(
+      (a, b) => a.enqueuedAt.getTime() - b.enqueuedAt.getTime(),
+    )
   }
   async save(job: HomeSyncJob) {
     const index = this.jobs.findIndex(({ id }) => id === job.id)

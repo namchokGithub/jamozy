@@ -22,6 +22,12 @@ export function Modal({
   const titleId = useId()
   const dialogRef = useRef<HTMLElement>(null)
   const previousFocus = useRef<HTMLElement | null>(null)
+  // Read the latest onClose without re-running the open effect: callers often
+  // pass an inline function, and re-running it would steal focus every render.
+  const onCloseRef = useRef(onClose)
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
 
   useEffect(() => {
     if (!open) return
@@ -31,14 +37,14 @@ export function Modal({
         : null
     dialogRef.current?.focus()
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
+      if (event.key === 'Escape') onCloseRef.current()
     }
     window.addEventListener('keydown', onKeyDown)
     return () => {
       window.removeEventListener('keydown', onKeyDown)
       previousFocus.current?.focus()
     }
-  }, [open, onClose])
+  }, [open])
 
   if (!open) return null
 
@@ -51,11 +57,11 @@ export function Modal({
         ref={dialogRef}
         tabIndex={-1}
         role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-      className={`w-full ${sizeClassName} rounded-3xl border border-[#eadfd4] bg-[#fffdf9] p-6 shadow-[0_24px_60px_-30px_rgba(54,41,31,0.5)]`}
-      onClick={(event) => event.stopPropagation()}
-    >
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className={`w-full ${sizeClassName} rounded-3xl border border-[#eadfd4] bg-[#fffdf9] p-6 shadow-[0_24px_60px_-30px_rgba(54,41,31,0.5)]`}
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="flex items-start justify-between gap-4">
           <h2
             id={titleId}

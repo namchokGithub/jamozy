@@ -10,7 +10,10 @@ export function AdminContentListToolbar({
   onSearch,
   status,
   onStatusChange,
+  descendants = [],
 }: {
+  /** Counts of deeper levels (from stored counters), shown under the status cards. */
+  descendants?: { label: string; value: number }[]
   totalLabel: string
   total: number
   counts: Record<ContentStatus, number>
@@ -39,6 +42,23 @@ export function AdminContentListToolbar({
           </div>
         ))}
       </div>
+      {descendants.length > 0 && (
+        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {descendants.map((metric) => (
+            <div
+              key={metric.label}
+              className="rounded-xl border border-[#f1e7dd] px-3 py-2"
+            >
+              <p className="text-xs font-semibold uppercase text-[#8b7d72]">
+                {metric.label}
+              </p>
+              <p className="mt-1 text-xl font-bold text-[#3f3029]">
+                {metric.value}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
         <label className="grid gap-2 text-sm font-semibold text-[#39465b]">
           {t('dashboard.search')}

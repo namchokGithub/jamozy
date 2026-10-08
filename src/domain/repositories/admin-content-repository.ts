@@ -2,6 +2,13 @@ import type { Course } from '../models/course'
 import type { Lesson } from '../models/lesson'
 import type { Unit } from '../models/unit'
 
+/** Content documents written together by `saveContent`. */
+export interface AdminContentChanges {
+  courses?: Course[]
+  units?: Unit[]
+  lessons?: Lesson[]
+}
+
 export interface AdminContentRepository {
   getCourses(): Promise<Course[]>
   getCourseById(courseId: string): Promise<Course | null>
@@ -19,9 +26,10 @@ export interface AdminContentRepository {
     input: Pick<Lesson, 'unitId' | 'title' | 'type'>,
   ): Promise<Lesson>
   saveLesson(lesson: Lesson): Promise<void>
-  moveUnit(unitId: string, direction: 'up' | 'down'): Promise<void>
-  moveLesson(lessonId: string, direction: 'up' | 'down'): Promise<void>
+  /** Writes every change atomically: all documents are saved, or none. */
+  saveContent(changes: AdminContentChanges): Promise<void>
+  /** Order calls take every sibling ID in its new order and write atomically. */
   saveCourseOrder(courseIds: string[]): Promise<void>
-  moveUnitToIndex(unitId: string, index: number): Promise<void>
-  moveLessonToIndex(lessonId: string, index: number): Promise<void>
+  saveUnitOrder(courseId: string, unitIds: string[]): Promise<void>
+  saveLessonOrder(unitId: string, lessonIds: string[]): Promise<void>
 }

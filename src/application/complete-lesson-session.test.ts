@@ -10,6 +10,8 @@ import {
 } from '../test/fakes'
 import type { Lesson } from '../domain/models/lesson'
 import type { Unit } from '../domain/models/unit'
+import { defaultUserProfile } from '../domain/models/user-profile'
+import { emptySessionAggregate } from '../domain/models/session-aggregate'
 
 function makeUnit(id: string): Unit {
   return {
@@ -57,19 +59,27 @@ describe('completeLessonSession', () => {
       sessionSubmissionRepo: new FakeSessionSubmissionRepository(),
     }
 
-    const outcome = await completeLessonSession(deps, 'user1', 'l1', {
-      accuracy: 90,
-      speedWpm: 20,
-      durationSeconds: 30,
-      startedAtMs: new Date('2026-01-01').getTime(),
-      exercisesAttempted: 1,
-      acceptedKeystrokes: 2,
-      rejectedKeystrokes: 0,
-      mistakes: [{ sourceExerciseId: 'ex1', targetText: '가' }],
-    }, 'session-1')
+    const outcome = await completeLessonSession(
+      deps,
+      'user1',
+      'l1',
+      {
+        accuracy: 90,
+        speedWpm: 20,
+        durationSeconds: 30,
+        startedAtMs: new Date('2026-01-01').getTime(),
+        exercisesAttempted: 1,
+        acceptedKeystrokes: 2,
+        rejectedKeystrokes: 0,
+        mistakes: [{ sourceExerciseId: 'ex1', targetText: '가' }],
+      },
+      'session-1',
+    )
 
     expect(outcome.progress.status).toBe('completed')
-    expect(deps.sessionSubmissionRepo.submissions[0]?.effects.reviewItems[0]?.id).toBe('ex1')
+    expect(
+      deps.sessionSubmissionRepo.submissions[0]?.effects.reviewItems[0]?.id,
+    ).toBe('ex1')
   })
 
   it('creates no review items when there are no mistakes', async () => {
@@ -82,18 +92,26 @@ describe('completeLessonSession', () => {
       sessionSubmissionRepo: new FakeSessionSubmissionRepository(),
     }
 
-    await completeLessonSession(deps, 'user1', 'l1', {
-      accuracy: 100,
-      speedWpm: 20,
-      durationSeconds: 30,
-      startedAtMs: new Date('2026-01-01').getTime(),
-      exercisesAttempted: 1,
-      acceptedKeystrokes: 2,
-      rejectedKeystrokes: 0,
-      mistakes: [],
-    }, 'session-1')
+    await completeLessonSession(
+      deps,
+      'user1',
+      'l1',
+      {
+        accuracy: 100,
+        speedWpm: 20,
+        durationSeconds: 30,
+        startedAtMs: new Date('2026-01-01').getTime(),
+        exercisesAttempted: 1,
+        acceptedKeystrokes: 2,
+        rejectedKeystrokes: 0,
+        mistakes: [],
+      },
+      'session-1',
+    )
 
-    expect(deps.sessionSubmissionRepo.submissions[0]?.effects.reviewItems).toEqual([])
+    expect(
+      deps.sessionSubmissionRepo.submissions[0]?.effects.reviewItems,
+    ).toEqual([])
   })
 
   it('returns the first completion outcome when the same submission ID is retried', async () => {
@@ -105,14 +123,84 @@ describe('completeLessonSession', () => {
       reviewRepo: new FakeReviewRepository(),
       sessionSubmissionRepo: new FakeSessionSubmissionRepository(),
     }
-    const result = { accuracy: 100, speedWpm: 20, durationSeconds: 30, startedAtMs: 0, exercisesAttempted: 1, acceptedKeystrokes: 2, rejectedKeystrokes: 0, mistakes: [] }
+    const result = {
+      accuracy: 100,
+      speedWpm: 20,
+      durationSeconds: 30,
+      startedAtMs: 0,
+      exercisesAttempted: 1,
+      acceptedKeystrokes: 2,
+      rejectedKeystrokes: 0,
+      mistakes: [],
+    }
 
-    const first = await completeLessonSession(deps, 'user1', 'l1', result, 'retry-me')
-    const retry = await completeLessonSession(deps, 'user1', 'l1', result, 'retry-me')
+    const first = await completeLessonSession(
+      deps,
+      'user1',
+      'l1',
+      result,
+      'retry-me',
+    )
+    const retry = await completeLessonSession(
+      deps,
+      'user1',
+      'l1',
+      result,
+      'retry-me',
+    )
 
     expect(first.expGained).toBe(170)
     expect(retry.expGained).toBe(170)
     expect(deps.sessionSubmissionRepo.submissions).toHaveLength(1)
+  })
+
+  it('derives the outcome level from legacy and session-tracked EXP', async () => {
+    const deps = {
+      courseRepo: new FakeCourseRepository([], [makeUnit('u1')]),
+      lessonRepo: new FakeLessonRepository([makeLesson('l1', 'u1')]),
+      progressRepo: new FakeProgressRepository(),
+      userProfileRepo: new FakeUserProfileRepository(),
+      reviewRepo: new FakeReviewRepository(),
+      sessionSubmissionRepo: new FakeSessionSubmissionRepository(),
+    }
+    const profile = defaultUserProfile('user1', new Date('2026-01-01'))
+    await deps.userProfileRepo.saveUserProfile('user1', {
+      ...profile,
+      sessionAggregate: { ...emptySessionAggregate(), exp: 630 },
+    })
+    const result = {
+      accuracy: 100,
+      speedWpm: 20,
+      durationSeconds: 30,
+      startedAtMs: 0,
+      exercisesAttempted: 1,
+      acceptedKeystrokes: 2,
+      rejectedKeystrokes: 0,
+      mistakes: [],
+    }
+
+    const first = await completeLessonSession(
+      deps,
+      'user1',
+      'l1',
+      result,
+      'level-check',
+    )
+    // The adapter has already added the first submission to the aggregate.
+    await deps.userProfileRepo.saveUserProfile('user1', {
+      ...profile,
+      sessionAggregate: { ...emptySessionAggregate(), exp: 800 },
+    })
+    const retry = await completeLessonSession(
+      deps,
+      'user1',
+      'l1',
+      result,
+      'level-check',
+    )
+
+    expect(first.level).toBe(5)
+    expect(retry.level).toBe(5)
   })
 
   it('awards 15 EXP for an intentional replay of a completed lesson', async () => {
@@ -134,16 +222,23 @@ describe('completeLessonSession', () => {
       completedAt: new Date('2026-01-01'),
     })
 
-    const outcome = await completeLessonSession(deps, 'user1', 'l1', {
-      accuracy: 100,
-      speedWpm: 20,
-      durationSeconds: 30,
-      startedAtMs: new Date('2026-01-02').getTime(),
-      exercisesAttempted: 1,
-      acceptedKeystrokes: 2,
-      rejectedKeystrokes: 0,
-      mistakes: [],
-    }, 'replay-1', new Date('2026-01-02'))
+    const outcome = await completeLessonSession(
+      deps,
+      'user1',
+      'l1',
+      {
+        accuracy: 100,
+        speedWpm: 20,
+        durationSeconds: 30,
+        startedAtMs: new Date('2026-01-02').getTime(),
+        exercisesAttempted: 1,
+        acceptedKeystrokes: 2,
+        rejectedKeystrokes: 0,
+        mistakes: [],
+      },
+      'replay-1',
+      new Date('2026-01-02'),
+    )
 
     expect(outcome.expGained).toBe(15)
     expect(outcome.progress.status).toBe('completed')

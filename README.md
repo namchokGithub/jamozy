@@ -61,9 +61,12 @@ A lesson session plays all of its exercises once in a fresh shuffled order,
 then moves on to the next lesson (and unit) with a short notice, looping back
 to the first lesson after the last one. A lesson
 completes once every exercise has been typed at least once, across sessions
-and devices: the first completion grants accuracy-based EXP, and a full
-replay of a completed lesson grants 15 EXP. Home lessons create no review
-items. Every save runs in the background through a retrying local outbox.
+and devices: first completion grants difficulty-based EXP per exercise, with
+an additional bonus for a perfect exercise; a full replay awards each exercise
+by its difficulty. Home lessons create no review items. See
+[`docs/LEVELING.md`](docs/LEVELING.md), [[DEC-045]], and [[DEC-046]] for the
+reward amounts and bonus calculation. Every save runs in the background through a retrying
+local outbox.
 
 When no Home course is published, Home falls back to the Learning Path player
 ([[DEC-042]]). The Hero and learning-path cards remain below the player.
@@ -317,6 +320,35 @@ pnpm build
 pnpm test
 ```
 
+`pnpm build` first runs `pnpm content:export-home`, so it reads Firestore and
+needs the `VITE_FIREBASE_*` variables below (in `.env.local`, or in the CI
+build environment).
+
+### Home course content
+
+Home plays one course of type `home` from a static file instead of Firestore
+([[DEC-043]]). To change what Home shows:
+
+1. In Admin BO, set the course's **Course type** to **Home**, add its units,
+   lessons, and exercises, then publish the course, units, and lessons. Only
+   one Home course can be published.
+2. Export it to `public/content/home.json`:
+
+   ```bash
+   pnpm content:export-home
+   ```
+
+   `pnpm build` runs this automatically, so a deploy always ships the latest
+   published Home content. Run it by hand to see changes in `pnpm dev`.
+
+3. Redeploy. Learners see the new content after the next deploy.
+
+The export only reads published content and needs no service credential. With
+no published Home course it prints a warning, removes any old
+`home.json`, and Home falls back to the Learning Path player. It fails if more
+than one Home course is published or if an exercise has text the Korean
+keyboard cannot type. `public/content/home.json` is generated and git-ignored.
+
 ## Environment Variables
 
 ```md
@@ -392,6 +424,12 @@ verification checklist and post-MVP roadmap.
 ### Next / Post-MVP
 
 - Complete the Home player's manual verification.
+- Deploy the updated Firestore Rules (content delete denied) and manually verify
+  the Admin BO hardening pass.
+- Deploy `firestore.indexes.json` (new `order` DESC indexes for Units and
+  Lessons) before the Admin code that creates content with them.
+- Deploy the content-counter code, then run `pnpm content:backfill-counts`
+  ([[DEC-047]]).
 - Set up a Cloudflare Pages deployment pipeline and use Preview deployments
   for release checks.
 - Decide whether sound feedback ships or is deferred, then implement the
@@ -400,11 +438,10 @@ verification checklist and post-MVP roadmap.
 - Dedicated Lesson Result visual redesign
 - History, summaries, and analytics
 - Learning Modes: VocabularyProgress, JamoStats, Practice, and Daily Quest
-- Roll out per-step Jamo SVG rendering: it is built behind the
-  `VITE_JAMO_SVG_RENDERER` flag with 1,858 approved syllables (DEC-039).
-  First validate it in a Preview deployment, including mobile, resolve the
-  space-target policy, and raise lesson-vocabulary coverage before enabling it
-  for learners. See the
+- Per-step Jamo SVG rendering is enabled in Production through
+  `VITE_JAMO_SVG_RENDERER=1` with 1,858 approved syllables (DEC-039, DEC-044).
+  Check it on mobile and raise lesson-vocabulary coverage so fewer targets
+  fall back to Canvas. See the
   [Progress Tracker](docs/PROGRESS.md#dev-tooling-jamo-svg).
 - Account linking between authentication providers
 - Achievements, daily streaks, pronunciation audio, and additional curriculum
@@ -426,6 +463,22 @@ Deploy the restrictive Rules only after the migration count is verified. The
 owner must sign out and back in after the claim is granted. The scripts use
 `GOOGLE_APPLICATION_CREDENTIALS` from `.env.local`; do not place a service
 credential in `VITE_*` variables or commit it.
+
+Content is retired by archiving, never hard-deleted: the Rules deny delete on
+`courses`, `units`, and `lessons` ([[DEC-034]]). Deploy Rules changes with
+`firebase deploy --only firestore:rules`. Home course edits reach learners only
+after the next build and deploy ([[DEC-043]]).
+
+Content documents store descendant counts ([[DEC-047]]). After deploying the
+code that maintains them, backfill or repair them while nobody edits content:
+
+```bash
+pnpm content:backfill-counts -- --dry-run
+pnpm content:backfill-counts -- --write --after-dry-run
+```
+
+The dry-run prints each document it would change; re-run it after the write to
+confirm `0` changes.
 
 Run the Rules authorization suite with `pnpm test:rules`. It starts a local
 Firestore Emulator, never contacts the Firebase project, and requires the

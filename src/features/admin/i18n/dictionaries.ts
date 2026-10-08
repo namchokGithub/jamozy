@@ -49,6 +49,8 @@ export const en = {
   'action.moveItemDown': 'Move {name} down',
   'action.dragHandle': 'Drag to reorder',
   'action.close': 'Close',
+  'action.leave': 'Leave',
+  'action.stay': 'Stay',
 
   'confirm.publish.title': 'Publish this {kind}?',
   'confirm.archive.title': 'Archive this {kind}?',
@@ -57,6 +59,9 @@ export const en = {
     'This hides the content from learners without changing learner history.',
   'confirm.visibility.body':
     'This change will update content visibility for learners.',
+  'confirm.publishWithParents.body':
+    'Not published yet: {parents}. They will be published first, which also shows their other Published content to learners.',
+  'action.publishWithParents': 'Publish all',
 
   'dashboard.eyebrow': 'Owner workspace',
   'dashboard.title': 'Content management',
@@ -64,6 +69,11 @@ export const en = {
   'dashboard.statusFilter': 'Status',
   'dashboard.allStatuses': 'All statuses',
   'dashboard.totalCourses': 'Courses',
+  'count.units': 'Units',
+  'count.lessons': 'Lessons',
+  'count.exercises': 'Exercises',
+  'count.unitSummary': '{lessons} Lessons · {exercises} Exercises',
+  'count.lessonSummary': '{exercises} Exercises',
   'dashboard.search': 'Search',
   'dashboard.searchPlaceholder': 'Search by title or description',
   'dashboard.lastUpdated': 'Updated {date}',
@@ -100,6 +110,12 @@ export const en = {
   'lesson.exerciseTranslation': 'Translation',
   'lesson.exerciseMetadata': 'Learning metadata',
 
+  'draft.courseTitle': 'Untitled Course',
+  'draft.courseDescription': 'Describe this learning path.',
+  'draft.unitTitle': 'Untitled Unit',
+  'draft.unitDescription': 'Describe this Unit.',
+  'draft.lessonTitle': 'Untitled Lesson',
+
   'field.title': 'Title',
   'field.description': 'Description',
   'field.courseType': 'Course type',
@@ -129,12 +145,20 @@ export const en = {
   'feedback.courseRestored': 'Course restored.',
   'feedback.unitRestored': 'Unit restored.',
   'feedback.lessonRestored': 'Lesson restored.',
+  'feedback.unitRestoredAsDraft':
+    'Unit restored as Draft because its Course is not published.',
+  'feedback.lessonRestoredAsDraft':
+    'Lesson restored as Draft because its Unit or Course is not published.',
   'feedback.courseReordered': 'Course order updated.',
   'feedback.unitReordered': 'Unit order updated.',
   'feedback.lessonReordered': 'Lesson order updated.',
   'feedback.contentUpdated': 'Content updated.',
   'feedback.unsavedChanges': 'Unsaved changes',
   'feedback.unsavedChangesWarning': 'You have unsaved changes. Leave anyway?',
+  'feedback.saveBeforeStatusChange':
+    'Save your changes before changing status.',
+  'notice.homeDeploy':
+    'This is the Home course. Learners see changes here only after the next build and deploy.',
 
   'error.missingTarget': 'Missing content target.',
   'error.unknownTarget': 'Unknown content target.',
@@ -149,7 +173,13 @@ export const en = {
   'error.publishCourseFirst': 'Publish the parent Course first.',
   'error.publishUnitFirst': 'Publish the parent Unit first.',
   'error.exerciseRequired': 'Add at least one Exercise before publishing.',
+  'error.publishedExerciseRequired':
+    'A published Lesson needs at least one Exercise.',
   'error.oneHomeCourse': 'Only one published Home course is allowed.',
+  'error.duplicateExerciseId':
+    'Two Exercises share the same ID. Refresh and try again.',
+  'error.exerciseRemoved':
+    'Saved Exercises cannot be removed. Archive the Lesson to retire them.',
   'error.untypeableText':
     'Target text has characters the keyboard cannot type. Retype them with a Korean keyboard:',
   'error.fieldRequired': 'This field is required.',
@@ -216,6 +246,8 @@ export const th: Record<AdminMessageKey, string> = {
   'action.moveItemDown': 'เลื่อน {name} ลง',
   'action.dragHandle': 'ลากเพื่อจัดลำดับใหม่',
   'action.close': 'ปิด',
+  'action.leave': 'ออกจากหน้านี้',
+  'action.stay': 'อยู่ต่อ',
 
   'confirm.publish.title': 'เผยแพร่{kind}นี้?',
   'confirm.archive.title': 'เก็บถาวร{kind}นี้?',
@@ -224,6 +256,9 @@ export const th: Record<AdminMessageKey, string> = {
     'เนื้อหานี้จะถูกซ่อนจากผู้เรียน โดยไม่เปลี่ยนประวัติการเรียนของผู้เรียน',
   'confirm.visibility.body':
     'การเปลี่ยนแปลงนี้จะอัปเดตการมองเห็นเนื้อหาสำหรับผู้เรียน',
+  'confirm.publishWithParents.body':
+    'ยังไม่เผยแพร่: {parents} ระบบจะเผยแพร่รายการเหล่านี้ก่อน และเนื้อหาอื่นที่เผยแพร่แล้วภายใต้รายการเหล่านี้จะแสดงต่อผู้เรียนด้วย',
+  'action.publishWithParents': 'เผยแพร่ทั้งหมด',
 
   'dashboard.eyebrow': 'พื้นที่ทำงานของเจ้าของ',
   'dashboard.title': 'จัดการเนื้อหา',
@@ -231,6 +266,11 @@ export const th: Record<AdminMessageKey, string> = {
   'dashboard.statusFilter': 'สถานะ',
   'dashboard.allStatuses': 'ทุกสถานะ',
   'dashboard.totalCourses': 'คอร์สทั้งหมด',
+  'count.units': 'ยูนิตทั้งหมด',
+  'count.lessons': 'บทเรียนทั้งหมด',
+  'count.exercises': 'แบบฝึกหัดทั้งหมด',
+  'count.unitSummary': '{lessons} บทเรียน · {exercises} แบบฝึกหัด',
+  'count.lessonSummary': '{exercises} แบบฝึกหัด',
   'dashboard.search': 'ค้นหา',
   'dashboard.searchPlaceholder': 'ค้นหาจากชื่อหรือคำอธิบาย',
   'dashboard.lastUpdated': 'อัปเดตเมื่อ {date}',
@@ -266,6 +306,12 @@ export const th: Record<AdminMessageKey, string> = {
   'lesson.exerciseTranslation': 'คำแปล',
   'lesson.exerciseMetadata': 'ข้อมูลสำหรับการเรียนรู้',
 
+  'draft.courseTitle': 'คอร์สใหม่',
+  'draft.courseDescription': 'อธิบายเส้นทางการเรียนนี้',
+  'draft.unitTitle': 'ยูนิตใหม่',
+  'draft.unitDescription': 'อธิบายยูนิตนี้',
+  'draft.lessonTitle': 'บทเรียนใหม่',
+
   'field.title': 'ชื่อ',
   'field.description': 'คำอธิบาย',
   'field.courseType': 'ประเภทคอร์ส',
@@ -295,11 +341,18 @@ export const th: Record<AdminMessageKey, string> = {
   'feedback.courseRestored': 'กู้คืนคอร์สแล้ว',
   'feedback.unitRestored': 'กู้คืนยูนิตแล้ว',
   'feedback.lessonRestored': 'กู้คืนบทเรียนแล้ว',
+  'feedback.unitRestoredAsDraft':
+    'กู้คืนยูนิตเป็นฉบับร่าง เพราะคอร์สยังไม่เผยแพร่',
+  'feedback.lessonRestoredAsDraft':
+    'กู้คืนบทเรียนเป็นฉบับร่าง เพราะยูนิตหรือคอร์สยังไม่เผยแพร่',
   'feedback.courseReordered': 'อัปเดตลำดับคอร์สแล้ว',
   'feedback.unitReordered': 'อัปเดตลำดับยูนิตแล้ว',
   'feedback.lessonReordered': 'อัปเดตลำดับบทเรียนแล้ว',
   'feedback.contentUpdated': 'อัปเดตเนื้อหาแล้ว',
   'feedback.unsavedChanges': 'มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก',
+  'feedback.saveBeforeStatusChange': 'บันทึกการเปลี่ยนแปลงก่อนเปลี่ยนสถานะ',
+  'notice.homeDeploy':
+    'นี่คือคอร์สหน้า Home ผู้เรียนจะเห็นการเปลี่ยนแปลงหลังจาก build และ deploy ครั้งถัดไปเท่านั้น',
   'feedback.unsavedChangesWarning':
     'มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก ต้องการออกจากหน้านี้หรือไม่?',
 
@@ -316,7 +369,13 @@ export const th: Record<AdminMessageKey, string> = {
   'error.publishCourseFirst': 'เผยแพร่คอร์สระดับบนก่อน',
   'error.publishUnitFirst': 'เผยแพร่ยูนิตระดับบนก่อน',
   'error.exerciseRequired': 'เพิ่มแบบฝึกหัดอย่างน้อยหนึ่งข้อก่อนเผยแพร่',
+  'error.publishedExerciseRequired':
+    'บทเรียนที่เผยแพร่แล้วต้องมีแบบฝึกหัดอย่างน้อยหนึ่งข้อ',
   'error.oneHomeCourse': 'เผยแพร่คอร์สหน้า Home ได้เพียงคอร์สเดียว',
+  'error.duplicateExerciseId':
+    'มีแบบฝึกหัดที่ใช้ ID ซ้ำกัน รีเฟรชแล้วลองอีกครั้ง',
+  'error.exerciseRemoved':
+    'ลบแบบฝึกหัดที่บันทึกแล้วไม่ได้ ให้เก็บถาวรบทเรียนแทนหากต้องการเลิกใช้',
   'error.untypeableText':
     'ข้อความเป้าหมายมีตัวอักษรที่พิมพ์ด้วยแป้นไม่ได้ ให้พิมพ์ใหม่ด้วยแป้นภาษาเกาหลี:',
   'error.fieldRequired': 'กรุณากรอกช่องนี้',

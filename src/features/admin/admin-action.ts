@@ -4,17 +4,30 @@ import {
   archiveCourse,
   archiveLesson,
   archiveUnit,
+  createDraftCourse,
+  createDraftLesson,
+  createDraftUnit,
   publishCourse,
   publishLesson,
+  publishLessonWithParents,
   publishUnit,
+  publishUnitWithParents,
   restoreCourse,
   restoreLesson,
   restoreUnit,
   saveCourse,
+  saveCourseOrder,
   saveLesson,
+  saveLessonOrder,
   saveUnit,
+  saveUnitOrder,
   type AdminCommandResult,
 } from '../../application/admin-content'
+import {
+  getAdminCourse,
+  getAdminLesson,
+  getAdminUnit,
+} from '../../application/get-admin-content'
 import type { Lesson, LessonExercise } from '../../domain/models/lesson'
 import type { AdminMessageKey } from './i18n/dictionaries'
 
@@ -26,32 +39,12 @@ export type AdminActionData = {
   createdId?: string
 }
 
-const commandErrorKeys: Record<string, AdminMessageKey> = {
-  'This field is required.': 'error.fieldRequired',
-  'Please check the form.': 'error.checkForm',
-  'Parent Course was not found.': 'error.parentCourseNotFound',
-  'Parent Unit was not found.': 'error.parentUnitNotFound',
-  'Publish the parent Course first.': 'error.publishCourseFirst',
-  'Publish the parent Unit first.': 'error.publishUnitFirst',
-  'Add at least one Exercise before publishing.': 'error.exerciseRequired',
-  'Only one published Home course is allowed.': 'error.oneHomeCourse',
-  'Target text has characters the keyboard cannot type.':
-    'error.untypeableText',
-}
-
-function commandError(error: string): AdminActionData {
-  const key = commandErrorKeys[error]
-  return key
-    ? { error: key }
-    : { error: 'error.actionFailed', errorDetail: error }
-}
-
 function commandResult(
   result: AdminCommandResult,
   message: AdminMessageKey,
 ): AdminActionData {
   if (result.ok) return { message }
-  const data = commandError(result.error)
+  const data: AdminActionData = { error: `error.${result.error}` }
   return result.detail ? { ...data, errorDetail: result.detail } : data
 }
 
@@ -80,46 +73,42 @@ export function createAdminAction(repo: AdminContentRepository) {
     const intent = text(form, 'intent')
     try {
       if (intent === 'create-course') {
-        const created = await repo.createCourse({
-          title: 'Untitled Course',
-          description: 'Describe this learning path.',
+        const created = await createDraftCourse(repo, {
+          title: text(form, 'title'),
+          description: text(form, 'description'),
         })
         return { message: 'feedback.courseCreated', createdId: created.id }
       }
       if (intent === 'create-unit' && params.courseId) {
-        const created = await repo.createUnit({
-          courseId: params.courseId,
-          title: 'Untitled Unit',
-          description: 'Describe this Unit.',
+        const created = await createDraftUnit(repo, params.courseId, {
+          title: text(form, 'title'),
+          description: text(form, 'description'),
         })
         return { message: 'feedback.unitCreated', createdId: created.id }
       }
       if (intent === 'create-lesson' && params.unitId) {
-        const created = await repo.createLesson({
-          unitId: params.unitId,
-          title: 'Untitled Lesson',
-          type: 'word',
+        const created = await createDraftLesson(repo, params.unitId, {
+          title: text(form, 'title'),
+          type: text(form, 'type'),
         })
         return { message: 'feedback.lessonCreated', createdId: created.id }
       }
       if (intent === 'save-course-order') {
         const order = parseOrder(form.get('order'))
         if (!order) return { error: 'error.checkForm' }
-        await repo.saveCourseOrder(order)
+        await saveCourseOrder(repo, order)
         return { message: 'feedback.courseReordered' }
       }
       if (intent === 'save-unit-order' && params.courseId) {
         const order = parseOrder(form.get('order'))
         if (!order) return { error: 'error.checkForm' }
-        for (const [index, id] of order.entries())
-          await repo.moveUnitToIndex(id, index)
+        await saveUnitOrder(repo, params.courseId, order)
         return { message: 'feedback.unitReordered' }
       }
       if (intent === 'save-lesson-order' && params.unitId) {
         const order = parseOrder(form.get('order'))
         if (!order) return { error: 'error.checkForm' }
-        for (const [index, id] of order.entries())
-          await repo.moveLessonToIndex(id, index)
+        await saveLessonOrder(repo, params.unitId, order)
         return { message: 'feedback.lessonReordered' }
       }
       const id = text(form, 'id')
@@ -144,8 +133,15 @@ async function courseAction(
   id: string,
   form: FormData,
 ): Promise<AdminActionData> {
-  const course = await repo.getCourseById(id)
+  const course = await getAdminCourse(repo, id)
   if (!course) return { error: 'error.courseNotFound' }
+  if (intent === 'rename') {
+    const result = await saveCourse(repo, {
+      ...course,
+      title: text(form, 'title'),
+    })
+    return commandResult(result, 'feedback.changesSaved')
+  }
   if (intent === 'save') {
     const result = await saveCourse(repo, {
       ...course,
@@ -180,8 +176,12 @@ async function unitAction(
   id: string,
   form: FormData,
 ): Promise<AdminActionData> {
-  const unit = await repo.getUnitById(id)
+  const unit = await getAdminUnit(repo, id)
   if (!unit) return { error: 'error.unitNotFound' }
+  if (intent === 'rename') {
+    const result = await saveUnit(repo, { ...unit, title: text(form, 'title') })
+    return commandResult(result, 'feedback.changesSaved')
+  }
   if (intent === 'save') {
     const result = await saveUnit(repo, {
       ...unit,
@@ -194,25 +194,24 @@ async function unitAction(
     const result = await publishUnit(repo, unit)
     return commandResult(result, 'feedback.unitPublished')
   }
+  if (intent === 'publish-with-parents') {
+    const result = await publishUnitWithParents(repo, unit)
+    return commandResult(result, 'feedback.unitPublished')
+  }
   if (intent === 'archive') {
     await archiveUnit(repo, unit)
     return { message: 'feedback.unitArchived' }
   }
   if (intent === 'restore') {
-    await restoreUnit(repo, unit)
-    return { message: 'feedback.unitRestored' }
-  }
-  if (intent === 'move-up' || intent === 'move-down') {
-    await repo.moveUnit(id, intent === 'move-up' ? 'up' : 'down')
-    return { message: 'feedback.unitReordered' }
-  }
-  if (intent === 'move') {
-    const targetIndex = text(form, 'targetIndex')
-    const index = Number(targetIndex)
-    if (!targetIndex || !Number.isInteger(index) || index < 0)
-      return { error: 'error.checkForm' }
-    await repo.moveUnitToIndex(id, index)
-    return { message: 'feedback.unitReordered' }
+    const result = await restoreUnit(repo, unit)
+    return commandResult(
+      result,
+      result.ok &&
+        result.status === 'draft' &&
+        unit.archivedFromStatus === 'published'
+        ? 'feedback.unitRestoredAsDraft'
+        : 'feedback.unitRestored',
+    )
   }
   return { error: 'error.unknownUnitAction' }
 }
@@ -233,8 +232,15 @@ async function lessonAction(
   id: string,
   form: FormData,
 ): Promise<AdminActionData> {
-  const lesson = await repo.getLessonById(id)
+  const lesson = await getAdminLesson(repo, id)
   if (!lesson) return { error: 'error.lessonNotFound' }
+  if (intent === 'rename') {
+    const result = await saveLesson(repo, {
+      ...lesson,
+      title: text(form, 'title'),
+    })
+    return commandResult(result, 'feedback.changesSaved')
+  }
   if (intent === 'save') {
     const exercises = exercisesFromForm(form)
     if (!exercises) return { error: 'error.checkForm' }
@@ -251,25 +257,24 @@ async function lessonAction(
     const result = await publishLesson(repo, lesson)
     return commandResult(result, 'feedback.lessonPublished')
   }
+  if (intent === 'publish-with-parents') {
+    const result = await publishLessonWithParents(repo, lesson)
+    return commandResult(result, 'feedback.lessonPublished')
+  }
   if (intent === 'archive') {
     await archiveLesson(repo, lesson)
     return { message: 'feedback.lessonArchived' }
   }
   if (intent === 'restore') {
-    await restoreLesson(repo, lesson)
-    return { message: 'feedback.lessonRestored' }
-  }
-  if (intent === 'move-up' || intent === 'move-down') {
-    await repo.moveLesson(id, intent === 'move-up' ? 'up' : 'down')
-    return { message: 'feedback.lessonReordered' }
-  }
-  if (intent === 'move') {
-    const targetIndex = text(form, 'targetIndex')
-    const index = Number(targetIndex)
-    if (!targetIndex || !Number.isInteger(index) || index < 0)
-      return { error: 'error.checkForm' }
-    await repo.moveLessonToIndex(id, index)
-    return { message: 'feedback.lessonReordered' }
+    const result = await restoreLesson(repo, lesson)
+    return commandResult(
+      result,
+      result.ok &&
+        result.status === 'draft' &&
+        lesson.archivedFromStatus === 'published'
+        ? 'feedback.lessonRestoredAsDraft'
+        : 'feedback.lessonRestored',
+    )
   }
   return { error: 'error.unknownLessonAction' }
 }

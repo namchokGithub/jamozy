@@ -1,7 +1,15 @@
-import { useCallback, useEffect } from 'react'
-import { useBeforeUnload, useBlocker } from 'react-router'
+import { useCallback } from 'react'
+import { useBeforeUnload, useBlocker, type Blocker } from 'react-router'
 
-export function useAdminUnsavedChanges(isDirty: boolean, message: string) {
+/**
+ * Guards unsaved edits. Tab close and reload keep the browser's native prompt
+ * (browsers allow no custom dialog there); in-app navigation is blocked and
+ * the returned blocker is confirmed through `AdminUnsavedChangesDialog`.
+ */
+export function useAdminUnsavedChanges(
+  isDirty: boolean,
+  message: string,
+): Blocker {
   useBeforeUnload(
     useCallback(
       (event) => {
@@ -12,10 +20,5 @@ export function useAdminUnsavedChanges(isDirty: boolean, message: string) {
       [isDirty, message],
     ),
   )
-  const blocker = useBlocker(isDirty)
-  useEffect(() => {
-    if (blocker.state !== 'blocked') return
-    if (window.confirm(message)) blocker.proceed()
-    else blocker.reset()
-  }, [blocker, message])
+  return useBlocker(isDirty)
 }

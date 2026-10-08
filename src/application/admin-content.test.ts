@@ -1,9 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import {
   archiveCourse,
+  createDraftCourse,
+  createDraftLesson,
+  createDraftUnit,
   publishCourse,
   publishLesson,
+  publishLessonWithParents,
+  publishUnitWithParents,
   restoreCourse,
+  restoreLesson,
+  restoreUnit,
   saveCourse,
   saveLesson,
 } from './admin-content'
@@ -60,7 +67,7 @@ function lessonSaveRequest(fields: Record<string, string>): Request {
 }
 
 describe('admin content lifecycle', () => {
-  it('does not replace an empty lesson exercise list with the saved exercises', async () => {
+  it('blocks removing a saved Exercise, even from a Draft Lesson (DEC-034)', async () => {
     const existingExercise = {
       id: 'exercise',
       targetText: '가',
@@ -88,8 +95,53 @@ describe('admin content lifecycle', () => {
       params: {},
     } as never)
 
-    expect(result).toEqual({ message: 'feedback.changesSaved' })
+    expect(result).toEqual({ error: 'error.exerciseRemoved' })
+    expect((await repo.getLessonById('lesson'))?.exercises).toEqual([
+      existingExercise,
+    ])
+  })
+
+  it('blocks saving two Exercises with the same ID', async () => {
+    const exercise = {
+      id: 'exercise',
+      targetText: '가',
+      romanization: null,
+      meaningTh: '',
+      meaningEn: '',
+      difficulty: 'easy' as const,
+      hint: null,
+    }
+    const repo = new FakeAdminContentRepository([course], [unit], [lesson([])])
+
+    await expect(
+      saveLesson(repo, lesson([exercise, { ...exercise, targetText: '나' }])),
+    ).resolves.toEqual({ ok: false, error: 'duplicateExerciseId' })
     expect((await repo.getLessonById('lesson'))?.exercises).toEqual([])
+  })
+
+  it('saves added and reordered Exercises that keep every saved ID', async () => {
+    const first = {
+      id: 'first',
+      targetText: '가',
+      romanization: null,
+      meaningTh: '',
+      meaningEn: '',
+      difficulty: 'easy' as const,
+      hint: null,
+    }
+    const added = { ...first, id: 'added', targetText: '나' }
+    const repo = new FakeAdminContentRepository(
+      [course],
+      [unit],
+      [lesson([first])],
+    )
+
+    await expect(saveLesson(repo, lesson([added, first]))).resolves.toEqual({
+      ok: true,
+    })
+    expect(
+      (await repo.getLessonById('lesson'))?.exercises.map((item) => item.id),
+    ).toEqual(['added', 'first'])
   })
 
   it('rejects an empty lesson title instead of retaining the saved title', async () => {
@@ -145,6 +197,34 @@ describe('admin content lifecycle', () => {
     ])
   })
 
+  it('saves only known Exercise fields from the editor form', async () => {
+    const repo = new FakeAdminContentRepository([course], [unit], [lesson([])])
+    const exercise = {
+      id: 'exercise',
+      targetText: '가',
+      romanization: null,
+      meaningTh: '',
+      meaningEn: '',
+      difficulty: 'easy',
+      hint: null,
+    }
+
+    const result = await createAdminAction(repo)({
+      request: lessonSaveRequest({
+        intent: 'save',
+        kind: 'lesson',
+        id: 'lesson',
+        title: 'Lesson',
+        type: 'word',
+        exercises: JSON.stringify([{ ...exercise, unexpected: 'field' }]),
+      }),
+      params: {},
+    } as never)
+
+    expect(result).toEqual({ message: 'feedback.changesSaved' })
+    expect((await repo.getLessonById('lesson'))?.exercises).toEqual([exercise])
+  })
+
   it('archives a lesson without requiring editor form fields', async () => {
     const repo = new FakeAdminContentRepository([course], [unit], [lesson([])])
 
@@ -165,9 +245,43 @@ describe('admin content lifecycle', () => {
     const repo = new FakeAdminContentRepository([course], [unit], [lesson([])])
     await expect(publishLesson(repo, lesson([]))).resolves.toEqual({
       ok: false,
-      error: 'Add at least one Exercise before publishing.',
+      error: 'exerciseRequired',
     })
     expect((await repo.getLessonById('lesson'))?.status).toBe('draft')
+  })
+
+  it('blocks saving a published Lesson without an Exercise', async () => {
+    const existingExercise = {
+      id: 'exercise',
+      targetText: '가',
+      romanization: null,
+      meaningTh: '',
+      meaningEn: '',
+      difficulty: 'easy' as const,
+      hint: null,
+    }
+    const repo = new FakeAdminContentRepository(
+      [course],
+      [unit],
+      [lesson([existingExercise], 'published')],
+    )
+
+    const result = await createAdminAction(repo)({
+      request: lessonSaveRequest({
+        intent: 'save',
+        kind: 'lesson',
+        id: 'lesson',
+        title: 'Lesson',
+        type: 'word',
+        exercises: '[]',
+      }),
+      params: {},
+    } as never)
+
+    expect(result).toEqual({ error: 'error.publishedExerciseRequired' })
+    expect((await repo.getLessonById('lesson'))?.exercises).toEqual([
+      existingExercise,
+    ])
   })
 
   describe('untypeable target text', () => {
@@ -195,7 +309,7 @@ describe('admin content lifecycle', () => {
 
       expect(result).toEqual({
         ok: false,
-        error: 'Target text has characters the keyboard cannot type.',
+        error: 'untypeableText',
         detail: 'Exercise 2: "a" U+0061, "\u1140" U+1140',
       })
       expect((await repo.getLessonById('lesson'))?.exercises).toEqual([])
@@ -207,7 +321,7 @@ describe('admin content lifecycle', () => {
 
       expect(await publishLesson(repo, bad)).toEqual({
         ok: false,
-        error: 'Target text has characters the keyboard cannot type.',
+        error: 'untypeableText',
         detail: 'Exercise 1: "a" U+0061, "b" U+0062',
       })
       expect((await repo.getLessonById('lesson'))?.status).toBe('draft')
@@ -315,7 +429,7 @@ describe('admin content lifecycle', () => {
     )
     await expect(
       publishLesson(repo, (await repo.getLessonById('lesson'))!),
-    ).resolves.toEqual({ ok: false, error: 'Publish the parent Course first.' })
+    ).resolves.toEqual({ ok: false, error: 'publishCourseFirst' })
   })
 
   it('restores an archived draft Course as draft', async () => {
@@ -324,6 +438,210 @@ describe('admin content lifecycle', () => {
     await archiveCourse(repo, draft)
     await restoreCourse(repo, (await repo.getCourseById('course'))!)
     expect((await repo.getCourseById('course'))?.status).toBe('draft')
+  })
+
+  describe('publishing with unpublished parents', () => {
+    const exercise = {
+      id: 'exercise',
+      targetText: '가',
+      romanization: null,
+      meaningTh: '',
+      meaningEn: '',
+      difficulty: 'easy' as const,
+      hint: null,
+    }
+    const draftCourse = { ...course, status: 'draft' as const }
+    const draftUnit = { ...unit, status: 'draft' as const }
+    const archivedCourse = {
+      ...course,
+      status: 'archived' as const,
+      archivedFromStatus: 'draft' as const,
+    }
+
+    it('publishes the Course, Unit, and Lesson top-down', async () => {
+      const repo = new FakeAdminContentRepository(
+        [draftCourse],
+        [draftUnit],
+        [lesson([exercise])],
+      )
+
+      const result = await createAdminAction(repo)({
+        request: lessonSaveRequest({
+          intent: 'publish-with-parents',
+          kind: 'lesson',
+          id: 'lesson',
+        }),
+        params: {},
+      } as never)
+
+      expect(result).toEqual({ message: 'feedback.lessonPublished' })
+      expect((await repo.getCourseById('course'))?.status).toBe('published')
+      expect((await repo.getUnitById('unit'))?.status).toBe('published')
+      expect((await repo.getLessonById('lesson'))?.status).toBe('published')
+    })
+
+    it('writes the Course, Unit, and Lesson in one atomic batch', async () => {
+      const repo = new FakeAdminContentRepository(
+        [draftCourse],
+        [draftUnit],
+        [lesson([exercise])],
+      )
+      const singleWrite = async () => {
+        throw new Error('Publish must not write documents one by one.')
+      }
+      repo.saveCourse = singleWrite
+      repo.saveUnit = singleWrite
+      repo.saveLesson = singleWrite
+
+      await expect(
+        publishLessonWithParents(repo, lesson([exercise])),
+      ).resolves.toEqual({ ok: true })
+      expect((await repo.getCourseById('course'))?.status).toBe('published')
+      expect((await repo.getUnitById('unit'))?.status).toBe('published')
+      expect((await repo.getLessonById('lesson'))?.status).toBe('published')
+    })
+
+    it('publishes an archived parent Course and clears its archive record', async () => {
+      const repo = new FakeAdminContentRepository([archivedCourse], [draftUnit])
+
+      await expect(publishUnitWithParents(repo, draftUnit)).resolves.toEqual({
+        ok: true,
+      })
+
+      const published = await repo.getCourseById('course')
+      expect(published?.status).toBe('published')
+      expect(published?.archivedFromStatus).toBeUndefined()
+      expect((await repo.getUnitById('unit'))?.status).toBe('published')
+    })
+
+    it('publishes no parent when the Lesson cannot be published', async () => {
+      const repo = new FakeAdminContentRepository(
+        [draftCourse],
+        [draftUnit],
+        [lesson([])],
+      )
+
+      await expect(publishLessonWithParents(repo, lesson([]))).resolves.toEqual(
+        {
+          ok: false,
+          error: 'exerciseRequired',
+        },
+      )
+      expect((await repo.getCourseById('course'))?.status).toBe('draft')
+      expect((await repo.getUnitById('unit'))?.status).toBe('draft')
+    })
+
+    it('publishes nothing when the parent Home course conflicts', async () => {
+      const repo = new FakeAdminContentRepository(
+        [
+          { ...course, id: 'home', type: 'home' },
+          { ...draftCourse, type: 'home' },
+        ],
+        [draftUnit],
+      )
+
+      await expect(publishUnitWithParents(repo, draftUnit)).resolves.toEqual({
+        ok: false,
+        error: 'oneHomeCourse',
+      })
+      expect((await repo.getCourseById('course'))?.status).toBe('draft')
+      expect((await repo.getUnitById('unit'))?.status).toBe('draft')
+    })
+  })
+
+  describe('restoring an archived Published Unit or Lesson', () => {
+    const exercise = {
+      id: 'exercise',
+      targetText: '가',
+      romanization: null,
+      meaningTh: '',
+      meaningEn: '',
+      difficulty: 'easy' as const,
+      hint: null,
+    }
+    const archived = <T extends Unit | Lesson>(item: T): T => ({
+      ...item,
+      status: 'archived',
+      archivedFromStatus: 'published',
+    })
+    const draftCourse = { ...course, status: 'draft' as const }
+    const draftUnit = { ...unit, status: 'draft' as const }
+
+    it('restores a Unit as Published below a Published Course', async () => {
+      const repo = new FakeAdminContentRepository([course], [archived(unit)])
+      await expect(
+        restoreUnit(repo, (await repo.getUnitById('unit'))!),
+      ).resolves.toEqual({ ok: true, status: 'published' })
+      expect((await repo.getUnitById('unit'))?.status).toBe('published')
+    })
+
+    it('restores a Unit as Draft below a non-Published Course', async () => {
+      const repo = new FakeAdminContentRepository(
+        [draftCourse],
+        [archived(unit)],
+      )
+
+      const result = await createAdminAction(repo)({
+        request: lessonSaveRequest({
+          intent: 'restore',
+          kind: 'unit',
+          id: 'unit',
+        }),
+        params: {},
+      } as never)
+
+      expect(result).toEqual({ message: 'feedback.unitRestoredAsDraft' })
+      const restored = await repo.getUnitById('unit')
+      expect(restored?.status).toBe('draft')
+      expect(restored?.archivedFromStatus).toBeUndefined()
+    })
+
+    it('restores a Lesson as Draft below a non-Published Unit', async () => {
+      const repo = new FakeAdminContentRepository(
+        [course],
+        [draftUnit],
+        [archived(lesson([]))],
+      )
+
+      const result = await createAdminAction(repo)({
+        request: lessonSaveRequest({
+          intent: 'restore',
+          kind: 'lesson',
+          id: 'lesson',
+        }),
+        params: {},
+      } as never)
+
+      expect(result).toEqual({ message: 'feedback.lessonRestoredAsDraft' })
+      expect((await repo.getLessonById('lesson'))?.status).toBe('draft')
+    })
+
+    it('restores a valid Lesson as Published below Published parents', async () => {
+      const repo = new FakeAdminContentRepository(
+        [course],
+        [unit],
+        [archived(lesson([exercise]))],
+      )
+      await expect(
+        restoreLesson(repo, (await repo.getLessonById('lesson'))!),
+      ).resolves.toEqual({ ok: true, status: 'published' })
+      expect((await repo.getLessonById('lesson'))?.status).toBe('published')
+    })
+
+    it('blocks restoring a Lesson as Published without an Exercise', async () => {
+      const repo = new FakeAdminContentRepository(
+        [course],
+        [unit],
+        [archived(lesson([]))],
+      )
+      await expect(
+        restoreLesson(repo, (await repo.getLessonById('lesson'))!),
+      ).resolves.toEqual({
+        ok: false,
+        error: 'exerciseRequired',
+      })
+      expect((await repo.getLessonById('lesson'))?.status).toBe('archived')
+    })
   })
 
   describe('single published Home course (DEC-043)', () => {
@@ -347,7 +665,7 @@ describe('admin content lifecycle', () => {
 
       expect(result).toEqual({
         ok: false,
-        error: 'Only one published Home course is allowed.',
+        error: 'oneHomeCourse',
       })
       expect((await repo.getCourseById('home-2'))?.status).toBe('draft')
     })
@@ -402,7 +720,202 @@ describe('admin content lifecycle', () => {
         ...course,
         type: 'quest' as never,
       })
-      expect(result.ok).toBe(false)
+      expect(result).toEqual({ ok: false, error: 'checkForm' })
+    })
+  })
+})
+
+describe('admin content order', () => {
+  const units = (...ids: string[]): Unit[] =>
+    ids.map((id, order) => ({ ...unit, id, order }))
+  const lessons = (...ids: string[]): Lesson[] =>
+    ids.map((id, order) => ({ ...lesson([]), id, order }))
+  const orderRequest = (intent: string, order: string[]) =>
+    lessonSaveRequest({ intent, order: JSON.stringify(order) })
+  const orderOf = (items: { id: string }[]) => items.map((item) => item.id)
+
+  it('saves a whole Unit order for its Course', async () => {
+    const repo = new FakeAdminContentRepository(
+      [course],
+      [...units('a', 'b', 'c'), { ...unit, id: 'other', courseId: 'x' }],
+    )
+
+    const result = await createAdminAction(repo)({
+      request: orderRequest('save-unit-order', ['c', 'a', 'b']),
+      params: { courseId: 'course' },
+    } as never)
+
+    expect(result).toEqual({ message: 'feedback.unitReordered' })
+    expect(orderOf(await repo.getUnitsByCourseId('course'))).toEqual([
+      'c',
+      'a',
+      'b',
+    ])
+  })
+
+  it('saves a whole Lesson order for its Unit', async () => {
+    const repo = new FakeAdminContentRepository(
+      [course],
+      [unit],
+      lessons('a', 'b', 'c'),
+    )
+
+    const result = await createAdminAction(repo)({
+      request: orderRequest('save-lesson-order', ['b', 'c', 'a']),
+      params: { unitId: 'unit' },
+    } as never)
+
+    expect(result).toEqual({ message: 'feedback.lessonReordered' })
+    expect(orderOf(await repo.getLessonsByUnitId('unit'))).toEqual([
+      'b',
+      'c',
+      'a',
+    ])
+  })
+
+  it.each([
+    ['is missing a sibling', ['b', 'a']],
+    ['repeats a sibling', ['a', 'a', 'b']],
+    ['names an item from another parent', ['a', 'b', 'other']],
+  ])(
+    'rejects a Unit order that %s and keeps the saved order',
+    async (_case, order) => {
+      const repo = new FakeAdminContentRepository(
+        [course],
+        [...units('a', 'b', 'c'), { ...unit, id: 'other', courseId: 'x' }],
+      )
+
+      const result = await createAdminAction(repo)({
+        request: orderRequest('save-unit-order', order),
+        params: { courseId: 'course' },
+      } as never)
+
+      expect(result).toEqual({
+        error: 'error.actionFailed',
+        errorDetail: 'Content order changed. Refresh and try again.',
+      })
+      expect(orderOf(await repo.getUnitsByCourseId('course'))).toEqual([
+        'a',
+        'b',
+        'c',
+      ])
+    },
+  )
+})
+
+describe('creating admin content', () => {
+  it('creates a Draft Course, Unit, and Lesson with placeholder text', async () => {
+    const repo = new FakeAdminContentRepository()
+
+    const createdCourse = await createDraftCourse(repo)
+    const createdUnit = await createDraftUnit(repo, createdCourse.id)
+    const createdLesson = await createDraftLesson(repo, createdUnit.id)
+
+    expect(createdCourse).toMatchObject({
+      title: 'Untitled Course',
+      description: 'Describe this learning path.',
+      status: 'draft',
+    })
+    expect(createdUnit).toMatchObject({
+      courseId: createdCourse.id,
+      title: 'Untitled Unit',
+      description: 'Describe this Unit.',
+      status: 'draft',
+    })
+    expect(createdLesson).toMatchObject({
+      unitId: createdUnit.id,
+      title: 'Untitled Lesson',
+      type: 'word',
+      status: 'draft',
+    })
+  })
+})
+
+describe('creating admin content updates parent counts', () => {
+  it('counts a new Unit on its Course and a new Lesson on its Unit and Course', async () => {
+    const repo = new FakeAdminContentRepository()
+    const createdCourse = await createDraftCourse(repo)
+    const createdUnit = await createDraftUnit(repo, createdCourse.id)
+    await createDraftLesson(repo, createdUnit.id)
+    await createDraftLesson(repo, createdUnit.id)
+
+    expect(await repo.getCourseById(createdCourse.id)).toMatchObject({
+      unitCount: 1,
+      lessonCount: 2,
+      exerciseCount: 0,
+    })
+    expect(await repo.getUnitById(createdUnit.id)).toMatchObject({
+      lessonCount: 2,
+      exerciseCount: 0,
+    })
+  })
+})
+
+describe('saving Exercises updates parent counts', () => {
+  it('adds new Exercises to the Unit and Course counts', async () => {
+    const first = {
+      id: 'first',
+      targetText: '가',
+      romanization: null,
+      meaningTh: '',
+      meaningEn: '',
+      difficulty: 'easy' as const,
+      hint: null,
+    }
+    const repo = new FakeAdminContentRepository(
+      [{ ...course, exerciseCount: 1 }],
+      [{ ...unit, exerciseCount: 1 }],
+      [{ ...lesson([first]), exerciseCount: 1 }],
+    )
+
+    await expect(
+      saveLesson(repo, {
+        ...lesson([first, { ...first, id: 'second', targetText: '나' }]),
+        order: 9,
+      }),
+    ).resolves.toEqual({ ok: true })
+
+    expect((await repo.getLessonById('lesson'))?.exerciseCount).toBe(2)
+    expect((await repo.getLessonById('lesson'))?.order).toBe(0)
+    expect((await repo.getUnitById('unit'))?.exerciseCount).toBe(2)
+    expect((await repo.getCourseById('course'))?.exerciseCount).toBe(2)
+  })
+})
+
+describe('creating admin content in the editor language', () => {
+  it('stores the placeholder text the editor sends', async () => {
+    const repo = new FakeAdminContentRepository()
+
+    const createdCourse = await createDraftCourse(repo, {
+      title: 'คอร์สใหม่',
+      description: 'อธิบายเส้นทางการเรียนนี้',
+    })
+    const createdUnit = await createDraftUnit(repo, createdCourse.id, {
+      title: 'ยูนิตใหม่',
+      description: 'อธิบายยูนิตนี้',
+    })
+    const createdLesson = await createDraftLesson(repo, createdUnit.id, {
+      title: 'บทเรียนใหม่',
+    })
+
+    expect(createdCourse).toMatchObject({
+      title: 'คอร์สใหม่',
+      description: 'อธิบายเส้นทางการเรียนนี้',
+    })
+    expect(createdUnit).toMatchObject({
+      title: 'ยูนิตใหม่',
+      description: 'อธิบายยูนิตนี้',
+    })
+    expect(createdLesson).toMatchObject({ title: 'บทเรียนใหม่' })
+  })
+
+  it('falls back to English placeholders for blank text', async () => {
+    const repo = new FakeAdminContentRepository()
+    await expect(
+      createDraftCourse(repo, { title: '  ', description: '' }),
+    ).resolves.toMatchObject({
+      title: 'Untitled Course',
+      description: 'Describe this learning path.',
     })
   })
 })
