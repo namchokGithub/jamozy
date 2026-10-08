@@ -425,38 +425,30 @@ export class FirebaseAdminContentRepository implements AdminContentRepository {
     return typeof last === 'number' ? last + 1 : 0
   }
 
+  // One sibling query (N reads), then one batch. The order must name exactly
+  // the current siblings; it does not detect a reorder made elsewhere with the
+  // same siblings, which single-owner editing makes acceptable.
   private async saveOrder(
     collectionName: 'courses' | 'units' | 'lessons',
-    siblings: { id: string; order: number }[],
+    siblings: { id: string }[],
     ids: string[],
   ): Promise<void> {
-    const currentById = new Map(siblings.map((item) => [item.id, item]))
+    const siblingIds = new Set(siblings.map((item) => item.id))
     if (
       ids.length !== siblings.length ||
       new Set(ids).size !== ids.length ||
-      ids.some((id) => !currentById.has(id))
+      ids.some((id) => !siblingIds.has(id))
     ) {
       throw new Error(ORDER_CHANGED)
     }
-    await runTransaction(this.firestore, async (transaction) => {
-      const references = ids.map((id) =>
-        doc(this.firestore, collectionName, id),
-      )
-      const snapshots = await Promise.all(
-        references.map((reference) => transaction.get(reference)),
-      )
-      if (
-        snapshots.some(
-          (snapshot, index) =>
-            !snapshot.exists() ||
-            snapshot.data().order !== currentById.get(ids[index])?.order,
-        )
-      ) {
-        throw new Error(ORDER_CHANGED)
-      }
-      references.forEach((reference, order) => {
-        transaction.update(reference, { order, updatedAt: new Date() })
+    const batch = writeBatch(this.firestore)
+    const updatedAt = new Date()
+    ids.forEach((id, order) => {
+      batch.update(doc(this.firestore, collectionName, id), {
+        order,
+        updatedAt,
       })
     })
+    await batch.commit()
   }
 }

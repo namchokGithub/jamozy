@@ -320,6 +320,47 @@ describeWithFirestoreEmulator('FirebaseAdminContentRepository counters', () => {
     })
   })
 
+  describe('order saves', () => {
+    const unitDoc = (title: string, order: number) => ({
+      description: 'Description',
+      createdAt: now,
+      updatedAt: now,
+      courseId: 'course',
+      title,
+      order,
+      status: 'draft',
+    })
+
+    async function seedUnits(firestore: Firestore) {
+      await setDoc(doc(firestore, 'units', 'a'), unitDoc('A', 0))
+      await setDoc(doc(firestore, 'units', 'b'), unitDoc('B', 1))
+      await setDoc(doc(firestore, 'units', 'c'), unitDoc('C', 2))
+    }
+
+    it('writes the whole new order', async () => {
+      const { firestore, repo } = adminRepository()
+      await seedUnits(firestore)
+
+      await repo.saveUnitOrder('course', ['c', 'a', 'b'])
+
+      expect(
+        (await repo.getUnitsByCourseId('course')).map((unit) => unit.id),
+      ).toEqual(['c', 'a', 'b'])
+    })
+
+    it('rejects an order whose IDs differ from the siblings and writes nothing', async () => {
+      const { firestore, repo } = adminRepository()
+      await seedUnits(firestore)
+
+      await expect(repo.saveUnitOrder('course', ['c', 'a'])).rejects.toThrow(
+        'Content order changed. Refresh and try again.',
+      )
+      expect(
+        (await repo.getUnitsByCourseId('course')).map((unit) => unit.id),
+      ).toEqual(['a', 'b', 'c'])
+    })
+  })
+
   describe('content saves never overwrite counters', () => {
     const base = { description: 'Description', createdAt: now, updatedAt: now }
 
