@@ -99,7 +99,7 @@ function HandSilhouette({
 }) {
   const activeFinger = activeFingerFor(side, nextKey)
   const fingerClass = (finger: Finger) =>
-    `transition-[fill] duration-150 ${finger === activeFinger ? 'fill-[#c84f82]' : 'fill-[#dce4f1]'}`
+    finger === activeFinger ? 'fill-[#78bca6]' : 'fill-[#dce4f1]'
   return (
     <div className="flex min-w-24 flex-col items-center gap-1.5">
       <svg
@@ -136,7 +136,7 @@ function HandSilhouette({
         {side === 'left' ? 'Left Hand' : 'Right Hand'}
       </p>
       <p
-        className={`rounded-full px-3 py-1 text-[10px] font-semibold ${activeFinger ? 'bg-[#fde7ef] text-[#c84f82]' : 'bg-[#f2edf9] text-[#98a2b3]'}`}
+        className={`rounded-full px-3 py-1 text-[10px] font-semibold ${activeFinger ? 'bg-[#ddf5e9] text-[#194d41]' : 'bg-[#f2edf9] text-[#98a2b3]'}`}
       >
         {activeFinger ?? 'Ready'}
       </p>

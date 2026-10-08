@@ -8,6 +8,7 @@ import {
 import { isKoreanJamoKey } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
+import FingerPlacementGuide from '../home/FingerPlacementGuide'
 import type { ReviewItem } from '../../domain/models/review-item'
 import type { SubmitReviewSessionOutcome } from '../../application/submit-review-session'
 import type { UserSettings } from '../../domain/models/user-profile'
@@ -129,12 +130,15 @@ export default function ReviewTypingSession({
       />
       {/* <p className="mt-2 text-sm text-[#667085]">Typed: {composed}</p> */}
       {keyboardSettings.showKeyboard && (
-        <VirtualKeyboard
-          nextKey={nextKey}
-          showEnglishKeys={keyboardSettings.showEnglishKeys}
-          opacity={keyboardSettings.keyboardOpacity}
-          onKeyPress={pressKey}
-        />
+        <>
+          <VirtualKeyboard
+            nextKey={nextKey}
+            showEnglishKeys={keyboardSettings.showEnglishKeys}
+            opacity={keyboardSettings.keyboardOpacity}
+            onKeyPress={pressKey}
+          />
+          <FingerPlacementGuide nextKey={nextKey} />
+        </>
       )}
     </div>
   )

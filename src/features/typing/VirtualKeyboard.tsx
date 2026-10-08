@@ -100,6 +100,13 @@ export default function VirtualKeyboard({
     const isJamoKey = isKoreanJamoKey(code)
     const hasHomeRowMarker = code === 'KeyF' || code === 'KeyJ'
     const canPress = Boolean(onKeyPress && (isJamoKey || isShiftKey))
+    const keyVisualClass = isNext
+      ? 'border-[#78bca6] bg-[#ddf5e9] text-[#194d41] shadow-[0_3px_10px_-5px_rgba(35,109,86,0.45)]'
+      : isActiveShift
+        ? 'border-[#e3ad73] bg-[#fff0d8] text-[#8b6035]'
+        : isJamoKey && nextKey
+          ? 'border-[#ebe7df] bg-[#fbf9f4] text-[#66736c]'
+          : 'border-[#d8e8e3] bg-[#f7f4ec] text-[#39465b]'
 
     const handleClick = () => {
       if (!onKeyPress) return
@@ -116,7 +123,7 @@ export default function VirtualKeyboard({
       <button
         type="button"
         key={code}
-        className={`relative flex h-12 ${keyWidth(wide)} flex-col items-center justify-center rounded-lg border px-1 text-sm sm:h-13 ${isNext || isActiveShift ? 'border-[#e4bd79] bg-[#fff0d8] text-[#8b6035]' : 'border-[#cfe0fb] bg-white/75 text-[#39465b]'} ${canPress ? 'cursor-pointer touch-manipulation active:scale-[0.98]' : 'cursor-default'}`}
+        className={`relative flex h-12 ${keyWidth(wide)} flex-col items-center justify-center rounded-lg border px-1 text-sm sm:h-13 ${keyVisualClass} ${canPress ? 'cursor-pointer touch-manipulation' : 'cursor-default'}`}
         aria-label={displayLabel}
         aria-pressed={isShiftKey ? virtualShiftActive : undefined}
         disabled={!canPress}
@@ -155,20 +162,10 @@ export default function VirtualKeyboard({
 
   return (
     <div
-      className="mt-6 rounded-2xl bg-[#f5f9ff] p-4 shadow-[0_0_24px_-16px_rgba(54,78,112,0.4)] select-none sm:p-5"
+      className="mt-6 rounded-2xl bg-[#fffaf3] p-4 shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)] select-none sm:p-5"
       aria-label="Virtual Korean keyboard"
       style={{ opacity }}
     >
-      {/* <div className="mb-3 flex justify-end">
-        <span
-          className={`flex items-center gap-1.5 text-xs font-semibold ${nextKey?.shift ? 'text-[#8b6035]' : 'text-[#667085]'}`}
-        >
-          <span
-            className={`h-2.5 w-2.5 rounded-sm ${nextKey?.shift ? 'bg-[#e4a455]' : 'bg-[#f08022]'}`}
-          />
-          Shift
-        </span>
-      </div> */}
       <div className="mx-auto max-w-4xl space-y-1.5">
         <div className="flex gap-1.5">{ROW_1.map(renderKey)}</div>
         <div className="flex gap-1.5">{ROW_2.map(renderKey)}</div>

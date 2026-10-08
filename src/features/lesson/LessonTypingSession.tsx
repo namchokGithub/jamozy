@@ -9,6 +9,7 @@ import {
 import { isKoreanJamoKey } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
+import FingerPlacementGuide from '../home/FingerPlacementGuide'
 import type { Lesson } from '../../domain/models/lesson'
 import type { CompleteLessonOutcome } from '../../application/complete-lesson'
 import type { UserSettings } from '../../domain/models/user-profile'
@@ -135,12 +136,15 @@ export default function LessonTypingSession({
       />
       {/* <p className="mt-2 text-sm text-[#667085]">Typed: {composed}</p> */}
       {keyboardSettings.showKeyboard && (
-        <VirtualKeyboard
-          nextKey={nextKey}
-          showEnglishKeys={keyboardSettings.showEnglishKeys}
-          opacity={keyboardSettings.keyboardOpacity}
-          onKeyPress={pressKey}
-        />
+        <>
+          <VirtualKeyboard
+            nextKey={nextKey}
+            showEnglishKeys={keyboardSettings.showEnglishKeys}
+            opacity={keyboardSettings.keyboardOpacity}
+            onKeyPress={pressKey}
+          />
+          <FingerPlacementGuide nextKey={nextKey} />
+        </>
       )}
     </div>
   )
