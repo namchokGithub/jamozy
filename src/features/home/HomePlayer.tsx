@@ -23,6 +23,7 @@ interface HomePlayerProps {
   data: HomePlayerData
   // Live Progress read in the background; null keeps the cached Progress.
   liveProgress: Promise<Progress[] | null>
+  courseId: string
   random?: () => number
 }
 

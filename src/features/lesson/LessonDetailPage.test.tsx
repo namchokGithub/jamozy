@@ -175,6 +175,22 @@ describe('LessonDetailPage', () => {
     expect(await waitForTypingTarget('가')).toBeInTheDocument()
   })
 
+  it('leaves a started lesson for its preview with Exit lesson', async () => {
+    renderPage(makeLesson())
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
+    await waitForTypingTarget('가')
+    fireEvent.click(screen.getByRole('button', { name: 'Exit lesson' }))
+
+    expect(
+      await screen.findByRole('button', { name: 'Start Lesson' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Course map' })).toHaveAttribute(
+      'href',
+      '/courses/c1',
+    )
+  })
+
   it('passes keyboard settings into the typing session', async () => {
     const router = createMemoryRouter(
       [

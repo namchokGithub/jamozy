@@ -5,6 +5,8 @@ import type { CourseMapLoaderData } from './CourseMapPage.loader'
 import type { CourseMapUnit } from '../../application/get-course'
 import type { LessonProgressStatus } from '../../domain/models/progress'
 import { Card } from '../../components/ui/Card'
+import { PageHeading } from '../../components/ui/PageHeading'
+import { PageNav } from '../../components/ui/PageNav'
 import { PageSurface } from '../../components/ui/PageSurface'
 
 function statusLabel(status: LessonProgressStatus | undefined): string {
@@ -37,8 +39,26 @@ function StatusPill({ status }: { status: LessonProgressStatus | undefined }) {
     </span>
   )
 }
-function UnitSection({ mapUnit }: { mapUnit: CourseMapUnit }) {
-  const [open, setOpen] = useState(false)
+// The unit the learner is on: the first with an unlocked lesson, else the
+// first with any lesson not yet completed.
+function currentUnitId(units: CourseMapUnit[]): string | undefined {
+  const current =
+    units.find(({ lessons }) =>
+      lessons.some(({ progress }) => progress?.status === 'unlocked'),
+    ) ??
+    units.find(({ lessons }) =>
+      lessons.some(({ progress }) => progress?.status !== 'completed'),
+    )
+  return current?.unit.id
+}
+function UnitSection({
+  mapUnit,
+  defaultOpen,
+}: {
+  mapUnit: CourseMapUnit
+  defaultOpen: boolean
+}) {
+  const [open, setOpen] = useState(defaultOpen)
   return (
     <li>
       <Card className="p-0">
@@ -89,17 +109,13 @@ function UnitSection({ mapUnit }: { mapUnit: CourseMapUnit }) {
 }
 export default function CourseMapPage() {
   const { courseMap } = useLoaderData() as CourseMapLoaderData
+  const openUnitId = currentUnitId(courseMap.units)
   return (
     <PageSurface contentClassName="max-w-3xl">
-      <header className="rounded-4xl border border-[#f0dfd1] bg-[#fffdf9] px-6 py-8 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)]">
-        <p className="text-sm font-semibold text-[#a85d4e]">
-          YOUR LEARNING PATH
-        </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">
-          {courseMap.course.title}
-        </h1>
+      <PageNav backTo="/" backLabel="Home" />
+      <PageHeading eyebrow="YOUR LEARNING PATH" title={courseMap.course.title}>
         <p className="mt-2 text-[#667085]">{courseMap.course.description}</p>
-      </header>
+      </PageHeading>
       {courseMap.units.length === 0 ? (
         <Card className="mt-6 text-center">
           <p className="font-bold">Your next unit will bloom here.</p>
@@ -108,7 +124,11 @@ export default function CourseMapPage() {
       ) : (
         <ul className="mt-6 space-y-4">
           {courseMap.units.map((unit) => (
-            <UnitSection key={unit.unit.id} mapUnit={unit} />
+            <UnitSection
+              key={unit.unit.id}
+              mapUnit={unit}
+              defaultOpen={unit.unit.id === openUnitId}
+            />
           ))}
         </ul>
       )}

@@ -7,6 +7,8 @@ import LessonTypingSession, {
 import LessonResult from './LessonResult'
 import { formatExerciseMeaning } from './format-exercise-meaning'
 import { Button } from '../../components/ui/Button'
+import { PageHeading } from '../../components/ui/PageHeading'
+import { PageNav } from '../../components/ui/PageNav'
 import { PageSurface } from '../../components/ui/PageSurface'
 
 export default function LessonDetailPage() {
@@ -32,34 +34,41 @@ function LessonDetailContent({
   const [started, setStarted] = useState(false)
   const [completion, setCompletion] = useState<LessonCompletion | null>(null)
 
+  const nav = <PageNav backTo={`/courses/${courseId}`} backLabel="Course map" />
+
   if (completion) {
     return (
-      <LessonResult
-        completion={completion}
-        onRetry={() => {
-          setCompletion(null)
-          setStarted(true)
-        }}
-        onReview={() => navigate('/review')}
-        onContinue={() =>
-          navigate(
-            completion.outcome.unlockedNextLessonId
-              ? `/lessons/${completion.outcome.unlockedNextLessonId}`
-              : `/courses/${courseId}`,
-          )
-        }
-      />
+      <PageSurface contentClassName="max-w-2xl">
+        {nav}
+        <LessonResult
+          completion={completion}
+          onRetry={() => {
+            setCompletion(null)
+            setStarted(true)
+          }}
+          onReview={() => navigate('/review')}
+          onContinue={() =>
+            navigate(
+              completion.outcome.unlockedNextLessonId
+                ? `/lessons/${completion.outcome.unlockedNextLessonId}`
+                : `/courses/${courseId}`,
+            )
+          }
+        />
+      </PageSurface>
     )
   }
 
   if (started) {
     return (
       <PageSurface contentClassName="max-w-2xl">
-        <h1 className="text-2xl font-medium text-slate-900">{lesson.title}</h1>
+        {nav}
+        <PageHeading eyebrow="TYPING NOW" title={lesson.title} />
         <LessonTypingSession
           lesson={lesson}
           onComplete={setCompletion}
           keyboardSettings={settings}
+          onExit={() => setStarted(false)}
         />
       </PageSurface>
     )
@@ -67,8 +76,10 @@ function LessonDetailContent({
 
   return (
     <PageSurface contentClassName="max-w-2xl">
-      <h1 className="text-2xl font-medium text-slate-900">{lesson.title}</h1>
-      <p className="mt-1 text-sm text-slate-600">{lesson.type}</p>
+      {nav}
+      <PageHeading eyebrow="LESSON" title={lesson.title}>
+        <p className="mt-2 text-[#667085]">{lesson.type}</p>
+      </PageHeading>
 
       {lesson.exercises.length === 0 ? (
         <p className="mt-6 text-sm text-slate-500">No exercises yet.</p>
