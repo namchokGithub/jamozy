@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { Link, useLoaderData } from 'react-router'
+import { useLoaderData, useNavigate } from 'react-router'
 import type { ReviewLoaderData } from './ReviewPage.loader'
 import ReviewTypingSession from './ReviewTypingSession'
+import JamoAccuracyGrid from './JamoAccuracyGrid'
+import WeakJamoCard from './WeakJamoCard'
 import type { SubmitReviewSessionOutcome } from '../../application/submit-review-session'
 import { formatExerciseMeaning } from '../lesson/format-exercise-meaning'
 import { Button } from '../../components/ui/Button'
@@ -10,18 +12,20 @@ import { PageNav } from '../../components/ui/PageNav'
 import { PageSurface } from '../../components/ui/PageSurface'
 
 export default function ReviewPage() {
-  const { previews, settings } = useLoaderData() as ReviewLoaderData
+  const { previews, settings, jamoOverview } =
+    useLoaderData() as ReviewLoaderData
   const items = previews.map((preview) => preview.item)
   const [started, setStarted] = useState(false)
   const [outcome, setOutcome] = useState<SubmitReviewSessionOutcome | null>(
     null,
   )
 
+  const navigate = useNavigate()
   const nav = <PageNav backTo="/" backLabel="Home" />
 
   if (outcome) {
     return (
-      <PageSurface contentClassName="max-w-2xl">
+      <PageSurface contentClassName="max-w-5xl">
         {nav}
         <PageHeading eyebrow="NICE WORK" title="Review complete!">
           <p className="mt-2 text-[#667085]">
@@ -29,23 +33,20 @@ export default function ReviewPage() {
             more practice
           </p>
         </PageHeading>
-        <Link
-          to="/"
-          className="mt-4 inline-block text-sm text-slate-600 underline"
-        >
-          Back to Course List
-        </Link>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Button onClick={() => navigate('/')}>Back to Course List</Button>
+        </div>
       </PageSurface>
     )
   }
 
   if (started) {
     return (
-      <PageSurface contentClassName="max-w-2xl">
+      <PageSurface contentClassName="max-w-5xl">
         {nav}
         <PageHeading eyebrow="TYPING NOW" title="Review" />
-        <ReviewTypingSession
-          items={items}
+        <ReviewTypingSession<SubmitReviewSessionOutcome>
+          exercises={items}
           onComplete={setOutcome}
           keyboardSettings={settings}
         />
@@ -54,9 +55,19 @@ export default function ReviewPage() {
   }
 
   return (
-    <PageSurface contentClassName="max-w-2xl">
+    <PageSurface contentClassName="max-w-5xl">
       {nav}
       <PageHeading eyebrow="PRACTICE YOUR MISTAKES" title="Review" />
+
+      {jamoOverview && (
+        <>
+          <WeakJamoCard overview={jamoOverview} />
+          <JamoAccuracyGrid
+            stats={jamoOverview.stats}
+            practicable={jamoOverview.practicable}
+          />
+        </>
+      )}
 
       {items.length === 0 ? (
         <p className="mt-6 text-sm text-slate-500">

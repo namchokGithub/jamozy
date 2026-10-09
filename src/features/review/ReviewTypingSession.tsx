@@ -1,17 +1,20 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useFetcher } from 'react-router'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
 import {
   getLessonProgress,
   getLessonResult,
 } from '../../domain/korean/lesson-session'
+import {
+  reviewSessionBody,
+  type CompletedTypingSession,
+} from './review-session-body'
 import { isKoreanJamoKey } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
 import FingerPlacementGuide from '../home/FingerPlacementGuide'
 import { useKeyboardFeedback } from '../typing/keyboard-feedback'
-import type { ReviewItem } from '../../domain/models/review-item'
-import type { SubmitReviewSessionOutcome } from '../../application/submit-review-session'
+import { Button } from '../../components/ui/Button'
 import type { UserSettings } from '../../domain/models/user-profile'
 import { usePressedKeyCodes } from '../typing/usePressedKeyCodes'
 
@@ -22,21 +25,27 @@ const defaultKeyboardSettings: KeyboardSettings = {
   showEnglishKeys: true,
 }
 
-interface ReviewTypingSessionProps {
-  items: ReviewItem[]
-  onComplete: (outcome: SubmitReviewSessionOutcome) => void
+interface ReviewTypingSessionProps<Outcome> {
+  exercises: Array<{ id: string; targetText: string }>
+  onComplete: (outcome: Outcome, completed: CompletedTypingSession) => void
   keyboardSettings?: KeyboardSettings
+  // Builds the action's JSON body; Review's shape by default.
+  buildBody?: (completed: CompletedTypingSession) => Record<string, unknown>
 }
 
-export default function ReviewTypingSession({
-  items,
+// Shared by Review and Weak Jamo practice (DEC-051).
+export default function ReviewTypingSession<Outcome extends object>({
+  exercises,
   onComplete,
   keyboardSettings = defaultKeyboardSettings,
-}: ReviewTypingSessionProps) {
+  buildBody = reviewSessionBody,
+}: ReviewTypingSessionProps<Outcome>) {
   const pressedCodes = usePressedKeyCodes()
   const { session, start, pressKey, generation, submissionId } =
     useLessonSessionStore()
-  const fetcher = useFetcher<SubmitReviewSessionOutcome>()
+  const fetcher = useFetcher<Outcome | { error: string }>()
+  const completedRef = useRef<CompletedTypingSession | null>(null)
+  const [body, setBody] = useState<Record<string, unknown> | null>(null)
   const { feedback, previousFeedback, recordAttempt } = useKeyboardFeedback()
   const hasStarted = useRef(false)
   const hasSubmitted = useRef(false)
@@ -51,9 +60,9 @@ export default function ReviewTypingSession({
     if (hasStarted.current) return
     hasStarted.current = true
     myGenerationRef.current = start(
-      items.map((item) => ({ id: item.id, targetText: item.targetText })),
+      exercises.map(({ id, targetText }) => ({ id, targetText })),
     )
-  }, [items, start])
+  }, [exercises, start])
 
   const handleKeyPress = useCallback(
     (code: string, shiftKey: boolean) => {
@@ -94,34 +103,57 @@ export default function ReviewTypingSession({
       !hasSubmitted.current
     ) {
       hasSubmitted.current = true
-      const metrics = getLessonResult(session)
-      const results = session.completedResults.map((result) => ({
-        itemId: result.exerciseId,
-        wasCorrect: result.mistakes.length === 0,
-      }))
-      fetcher.submit(
-        {
-          submissionId,
-          durationSeconds: metrics.durationSeconds,
-          startedAtMs: metrics.startedAtMs,
-          exercisesAttempted: metrics.exercisesAttempted,
-          acceptedKeystrokes: metrics.acceptedKeystrokes,
-          rejectedKeystrokes: metrics.rejectedKeystrokes,
-          results: results.map((result) => ({
-            itemId: result.itemId,
-            wasCorrect: result.wasCorrect,
-          })),
-        },
-        { method: 'post', encType: 'application/json' },
-      )
+      const completed = {
+        submissionId,
+        metrics: getLessonResult(session),
+        results: session.completedResults,
+      }
+      completedRef.current = completed
+      const nextBody = buildBody(completed)
+      setBody(nextBody)
+      fetcher.submit(nextBody as never, {
+        method: 'post',
+        encType: 'application/json',
+      })
     }
-  }, [session, generation, submissionId, fetcher])
+  }, [session, generation, submissionId, fetcher, buildBody])
+
+  const saveError =
+    fetcher.state === 'idle' && fetcher.data && 'error' in fetcher.data
+      ? fetcher.data.error
+      : null
 
   useEffect(() => {
-    if (fetcher.state === 'idle' && fetcher.data) {
-      onComplete(fetcher.data)
+    if (
+      fetcher.state === 'idle' &&
+      fetcher.data &&
+      !('error' in fetcher.data) &&
+      completedRef.current
+    ) {
+      onComplete(fetcher.data as Outcome, completedRef.current)
     }
   }, [fetcher.state, fetcher.data, onComplete])
+
+  if (saveError && body) {
+    // The same body keeps the submission id, so the retry cannot count twice.
+    return (
+      <div className="mt-4">
+        <p className="text-sm text-[#a85d4e]">{saveError}</p>
+        <Button
+          type="button"
+          className="mt-3"
+          onClick={() =>
+            fetcher.submit(body as never, {
+              method: 'post',
+              encType: 'application/json',
+            })
+          }
+        >
+          Try again
+        </Button>
+      </div>
+    )
+  }
 
   if (!session || session.status === 'completed') {
     return <p className="mt-4 text-sm text-slate-500">Saving…</p>
@@ -140,9 +172,10 @@ export default function ReviewTypingSession({
 
       <HangulTarget
         session={session.currentSession}
-        className="mt-4 text-3xl"
+        className="mt-4 mb-8 scale-120 text-8xl font-bold sm:text-8xl"
         compact
       />
+
       {/* <p className="mt-2 text-sm text-[#667085]">Typed: {composed}</p> */}
       {keyboardSettings.showKeyboard && (
         <>

@@ -18,7 +18,9 @@ export async function migrateGuestDataToAccount(
   const snapshot = await source.getSnapshot(guestId)
   await source.saveCheckpoint({ guestId, accountId, status: 'started', updatedAt: now })
   await destination.mergeInitialState(accountId, guestId, snapshot)
-  for (const outcome of snapshot.sessionOutcomes) {
+  for (const outcome of [...snapshot.sessionOutcomes].sort(
+    (left, right) => left.session.completedAt.getTime() - right.session.completedAt.getTime(),
+  )) {
     await destination.migrateSessionOutcome(accountId, outcome)
   }
   await destination.markComplete({ guestId, accountId, completedAt: now })

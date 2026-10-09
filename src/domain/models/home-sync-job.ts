@@ -1,4 +1,7 @@
 import type { ExerciseResult } from '../korean/lesson-session'
+import type { ExerciseStat } from './player-stats'
+import type { LessonType } from './lesson'
+import type { JamoCounts } from './jamo-stat'
 
 export interface HomeSessionTotals {
   startedAtMs: number
@@ -6,6 +9,8 @@ export interface HomeSessionTotals {
   exercisesAttempted: number
   acceptedKeystrokes: number
   rejectedKeystrokes: number
+  exercises?: ExerciseStat[]
+  jamoCounts?: JamoCounts
 }
 
 interface HomeSyncJobBase {
@@ -22,7 +27,7 @@ export type HomeSyncJob = HomeSyncJobBase &
   (
     | {
         kind: 'exercise'
-        lesson: { id: string; exercises: Array<{ id: string }> }
+        lesson: { id: string; type?: LessonType; exercises: Array<{ id: string }> }
         result: ExerciseResult
         submissionId: string
       }
@@ -31,5 +36,6 @@ export type HomeSyncJob = HomeSyncJobBase &
         lessonId: string
         sessionId: string
         totals: HomeSessionTotals
+        lessonType?: LessonType
       }
   )

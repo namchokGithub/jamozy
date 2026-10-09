@@ -35,30 +35,31 @@ Development-only data pipeline; the learner SVG renderer is behind a build flag,
 
 ## Planned Learning Modes
 
-| Item                                           | Status      | Notes                                                                                                                                        |
-| ---------------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Contiguous Learning Path frontier              | Not started | Soft-locked future lessons may complete early; the recommended lesson remains the first globally ordered lesson not completed ([[DEC-026]]). |
-| VocabularyProgress domain/repository support   | Not started | One raw-counter history per VocabularyEntry across modes; no mastery field in MVP ([[DEC-028]]).                                             |
-| JamoStats domain/repository support            | Not started | Expected-jamo raw counters and first/latest submitted-practice timestamps across modes ([[DEC-028]]).                                        |
-| Shared session-result aggregation              | Not started | Aggregate VocabularyProgress, JamoStats, and UserStats only at submitted checkpoints; never persist per keystroke.                           |
-| Topic progress derived from VocabularyProgress | Not started | Topic metadata plus VocabularyEntry membership; display Practiced/Encountered counts, not TopicProgress.                                     |
-| Keyboard Position stats derived from JamoStats | Not started | Position is a view/filter over expected-jamo records; no PositionProgress.                                                                   |
-| DailyQuestProgress persistence                 | Not started | Stable 10-item`dailyQuestProgress/{dateKey}` record with completion and reward state; timezone policy still to be decided.                   |
-| Daily Quest idempotent EXP reward              | Not started | Grant EXP once per dateKey; retries still update shared state but cannot award again.                                                        |
+| Item                                           | Status      | Notes                                                                                                                                                                                                   |
+| ---------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Contiguous Learning Path frontier              | Not started | Soft-locked future lessons may complete early; the recommended lesson remains the first globally ordered lesson not completed ([[DEC-026]]).                                                            |
+| VocabularyProgress domain/repository support   | Not started | One raw-counter history per VocabularyEntry across modes; no mastery field in MVP ([[DEC-028]]).                                                                                                        |
+| JamoStats domain/repository support            | Done        | Key-level jamo counts recorded in the submit transaction into one map doc`learnerStats/jamo` ([[DEC-050]], amends [[DEC-028]] storage); rankings derived on read; no UI; Guest jamo stats not migrated. |
+| Weak Jamo practice                             | Done        | `/review/weak-jamo` drills up to 3 weakest key-level jamo with Home exercises; `weak-jamo` sessions count `practicesCompleted`, no EXP or ReviewItem changes ([[DEC-051]]).                             |
+| Shared session-result aggregation              | Not started | Aggregate VocabularyProgress, JamoStats, and UserStats only at submitted checkpoints; never persist per keystroke.                                                                                      |
+| Topic progress derived from VocabularyProgress | Not started | Topic metadata plus VocabularyEntry membership; display Practiced/Encountered counts, not TopicProgress.                                                                                                |
+| Keyboard Position stats derived from JamoStats | Not started | Position is a view/filter over expected-jamo records; no PositionProgress.                                                                                                                              |
+| DailyQuestProgress persistence                 | Not started | Stable 10-item`dailyQuestProgress/{dateKey}` record with completion and reward state; timezone policy still to be decided.                                                                              |
+| Daily Quest idempotent EXP reward              | Not started | Grant EXP once per dateKey; retries still update shared state but cannot award again.                                                                                                                   |
 
 ## Planned Session History
 
-| Item                                 | Status      | Notes                                                                                                                                              |
-| ------------------------------------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| LearningSession domain model         | Done        | Lesson and Review submitted activity with stable session IDs and raw counters; remaining modes are deferred ([[DEC-029]]).                         |
-| LearningSession repository interface | Done        | Shared local/Firebase history and checkpoint contracts.                                                                                            |
-| Local IndexedDB session persistence  | Done        | Guest session history, receipt, aggregate, progress, and review effects share one IndexedDB transaction.                                           |
-| Firestore session persistence        | Done        | Authenticated history at`users/{userId}/learningSessions/{sessionId}` is written in a Firestore transaction.                                       |
-| Exactly-once submission integration  | Done        | A receipt keyed by`sessionId` returns the original outcome and prevents duplicate aggregate/progress/review effects for Lesson and Review retries. |
-| Session history recording            | Done        | Lesson and Review create one LearningSession per logical submitted session; a real replay creates a new ID.                                        |
-| History read/query use case          | Not started | Future read model over LearningSession records; no UI in this task.                                                                                |
-| History UI                           | Not started | Future presentation of session history.                                                                                                            |
-| Summary and analytics                | Not started | Future consumers of LearningSession; no persisted period aggregates or analytics schema yet.                                                       |
+| Item                                 | Status      | Notes                                                                                                                                                                                   |
+| ------------------------------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| LearningSession domain model         | Done        | Lesson and Review submitted activity with stable session IDs and raw counters; remaining modes are deferred ([[DEC-029]]).                                                              |
+| LearningSession repository interface | Done        | Shared local/Firebase history and checkpoint contracts.                                                                                                                                 |
+| Local IndexedDB session persistence  | Done        | Guest session history, receipt, aggregate, progress, and review effects share one IndexedDB transaction.                                                                                |
+| Firestore session persistence        | Done        | Authenticated history at`users/{userId}/learningSessions/{sessionId}` is written in a Firestore transaction.                                                                            |
+| Exactly-once submission integration  | Done        | A receipt keyed by`sessionId` returns the original outcome and prevents duplicate aggregate/progress/review effects for Lesson and Review retries.                                      |
+| Session history recording            | Done        | Lesson and Review create one LearningSession per logical submitted session; a real replay creates a new ID.                                                                             |
+| History read/query use case          | Not started | Future read model over LearningSession records; no UI in this task.                                                                                                                     |
+| History UI                           | Not started | Future presentation of session history.                                                                                                                                                 |
+| Summary and analytics                | In progress | Player Stats data ships ([[DEC-049]]): `playerStats`, `dailyStats`, `monthlyStats` written in the submit transaction for every mode; Profile UI and item (jamo/word) stats not started. |
 
 ## Planned Authentication and Persistence
 
@@ -117,6 +118,6 @@ A fresh whole-branch review (Opus) found no Critical issues. The one Important f
 
 **Still open, not forgotten:** [[DEC-022]]'s vocabulary-backed `ReviewItem` identity is documented but not yet implemented or migrated. [[DEC-019]]'s review-system Minor findings remain deferred. Settings round's deferred Minor findings remain: Save re-enables during post-save loader revalidation; "Saved" can show a moment early when nothing was edited; `getSettings` does not merge stored settings over defaults field-by-field; a Save failure replaces the whole page via `RouteError`; no Firestore transaction wraps the settings read-modify-write; the multi-phase fetcher-state test does not separately assert the Save button was disabled mid-flight; "Saved" has no `aria-live`; and the opacity slider shows no numeric value. `ProfileSummary.exp`/`stats` default to zero for a hypothetical pre-field profile, while one loader test has a harmless nondeterministic `createdAt` fixture.
 
-`pnpm test`/`pnpm exec tsc -b`/`pnpm lint` all pass (627tests, 17 skipped).
+`pnpm test`/`pnpm exec tsc -b`/`pnpm lint` all pass (718 passed | 24 skipped (742)).
 
 Next real steps, not blocked on each other: (1) decide whether to defer the misleading sound control to post-MVP or implement real sound; build real dark-mode CSS as a separate cross-cutting change, (2) a proper Lesson Result screen (currently an inline MVP result).

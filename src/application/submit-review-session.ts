@@ -1,10 +1,16 @@
+import type { JamoCounts } from '../domain/models/jamo-stat'
 import type { ReviewRepository } from '../domain/repositories/review-repository'
 import type { SessionSubmissionRepository } from '../domain/repositories/session-submission-repository'
 import { nextBox, nextReviewDate, type ReviewItem } from '../domain/models/review-item'
+import type { UserProfileRepository } from '../domain/repositories/user-profile-repository'
+import { deviceTimeZone, sessionStatsFrom, type ExerciseStat } from '../domain/models/player-stats'
 
 export interface SubmitReviewSessionResult {
   itemId: string
   wasCorrect: boolean
+  mistakeCount?: number
+  typingSeconds?: number
+  elapsedSeconds?: number
 }
 
 export interface SubmitReviewSessionOutcome {
@@ -20,6 +26,7 @@ export interface SubmitReviewSessionInput {
   acceptedKeystrokes: number
   rejectedKeystrokes: number
   results: SubmitReviewSessionResult[]
+  jamoCounts?: JamoCounts
 }
 
 function updatedReview(item: ReviewItem, wasCorrect: boolean, now: Date): ReviewItem {
@@ -35,7 +42,7 @@ function updatedReview(item: ReviewItem, wasCorrect: boolean, now: Date): Review
 }
 
 export async function submitReviewSession(
-  deps: { reviewRepo: ReviewRepository; sessionSubmissionRepo: SessionSubmissionRepository },
+  deps: { reviewRepo: ReviewRepository; sessionSubmissionRepo: SessionSubmissionRepository; userProfileRepo?: UserProfileRepository },
   userId: string,
   input: SubmitReviewSessionInput,
   now: Date = new Date(),
@@ -43,10 +50,14 @@ export async function submitReviewSession(
   let correctCount = 0
   let needsPracticeCount = 0
   const reviewItems: ReviewItem[] = []
+  const stats: ExerciseStat[] = []
 
-  for (const { itemId, wasCorrect } of input.results) {
+  for (const result of input.results) {
+    const { itemId, wasCorrect } = result
     const item = await deps.reviewRepo.getReviewItem(userId, itemId)
     if (!item) continue
+
+    stats.push({ targetText: item.targetText, lessonType: item.sourceLessonType, mistakeCount: result.mistakeCount ?? (wasCorrect ? 0 : 1), typingSeconds: result.typingSeconds ?? 0, elapsedSeconds: result.elapsedSeconds ?? 0 })
 
     reviewItems.push(updatedReview(item, wasCorrect, now))
     if (wasCorrect) {
@@ -56,6 +67,7 @@ export async function submitReviewSession(
     }
   }
 
+  const timeZone = (await deps.userProfileRepo?.getUserProfile(userId))?.timezone ?? deviceTimeZone()
   await deps.sessionSubmissionRepo.submit(userId, {
     id: input.submissionId,
     context: { mode: 'review' },
@@ -66,7 +78,8 @@ export async function submitReviewSession(
     acceptedKeystrokes: input.acceptedKeystrokes,
     rejectedKeystrokes: input.rejectedKeystrokes,
     expGained: 0,
-  }, { progress: [], reviewItems })
+    ...sessionStatsFrom(stats, undefined, timeZone, now),
+  }, { progress: [], reviewItems, ...(input.jamoCounts ? { jamoCounts: input.jamoCounts } : {}) })
 
   return { correctCount, needsPracticeCount }
 }

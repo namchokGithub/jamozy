@@ -7,6 +7,7 @@ import type { SessionSubmissionOutcome } from '../../../domain/repositories/sess
 import { toProgress, toProgressDoc } from '../mappers/progress-mapper'
 import { toReviewItem, toReviewItemDoc } from './firebase-review-repository'
 import { toUserProfile, toUserProfileDoc } from './firebase-user-profile-repository'
+import { readSessionStatsWrites } from './firestore-player-stats'
 
 type FirebaseMigrationDependencies = {
   db: typeof db
@@ -75,19 +76,24 @@ export class FirebaseAccountMigrationRepository implements AccountMigrationRepos
       const profileRef = doc(db, 'users', accountId)
       const profile = await transaction.get(profileRef)
       const current = (profile.data()?.sessionAggregate as SessionAggregate | undefined) ?? emptySessionAggregate()
-      for (const guestProgress of outcome.effects.progress) {
+      const progressReads = await Promise.all(outcome.effects.progress.map(async (guestProgress) => {
         const progressRef = doc(db, 'users', accountId, 'lessonProgress', guestProgress.lessonId)
-        const cloud = await transaction.get(progressRef)
+        return { guestProgress, progressRef, cloud: await transaction.get(progressRef) }
+      }))
+      const reviewReads = await Promise.all(outcome.effects.reviewItems.map(async (guestReview) => {
+        const reviewRef = doc(db, 'users', accountId, 'reviewItems', guestReview.id)
+        return { guestReview, reviewRef, cloud: await transaction.get(reviewRef) }
+      }))
+      const writeStats = await readSessionStatsWrites({ db, doc }, transaction, accountId, profile.data(), outcome.session)
+      for (const { guestProgress, progressRef, cloud } of progressReads) {
         transaction.set(progressRef, toProgressDoc(mergeProgress(cloud.exists() ? toProgress(guestProgress.lessonId, cloud.data()) : null, guestProgress)))
       }
-      for (const guestReview of outcome.effects.reviewItems) {
-        const reviewRef = doc(db, 'users', accountId, 'reviewItems', guestReview.id)
-        const cloud = await transaction.get(reviewRef)
+      for (const { guestReview, reviewRef, cloud } of reviewReads) {
         transaction.set(reviewRef, toReviewItemDoc(mergeReviewItem(cloud.exists() ? toReviewItem(guestReview.id, cloud.data()) : null, guestReview)))
       }
       transaction.set(doc(db, 'users', accountId, 'learningSessions', outcome.session.id), sessionDoc(outcome.session))
       transaction.set(receiptRef, outcome)
-      transaction.set(profileRef, { sessionAggregate: addSessionAggregate(current, outcome.aggregate) }, { merge: true })
+      transaction.set(profileRef, { sessionAggregate: addSessionAggregate(current, outcome.aggregate), ...writeStats(transaction) }, { merge: true })
     })
   }
 

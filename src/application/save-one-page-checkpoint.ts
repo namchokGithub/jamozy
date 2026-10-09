@@ -1,3 +1,4 @@
+import { jamoCountsFrom, mergeJamoCounts } from '../domain/models/jamo-stat'
 import type { ExerciseResult, LessonResult } from '../domain/korean/lesson-session'
 import type { Lesson } from '../domain/models/lesson'
 import type { OnePageLearningCheckpoint, OnePagePartialLessonResult } from '../domain/models/one-page-learning-checkpoint'
@@ -39,6 +40,8 @@ function lessonResult(partial: OnePagePartialLessonResult, now: Date): LessonRes
     acceptedKeystrokes: partial.acceptedKeystrokes,
     rejectedKeystrokes: partial.rejectedKeystrokes,
     mistakes: partial.mistakes,
+    exercises: partial.exercises ?? [],
+    ...(partial.jamoCounts ? { jamoCounts: partial.jamoCounts } : {}),
   }
 }
 
@@ -81,6 +84,13 @@ export async function recordOnePageExercise(
         mistakes: input.result.mistakes.length > 0
           ? [...existing.mistakes, { sourceExerciseId: input.result.exerciseId, targetText: input.result.targetText }]
           : existing.mistakes,
+        exercises: [...(existing.exercises ?? []), {
+          targetText: input.result.targetText,
+          mistakeCount: input.result.mistakes.length,
+          typingSeconds: input.result.typingSeconds ?? 0,
+          elapsedSeconds: input.result.elapsedSeconds ?? 0,
+        }],
+        jamoCounts: mergeJamoCounts(existing.jamoCounts, jamoCountsFrom([input.result])),
       }
   const nextCheckpoint: OnePageLearningCheckpoint = {
     ...checkpoint,

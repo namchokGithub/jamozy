@@ -45,7 +45,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-025 | Vocabulary import identity and nullable meanings; simplify persisted Progress states                                                                              | Accepted                                                                                               | 2026-09-27 |
 | DEC-026 | Learning Modes, shared learner state, and contiguous progression frontier                                                                                         | Accepted (Home course exception: DEC-043)                                                              | 2026-09-27 |
 | DEC-027 | Guest local persistence and migration to authenticated accounts                                                                                                   | Accepted                                                                                               | 2026-09-27 |
-| DEC-028 | Shared learner-state checkpoints and Daily Quest completion                                                                                                       | Accepted                                                                                               | 2026-09-27 |
+| DEC-028 | Shared learner-state checkpoints and Daily Quest completion                                                                                                       | Accepted (JamoStat storage amended by DEC-050)                                                         | 2026-09-27 |
 | DEC-029 | Session history separated from learner state and lifetime aggregates                                                                                              | Accepted (`home` session context: DEC-043)                                                             | 2026-09-28 |
 | DEC-030 | Guest-to-account migration merge policy                                                                                                                           | Accepted (Home exercise-progress merge: DEC-043)                                                       | 2026-09-28 |
 | DEC-031 | Preserve pre-session learner values as a compatibility baseline                                                                                                   | Accepted                                                                                               | 2026-09-28 |
@@ -63,6 +63,9 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-046 | Difficulty-based EXP rewards for completed-lesson replays                                                                                                         | Accepted                                                                                               | 2026-10-06 |
 | DEC-047 | Content documents store descendant counts, kept by atomic writes                                                                                                  | Accepted                                                                                               | 2026-10-08 |
 | DEC-048 | Level is derived, never stored, using the LEVELING.md curve                                                                                                       | Accepted                                                                                               | 2026-10-08 |
+| DEC-049 | Player stats fold into lifetime, daily, and monthly state in the submit transaction                                                                               | Accepted                                                                                               | 2026-10-09 |
+| DEC-050 | Key-level jamo stats live in one map document, updated in the submit transaction                                                                                  | Accepted                                                                                               | 2026-10-09 |
+| DEC-051 | Weak Jamo practice picks Home exercises by the learner's weakest key-level jamo                                                                                   | Accepted                                                                                               | 2026-10-09 |
 
 ## Superseded index (history only)
 
@@ -1268,3 +1271,189 @@ legacy plus session-tracked EXP (`totalExp`). Rebirth, Rank, Perk, and `Progress
 scoped by `docs/superpowers/specs/2026-10-06-player-progression-models-design.md`
 and are not adopted here. Alternative considered: starting the soft cap at
 Level 110; rejected, the Level 100 wall is intended.
+
+## DEC-049 — Player stats fold into lifetime, daily, and monthly state in the submit transaction
+
+**Date:** 2026-10-09
+**Status:** Accepted
+**Related:** [[DEC-029]], [[DEC-030]], [[DEC-031]], [[DEC-043]], [[DEC-048]];
+spec `docs/superpowers/specs/2026-10-09-player-stats-design.md`
+
+**Decision:** Clients measure a small `ExerciseStat` per finished exercise:
+target text, mistakes, typing seconds, and elapsed seconds. Use cases fold
+these into optional `LearningSession` fields. The fields are `localDate`,
+`timeZone`, `typingSeconds`, `learningSeconds` (Home), `charactersTyped`,
+`wordsPracticed`, `sentencesPracticed`, `exerciseMistakes`, and `isReplay`.
+
+Every adapter calls one pure function, `applySessionStats`, inside its existing
+receipt-gated submit transaction. That covers the Firestore submit, the
+IndexedDB `putSessionOnce`, and Guest→account `migrateSessionOutcome`. The
+function updates three things together:
+
+- `UserProfile.playerStats`: active days, streak, perfect streak, and records.
+- `users/{id}/dailyStats/{YYYY-MM-DD}`.
+- `users/{id}/monthlyStats/{YYYY-MM}`.
+
+`sessionAggregate` gains lifetime sums and maximums.
+
+| Topic | Rule |
+| --- | --- |
+| Words / sentences / characters | By lesson type: `word` → words; `phrase`/`sentence` → sentences. Characters are Hangul syllables of finished targets, spaces excluded. Review uses each item's `sourceLessonType`, and counts characters only when it is absent. |
+| Perfect lesson | Lesson modes (`learning-path`, `home`) with `rejectedKeystrokes === 0`, replays included; Review never. |
+| Perfect streak | Exercises without a mistake in a row, continuing across sessions. |
+| Typing vs Learning Time | Typing runs from the first to the last keystroke per exercise, skipping gaps over 10 seconds. Learning is session length (`sessionAggregate.totalTypingTimeSeconds` keeps its name). Home uses summed per-exercise elapsed time, so a lesson resumed the next day does not count the night. |
+| Active day / streak | A `localDate` with at least one submitted session in any mode. A late session adds to its day but never changes the streak. |
+| Timezone | `UserProfile.timezone` (IANA) per adapter, filled from the first session's device zone. `localDate` is fixed on the session at submit. |
+| Old data | Not backfilled; all new stats start at zero on deploy. |
+
+**Why:** Day and month totals, streaks, and records need the current state, so
+blind `increment()` writes would still need reads. That would also split the
+logic between Firestore and IndexedDB. Computing from `learningSessions` on
+read would scan all history on every Profile view, which is what [[DEC-029]]'s
+aggregates avoid. One pure fold in the existing transaction keeps both adapters
+identical, deduplicated by the receipt, and unit-testable.
+
+**Consequences:**
+
+- Each submit reads and writes two more documents.
+- Firestore Rules allow owner-only `dailyStats` and `monthlyStats`.
+- The Guest IndexedDB moves to version 7.
+- Optional fields are omitted rather than stored as `undefined`, because
+  Firestore rejects undefined values. For example, `toReviewItem` leaves out
+  `sourceLessonType` when it is absent.
+- Migration applies Guest outcomes oldest first and never merges Guest
+  `playerStats` directly.
+- Item stats (per jamo or word), Rebirth/Rank/Perk state, Streak Guard, and
+  Profile UI are out of scope.
+- Rejected alternatives: blind increments; read-time aggregation; weekly and
+  yearly docs (a Week view reads 7 day docs, a Year view 12 month docs).
+
+## DEC-050 — Key-level jamo stats live in one map document, updated in the submit transaction
+
+**Date:** 2026-10-09
+**Status:** Accepted
+**Amends:** [[DEC-028]] (JamoStat storage)
+**Related:** [[DEC-030]], [[DEC-049]]; spec
+`docs/superpowers/specs/2026-10-09-jamo-stats-design.md`
+
+**Decision:** JamoStat keeps [[DEC-028]]'s fields and counting rule. Its
+storage moves from one document per jamo to one map document,
+`users/{userId}/learnerStats/jamo`. Guests use IndexedDB store `learnerStats`
+(DB version 8). Jamo are counted at the key level, `ExpectedKey.jamo`:
+
+- `ㅘ` = `ㅗ` + `ㅏ`, `ㄳ` = `ㄱ` + `ㅅ`, and `ㄲ` is one key.
+- Literal keys (space, punctuation) are skipped.
+- A target the keymap cannot type contributes only its mistakes.
+
+The flow per submit:
+
+1. Clients derive `JamoCounts` from finished exercises.
+2. Use cases pass them as `SessionSubmissionEffects.jamoCounts`, never as a
+   `LearningSession` field.
+3. Both adapters read the map, apply `applyJamoCounts`, and write it back
+   inside the existing receipt-gated submit transaction.
+4. Actions drop invalid counts (unknown key, or not an integer in 0..10,000)
+   and still save the session.
+
+Rankings are derived on read:
+
+- Most Practiced and Most Mistyped.
+- Weakest and Strongest, by mistake rate over jamo with at least 20 attempts;
+  ties go to more attempts.
+- Best Accuracy Lesson and Most Replayed Lesson, from completed
+  `LessonProgress`.
+
+**Why:**
+
+- About 33 key-level jamo fit one small document (a few KB). Each submit then
+  costs one read and one write, not one for each of the 10–20 distinct jamo in
+  a session.
+- Rankings read one document.
+- A pure fold inside the existing transaction stays deduplicated by the receipt
+  and identical across Firestore and IndexedDB.
+
+**Consequences:**
+
+- **Rules:** owner-only `learnerStats/{statsId}`.
+- **Migration (an exception to [[DEC-030]]):** `migrateSessionOutcome` does not
+  apply jamo counts, so an account starts its jamo stats at login. Guest counts
+  remain only in Guest receipts.
+- **Queries:** no server-side query over individual jamo; the map is filtered on
+  the client.
+- **Out of scope:** composed-jamo stats, word stats (pending `VocabularyEntry`),
+  Personalized Review (next spec), and UI.
+- **Rejected:** per-jamo documents (10–20 reads and writes per submit),
+  fire-and-forget writes (lost or double counts), and `increment()` per field
+  (still needs `firstPracticedAt`, and splits logic from IndexedDB).
+
+## DEC-051 — Weak Jamo practice picks Home exercises by the learner's weakest key-level jamo
+
+**Date:** 2026-10-09
+**Status:** Accepted
+**Related:** [[DEC-043]], [[DEC-045]], [[DEC-049]], [[DEC-050]]; spec
+`docs/superpowers/specs/2026-10-09-weak-jamo-practice-design.md`
+
+**Decision:** A `weak-jamo` practice mode, opened from `/review` and played at
+`/review/weak-jamo`:
+
+- **Targets:** up to 3 key-level jamo with at least 20 attempts and a mistake
+  rate above 0, highest rate first; ties go to more attempts.
+- **Content:** up to 10 Home static-export exercises, drawn at random from the
+  30 highest scores. Score = Σ (target-jamo keys × that jamo's mistake rate).
+  Exercises that score 0 are skipped, and IDs are `${lessonId}:${exerciseId}`.
+- **Recording:** sessions use context `{ mode: 'weak-jamo' }` with
+  `expGained: 0`. Their effects are only `jamoCounts`; no `ReviewItem` or
+  `Progress` change.
+- **Stats:** Player Stats gain `practicesCompleted`. `periodStatsFrom` now names
+  lesson modes explicitly (`learning-path`, `home`), so practice modes no longer
+  count as lessons or perfect lessons.
+- **UI:** the Review typing session is generalized (exercises plus a body
+  builder) and offers a same-ID retry when saving fails.
+
+**Why:**
+
+- The Home export is already loaded and cached, so building a session reads no
+  Firestore content.
+- It reuses jamo stats ([[DEC-050]]) and the Review player.
+- Leaving `ReviewItem` alone keeps the Leitner queue meaningful.
+
+**Consequences:**
+
+- Practice EXP ([[DEC-045]]) stays deferred for every practice mode.
+- Learners whose weak jamo appear in no Home exercise see no entry.
+- Rejected:
+  - selecting from `ReviewItem` (too few items);
+  - synthetic syllable drills (meaningless text);
+  - reading completed Learning Path lessons (reads grow with progress);
+  - reusing the `review` context (mixes stats).
+
+**Amendment (2026-10-09):** `/review` always shows the entry and a per-jamo
+accuracy grid.
+
+- **Grid:** the 33 letter keys in four groups. A cell is colored only from 20
+  attempts: < 70% red, 70–90% yellow, 90%+ green. Below that it shows the
+  accuracy in gray.
+- **Entry card:** stays locked with progress (the practiced jamo closest to 20
+  attempts) until a target exists.
+- **Chosen jamo:** tapping a red or yellow cell whose jamo appears in Home opens
+  `/review/weak-jamo?jamo=…`. That jamo becomes the only target under the same
+  ranking rule; otherwise the page redirects to `/review`.
+
+**Amendment (2026-10-09, recent accuracy):** each JamoStat also keeps
+`recentAccepted` and `recentRejected`.
+
+- **Update rule:** on each submit that practices the jamo, the stored recent
+  counts are multiplied by 0.9 and the session's counts are added.
+- **What uses them:** mistake rates for Weakest/Strongest, Weak Jamo targets, and
+  the grid's accuracy. Lifetime counts still gate ranking (20 attempts) and
+  drive Most Practiced/Mistyped.
+- **Old data:** stats stored before this read their lifetime counts as recent;
+  no migration.
+- **Why:** lifetime accuracy barely moves after many attempts, so a learner who
+  improved would stay red.
+- **Trade-offs:**
+  - The window is counted in sessions, not time.
+  - Rarely practiced jamo keep old data longer.
+  - The decay factor cannot be applied retroactively.
+- **Rejected:** keeping the last 50 attempts per jamo (a larger document).
+

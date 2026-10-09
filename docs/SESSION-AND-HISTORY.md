@@ -11,6 +11,7 @@ remain target work.
 | `LearningSession` | What happened in this practice activity? | immutable historical record |
 | learner state | Where is the learner now? | current `LessonProgress`, `VocabularyProgress`, `JamoStat`, `ReviewItem`, and `DailyQuestProgress` |
 | `UserStats` | What are the lifetime aggregates? | cheap aggregate snapshot |
+| Player Stats | What did the learner do per day/month, and what are the streaks and records? | `playerStats` on the profile plus `dailyStats`/`monthlyStats` docs ([[DEC-049]]) |
 
 `LearningSession` is not live typing state, a source of truth for current
 learner state, a reward decision, or a progression mechanism. Live typing data
@@ -26,6 +27,7 @@ Submitted Session Result
         |
         +--> shared learner-state aggregation
         |      ├─ UserStats
+        |      ├─ Player Stats (playerStats, dailyStats, monthlyStats)
         |      ├─ VocabularyProgress / JamoStat
         |      └─ ReviewItem where applicable
         |
@@ -38,7 +40,8 @@ Submitted Session Result
 
 All effects above belong to one logical submission. Lesson and Review use a
 receipt keyed by `sessionId`: Guest storage uses one IndexedDB transaction and
-authenticated storage uses one Firestore transaction. Other modes must adopt
+authenticated storage uses one Firestore transaction. Weak Jamo practice
+(`weak-jamo`, [[DEC-051]]) uses the same receipt boundary. Other modes must adopt
 the same checkpoint boundary when implemented.
 
 No record is written per keystroke. MVP history contains submitted/completed
@@ -124,10 +127,18 @@ History is a future read/query over `LearningSession` records. It may show a
 session's context, duration, derived accuracy/WPM, and EXP without rebuilding
 activity from `UserStats`.
 
-Future Summary may initially aggregate sessions by day, week, or month for
-counts, typing time, and trends. Do not add persisted DailySummary or
-WeeklySummary documents, caching, analytics schemas, or event pipelines until
-real query/cost requirements justify them.
+Day and month totals are persisted as `dailyStats/{YYYY-MM-DD}` and
+`monthlyStats/{YYYY-MM}` ([[DEC-049]]).
+
+- They are written in the same receipt-gated transaction as the session, from
+  the session's fixed `localDate`.
+- A Week view reads 7 day docs, and a Year view reads 12 month docs.
+- They are derived counters, not history: `LearningSession` stays the record of
+  what happened.
+- Sessions submitted before DEC-049 are not backfilled.
+
+Do not add weekly or yearly docs, analytics schemas, or event pipelines until
+real query or cost requirements justify them.
 
 Retries are separate historical activities and may create their own
 LearningSession. Their EXP and curriculum effects remain governed by the

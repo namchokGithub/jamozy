@@ -177,6 +177,60 @@ describe('recordHomeExercise', () => {
     expect(submissions).toHaveLength(1)
   })
 
+  it('accumulates exercise stats across visits and submits them on completion', async () => {
+    const { deps, submissions } = setup()
+    const wordLesson = { ...lesson, type: 'word' as const }
+    const timed = (id: string, typingSeconds: number, elapsedSeconds: number) => ({ ...result(id), typingSeconds, elapsedSeconds })
+
+    await recordHomeExercise(deps, { userId: 'u1', lesson: wordLesson, result: timed('e1', 2, 3), submissionId: 's1', now: new Date('2026-10-09T01:00:00Z') })
+    await recordHomeExercise(deps, { userId: 'u1', lesson: wordLesson, result: timed('e2', 1, 2), submissionId: 's2', now: new Date('2026-10-09T01:01:00Z') })
+    // The last exercise comes back the next day: learning time must not
+    // include the night in between.
+    await recordHomeExercise(deps, { userId: 'u1', lesson: wordLesson, result: timed('e3', 3, 4), submissionId: 's3', now: new Date('2026-10-10T09:00:00Z') })
+
+    expect(submissions[0].session).toMatchObject({
+      typingSeconds: 6,
+      learningSeconds: 9,
+      charactersTyped: 3,
+      wordsPracticed: 3,
+      exerciseMistakes: [0, 0, 0],
+      isReplay: false,
+    })
+  })
+
+  it('submits a job queued before stats existed, without a type or timing', async () => {
+    const { deps, submissions } = setup()
+    for (const id of ['e1', 'e2', 'e3'])
+      await recordHomeExercise(deps, { userId: 'u1', lesson, result: result(id), submissionId: `s-${id}`, now: at(0) })
+
+    expect(submissions[0].session).toMatchObject({
+      typingSeconds: 0,
+      learningSeconds: 0,
+      wordsPracticed: 0,
+      sentencesPracticed: 0,
+      charactersTyped: 3,
+    })
+  })
+
+  it('accumulates jamo counts across exercises and submits them on completion', async () => {
+    const { deps, submissions } = setup()
+    for (const id of ['e1', 'e2', 'e3'])
+      await recordHomeExercise(deps, { userId: 'u1', lesson, result: result(id, 2, id === 'e2' ? 1 : 0), submissionId: `s-${id}`, now: at(0) })
+    // Each target is '가'; the mistake fixture expects ㄱ.
+    expect(submissions[0].effects.jamoCounts).toEqual({ ㄱ: { accepted: 3, rejected: 1 }, ㅏ: { accepted: 3, rejected: 0 } })
+  })
+
+  it('counts only new exercises for a partial result saved before jamo counts', async () => {
+    const { deps, progressRepo, submissions } = setup()
+    await progressRepo.saveProgress('u1', {
+      lessonId: 'lesson-1', status: 'unlocked', bestAccuracy: 0, bestSpeedWpm: 0, attempts: 0, lastAttemptAt: at(0), completedAt: null,
+      completedExerciseIds: ['e1', 'e2'],
+      homePartialResult: { submissionId: 's-old', startedAtMs: at(0).getTime(), acceptedKeystrokes: 4, rejectedKeystrokes: 0 },
+    })
+    await recordHomeExercise(deps, { userId: 'u1', lesson, result: result('e3'), submissionId: 'x', now: at(10) })
+    expect(submissions[0].effects.jamoCounts).toEqual({ ㄱ: { accepted: 1, rejected: 0 }, ㅏ: { accepted: 1, rejected: 0 } })
+  })
+
   it('rejects an exercise that is not part of the lesson', async () => {
     const { deps } = setup()
     await expect(
@@ -239,6 +293,31 @@ describe('submitHomeReplay', () => {
       completedExerciseIds: ['e1', 'e2', 'e3'],
       attempts: 2,
       lastAttemptAt: at(130),
+    })
+  })
+
+  it('marks a replay and counts sentences from the lesson type', async () => {
+    const { deps, submissions } = await completedSetup()
+
+    await submitHomeReplay(deps, {
+      userId: 'u1',
+      lessonId: 'lesson-1',
+      sessionId: 'replay-1',
+      totals: {
+        ...totals,
+        exercises: [
+          { targetText: '안녕 하세요', mistakeCount: 0, typingSeconds: 2, elapsedSeconds: 3 },
+        ],
+      },
+      lessonType: 'sentence',
+      now: at(130),
+    })
+
+    expect(submissions.at(-1)?.session).toMatchObject({
+      isReplay: true,
+      sentencesPracticed: 1,
+      charactersTyped: 5,
+      learningSeconds: 3,
     })
   })
 

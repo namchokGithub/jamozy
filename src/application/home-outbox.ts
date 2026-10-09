@@ -4,6 +4,7 @@ import type {
   HomeSessionTotals,
   HomeSyncJob,
 } from '../domain/models/home-sync-job'
+import type { LessonType } from '../domain/models/lesson'
 import type { HomeSyncJobRepository } from '../domain/repositories/home-sync-job-repository'
 import {
   recordHomeExercise,
@@ -38,7 +39,7 @@ export class HomeOutbox {
 
   async enqueueExercise(input: {
     userId: string
-    lesson: { id: string; exercises: Array<{ id: string }> }
+    lesson: { id: string; type?: LessonType; exercises: Array<{ id: string }> }
     result: ExerciseResult
     submissionId: string
   }): Promise<void> {
@@ -56,6 +57,7 @@ export class HomeOutbox {
     lessonId: string
     sessionId: string
     totals: HomeSessionTotals
+    lessonType?: LessonType
   }): Promise<void> {
     await this.enqueue({
       ...this.newJob(input.userId),
@@ -63,6 +65,7 @@ export class HomeOutbox {
       lessonId: input.lessonId,
       sessionId: input.sessionId,
       totals: input.totals,
+      lessonType: input.lessonType,
     })
   }
 
@@ -150,6 +153,7 @@ export class HomeOutbox {
       sessionId: job.sessionId,
       totals: job.totals,
       now: job.enqueuedAt,
+      lessonType: job.lessonType,
     })
   }
 

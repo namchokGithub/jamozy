@@ -257,6 +257,14 @@ function AccountNav({
                 >
                   Profile
                 </Link>
+                <Link
+                  to="/review"
+                  role="menuitem"
+                  onClick={() => setUserMenuOpen(false)}
+                  className="flex rounded-xl px-3 py-2 text-sm font-medium text-[#39465b] transition hover:bg-[#f7f0e8] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#bc6c5d]"
+                >
+                  Review
+                </Link>
                 <button
                   type="button"
                   role="menuitem"

@@ -25,7 +25,11 @@ export async function getProfileSummary(
   now: Date = new Date(),
 ): Promise<ProfileSummary> {
   const profile = await userProfileRepo.getUserProfile(userId)
-  const resolved = profile ?? defaultUserProfile(userId, now)
+  const fallback = defaultUserProfile(userId, now)
+  // Guest profiles skip the Firestore mapper, so guard missing stats here too.
+  const resolved = profile
+    ? { ...profile, stats: profile.stats ?? fallback.stats }
+    : fallback
   const sessionAggregate = resolved.sessionAggregate ?? emptySessionAggregate()
   const exp = totalExp(resolved)
   const hasLegacyBaseline =

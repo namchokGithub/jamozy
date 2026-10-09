@@ -68,7 +68,7 @@ export const useOnePagePlayerStore = create<OnePagePlayerStore>((set, get) => ({
   pressKey: (code, shiftKey) => {
     const state = get()
     if (!state.session) return null
-    const next = pressKeyReducer(state.session, code, shiftKey)
+    const next = pressKeyReducer(state.session, code, shiftKey, Date.now())
     const result = next.lastCompletedExercise
     if (!result) {
       set({ session: next })

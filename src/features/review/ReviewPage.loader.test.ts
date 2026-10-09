@@ -4,6 +4,7 @@ import {
   FakeLessonRepository,
   FakeReviewRepository,
   FakeUserProfileRepository,
+  FakeJamoStatsRepository,
 } from '../../test/fakes'
 import type { ReviewItem } from '../../domain/models/review-item'
 import type { Lesson } from '../../domain/models/lesson'
@@ -90,5 +91,23 @@ describe('createReviewLoader', () => {
 
     expect(data.previews).toEqual([{ item: makeItem('missing', { sourceLessonId: 'gone' }), exercise: null }])
     expect(data.settings).toMatchObject({ romanizationEnabled: false, meaningLanguage: 'th' })
+  })
+
+  it('keeps previews and the jamo grid, without practice, when Home content fails', async () => {
+    const reviewRepo = new FakeReviewRepository()
+    await reviewRepo.addReviewItem('user1', makeItem('due'))
+    const loader = createReviewLoader({
+      reviewRepo,
+      lessonRepo: new FakeLessonRepository([makeLesson('l1')]),
+      userProfileRepo: new FakeUserProfileRepository(),
+      jamoStatsRepo: new FakeJamoStatsRepository(),
+      contentRepo: { getHomeContent: async () => { throw new Error('offline') } },
+      ensureUser: vi.fn().mockResolvedValue({ uid: 'user1' }),
+    })
+
+    const data = await loader()
+
+    expect(data.previews).toHaveLength(1)
+    expect(data.jamoOverview).toEqual({ stats: {}, weakJamo: null, practicable: [] })
   })
 })

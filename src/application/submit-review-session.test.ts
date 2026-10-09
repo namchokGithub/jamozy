@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { submitReviewSession, type SubmitReviewSessionResult } from './submit-review-session'
 import { FakeReviewRepository, FakeSessionSubmissionRepository } from '../test/fakes'
+import { FakeUserProfileRepository } from '../test/fakes'
 import type { ReviewItem } from '../domain/models/review-item'
 
 function makeItem(id: string, overrides: Partial<ReviewItem> = {}): ReviewItem {
@@ -81,5 +82,23 @@ describe('submitReviewSession', () => {
 
     expect(outcome).toEqual({ correctCount: 0, needsPracticeCount: 0 })
     expect(sessionSubmissionRepo.submissions[0]?.effects.reviewItems).toEqual([])
+  })
+
+  it("submits stats using each review item's lesson type", async () => {
+    const repo = new FakeReviewRepository()
+    const sessionSubmissionRepo = new FakeSessionSubmissionRepository()
+    const userProfileRepo = new FakeUserProfileRepository()
+    await repo.addReviewItem('u1', makeItem('a', { targetText: '안녕 하세요', sourceLessonType: 'sentence' }))
+    await repo.addReviewItem('u1', makeItem('b', { targetText: '가' }))
+    await submitReviewSession({ reviewRepo: repo, sessionSubmissionRepo, userProfileRepo }, 'u1', input([{ itemId: 'a', wasCorrect: true, mistakeCount: 0, typingSeconds: 3, elapsedSeconds: 4 }, { itemId: 'b', wasCorrect: false, mistakeCount: 2, typingSeconds: 1, elapsedSeconds: 1 }]), new Date('2026-10-09T01:00:00Z'))
+    expect(sessionSubmissionRepo.submissions[0]?.session).toMatchObject({ context: { mode: 'review' }, charactersTyped: 6, sentencesPracticed: 1, wordsPracticed: 0, typingSeconds: 4, exerciseMistakes: [0, 2] })
+  })
+
+  it('passes jamo counts to the submission effects', async () => {
+    const repo = new FakeReviewRepository()
+    const sessionSubmissionRepo = new FakeSessionSubmissionRepository()
+    await repo.addReviewItem('u1', makeItem('a'))
+    await submitReviewSession({ reviewRepo: repo, sessionSubmissionRepo }, 'u1', { ...input([{ itemId: 'a', wasCorrect: true }]), jamoCounts: { ㄱ: { accepted: 1, rejected: 0 } } })
+    expect(sessionSubmissionRepo.submissions[0]?.effects.jamoCounts).toEqual({ ㄱ: { accepted: 1, rejected: 0 } })
   })
 })

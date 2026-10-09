@@ -3,6 +3,7 @@ import { defaultUserProfile } from './user-profile'
 import type { Progress } from './progress'
 import type { ReviewItem } from './review-item'
 import { mergeProfile, mergeProgress, mergeReviewItem } from './guest-migration'
+import { emptyPlayerStats } from './player-stats'
 
 const guestProfile = {
   ...defaultUserProfile('guest-1', new Date('2026-01-01'), 'Guest#0042'),
@@ -50,6 +51,13 @@ describe('guest migration merge rules', () => {
     expect(merged.legacyBaseline?.exp).toBe(250)
     expect(merged.exp).toBe(250)
     expect(merged.settings).toEqual(guestProfile.settings)
+  })
+
+  it('keeps the cloud timezone and player stats; falls back to the guest timezone', () => {
+    const cloud = { ...defaultUserProfile('account-1', new Date()), timezone: 'Asia/Seoul', playerStats: { ...emptyPlayerStats(), activeDays: 3 } }
+    const guest = { ...guestProfile, timezone: 'Asia/Bangkok', playerStats: { ...emptyPlayerStats(), activeDays: 9 } }
+    expect(mergeProfile(cloud, guest)).toMatchObject({ timezone: 'Asia/Seoul', playerStats: { activeDays: 3 } })
+    expect(mergeProfile({ ...cloud, timezone: undefined }, guest)?.timezone).toBe('Asia/Bangkok')
   })
 
   it('keeps the furthest progress and its best results', () => {

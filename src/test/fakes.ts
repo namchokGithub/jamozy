@@ -1,3 +1,5 @@
+import type { JamoStats } from '../domain/models/jamo-stat'
+import type { JamoStatsRepository } from '../domain/repositories/jamo-stats-repository'
 import type { CourseRepository } from '../domain/repositories/course-repository'
 import type { LessonRepository } from '../domain/repositories/lesson-repository'
 import type { ProgressRepository } from '../domain/repositories/progress-repository'
@@ -367,5 +369,13 @@ export class FakeHomeSyncJobRepository implements HomeSyncJobRepository {
   async remove(job: HomeSyncJob) {
     const index = this.jobs.findIndex(({ id }) => id === job.id)
     if (index !== -1) this.jobs.splice(index, 1)
+  }
+}
+
+export class FakeJamoStatsRepository implements JamoStatsRepository {
+  constructor(private readonly stats: Record<string, JamoStats> = {}) {}
+
+  async getJamoStats(userId: string): Promise<JamoStats> {
+    return this.stats[userId] ?? {}
   }
 }

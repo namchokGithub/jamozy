@@ -1,4 +1,5 @@
 import type { ProgressRepository } from '../domain/repositories/progress-repository'
+import type { LessonType } from '../domain/models/lesson'
 import {
   homeAttemptProgress,
   submitHomeSession,
@@ -19,6 +20,7 @@ export interface SubmitHomeReplayInput {
   // A new ID per replay session ([[DEC-029]]); reused only by retries.
   sessionId: string
   totals: HomeSessionTotals
+  lessonType?: LessonType
   now?: Date
 }
 
@@ -46,5 +48,7 @@ export async function submitHomeReplay(
       completedExerciseIds: existing.completedExerciseIds ?? [],
     }),
     now,
+    lessonType: input.lessonType,
+    isReplay: true,
   })
 }

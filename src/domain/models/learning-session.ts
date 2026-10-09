@@ -2,6 +2,7 @@ export type LearningSessionContext =
   | { mode: 'learning-path'; lessonId: string }
   | { mode: 'home'; lessonId: string }
   | { mode: 'review' }
+  | { mode: 'weak-jamo' }
 
 export interface LearningSession {
   id: string
@@ -13,6 +14,24 @@ export interface LearningSession {
   acceptedKeystrokes: number
   rejectedKeystrokes: number
   expGained: number
+  // Player stats (DEC-049); absent on sessions before it.
+  localDate?: string
+  // Player stats (DEC-049); absent on sessions before it.
+  timeZone?: string
+  // Player stats (DEC-049); absent on sessions before it.
+  typingSeconds?: number
+  // Player stats (DEC-049); absent on sessions before it.
+  learningSeconds?: number
+  // Player stats (DEC-049); absent on sessions before it.
+  charactersTyped?: number
+  // Player stats (DEC-049); absent on sessions before it.
+  wordsPracticed?: number
+  // Player stats (DEC-049); absent on sessions before it.
+  sentencesPracticed?: number
+  // Player stats (DEC-049); absent on sessions before it.
+  exerciseMistakes?: number[]
+  // Player stats (DEC-049); absent on sessions before it.
+  isReplay?: boolean
 }
 
 export function sessionAccuracy(session: Pick<LearningSession, 'acceptedKeystrokes' | 'rejectedKeystrokes'>): number {

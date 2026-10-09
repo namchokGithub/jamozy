@@ -72,8 +72,11 @@ repositories remain shared read access; learner-state repositories select the
 local or Firebase adapter based on the session. IndexedDB, not `localStorage`,
 is the primary local store for guest lesson progress, vocabulary progress,
 review items, jamo stats, daily quests, learning-session history, user stats,
-and profile. `localStorage` may hold only small UI/session hints where
-appropriate.
+profile, and Player Stats day/month records (`dailyStats`, `monthlyStats`
+stores) and jamo stats (`learnerStats` store, DB version 8). `localStorage` may hold only small UI/session hints
+where appropriate. Each adapter stores `UserProfile.timezone` with its profile
+(Guest: IndexedDB; account: Firestore); it is filled from the first submitted
+session's device zone ([[DEC-049]]).
 
 Because Guests do not authenticate with Firebase yet access the same learning
 content, a future Firestore-rules implementation must permit the required
@@ -141,6 +144,9 @@ history record.
 | `displayName` | Prefer Cloud; use the Guest name only when the account has no name. |
 | `bestAccuracy` / `bestWpm` | Keep the maximum value. |
 | `LearningSession` | Union by the original `sessionId`; do not recreate a record during migration or retry. |
+| Player Stats ([[DEC-049]]) | Never merge Guest `playerStats` or period docs directly. Re-apply each not-yet-migrated session outcome, oldest `completedAt` first, in its receipt transaction. A Guest session dated before the account's `lastActiveDate` adds to its day but leaves the streak. |
+| `timezone` | Prefer Cloud; use the Guest zone only when the account has none. |
+| Jamo stats ([[DEC-050]]) | Not migrated: the account keeps its own `learnerStats/jamo`. Guest jamo counts stay only in the Guest receipts. |
 
 Local Guest data remains until migration succeeds; it must never be deleted
 before a successful, durable Cloud write.

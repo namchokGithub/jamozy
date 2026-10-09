@@ -8,6 +8,11 @@ export function toReviewItem(id: string, data: Record<string, unknown>): ReviewI
     id,
     sourceLessonId: data.sourceLessonId as string,
     sourceExerciseId: data.sourceExerciseId as string,
+    // Only when stored: items are written back whole, and Firestore rejects
+    // undefined field values.
+    ...(typeof data.sourceLessonType === 'string'
+      ? { sourceLessonType: data.sourceLessonType as ReviewItem['sourceLessonType'] }
+      : {}),
     targetText: data.targetText as string,
     reason: data.reason as ReviewItem['reason'],
     mistakeCount: data.mistakeCount as number,
@@ -22,6 +27,7 @@ export function toReviewItemDoc(item: ReviewItem) {
   return {
     sourceLessonId: item.sourceLessonId,
     sourceExerciseId: item.sourceExerciseId,
+    ...(item.sourceLessonType ? { sourceLessonType: item.sourceLessonType } : {}),
     targetText: item.targetText,
     reason: item.reason,
     mistakeCount: item.mistakeCount,

@@ -243,5 +243,36 @@ describe('completeLessonSession', () => {
     expect(outcome.expGained).toBe(15)
     expect(outcome.progress.status).toBe('completed')
     expect(outcome.unlockedNextLessonId).toBeNull()
+    expect(deps.sessionSubmissionRepo.submissions[0]?.session.isReplay).toBe(true)
+  })
+
+  it('includes per-exercise player stats and lesson type in the submitted session', async () => {
+    const deps = { courseRepo: new FakeCourseRepository([], [makeUnit('u1')]), lessonRepo: new FakeLessonRepository([makeLesson('l1', 'u1')]), progressRepo: new FakeProgressRepository(), userProfileRepo: new FakeUserProfileRepository(), reviewRepo: new FakeReviewRepository(), sessionSubmissionRepo: new FakeSessionSubmissionRepository() }
+    await deps.userProfileRepo.saveUserProfile('user1', { ...defaultUserProfile('user1', new Date()), timezone: 'Asia/Bangkok' })
+    await completeLessonSession(deps, 'user1', 'l1', { accuracy: 90, speedWpm: 20, durationSeconds: 30, startedAtMs: 0, exercisesAttempted: 2, acceptedKeystrokes: 5, rejectedKeystrokes: 1, mistakes: [{ sourceExerciseId: 'ex1', targetText: '사과' }], exercises: [{ targetText: '사과', mistakeCount: 0, typingSeconds: 2, elapsedSeconds: 3 }, { targetText: '바나나', mistakeCount: 1, typingSeconds: 4, elapsedSeconds: 5 }] }, 'stats-1', new Date('2026-10-09T17:30:00Z'))
+    expect(deps.sessionSubmissionRepo.submissions[0]?.session).toMatchObject({ localDate: '2026-10-10', timeZone: 'Asia/Bangkok', typingSeconds: 6, charactersTyped: 5, wordsPracticed: 2, exerciseMistakes: [0, 1], isReplay: false })
+    expect(deps.sessionSubmissionRepo.submissions[0]?.effects.reviewItems[0]).toMatchObject({ sourceLessonType: 'word' })
+  })
+
+  // Firestore rejects undefined field values, so a missing lesson must leave
+  // the key out rather than store sourceLessonType: undefined.
+  it('omits the source lesson type from review items when the lesson is not found', async () => {
+    const deps = { courseRepo: new FakeCourseRepository([], [makeUnit('u1')]), lessonRepo: new FakeLessonRepository([]), progressRepo: new FakeProgressRepository(), userProfileRepo: new FakeUserProfileRepository(), reviewRepo: new FakeReviewRepository(), sessionSubmissionRepo: new FakeSessionSubmissionRepository() }
+    const result = { accuracy: 50, speedWpm: 20, durationSeconds: 30, startedAtMs: 0, exercisesAttempted: 2, acceptedKeystrokes: 2, rejectedKeystrokes: 2, mistakes: [{ sourceExerciseId: 'ex1', targetText: '가' }] }
+    await completeLessonSession(deps, 'user1', 'l1', result, 'missing-1', new Date('2026-01-02'))
+    expect(deps.sessionSubmissionRepo.submissions[0]?.effects.reviewItems[0]).not.toHaveProperty('sourceLessonType')
+
+    await deps.reviewRepo.addReviewItem('user1', { ...deps.sessionSubmissionRepo.submissions[0]!.effects.reviewItems[0]!, id: 'ex2', sourceExerciseId: 'ex2' })
+    await completeLessonSession(deps, 'user1', 'l1', { ...result, mistakes: [{ sourceExerciseId: 'ex2', targetText: '가' }] }, 'missing-2', new Date('2026-01-03'))
+    expect(deps.sessionSubmissionRepo.submissions[1]?.effects.reviewItems[0]).not.toHaveProperty('sourceLessonType')
+  })
+
+  it('passes jamo counts to the submission effects only when the result has them', async () => {
+    const deps = { courseRepo: new FakeCourseRepository([], [makeUnit('u1')]), lessonRepo: new FakeLessonRepository([makeLesson('l1', 'u1')]), progressRepo: new FakeProgressRepository(), userProfileRepo: new FakeUserProfileRepository(), reviewRepo: new FakeReviewRepository(), sessionSubmissionRepo: new FakeSessionSubmissionRepository() }
+    const result = { accuracy: 100, speedWpm: 20, durationSeconds: 30, startedAtMs: 0, exercisesAttempted: 1, acceptedKeystrokes: 2, rejectedKeystrokes: 0, mistakes: [] }
+    await completeLessonSession(deps, 'user1', 'l1', { ...result, jamoCounts: { ㄱ: { accepted: 1, rejected: 0 } } }, 'jamo-1')
+    await completeLessonSession(deps, 'user1', 'l1', result, 'jamo-2')
+    expect(deps.sessionSubmissionRepo.submissions[0]?.effects.jamoCounts).toEqual({ ㄱ: { accepted: 1, rejected: 0 } })
+    expect(deps.sessionSubmissionRepo.submissions[1]?.effects).not.toHaveProperty('jamoCounts')
   })
 })

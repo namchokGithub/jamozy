@@ -7,6 +7,7 @@ import {
   pressKey,
   startLessonSession,
   lessonResultSchema,
+  exerciseResultSchema,
   type LessonSessionState,
 } from './lesson-session'
 import { startTypingSession, type MistakeEvent } from './typing-session'
@@ -41,7 +42,14 @@ describe('pressKey', () => {
     expect(state.currentIndex).toBe(1)
     expect(state.status).toBe('typing')
     expect(state.completedResults).toEqual([
-      { exerciseId: 'e1', targetText: '가', correctKeyCount: 2, mistakes: [] },
+      {
+        exerciseId: 'e1',
+        targetText: '가',
+        correctKeyCount: 2,
+        mistakes: [],
+        typingSeconds: 0,
+        elapsedSeconds: 0,
+      },
     ])
     expect(state.currentSession.targetText).toBe('나')
 
@@ -60,6 +68,92 @@ describe('pressKey', () => {
     const completed = state
     state = pressKey(state, 'KeyR', false)
     expect(state).toEqual(completed)
+  })
+})
+
+describe('exercise timing', () => {
+  it('sums keystroke gaps up to 10 seconds and skips longer gaps', () => {
+    let state = startLessonSession([{ id: 'e1', targetText: '가' }])
+    state = pressKey(state, 'KeyR', false, 1_000)
+    state = pressKey(state, 'KeyK', false, 13_000)
+    expect(state.lastCompletedExercise?.typingSeconds).toBe(0)
+    expect(state.lastCompletedExercise?.elapsedSeconds).toBe(12)
+  })
+
+  it('counts a gap of exactly 10 seconds', () => {
+    let state = startLessonSession([{ id: 'e1', targetText: '가' }])
+    state = pressKey(state, 'KeyR', false, 0)
+    state = pressKey(state, 'KeyK', false, 10_000)
+    expect(state.lastCompletedExercise?.typingSeconds).toBe(10)
+  })
+
+  it('restarts timing for the next exercise and counts wrong keys', () => {
+    let state = startLessonSession([
+      { id: 'e1', targetText: '가' },
+      { id: 'e2', targetText: '가' },
+    ])
+    state = pressKey(state, 'KeyR', false, 0)
+    state = pressKey(state, 'KeyK', false, 1_000)
+    state = pressKey(state, 'KeyQ', false, 60_000)
+    state = pressKey(state, 'KeyR', false, 61_000)
+    state = pressKey(state, 'KeyK', false, 63_000)
+    expect(state.completedResults[1]).toMatchObject({
+      typingSeconds: 3,
+      elapsedSeconds: 3,
+    })
+  })
+
+  it('records zero time when no clock is passed', () => {
+    let state = startLessonSession([{ id: 'e1', targetText: '가' }])
+    state = pressKey(state, 'KeyR', false)
+    state = pressKey(state, 'KeyK', false)
+    expect(state.lastCompletedExercise).toMatchObject({
+      typingSeconds: 0,
+      elapsedSeconds: 0,
+    })
+  })
+
+  it('reports per-exercise stats in the lesson result', () => {
+    let state = startLessonSession([{ id: 'e1', targetText: '가' }])
+    state = pressKey(state, 'KeyQ', false, 0)
+    state = pressKey(state, 'KeyR', false, 1_000)
+    state = pressKey(state, 'KeyK', false, 2_000)
+    expect(getLessonResult(state).exercises).toEqual([
+      {
+        targetText: '가',
+        mistakeCount: 1,
+        typingSeconds: 2,
+        elapsedSeconds: 2,
+      },
+    ])
+  })
+
+  it('clears the last completed exercise on a modifier key without timing it', () => {
+    let state = startLessonSession([
+      { id: 'e1', targetText: '가' },
+      { id: 'e2', targetText: '가' },
+    ])
+    state = pressKey(state, 'KeyR', false, 0)
+    state = pressKey(state, 'KeyK', false, 1_000)
+    state = pressKey(state, 'ShiftLeft', true, 2_000)
+    expect(state.lastCompletedExercise).toBeNull()
+    state = pressKey(state, 'KeyR', false, 30_000)
+    state = pressKey(state, 'KeyK', false, 31_000)
+    expect(state.completedResults[1]).toMatchObject({
+      typingSeconds: 1,
+      elapsedSeconds: 1,
+    })
+  })
+
+  it('still parses an exercise result saved before timing existed', () => {
+    expect(
+      exerciseResultSchema.parse({
+        exerciseId: 'e1',
+        targetText: '가',
+        correctKeyCount: 2,
+        mistakes: [],
+      }),
+    ).not.toHaveProperty('typingSeconds')
   })
 })
 
@@ -115,7 +209,7 @@ describe('getLessonResult', () => {
   it('returns all zeros for a lesson with no exercises', () => {
     const state = startLessonSession([])
     const result = getLessonResult(state, state.startedAt) // same instant, duration 0
-    expect(result).toEqual({ accuracy: 0, speedWpm: 0, durationSeconds: 0, startedAtMs: state.startedAt.getTime(), exercisesAttempted: 0, acceptedKeystrokes: 0, rejectedKeystrokes: 0, mistakes: [] })
+    expect(result).toEqual({ accuracy: 0, speedWpm: 0, durationSeconds: 0, startedAtMs: state.startedAt.getTime(), exercisesAttempted: 0, acceptedKeystrokes: 0, rejectedKeystrokes: 0, mistakes: [], exercises: [], jamoCounts: {} })
   })
 })
 
@@ -220,5 +314,43 @@ describe('compactLessonSession', () => {
     const appended = appendExercises(compacted, [{ id: 'e2', targetText: '나' }])
     expect(appended.currentIndex).toBe(1)
     expect(appended.currentSession.targetText).toBe('나')
+  })
+})
+
+describe('jamo counts', () => {
+  it('reports key-level jamo counts in the lesson result', () => {
+    let state = startLessonSession([{ id: 'e1', targetText: '가' }])
+    state = pressKey(state, 'KeyQ', false, 0) // wrong: expected ㄱ
+    state = pressKey(state, 'KeyR', false, 1_000)
+    state = pressKey(state, 'KeyK', false, 2_000)
+    expect(getLessonResult(state).jamoCounts).toEqual({
+      ㄱ: { accepted: 1, rejected: 1 },
+      ㅏ: { accepted: 1, rejected: 0 },
+    })
+  })
+
+  it('drops invalid jamo counts instead of rejecting the lesson result', () => {
+    const base = {
+      accuracy: 100,
+      speedWpm: 0,
+      durationSeconds: 1,
+      startedAtMs: 0,
+      exercisesAttempted: 1,
+      acceptedKeystrokes: 2,
+      rejectedKeystrokes: 0,
+      mistakes: [],
+    }
+    expect(
+      lessonResultSchema.parse({
+        ...base,
+        jamoCounts: { x: { accepted: -1, rejected: 0 } },
+      }),
+    ).not.toHaveProperty('jamoCounts')
+    expect(
+      lessonResultSchema.parse({
+        ...base,
+        jamoCounts: { ㄱ: { accepted: 1, rejected: 0 } },
+      }).jamoCounts,
+    ).toEqual({ ㄱ: { accepted: 1, rejected: 0 } })
   })
 })

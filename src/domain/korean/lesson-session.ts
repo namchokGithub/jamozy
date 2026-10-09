@@ -6,12 +6,40 @@ import {
   type TypingSessionState,
 } from './typing-session'
 import type { LessonExercise } from '../models/lesson'
+import type { ExerciseStat } from '../models/player-stats'
+import { jamoCountsFrom, jamoCountsSchema, type JamoCounts } from '../models/jamo-stat'
+
+export const TYPING_GAP_LIMIT_MS = 10_000
+
+interface ExerciseTiming {
+  firstKeyAtMs: number | null
+  lastKeyAtMs: number | null
+  typingMs: number
+}
+
+const emptyTiming = (): ExerciseTiming => ({
+  firstKeyAtMs: null,
+  lastKeyAtMs: null,
+  typingMs: 0,
+})
+
+function nextTiming(timing: ExerciseTiming, nowMs: number | undefined): ExerciseTiming {
+  if (nowMs === undefined) return timing
+  const gap = timing.lastKeyAtMs === null ? 0 : nowMs - timing.lastKeyAtMs
+  return {
+    firstKeyAtMs: timing.firstKeyAtMs ?? nowMs,
+    lastKeyAtMs: nowMs,
+    typingMs: timing.typingMs + (gap > 0 && gap <= TYPING_GAP_LIMIT_MS ? gap : 0),
+  }
+}
 
 export interface ExerciseResult {
   exerciseId: string
   targetText: string
   correctKeyCount: number
   mistakes: MistakeEvent[]
+  typingSeconds?: number
+  elapsedSeconds?: number
 }
 
 export const exerciseResultSchema = z.object({
@@ -28,6 +56,8 @@ export const exerciseResultSchema = z.object({
       pressedShift: z.boolean(),
     }),
   ),
+  typingSeconds: z.number().min(0).optional(),
+  elapsedSeconds: z.number().min(0).optional(),
 })
 
 export interface LessonSessionState {
@@ -38,6 +68,7 @@ export interface LessonSessionState {
   lastCompletedExercise: ExerciseResult | null
   startedAt: Date
   status: 'typing' | 'completed'
+  timing?: ExerciseTiming
 }
 
 export function startLessonSession(
@@ -52,17 +83,27 @@ export function startLessonSession(
     lastCompletedExercise: null,
     startedAt: now,
     status: exercises.length === 0 ? 'completed' : 'typing',
+    timing: emptyTiming(),
   }
 }
 
-export function pressKey(state: LessonSessionState, code: string, shiftKey: boolean): LessonSessionState {
+export function pressKey(
+  state: LessonSessionState,
+  code: string,
+  shiftKey: boolean,
+  nowMs?: number,
+): LessonSessionState {
   if (state.status === 'completed') {
     return state
   }
 
   const nextSession = typingSessionPressKey(state.currentSession, code, shiftKey)
+  if (nextSession === state.currentSession)
+    return { ...state, lastCompletedExercise: null }
+
+  const timing = nextTiming(state.timing ?? emptyTiming(), nowMs)
   if (nextSession.status !== 'completed') {
-    return { ...state, currentSession: nextSession, lastCompletedExercise: null }
+    return { ...state, currentSession: nextSession, lastCompletedExercise: null, timing }
   }
 
   const exercise = state.exercises[state.currentIndex]
@@ -71,12 +112,24 @@ export function pressKey(state: LessonSessionState, code: string, shiftKey: bool
     targetText: exercise.targetText,
     correctKeyCount: nextSession.keyIndex,
     mistakes: nextSession.mistakes,
+    typingSeconds: timing.typingMs / 1000,
+    elapsedSeconds:
+      timing.firstKeyAtMs === null || timing.lastKeyAtMs === null
+        ? 0
+        : (timing.lastKeyAtMs - timing.firstKeyAtMs) / 1000,
   }
   const completedResults = [...state.completedResults, result]
   const nextIndex = state.currentIndex + 1
 
   if (nextIndex >= state.exercises.length) {
-    return { ...state, currentSession: nextSession, completedResults, lastCompletedExercise: result, status: 'completed' }
+    return {
+      ...state,
+      currentSession: nextSession,
+      completedResults,
+      lastCompletedExercise: result,
+      status: 'completed',
+      timing: emptyTiming(),
+    }
   }
 
   return {
@@ -85,6 +138,7 @@ export function pressKey(state: LessonSessionState, code: string, shiftKey: bool
     currentSession: startTypingSession(state.exercises[nextIndex].targetText),
     completedResults,
     lastCompletedExercise: result,
+    timing: emptyTiming(),
   }
 }
 
@@ -135,6 +189,8 @@ export interface LessonResult {
   acceptedKeystrokes: number
   rejectedKeystrokes: number
   mistakes: MistakeReport[]
+  exercises?: ExerciseStat[]
+  jamoCounts?: JamoCounts
 }
 
 export function getLessonResult(state: LessonSessionState, now: Date = new Date()): LessonResult {
@@ -161,6 +217,13 @@ export function getLessonResult(state: LessonSessionState, now: Date = new Date(
     acceptedKeystrokes: totalCorrectKeystrokes,
     rejectedKeystrokes: totalMistakes,
     mistakes,
+    exercises: state.completedResults.map((result) => ({
+      targetText: result.targetText,
+      mistakeCount: result.mistakes.length,
+      typingSeconds: result.typingSeconds ?? 0,
+      elapsedSeconds: result.elapsedSeconds ?? 0,
+    })),
+    jamoCounts: jamoCountsFrom(state.completedResults),
   }
 }
 
@@ -182,4 +245,20 @@ export const lessonResultSchema = z.object({
       targetText: z.string(),
     }),
   ),
-})
+  exercises: z
+    .array(
+      z.object({
+        targetText: z.string(),
+        mistakeCount: z.number().int().min(0),
+        typingSeconds: z.number().min(0),
+        elapsedSeconds: z.number().min(0),
+      }),
+    )
+    .max(100)
+    .optional(),
+  // Invalid counts are dropped so the lesson result still saves (DEC-050).
+  jamoCounts: jamoCountsSchema.optional().catch(undefined),
+}).transform(
+  ({ jamoCounts, ...rest }): typeof rest & { jamoCounts?: JamoCounts } =>
+    jamoCounts ? { ...rest, jamoCounts } : rest,
+)

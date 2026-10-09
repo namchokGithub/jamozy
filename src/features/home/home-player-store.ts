@@ -61,7 +61,7 @@ export const useHomePlayerStore = create<HomePlayerStore>((set, get) => ({
     const { session } = get()
     if (!session || session.status === 'completed')
       return { result: null, finished: false }
-    const next = pressKeyReducer(session, code, shiftKey)
+    const next = pressKeyReducer(session, code, shiftKey, Date.now())
     set({ session: next })
     return {
       result: next.lastCompletedExercise,

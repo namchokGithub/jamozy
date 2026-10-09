@@ -17,6 +17,8 @@ import {
   findContiguousFrontier,
   getOrderedLearningPath,
 } from './learning-path-order'
+import { deviceTimeZone, sessionStatsFrom } from '../domain/models/player-stats'
+import type { LessonType } from '../domain/models/lesson'
 
 export interface CompleteLessonSessionDeps {
   courseRepo: CourseRepository
@@ -37,6 +39,7 @@ async function reviewEffects(
   lessonId: string,
   result: LessonResult,
   now: Date,
+  lessonType: LessonType | undefined,
 ): Promise<ReviewItem[]> {
   return Promise.all(
     result.mistakes.map(async (mistake) => {
@@ -44,6 +47,9 @@ async function reviewEffects(
         userId,
         mistake.sourceExerciseId,
       )
+      // Spread only a known type: Firestore rejects undefined field values.
+      const sourceLessonType = existing?.sourceLessonType ?? lessonType
+      const typed = sourceLessonType ? { sourceLessonType } : {}
       if (existing) {
         return {
           ...existing,
@@ -52,12 +58,14 @@ async function reviewEffects(
           resolved: false,
           box: 1,
           nextReviewAt: nextReviewDate(1, now),
+          ...typed,
         }
       }
       return {
         id: mistake.sourceExerciseId,
         sourceLessonId: lessonId,
         sourceExerciseId: mistake.sourceExerciseId,
+        ...typed,
         targetText: mistake.targetText,
         reason: 'mistake' as const,
         mistakeCount: 1,
@@ -79,6 +87,7 @@ export async function completeLessonSession(
   now: Date = new Date(),
 ): Promise<CompleteLessonOutcome> {
   const existing = await deps.progressRepo.getProgress(userId, lessonId)
+  const lesson = await deps.lessonRepo.getLessonById(lessonId)
   const attempted: Progress = {
     lessonId,
     status: existing?.status ?? 'unlocked',
@@ -138,12 +147,15 @@ export async function completeLessonSession(
       acceptedKeystrokes: result.acceptedKeystrokes,
       rejectedKeystrokes: result.rejectedKeystrokes,
       expGained,
+      ...sessionStatsFrom(result.exercises ?? [], lesson?.type, profile.timezone ?? deviceTimeZone(), now),
+      isReplay: wasAlreadyCompleted,
     },
     {
+      ...(result.jamoCounts ? { jamoCounts: result.jamoCounts } : {}),
       progress,
       reviewItems: wasAlreadyCompleted
         ? []
-        : await reviewEffects(deps.reviewRepo, userId, lessonId, result, now),
+        : await reviewEffects(deps.reviewRepo, userId, lessonId, result, now, lesson?.type),
     },
   )
   const persistedProgress =

@@ -45,6 +45,7 @@ export function mergeProfile(cloud: UserProfile | null, guest: UserProfile | nul
     exp: baseline.exp,
     stats: baseline.stats,
     settings: useGuestSettings ? guest.settings : cloud.settings,
+    timezone: cloud.timezone ?? guest.timezone,
     legacyBaseline: baseline,
     updatedAt: later(cloud.updatedAt ?? null, guest.updatedAt ?? null) ?? cloud.createdAt,
   }

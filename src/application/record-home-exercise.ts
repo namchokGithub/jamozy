@@ -1,5 +1,7 @@
+import { jamoCountsFrom, mergeJamoCounts } from '../domain/models/jamo-stat'
 import { ValidationError } from '../domain/errors'
 import type { ExerciseResult } from '../domain/korean/lesson-session'
+import type { LessonType } from '../domain/models/lesson'
 import type { HomePartialResult, Progress } from '../domain/models/progress'
 import type { ProgressRepository } from '../domain/repositories/progress-repository'
 import { expForAccuracy } from './complete-lesson-session'
@@ -17,7 +19,7 @@ export interface RecordHomeExerciseDeps extends HomeSessionDeps {
 
 export interface RecordHomeExerciseInput {
   userId: string
-  lesson: { id: string; exercises: Array<{ id: string }> }
+  lesson: { id: string; type?: LessonType; exercises: Array<{ id: string }> }
   result: ExerciseResult
   // Used only when this is the lesson's first recorded exercise; it becomes
   // the first-completion session ID.
@@ -63,6 +65,8 @@ export async function recordHomeExercise(
     ...previous,
     acceptedKeystrokes: previous.acceptedKeystrokes + result.correctKeyCount,
     rejectedKeystrokes: previous.rejectedKeystrokes + result.mistakes.length,
+    exercises: [...(previous.exercises ?? []), { targetText: result.targetText, mistakeCount: result.mistakes.length, typingSeconds: result.typingSeconds ?? 0, elapsedSeconds: result.elapsedSeconds ?? 0 }],
+    jamoCounts: mergeJamoCounts(previous.jamoCounts, jamoCountsFrom([result])),
   }
   const ids = [...completedIds, result.exerciseId]
 
@@ -88,6 +92,8 @@ export async function recordHomeExercise(
     exercisesAttempted: ids.length,
     acceptedKeystrokes: partial.acceptedKeystrokes,
     rejectedKeystrokes: partial.rejectedKeystrokes,
+    exercises: partial.exercises,
+    jamoCounts: partial.jamoCounts,
   }
   const progress = homeAttemptProgress(lesson.id, existing, totals, now, {
     status: 'completed',
@@ -101,6 +107,8 @@ export async function recordHomeExercise(
     expGained: expForAccuracy(accuracyOf(totals)),
     progress,
     now,
+    lessonType: lesson.type,
+    isReplay: false,
   })
   return { progress: completed.progress, completed }
 }

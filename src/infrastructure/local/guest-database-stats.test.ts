@@ -1,0 +1,31 @@
+import { describe, expect, it } from 'vitest'
+import { guestJamoWrite, guestStatsWrites } from './guest-database'
+import { defaultUserProfile } from '../../domain/models/user-profile'
+
+const session = {
+  id: 's1', context: { mode: 'review' as const }, startedAt: new Date('2026-10-09T01:00:00Z'), completedAt: new Date('2026-10-09T01:01:00Z'), durationSeconds: 60, exercisesAttempted: 1, acceptedKeystrokes: 5, rejectedKeystrokes: 1, expGained: 0, localDate: '2026-10-09', timeZone: 'Asia/Bangkok', exerciseMistakes: [1],
+}
+
+describe('guestStatsWrites', () => {
+  it('fills the timezone once and counts a review day', () => {
+    const profile = defaultUserProfile('guest-1', new Date(0))
+    const writes = guestStatsWrites(profile, null, null, session)
+    expect(writes.profile.timezone).toBe('Asia/Bangkok')
+    expect(writes.daily).toMatchObject({ reviewsCompleted: 1, incorrectKeystrokes: 1 })
+    expect(writes.profile.playerStats).toMatchObject({ activeDays: 1, perfectStreak: { current: 0 } })
+    const kept = guestStatsWrites({ ...profile, timezone: 'Asia/Seoul' }, writes.daily, writes.monthly, session)
+    expect(kept.profile.timezone).toBe('Asia/Seoul')
+  })
+})
+
+describe('guestJamoWrite', () => {
+  const now = new Date('2026-10-09T00:00:00Z')
+
+  it('skips the write without counts and applies counts otherwise', () => {
+    expect(guestJamoWrite(undefined, undefined, now)).toBeNull()
+    expect(guestJamoWrite(undefined, {}, now)).toBeNull()
+    expect(guestJamoWrite(undefined, { ㄱ: { accepted: 1, rejected: 0 } }, now)).toEqual({
+      ㄱ: { acceptedKeystrokes: 1, rejectedKeystrokes: 0, recentAccepted: 1, recentRejected: 0, firstPracticedAt: now, lastPracticedAt: now },
+    })
+  })
+})
