@@ -18,11 +18,14 @@ import { useHomePlayerStore } from './home-player-store'
 import { useHomeServices } from './home-services'
 import { prefetchHangulTargets } from '../typing/prefetch-hangul-targets'
 import { usePressedKeyCodes } from '../typing/usePressedKeyCodes'
+import { useKeyboardSound } from '../typing/useKeyboardSound'
+import { useResolvedSoundSettings, type SoundSettings } from '../typing/useResolvedSoundSettings'
 
 interface HomePlayerProps {
   data: HomePlayerData
   // Live Progress read in the background; null keeps the cached Progress.
   liveProgress: Promise<Progress[] | null>
+  settings: SoundSettings | Promise<SoundSettings>
   random?: () => number
 }
 
@@ -35,6 +38,7 @@ const toProgressMap = (progress: Progress[]) =>
 export default function HomePlayer({
   data,
   liveProgress,
+  settings,
   random,
 }: HomePlayerProps) {
   const services = useHomeServices()
@@ -57,6 +61,12 @@ export default function HomePlayer({
     () => useHomePlayerStore.getState().generation,
   )
   const opened = generation > mountGeneration
+  const soundSettings = useResolvedSoundSettings(settings)
+  const playVirtualKey = useKeyboardSound(
+    soundSettings.soundEnabled,
+    soundSettings.keyboardSoundPack,
+    opened && session?.status === 'typing',
+  )
   const [{ content, initialProgress, initialPending, resume }] = useState(
     () => ({
       content: data.content,
@@ -324,7 +334,10 @@ export default function HomePlayer({
             previousFeedback={previousFeedback}
             showEnglishKeys
             opacity={1}
-            onKeyPress={handleKeyPress}
+            onKeyPress={(code, shiftKey) => {
+              playVirtualKey(code)
+              handleKeyPress(code, shiftKey)
+            }}
             pressedCodes={pressedCodes}
             mobileStyle
           />

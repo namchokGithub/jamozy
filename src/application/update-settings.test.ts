@@ -6,6 +6,7 @@ import { defaultUserProfile, type UserProfile, type UserSettings } from '../doma
 function makeSettings(overrides: Partial<UserSettings> = {}): UserSettings {
   return {
     soundEnabled: false,
+    keyboardSoundPack: 'mxblue',
     showKeyboard: false,
     showEnglishKeys: false,
     keyboardOpacity: 0.2,

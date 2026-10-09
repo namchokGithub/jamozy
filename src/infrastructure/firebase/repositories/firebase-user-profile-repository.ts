@@ -1,7 +1,11 @@
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { db } from '../firebase'
 import type { UserProfileRepository } from '../../../domain/repositories/user-profile-repository'
-import { defaultUserProfile, type UserProfile } from '../../../domain/models/user-profile'
+import {
+  defaultUserProfile,
+  normalizeUserSettings,
+  type UserProfile,
+} from '../../../domain/models/user-profile'
 import type { PlayerStats } from '../../../domain/models/player-stats'
 
 export function toUserProfile(id: string, data: Record<string, unknown>): UserProfile {
@@ -12,7 +16,9 @@ export function toUserProfile(id: string, data: Record<string, unknown>): UserPr
     id,
     displayName: typeof data.displayName === 'string' ? data.displayName : 'Guest',
     exp: typeof data.exp === 'number' ? data.exp : 0,
-    settings: (data.settings as UserProfile['settings'] | undefined) ?? defaults.settings,
+    settings: normalizeUserSettings(
+      (data.settings as UserProfile['settings'] | undefined) ?? defaults.settings,
+    ),
     stats: (data.stats as UserProfile['stats'] | undefined) ?? defaults.stats,
     legacyBaseline: data.legacyBaseline as UserProfile['legacyBaseline'],
     sessionAggregate: data.sessionAggregate as UserProfile['sessionAggregate'],

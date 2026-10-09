@@ -18,8 +18,9 @@ import type { CompleteLessonActionData } from './LessonDetailPage.action'
 import { Button } from '../../components/ui/Button'
 import type { UserSettings } from '../../domain/models/user-profile'
 import { usePressedKeyCodes } from '../typing/usePressedKeyCodes'
+import { useKeyboardSound } from '../typing/useKeyboardSound'
 
-type KeyboardSettings = Pick<UserSettings, 'showKeyboard' | 'showEnglishKeys'>
+type KeyboardSettings = Pick<UserSettings, 'showKeyboard' | 'showEnglishKeys' | 'soundEnabled' | 'keyboardSoundPack'>
 
 export interface LessonCompletion {
   outcome: CompleteLessonOutcome
@@ -48,6 +49,11 @@ export default function LessonTypingSession({
   const pressedCodes = usePressedKeyCodes()
   const { session, start, pressKey, generation, submissionId } =
     useLessonSessionStore()
+  const playVirtualKey = useKeyboardSound(
+    keyboardSettings.soundEnabled,
+    keyboardSettings.keyboardSoundPack,
+    session?.status === 'typing',
+  )
   const fetcher = useFetcher<CompleteLessonActionData>()
   const submittedPayload = useRef<Record<string, unknown> | null>(null)
   const [slowSave, setSlowSave] = useState(false)
@@ -274,7 +280,10 @@ export default function LessonTypingSession({
             // Keyboard opacity is on hold: the setting stays stored but is
             // not offered, so the guide is always fully visible, as on Home.
             opacity={1}
-            onKeyPress={handleKeyPress}
+            onKeyPress={(code, shiftKey) => {
+              playVirtualKey(code)
+              handleKeyPress(code, shiftKey)
+            }}
             pressedCodes={pressedCodes}
             mobileStyle
           />

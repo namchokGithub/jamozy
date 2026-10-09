@@ -6,6 +6,15 @@ import type { OnePageLearningPath } from '../../application/get-one-page-learnin
 import { useOnePagePlayerStore } from './one-page-player-store'
 import OnePageLearningPlayer from './OnePageLearningPlayer'
 
+const { playSound, loadSound, unlockSound } = vi.hoisted(() => ({
+  playSound: vi.fn(),
+  loadSound: vi.fn(async () => undefined),
+  unlockSound: vi.fn(async () => undefined),
+}))
+vi.mock('../../infrastructure/audio/keyboard-sound-player', () => ({
+  keyboardSoundPlayer: { play: playSound, load: loadSound, unlock: unlockSound },
+}))
+
 const initialPath: OnePageLearningPath = {
   courses: [{ id: 'course-1', title: 'Starter course', description: 'Learn Hangul' }],
   selectedCourseId: 'course-1',
@@ -63,7 +72,9 @@ const initialPath: OnePageLearningPath = {
   pendingLessonId: null,
 }
 
-function PlayerHarness() {
+function PlayerHarness({ settings = { soundEnabled: false, keyboardSoundPack: 'turquoise' } }: {
+  settings?: { soundEnabled: boolean; keyboardSoundPack: 'turquoise' | 'mxblack' | 'mxblue' }
+}) {
   const [learningPath, setLearningPath] = useState(initialPath)
 
   return (
@@ -74,16 +85,16 @@ function PlayerHarness() {
       >
         Revalidate
       </button>
-      <OnePageLearningPlayer learningPath={learningPath} />
+      <OnePageLearningPlayer learningPath={learningPath} settings={settings} />
     </>
   )
 }
 
-function renderPlayer() {
+function renderPlayer(settings: { soundEnabled: boolean; keyboardSoundPack: 'turquoise' | 'mxblack' | 'mxblue' } = { soundEnabled: false, keyboardSoundPack: 'turquoise' }) {
   const router = createMemoryRouter(
     [{
       path: '/',
-      Component: PlayerHarness,
+      Component: () => <PlayerHarness settings={settings} />,
       loader: async ({ request }: { request: Request }) => loaderData(request, initialPath),
     }],
     { initialEntries: ['/'] },
@@ -96,7 +107,7 @@ function renderPlayer() {
 }
 
 function PlayerRoute() {
-  return <OnePageLearningPlayer learningPath={useLoaderData() as OnePageLearningPath} />
+  return <OnePageLearningPlayer learningPath={useLoaderData() as OnePageLearningPath} settings={{ soundEnabled: false, keyboardSoundPack: 'turquoise' }} />
 }
 
 function threeExercisePath(): OnePageLearningPath {
@@ -157,7 +168,17 @@ function renderPlayerWithPendingSaves() {
 
 describe('OnePageLearningPlayer', () => {
   beforeEach(() => {
+    playSound.mockClear()
     useOnePagePlayerStore.setState({ entries: [], session: null, completedCount: 0, exhausted: false })
+  })
+
+  it('plays a virtual key in the Learning Path fallback', async () => {
+    renderPlayer({ soundEnabled: true, keyboardSoundPack: 'mxblack' })
+    await screen.findByRole('img', { name: '가' })
+
+    fireEvent.click(screen.getByRole('button', { name: 'r' }))
+
+    expect(playSound).toHaveBeenCalledWith('press/GENERIC_R2')
   })
 
   it('keeps its own queue and typed progress when revalidation returns a different queue', async () => {

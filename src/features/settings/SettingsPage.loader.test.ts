@@ -14,6 +14,7 @@ describe('createSettingsLoader', () => {
     expect(ensureUser).toHaveBeenCalledOnce()
     expect(data.settings).toEqual({
       soundEnabled: true,
+      keyboardSoundPack: 'turquoise',
       showKeyboard: true,
       showEnglishKeys: true,
       keyboardOpacity: 0.7,

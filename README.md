@@ -35,6 +35,7 @@ and sentences while improving typing accuracy and speed.
 - Home player for one Admin-managed Home course, exported to static JSON at build
 - Korean typing exercises
 - Virtual Korean keyboard guide
+- Configurable mechanical-keyboard sound feedback for physical and virtual typing
 - Finger-placement reference for Korean keyboard practice
 - Correct / incorrect typing feedback
 - Accuracy and typing speed tracking
@@ -396,7 +397,7 @@ For document-backed domain entities, the domain `id` is the Firestore document I
 
 ## Content Credits
 
-Vocabulary sources, attribution, and licenses are recorded in [docs/CREDITS.md](docs/CREDITS.md) before their data is imported.
+Vocabulary and keyboard-audio sources, attribution, and licenses are recorded in [docs/CREDITS.md](docs/CREDITS.md).
 
 Current sources:
 
@@ -404,6 +405,7 @@ Current sources:
   National Institute of Korean Language (국립국어원) —
   [https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=71&amp;pageIndex=1](https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=71&pageIndex=1)
 - 현대 국어 사용 빈도 조사 2, National Institute of Korean Language (국립국어원)
+- [Mechanical Keyboard Simulator](https://github.com/tplai/kbsim/tree/master) sound packs, Thomas Lai (`tplai`) — [MIT license](https://github.com/tplai/kbsim/blob/master/LICENSE.md)
 
 > Lesson content is treated as shared application data, while progress, review
 > history, EXP, levels, and statistics belong to individual users.
@@ -412,14 +414,16 @@ Current sources:
 
 The core MVP is functionally complete: Learning Path, lessons, results,
 review, guest and authenticated persistence, settings, profile, and Admin BO
-are implemented. The Home player ([[DEC-043]]) is awaiting its final manual
-verification pass. See the [Progress Tracker](docs/PROGRESS.md) for
-the detailed current status.
+are implemented. Keyboard sound feedback is implemented with three persisted
+pack choices and Turquoise Tealio as the default ([[DEC-052]]). The Home player
+and keyboard sounds are awaiting final manual verification. See the
+[Progress Tracker](docs/PROGRESS.md) for the detailed current status.
 
 ### MVP
 
-MVP is complete apart from final user-owned verification of the Home player. See [Progress Tracker](docs/PROGRESS.md) for the
-verification checklist and post-MVP roadmap.
+MVP is complete apart from final user-owned verification of the Home player and
+keyboard sounds. See [Progress Tracker](docs/PROGRESS.md) for the verification
+checklist and post-MVP roadmap.
 
 ### Next / Post-MVP
 
@@ -432,8 +436,6 @@ verification checklist and post-MVP roadmap.
   ([[DEC-047]]).
 - Set up a Cloudflare Pages deployment pipeline and use Preview deployments
   for release checks.
-- Decide whether sound feedback ships or is deferred, then implement the
-  selected behavior
 - Dark-mode CSS
 - Dedicated Lesson Result visual redesign
 - History, summaries, and analytics

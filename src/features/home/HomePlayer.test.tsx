@@ -8,6 +8,15 @@ import HomePlayer from './HomePlayer'
 import { useHomePlayerStore } from './home-player-store'
 import { HomeServicesProvider, type HomeServices } from './home-services'
 
+const { playSound, loadSound, unlockSound } = vi.hoisted(() => ({
+  playSound: vi.fn(),
+  loadSound: vi.fn(async () => undefined),
+  unlockSound: vi.fn(async () => undefined),
+}))
+vi.mock('../../infrastructure/audio/keyboard-sound-player', () => ({
+  keyboardSoundPlayer: { play: playSound, load: loadSound, unlock: unlockSound },
+}))
+
 const exercise = (id: string, targetText: string) => ({
   id,
   targetText,
@@ -77,6 +86,7 @@ const completed = (lessonId: string): Progress => ({
 function setup(
   overrides: Partial<HomePlayerData> = {},
   liveProgress: Promise<Progress[] | null> = Promise.resolve(null),
+  settings: { soundEnabled: boolean; keyboardSoundPack: 'turquoise' | 'mxblack' | 'mxblue' } = { soundEnabled: false, keyboardSoundPack: 'turquoise' },
 ) {
   const services: HomeServices = {
     recordExercise: vi.fn(),
@@ -93,7 +103,7 @@ function setup(
   const view = render(
     <SnackbarProvider>
       <HomeServicesProvider value={services}>
-        <HomePlayer data={data} liveProgress={liveProgress} random={() => 0} />
+        <HomePlayer data={data} liveProgress={liveProgress} random={() => 0} settings={settings} />
       </HomeServicesProvider>
     </SnackbarProvider>,
   )
@@ -107,6 +117,7 @@ const badge = (lessonTitle: string) =>
 
 describe('HomePlayer', () => {
   beforeEach(() => {
+    playSound.mockClear()
     useHomePlayerStore.setState({
       session: null,
       lesson: null,
@@ -115,6 +126,15 @@ describe('HomePlayer', () => {
       isReplay: false,
       exercises: [],
     })
+  })
+
+  it('plays a virtual key with the saved Home sound settings', async () => {
+    setup({}, Promise.resolve(null), { soundEnabled: true, keyboardSoundPack: 'mxblue' })
+    await waitFor(() => expect(useHomePlayerStore.getState().session?.status).toBe('typing'))
+
+    fireEvent.click(screen.getByRole('button', { name: 'r' }))
+
+    expect(playSound).toHaveBeenCalledWith('press/GENERIC_R2')
   })
 
   it('opens the resume lesson and saves it as the resume point', async () => {
@@ -230,6 +250,7 @@ describe('HomePlayer', () => {
       <SnackbarProvider>
         <HomeServicesProvider value={services}>
           <HomePlayer
+            settings={{ soundEnabled: false, keyboardSoundPack: 'turquoise' }}
             data={{
               content,
               progress: [],
@@ -258,6 +279,7 @@ describe('HomePlayer', () => {
     render(
       <HomeServicesProvider value={services}>
         <HomePlayer
+          settings={{ soundEnabled: false, keyboardSoundPack: 'turquoise' }}
           data={{
             content: { ...content, units: [] },
             progress: [],

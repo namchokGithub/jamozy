@@ -16,4 +16,13 @@ describe('toUserProfile', () => {
   it('reads a missing exp as zero', () => {
     expect(toUserProfile('user1', { createdAt }).exp).toBe(0)
   })
+
+  it('adds Turquoise Tealio to legacy settings without a selected pack', () => {
+    const legacySettings = defaultUserProfile('user1', new Date('2026-01-01')).settings
+    delete (legacySettings as Partial<typeof legacySettings>).keyboardSoundPack
+
+    expect(toUserProfile('user1', { createdAt, settings: legacySettings }).settings).toMatchObject({
+      keyboardSoundPack: 'turquoise',
+    })
+  })
 })

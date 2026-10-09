@@ -32,3 +32,13 @@ of Korean Language.
 This dataset is used under the Korea Open Government License (KOGL)
 Type 1. Copyright and source attribution belong to the National Institute
 of Korean Language.
+
+## Keyboard Sound Packs
+
+### Mechanical Keyboard Simulator (kbsim)
+
+- **Source ID:** `tplai-kbsim-keyboard-audio`
+- **Source / author:** [tplai/kbsim](https://github.com/tplai/kbsim/tree/master), Thomas Lai (`tplai`)
+- **License:** [MIT](https://github.com/tplai/kbsim/blob/master/LICENSE.md); copyright (c) Thomas Lai. A copy of the notice ships with the app at [`public/licenses/kbsim-LICENSE.md`](../public/licenses/kbsim-LICENSE.md).
+- **Usage in Jamozy:** Bundled key press and release sounds for Turquoise Tealio, Cherry MX Blacks, and Cherry MX Blues. The three sound-pack derivatives are selected in Settings and played during typing practice.
+- **Modifications:** Files are grouped into Jamozy's three pack directories and mapped to Korean typing keys; the audio remains sourced from kbsim.

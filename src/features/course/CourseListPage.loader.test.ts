@@ -6,6 +6,7 @@ import type { Unit } from '../../domain/models/unit'
 import type { ProgressRepository } from '../../domain/repositories/progress-repository'
 import type { Course } from '../../domain/models/course'
 import type { ReviewItem } from '../../domain/models/review-item'
+import { defaultUserProfile } from '../../domain/models/user-profile'
 
 function makeCourse(id: string): Course {
   return {
@@ -34,6 +35,34 @@ function makeReviewItem(id: string): ReviewItem {
 }
 
 describe('createCourseListLoader', () => {
+  it('exposes sound settings from one profile read without waiting for review data', async () => {
+    const profile = defaultUserProfile('user1', new Date('2026-01-01'))
+    const profiles = new FakeUserProfileRepository()
+    await profiles.saveUserProfile('user1', {
+      ...profile,
+      settings: { ...profile.settings, soundEnabled: false, keyboardSoundPack: 'mxblue' },
+    })
+    const profileRead = vi.spyOn(profiles, 'getUserProfile')
+    const reviews = new FakeReviewRepository()
+    let releaseReviews: () => void = () => {}
+    const gate = new Promise<void>((resolve) => { releaseReviews = resolve })
+    reviews.getReviewItems = async () => { await gate; return [] }
+    const loader = createCourseListLoader({
+      courseRepo: new FakeCourseRepository(),
+      reviewRepo: reviews,
+      userProfileRepo: profiles,
+      ensureUser: async () => ({ uid: 'user1' }),
+    })
+
+    const data = await loader()
+    await expect(data.settings).resolves.toMatchObject({
+      soundEnabled: false,
+      keyboardSoundPack: 'mxblue',
+    })
+    expect(profileRead).toHaveBeenCalledOnce()
+    releaseReviews()
+    await data.page
+  })
   it('signs in before reading courses, and returns them alongside the due review count', async () => {
     const ensureUser = vi.fn().mockResolvedValue({ uid: 'user1' })
     const reviewRepo = new FakeReviewRepository()
@@ -69,7 +98,7 @@ describe('createCourseListLoader', () => {
 
   it('returns the persisted Guest display name', async () => {
     const profiles = new FakeUserProfileRepository()
-    await profiles.saveUserProfile('user1', { id: 'user1', displayName: 'Guest#1245', exp: 0, settings: { soundEnabled: true, showKeyboard: true, showEnglishKeys: true, keyboardOpacity: 0.7, romanizationEnabled: true, meaningLanguage: 'both', theme: 'light' }, stats: { lessonsCompleted: 0, wordsPracticed: 0, averageAccuracy: 0, bestAccuracy: 0, averageSpeedWpm: 0, totalTypingTimeSeconds: 0 }, createdAt: new Date(), updatedAt: new Date() })
+    await profiles.saveUserProfile('user1', { id: 'user1', displayName: 'Guest#1245', exp: 0, settings: { soundEnabled: true, keyboardSoundPack: 'turquoise', showKeyboard: true, showEnglishKeys: true, keyboardOpacity: 0.7, romanizationEnabled: true, meaningLanguage: 'both', theme: 'light' }, stats: { lessonsCompleted: 0, wordsPracticed: 0, averageAccuracy: 0, bestAccuracy: 0, averageSpeedWpm: 0, totalTypingTimeSeconds: 0 }, createdAt: new Date(), updatedAt: new Date() })
     const loader = createCourseListLoader({ courseRepo: new FakeCourseRepository(), reviewRepo: new FakeReviewRepository(), userProfileRepo: profiles, ensureUser: async () => ({ uid: 'user1' }) })
     expect((await (await loader()).page).displayName).toBe('Guest#1245')
   })

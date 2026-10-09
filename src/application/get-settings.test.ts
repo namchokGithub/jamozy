@@ -10,6 +10,7 @@ describe('getSettings', () => {
       ...defaultUserProfile('user1', new Date('2025-01-01')),
       settings: {
         soundEnabled: false,
+        keyboardSoundPack: 'mxblue',
         showKeyboard: true,
         showEnglishKeys: false,
         keyboardOpacity: 0.3,
@@ -41,5 +42,21 @@ describe('getSettings', () => {
     await getSettings(userProfileRepo, 'user1')
 
     expect(saveSpy).not.toHaveBeenCalled()
+  })
+
+  it('returns Turquoise Tealio for a legacy profile without a selected sound pack', async () => {
+    const userProfileRepo = new FakeUserProfileRepository()
+    const profile = defaultUserProfile('user1', new Date('2025-01-01'))
+    const legacyProfile = {
+      ...profile,
+      settings: Object.fromEntries(
+        Object.entries(profile.settings).filter(([key]) => key !== 'keyboardSoundPack'),
+      ),
+    } as UserProfile
+    await userProfileRepo.saveUserProfile('user1', legacyProfile)
+
+    await expect(getSettings(userProfileRepo, 'user1')).resolves.toMatchObject({
+      keyboardSoundPack: 'turquoise',
+    })
   })
 })

@@ -4,6 +4,7 @@ import {
   expRequiredForNextLevel,
   levelFromExp,
   levelProgress,
+  normalizeUserSettings,
   totalExp,
   userSettingsSchema,
 } from './user-profile'
@@ -96,6 +97,7 @@ describe('defaultUserProfile', () => {
       exp: 0,
       settings: {
         soundEnabled: true,
+        keyboardSoundPack: 'turquoise',
         showKeyboard: true,
         showEnglishKeys: true,
         keyboardOpacity: 0.7,
@@ -120,6 +122,7 @@ describe('defaultUserProfile', () => {
 function makeValidSettings() {
   return {
     soundEnabled: true,
+    keyboardSoundPack: 'turquoise' as const,
     showKeyboard: true,
     showEnglishKeys: true,
     keyboardOpacity: 0.5,
@@ -156,5 +159,30 @@ describe('userSettingsSchema', () => {
     expect(() =>
       userSettingsSchema.parse({ ...makeValidSettings(), theme: 'blue' }),
     ).toThrow()
+  })
+
+  it('rejects an invalid keyboard sound pack', () => {
+    expect(() =>
+      userSettingsSchema.parse({ ...makeValidSettings(), keyboardSoundPack: 'bluealps' }),
+    ).toThrow()
+  })
+})
+
+describe('normalizeUserSettings', () => {
+  it('adds the Turquoise Tealio default to legacy settings without changing other preferences', () => {
+    const legacySettings = {
+      soundEnabled: false,
+      showKeyboard: true,
+      showEnglishKeys: false,
+      keyboardOpacity: 0.3,
+      romanizationEnabled: false,
+      meaningLanguage: 'en' as const,
+      theme: 'dark' as const,
+    }
+
+    expect(normalizeUserSettings(legacySettings)).toEqual({
+      ...legacySettings,
+      keyboardSoundPack: 'turquoise',
+    })
   })
 })
