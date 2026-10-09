@@ -11,6 +11,7 @@ import { isKoreanJamoKey } from '../../domain/korean/keymap'
 import type { Progress } from '../../domain/models/progress'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
+import { homeTargetSize } from '../typing/hangul-target-layout'
 import { useSnackbar } from '../../components/ui/SnackbarProvider'
 import FingerPlacementGuide from './FingerPlacementGuide'
 import { useKeyboardFeedback } from '../typing/keyboard-feedback'
@@ -19,7 +20,10 @@ import { useHomeServices } from './home-services'
 import { prefetchHangulTargets } from '../typing/prefetch-hangul-targets'
 import { usePressedKeyCodes } from '../typing/usePressedKeyCodes'
 import { useKeyboardSound } from '../typing/useKeyboardSound'
-import { useResolvedSoundSettings, type SoundSettings } from '../typing/useResolvedSoundSettings'
+import {
+  useResolvedSoundSettings,
+  type SoundSettings,
+} from '../typing/useResolvedSoundSettings'
 
 interface HomePlayerProps {
   data: HomePlayerData
@@ -294,10 +298,12 @@ export default function HomePlayer({
             </div>
             <HangulTarget
               session={session.currentSession}
-              className="mt-3 origin-center text-6xl font-bold tracking-wide sm:scale-160 sm:text-7xl"
-              compact
+              // The negative top margin keeps the tiles where the earlier
+              // 160% scale drew them, now that they take their real size.
+              className="mt-3 text-6xl font-bold tracking-wide sm:-mt-[19px] sm:text-7xl"
+              size={homeTargetSize(session.currentSession.targetText)}
             />
-            <div className="mx-auto mt-4 max-w-44 sm:mt-10">
+            <div className="mx-auto mt-4 max-w-44 sm:mt-[9px]">
               <p className="text-[10px] font-semibold text-[#98a2b3]">
                 {completedSteps} / {totalSteps} steps
               </p>

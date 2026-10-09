@@ -15,14 +15,14 @@ import {
   type SyllableGroup,
 } from './hangul-target-selection'
 import { isJamoSvgRendererEnabled } from './jamo-svg-flag'
+import type { HangulTargetSize } from './hangul-target-layout'
 
 export const JAMO_SVG_LOAD_TIMEOUT_MS = 1500
 
 interface HangulTargetProps {
   session: TypingSessionState
   className?: string
-  // Shrinks syllable tiles below `sm`; `sm` and up is unchanged.
-  compact?: boolean
+  size?: HangulTargetSize
 }
 
 function warn(reason: string) {
@@ -34,7 +34,7 @@ function warn(reason: string) {
 export default function HangulTarget({
   session,
   className = '',
-  compact = false,
+  size = 'regular',
 }: HangulTargetProps) {
   const [enabled] = useState(isJamoSvgRendererEnabled)
   const { targetText, expectedKeys } = session
@@ -99,7 +99,7 @@ export default function HangulTarget({
       <DecomposedHangulTarget
         session={session}
         className={className}
-        compact={compact}
+        size={size}
       />
     )
   const choice =
@@ -111,7 +111,7 @@ export default function HangulTarget({
         spaces={groups.map(isSpaceGroup)}
         label={targetText}
         className={className}
-        compact={compact}
+        size={size}
       />
     )
   if (choice.kind === 'canvas')
@@ -119,7 +119,7 @@ export default function HangulTarget({
       <DecomposedHangulTarget
         session={session}
         className={className}
-        compact={compact}
+        size={size}
       />
     )
   return (
@@ -128,7 +128,7 @@ export default function HangulTarget({
       glyphs={choice.glyphs}
       unitsPerEm={choice.unitsPerEm}
       className={className}
-      compact={compact}
+      size={size}
     />
   )
 }

@@ -19,7 +19,10 @@ import type { UserSettings } from '../../domain/models/user-profile'
 import { usePressedKeyCodes } from '../typing/usePressedKeyCodes'
 import { useKeyboardSound } from '../typing/useKeyboardSound'
 
-type KeyboardSettings = Pick<UserSettings, 'showKeyboard' | 'showEnglishKeys' | 'soundEnabled' | 'keyboardSoundPack'>
+type KeyboardSettings = Pick<
+  UserSettings,
+  'showKeyboard' | 'showEnglishKeys' | 'soundEnabled' | 'keyboardSoundPack'
+>
 
 const defaultKeyboardSettings: KeyboardSettings = {
   showKeyboard: true,
@@ -181,7 +184,7 @@ export default function ReviewTypingSession<Outcome extends object>({
       <HangulTarget
         session={session.currentSession}
         className="mt-4 mb-8 scale-120 text-8xl font-bold sm:text-8xl"
-        compact
+        size="compact"
       />
 
       {/* <p className="mt-2 text-sm text-[#667085]">Typed: {composed}</p> */}

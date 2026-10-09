@@ -20,7 +20,10 @@ import type { UserSettings } from '../../domain/models/user-profile'
 import { usePressedKeyCodes } from '../typing/usePressedKeyCodes'
 import { useKeyboardSound } from '../typing/useKeyboardSound'
 
-type KeyboardSettings = Pick<UserSettings, 'showKeyboard' | 'showEnglishKeys' | 'soundEnabled' | 'keyboardSoundPack'>
+type KeyboardSettings = Pick<
+  UserSettings,
+  'showKeyboard' | 'showEnglishKeys' | 'soundEnabled' | 'keyboardSoundPack'
+>
 
 export interface LessonCompletion {
   outcome: CompleteLessonOutcome
@@ -267,7 +270,7 @@ export default function LessonTypingSession({
       <HangulTarget
         session={session.currentSession}
         className="mt-4 text-3xl"
-        compact
+        size="compact"
       />
       {/* <p className="mt-2 text-sm text-[#667085]">Typed: {composed}</p> */}
       {keyboardSettings.showKeyboard && (
