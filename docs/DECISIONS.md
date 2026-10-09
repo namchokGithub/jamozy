@@ -1439,3 +1439,21 @@ accuracy grid.
   `/review/weak-jamo?jamo=…`. That jamo becomes the only target under the same
   ranking rule; otherwise the page redirects to `/review`.
 
+**Amendment (2026-10-09, recent accuracy):** each JamoStat also keeps
+`recentAccepted` and `recentRejected`.
+
+- **Update rule:** on each submit that practices the jamo, the stored recent
+  counts are multiplied by 0.9 and the session's counts are added.
+- **What uses them:** mistake rates for Weakest/Strongest, Weak Jamo targets, and
+  the grid's accuracy. Lifetime counts still gate ranking (20 attempts) and
+  drive Most Practiced/Mistyped.
+- **Old data:** stats stored before this read their lifetime counts as recent;
+  no migration.
+- **Why:** lifetime accuracy barely moves after many attempts, so a learner who
+  improved would stay red.
+- **Trade-offs:**
+  - The window is counted in sessions, not time.
+  - Rarely practiced jamo keep old data longer.
+  - The decay factor cannot be applied retroactively.
+- **Rejected:** keeping the last 50 attempts per jamo (a larger document).
+

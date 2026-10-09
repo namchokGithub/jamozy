@@ -82,3 +82,12 @@ describe('practicableJamo', () => {
     ).toEqual(['ㄱ', 'ㄴ', 'ㅏ', 'ㅗ'])
   })
 })
+
+describe('jamoCell with recent counts', () => {
+  it('shows recent accuracy once ranked', () => {
+    expect(
+      jamoCell('ㄱ', { ...stat(60, 40), recentAccepted: 9.5, recentRejected: 0.5 }),
+    ).toMatchObject({ attempts: 100, accuracy: 95, tone: 'strong' })
+  })
+})
+

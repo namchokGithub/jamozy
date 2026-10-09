@@ -2,6 +2,7 @@ import type { HomeContent } from '../models/home-content'
 import {
   jamoKeysOf,
   MIN_RANKED_JAMO_ATTEMPTS,
+  recentMistakeRate,
   type JamoStats,
 } from '../models/jamo-stat'
 import type { LessonType } from '../models/lesson'
@@ -32,7 +33,7 @@ export function weakJamoTargets(stats: JamoStats): WeakJamoTarget[] {
       return {
         jamo,
         attempts,
-        mistakeRate: attempts === 0 ? 0 : stat.rejectedKeystrokes / attempts,
+        mistakeRate: recentMistakeRate(stat),
       }
     })
     .filter(

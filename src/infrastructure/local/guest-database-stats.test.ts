@@ -25,7 +25,7 @@ describe('guestJamoWrite', () => {
     expect(guestJamoWrite(undefined, undefined, now)).toBeNull()
     expect(guestJamoWrite(undefined, {}, now)).toBeNull()
     expect(guestJamoWrite(undefined, { ㄱ: { accepted: 1, rejected: 0 } }, now)).toEqual({
-      ㄱ: { acceptedKeystrokes: 1, rejectedKeystrokes: 0, firstPracticedAt: now, lastPracticedAt: now },
+      ㄱ: { acceptedKeystrokes: 1, rejectedKeystrokes: 0, recentAccepted: 1, recentRejected: 0, firstPracticedAt: now, lastPracticedAt: now },
     })
   })
 })

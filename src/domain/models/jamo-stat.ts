@@ -9,6 +9,11 @@ import type { ExerciseResult } from '../korean/lesson-session'
 export interface JamoStat {
   acceptedKeystrokes: number
   rejectedKeystrokes: number
+  // Recent counts (DEC-051 amendment): earlier sessions decay by
+  // RECENT_DECAY, so improvement shows. Absent on stats stored before them,
+  // which read as the lifetime counts.
+  recentAccepted?: number
+  recentRejected?: number
   firstPracticedAt: Date
   lastPracticedAt: Date
 }
@@ -16,6 +21,26 @@ export type JamoStats = Record<string, JamoStat>
 export type JamoCounts = Record<string, { accepted: number; rejected: number }>
 
 export const MIN_RANKED_JAMO_ATTEMPTS = 20
+export const RECENT_DECAY = 0.9
+
+const roundCount = (value: number) => Math.round(value * 1000) / 1000
+
+/** Recent counts, or the lifetime counts for a stat stored before them. */
+export function recentJamoCounts(stat: JamoStat): {
+  accepted: number
+  rejected: number
+} {
+  return {
+    accepted: stat.recentAccepted ?? stat.acceptedKeystrokes,
+    rejected: stat.recentRejected ?? stat.rejectedKeystrokes,
+  }
+}
+
+/** Share of recent attempts that were mistakes; 0 without attempts. */
+export function recentMistakeRate(stat: JamoStat): number {
+  const { accepted, rejected } = recentJamoCounts(stat)
+  return accepted + rejected === 0 ? 0 : rejected / (accepted + rejected)
+}
 const MAX_COUNT_PER_SESSION = 10_000
 
 // A Hangul letter key only: JAMO_TO_KEY also maps the space bar.
@@ -89,9 +114,14 @@ export function applyJamoCounts(
   for (const [jamo, { accepted, rejected }] of Object.entries(counts)) {
     if (accepted + rejected === 0) continue
     const existing = current[jamo]
+    const recent = existing
+      ? recentJamoCounts(existing)
+      : { accepted: 0, rejected: 0 }
     next[jamo] = {
       acceptedKeystrokes: (existing?.acceptedKeystrokes ?? 0) + accepted,
       rejectedKeystrokes: (existing?.rejectedKeystrokes ?? 0) + rejected,
+      recentAccepted: roundCount(recent.accepted * RECENT_DECAY + accepted),
+      recentRejected: roundCount(recent.rejected * RECENT_DECAY + rejected),
       // Home outbox jobs can submit after newer sessions, so never move the
       // first practice later or the last practice earlier.
       firstPracticedAt:
@@ -140,7 +170,7 @@ export function jamoRankings(stats: JamoStats): {
       jamo,
       attempts,
       rejected: stat.rejectedKeystrokes,
-      mistakeRate: attempts === 0 ? 0 : stat.rejectedKeystrokes / attempts,
+      mistakeRate: recentMistakeRate(stat),
     }
   })
   // A few early attempts swing the rate, so only practiced jamo are ranked.

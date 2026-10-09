@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   applyJamoCounts,
+  recentJamoCounts,
   jamoCountsFrom,
   jamoCountsSchema,
   jamoRankings,
@@ -97,12 +98,16 @@ describe('applyJamoCounts', () => {
     expect(next.ㄱ).toEqual({
       acceptedKeystrokes: 7,
       rejectedKeystrokes: 2,
+      recentAccepted: 6.5,
+      recentRejected: 1.9,
       firstPracticedAt: first,
       lastPracticedAt: now,
     })
     expect(next.ㅏ).toEqual({
       acceptedKeystrokes: 3,
       rejectedKeystrokes: 0,
+      recentAccepted: 3,
+      recentRejected: 0,
       firstPracticedAt: now,
       lastPracticedAt: now,
     })
@@ -187,3 +192,41 @@ describe('jamoCountsSchema', () => {
     expect(ok({ ㄱ: { accepted: 1.5, rejected: 0 } })).toBe(false)
   })
 })
+
+describe('recent accuracy', () => {
+  const now = new Date('2026-10-09T00:00:00Z')
+
+  it('starts recent counts from the session for a new jamo', () => {
+    const next = applyJamoCounts({}, { ㄱ: { accepted: 3, rejected: 1 } }, now)
+    expect(recentJamoCounts(next.ㄱ)).toEqual({ accepted: 3, rejected: 1 })
+  })
+
+  it('decays earlier recent counts by 0.9 before adding the session', () => {
+    const current: JamoStats = {
+      ㄱ: { acceptedKeystrokes: 50, rejectedKeystrokes: 50, recentAccepted: 10, recentRejected: 10, firstPracticedAt: now, lastPracticedAt: now },
+    }
+    const next = applyJamoCounts(current, { ㄱ: { accepted: 5, rejected: 0 } }, now)
+    expect(next.ㄱ).toMatchObject({ acceptedKeystrokes: 55, rejectedKeystrokes: 50 })
+    expect(recentJamoCounts(next.ㄱ)).toEqual({ accepted: 14, rejected: 9 })
+  })
+
+  it('reads lifetime counts as recent for a stat stored before recent counts', () => {
+    const legacy = { acceptedKeystrokes: 8, rejectedKeystrokes: 2, firstPracticedAt: now, lastPracticedAt: now }
+    expect(recentJamoCounts(legacy)).toEqual({ accepted: 8, rejected: 2 })
+    const next = applyJamoCounts({ ㄱ: legacy }, { ㄱ: { accepted: 1, rejected: 0 } }, now)
+    expect(recentJamoCounts(next.ㄱ)).toEqual({ accepted: 8.2, rejected: 1.8 })
+  })
+
+  it('ranks weakest by recent mistakes, so improvement shows', () => {
+    const stat = (accepted: number, rejected: number, recentAccepted: number, recentRejected: number) => ({
+      acceptedKeystrokes: accepted, rejectedKeystrokes: rejected, recentAccepted, recentRejected, firstPracticedAt: now, lastPracticedAt: now,
+    })
+    const rankings = jamoRankings({
+      ㄱ: stat(60, 40, 9.5, 0.5), // was weak, now 5% recent mistakes
+      ㄴ: stat(90, 10, 8, 2), // 20% recent mistakes
+    })
+    expect(rankings.weakest?.jamo).toBe('ㄴ')
+    expect(rankings.weakest?.mistakeRate).toBeCloseTo(0.2)
+  })
+})
+

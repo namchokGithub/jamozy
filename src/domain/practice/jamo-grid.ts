@@ -1,6 +1,7 @@
 import {
   jamoKeysOf,
   MIN_RANKED_JAMO_ATTEMPTS,
+  recentMistakeRate,
   type JamoStat,
   type JamoStats,
 } from '../models/jamo-stat'
@@ -36,7 +37,8 @@ export function jamoCell(jamo: string, stat: JamoStat | undefined): JamoCell {
   const attempts = stat ? stat.acceptedKeystrokes + stat.rejectedKeystrokes : 0
   if (!stat || attempts === 0)
     return { jamo, attempts: 0, accuracy: null, tone: 'none' }
-  const accuracy = Math.round((stat.acceptedKeystrokes / attempts) * 100)
+  // Lifetime attempts gate the color; recent counts give the accuracy.
+  const accuracy = Math.round((1 - recentMistakeRate(stat)) * 100)
   const tone: JamoTone =
     attempts < MIN_RANKED_JAMO_ATTEMPTS
       ? 'pending'

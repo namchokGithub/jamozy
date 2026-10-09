@@ -237,11 +237,18 @@ field exists in MVP.
 | rejectedKeystrokes | number | incremented for rejected input while this jamo was expected |
 | firstPracticedAt   | Date   | first submitted session containing this expected jamo       |
 | lastPracticedAt    | Date   | latest submitted session containing this expected jamo      |
+| recentAccepted?    | number | decayed recent count: earlier sessions × 0.9, plus this one   |
+| recentRejected?    | number | as `recentAccepted`, for rejected input                       |
 
 Accuracy is derived from the raw counters. Keyboard Position is a view/filter
 over shared jamo and keyboard metadata; it has no separate progress entity.
 All counters and timestamps are aggregated from a submitted session result,
 never persisted per keystroke.
+
+**Recent accuracy ([[DEC-051]] amendment):** rankings, the Review grid and
+Weak Jamo targets use the recent counts, so improvement shows. Lifetime
+attempts still gate ranking (20). A stat stored before recent counts reads its
+lifetime counts as recent.
 
 **Counting rules ([[DEC-050]]):**
 

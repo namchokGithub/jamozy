@@ -141,3 +141,14 @@ describe('homePracticeExercises', () => {
     ])
   })
 })
+
+describe('weakJamoTargets with recent counts', () => {
+  it('uses recent mistake rates and lifetime attempts', () => {
+    const targets = weakJamoTargets({
+      ㄱ: { ...stat(60, 40), recentAccepted: 10, recentRejected: 0 }, // recovered
+      ㄴ: { ...stat(95, 5), recentAccepted: 7, recentRejected: 3 },
+    })
+    expect(targets).toEqual([{ jamo: 'ㄴ', mistakeRate: 0.3, attempts: 100 }])
+  })
+})
+
