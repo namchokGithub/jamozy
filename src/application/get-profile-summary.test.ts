@@ -152,4 +152,15 @@ describe('getProfileSummary', () => {
 
     expect(saveSpy).not.toHaveBeenCalled()
   })
+
+  it('treats a stored profile without stats as zero stats instead of failing', async () => {
+    const userProfileRepo = new FakeUserProfileRepository()
+    const { stats: _stats, ...withoutStats } = defaultUserProfile('user1', new Date('2026-01-01'))
+    void _stats
+    await userProfileRepo.saveUserProfile('user1', withoutStats as UserProfile)
+
+    const summary = await getProfileSummary(userProfileRepo, 'user1')
+
+    expect(summary.stats).toMatchObject({ lessonsCompleted: 0, averageAccuracy: 0, totalTypingTimeSeconds: 0 })
+  })
 })
