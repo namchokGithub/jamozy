@@ -59,9 +59,16 @@ describe('SettingsPage', () => {
   it('links back to the course list', async () => {
     renderPage()
 
-    expect(
-      await screen.findByRole('link', { name: 'Back to Course List' }),
-    ).toHaveAttribute('href', '/')
+    expect(await screen.findByRole('link', { name: 'Home' })).toHaveAttribute(
+      'href',
+      '/',
+    )
+  })
+
+  it('shows boolean settings as switches', async () => {
+    renderPage()
+
+    expect(await screen.findByRole('switch', { name: 'Sound' })).toBeChecked()
   })
 
   it('disables Save while submitting and announces success once it succeeds', async () => {
