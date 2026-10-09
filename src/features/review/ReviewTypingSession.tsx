@@ -15,15 +15,11 @@ import type { SubmitReviewSessionOutcome } from '../../application/submit-review
 import type { UserSettings } from '../../domain/models/user-profile'
 import { usePressedKeyCodes } from '../typing/usePressedKeyCodes'
 
-type KeyboardSettings = Pick<
-  UserSettings,
-  'showKeyboard' | 'showEnglishKeys' | 'keyboardOpacity'
->
+type KeyboardSettings = Pick<UserSettings, 'showKeyboard' | 'showEnglishKeys'>
 
 const defaultKeyboardSettings: KeyboardSettings = {
   showKeyboard: true,
   showEnglishKeys: true,
-  keyboardOpacity: 0.7,
 }
 
 interface ReviewTypingSessionProps {
@@ -155,7 +151,9 @@ export default function ReviewTypingSession({
             feedback={feedback}
             previousFeedback={previousFeedback}
             showEnglishKeys={keyboardSettings.showEnglishKeys}
-            opacity={keyboardSettings.keyboardOpacity}
+            // Keyboard opacity is on hold: the setting stays stored but is
+            // not offered, so the guide is always fully visible, as on Home.
+            opacity={1}
             onKeyPress={handleKeyPress}
             pressedCodes={pressedCodes}
             mobileStyle

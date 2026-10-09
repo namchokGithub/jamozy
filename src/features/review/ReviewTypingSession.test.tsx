@@ -83,7 +83,7 @@ describe('ReviewTypingSession', () => {
     expect(screen.queryByText('ㅂ')).not.toBeInTheDocument()
   })
 
-  it('passes English-label and opacity settings to a visible keyboard guide', async () => {
+  it('passes the English-label setting and ignores the held opacity setting', async () => {
     renderSession(
       vi.fn(),
       [makeItem('a')],
@@ -93,7 +93,7 @@ describe('ReviewTypingSession', () => {
 
     await waitForTypingTarget('가')
     expect(screen.queryByText('r')).not.toBeInTheDocument()
-    expect(screen.getByLabelText('Virtual Korean keyboard')).toHaveStyle({ opacity: '0' })
+    expect(screen.getByLabelText('Virtual Korean keyboard')).toHaveStyle({ opacity: '1' })
   })
 
   it('submits the result and calls onComplete once the review session finishes', async () => {

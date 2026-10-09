@@ -19,10 +19,7 @@ import { Button } from '../../components/ui/Button'
 import type { UserSettings } from '../../domain/models/user-profile'
 import { usePressedKeyCodes } from '../typing/usePressedKeyCodes'
 
-type KeyboardSettings = Pick<
-  UserSettings,
-  'showKeyboard' | 'showEnglishKeys' | 'keyboardOpacity'
->
+type KeyboardSettings = Pick<UserSettings, 'showKeyboard' | 'showEnglishKeys'>
 
 export interface LessonCompletion {
   outcome: CompleteLessonOutcome
@@ -272,7 +269,9 @@ export default function LessonTypingSession({
             feedback={feedback}
             previousFeedback={previousFeedback}
             showEnglishKeys={keyboardSettings.showEnglishKeys}
-            opacity={keyboardSettings.keyboardOpacity}
+            // Keyboard opacity is on hold: the setting stays stored but is
+            // not offered, so the guide is always fully visible, as on Home.
+            opacity={1}
             onKeyPress={handleKeyPress}
             pressedCodes={pressedCodes}
             mobileStyle

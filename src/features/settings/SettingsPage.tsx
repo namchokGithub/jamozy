@@ -50,7 +50,6 @@ export default function SettingsPage() {
       <SettingsCard icon={<Keyboard aria-hidden="true" size={18} />} tone="sage" title="Keyboard guide" description="Show just the hints you need.">
         <Toggle label="Show keyboard" checked={settings.showKeyboard} onChange={(value) => update('showKeyboard', value)} />
         <Toggle label="Show English key labels" checked={settings.showEnglishKeys} onChange={(value) => update('showEnglishKeys', value)} />
-        <label className="grid gap-2 text-sm font-semibold text-[#39465b]">Keyboard opacity<input aria-label="Keyboard opacity" className="accent-[#a85d4e]" type="range" min={0} max={1} step={0.1} value={settings.keyboardOpacity} onChange={(event) => update('keyboardOpacity', Number(event.target.value))} /></label>
       </SettingsCard>
       <SettingsCard icon={<SlidersHorizontal aria-hidden="true" size={18} />} tone="lilac" title="Appearance" description="Light theme is styled for gentle, focused practice.">
         <Dropdown label="Theme" value={settings.theme} onChange={(value) => update('theme', value)} options={[{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]} />
