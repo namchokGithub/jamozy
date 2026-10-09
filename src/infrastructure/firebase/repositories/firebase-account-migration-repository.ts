@@ -76,8 +76,14 @@ export class FirebaseAccountMigrationRepository implements AccountMigrationRepos
       const profileRef = doc(db, 'users', accountId)
       const profile = await transaction.get(profileRef)
       const current = (profile.data()?.sessionAggregate as SessionAggregate | undefined) ?? emptySessionAggregate()
-      const progressReads = await Promise.all(outcome.effects.progress.map(async (guestProgress) => ({ guestProgress, progressRef: doc(db, 'users', accountId, 'lessonProgress', guestProgress.lessonId), cloud: await transaction.get(doc(db, 'users', accountId, 'lessonProgress', guestProgress.lessonId)) })))
-      const reviewReads = await Promise.all(outcome.effects.reviewItems.map(async (guestReview) => ({ guestReview, reviewRef: doc(db, 'users', accountId, 'reviewItems', guestReview.id), cloud: await transaction.get(doc(db, 'users', accountId, 'reviewItems', guestReview.id)) })))
+      const progressReads = await Promise.all(outcome.effects.progress.map(async (guestProgress) => {
+        const progressRef = doc(db, 'users', accountId, 'lessonProgress', guestProgress.lessonId)
+        return { guestProgress, progressRef, cloud: await transaction.get(progressRef) }
+      }))
+      const reviewReads = await Promise.all(outcome.effects.reviewItems.map(async (guestReview) => {
+        const reviewRef = doc(db, 'users', accountId, 'reviewItems', guestReview.id)
+        return { guestReview, reviewRef, cloud: await transaction.get(reviewRef) }
+      }))
       const writeStats = await readSessionStatsWrites({ db, doc }, transaction, accountId, profile.data(), outcome.session)
       for (const { guestProgress, progressRef, cloud } of progressReads) {
         transaction.set(progressRef, toProgressDoc(mergeProgress(cloud.exists() ? toProgress(guestProgress.lessonId, cloud.data()) : null, guestProgress)))

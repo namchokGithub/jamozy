@@ -2,6 +2,7 @@ import { createContext, useContext } from 'react'
 import type { HomeLessonRef } from '../../domain/home/home-session'
 import type { ExerciseResult } from '../../domain/korean/lesson-session'
 import type { HomeLesson } from '../../domain/models/home-content'
+import type { LessonType } from '../../domain/models/lesson'
 import type { HomeSessionTotals } from '../../domain/models/home-sync-job'
 
 // Home's background writes (DEC-043). Each call returns at once; the app
@@ -11,7 +12,7 @@ export interface HomeServices {
     lesson: HomeLesson
     result: ExerciseResult
   }) => void
-  recordReplay: (input: { lessonId: string; lessonType?: import('../../domain/models/lesson').LessonType; totals: HomeSessionTotals }) => void
+  recordReplay: (input: { lessonId: string; lessonType?: LessonType; totals: HomeSessionTotals }) => void
   saveResume: (resume: HomeLessonRef) => void
 }
 

@@ -1,5 +1,6 @@
 import { ValidationError } from '../domain/errors'
 import type { ExerciseResult } from '../domain/korean/lesson-session'
+import type { LessonType } from '../domain/models/lesson'
 import type { HomePartialResult, Progress } from '../domain/models/progress'
 import type { ProgressRepository } from '../domain/repositories/progress-repository'
 import { expForAccuracy } from './complete-lesson-session'
@@ -17,7 +18,7 @@ export interface RecordHomeExerciseDeps extends HomeSessionDeps {
 
 export interface RecordHomeExerciseInput {
   userId: string
-  lesson: { id: string; type?: import('../domain/models/lesson').LessonType; exercises: Array<{ id: string }> }
+  lesson: { id: string; type?: LessonType; exercises: Array<{ id: string }> }
   result: ExerciseResult
   // Used only when this is the lesson's first recorded exercise; it becomes
   // the first-completion session ID.
