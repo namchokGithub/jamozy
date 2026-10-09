@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getWeakJamoPractice, getWeakJamoSummary } from './get-weak-jamo-practice'
+import { getJamoOverview, getWeakJamoPractice, getWeakJamoSummary } from './get-weak-jamo-practice'
 import { FakeJamoStatsRepository } from '../test/fakes'
 import { homeContentWith } from '../test/home-content-fixture'
 import type { HomeContentRepository } from '../domain/repositories/home-content-repository'
@@ -46,3 +46,50 @@ describe('getWeakJamoPractice', () => {
     expect(await getWeakJamoPractice(deps(content(['가'])), 'u1')).toBeNull()
   })
 })
+
+describe('getJamoOverview', () => {
+  it('returns stats, the weak jamo summary, and the jamo Home can drill', async () => {
+    const overview = await getJamoOverview(deps(content(['어', '가'])), 'u1')
+    expect(overview?.stats).toBe(weakStats)
+    expect(overview?.weakJamo?.targets[0].jamo).toBe('ㅓ')
+    expect(overview?.practicable.sort()).toEqual(['ㄱ', 'ㅇ', 'ㅏ', 'ㅓ'])
+  })
+
+  it('keeps stats when Home content fails, and is null when stats fail', async () => {
+    const overview = await getJamoOverview(
+      deps({ getHomeContent: async () => { throw new Error('404') } }),
+      'u1',
+    )
+    expect(overview).toEqual({ stats: weakStats, weakJamo: null, practicable: [] })
+    expect(
+      await getJamoOverview(
+        { jamoStatsRepo: { getJamoStats: async () => { throw new Error('offline') } }, contentRepo: content(['어']) },
+        'u1',
+      ),
+    ).toBeNull()
+  })
+})
+
+describe('getWeakJamoPractice with a chosen jamo', () => {
+  const stats = {
+    ...weakStats,
+    ㄱ: { acceptedKeystrokes: 15, rejectedKeystrokes: 5, firstPracticedAt: new Date(0), lastPracticedAt: new Date(0) },
+  }
+  const focusDeps = (targets: string[]) => ({
+    jamoStatsRepo: new FakeJamoStatsRepository({ u1: stats }),
+    contentRepo: content(targets),
+  })
+
+  it('drills only the chosen jamo', async () => {
+    const practice = await getWeakJamoPractice(focusDeps(['어', '가']), 'u1', () => 0, 'ㄱ')
+    expect(practice?.targets).toEqual([{ jamo: 'ㄱ', mistakeRate: 0.25, attempts: 20 }])
+    expect(practice?.exercises.map((exercise) => exercise.targetText)).toEqual(['가'])
+  })
+
+  it('returns null for a jamo that is unranked, unknown, or not in any exercise', async () => {
+    expect(await getWeakJamoPractice(focusDeps(['가']), 'u1', () => 0, 'ㄴ')).toBeNull()
+    expect(await getWeakJamoPractice(focusDeps(['가']), 'u1', () => 0, 'x')).toBeNull()
+    expect(await getWeakJamoPractice(focusDeps(['어']), 'u1', () => 0, 'ㄱ')).toBeNull()
+  })
+})
+

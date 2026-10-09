@@ -28,6 +28,7 @@ function WeakJamoRound() {
   // The set this round started with, kept for its results and labels.
   const [{ targets, exercises, settings }] = useState(loaderData)
   const navigate = useNavigate()
+  const location = useLocation()
   const [finished, setFinished] = useState<Finished | null>(null)
   const handleComplete = useCallback(
     (outcome: SubmitWeakJamoSessionOutcome, completed: CompletedTypingSession) =>
@@ -97,7 +98,11 @@ function WeakJamoRound() {
         <div className="mt-6 flex flex-wrap gap-3">
           <Button
             type="button"
-            onClick={() => navigate('/review/weak-jamo', { replace: true })}
+            onClick={() =>
+              navigate(`${location.pathname}${location.search}`, {
+                replace: true,
+              })
+            }
           >
             Practice again
           </Button>

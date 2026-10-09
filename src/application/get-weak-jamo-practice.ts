@@ -1,5 +1,7 @@
 import type { HomeContentRepository } from '../domain/repositories/home-content-repository'
 import type { JamoStatsRepository } from '../domain/repositories/jamo-stats-repository'
+import type { JamoStats } from '../domain/models/jamo-stat'
+import { practicableJamo } from '../domain/practice/jamo-grid'
 import {
   homePracticeExercises,
   selectWeakJamoExercises,
@@ -21,15 +23,34 @@ export interface WeakJamoSummary {
   available: number
 }
 
+export interface JamoOverview {
+  stats: JamoStats
+  weakJamo: WeakJamoSummary | null
+  // Jamo keys at least one Home exercise drills (tappable grid cells).
+  practicable: string[]
+}
+
+// A learner-chosen jamo is drilled only when it is ranked the same way as
+// the automatic targets: enough attempts and at least one mistake.
+function chosenTarget(stats: JamoStats, jamo: string): WeakJamoTarget[] {
+  return weakJamoTargets({ ...(stats[jamo] ? { [jamo]: stats[jamo] } : {}) })
+}
+
 // Weak Jamo practice (DEC-051) is optional: a failed read only hides it.
-async function readCandidates(deps: WeakJamoDeps, userId: string) {
+async function readCandidates(
+  deps: WeakJamoDeps,
+  userId: string,
+  focusJamo?: string,
+) {
   try {
     const [stats, content] = await Promise.all([
       deps.jamoStatsRepo.getJamoStats(userId),
       deps.contentRepo.getHomeContent(),
     ])
     if (!content) return null
-    const targets = weakJamoTargets(stats)
+    const targets = focusJamo
+      ? chosenTarget(stats, focusJamo)
+      : weakJamoTargets(stats)
     if (targets.length === 0) return null
     return { targets, exercises: homePracticeExercises(content) }
   } catch {
@@ -57,8 +78,9 @@ export async function getWeakJamoPractice(
   deps: WeakJamoDeps,
   userId: string,
   random?: () => number,
+  focusJamo?: string,
 ): Promise<{ targets: WeakJamoTarget[]; exercises: PracticeExercise[] } | null> {
-  const candidates = await readCandidates(deps, userId)
+  const candidates = await readCandidates(deps, userId, focusJamo)
   if (!candidates) return null
   const exercises = selectWeakJamoExercises(
     candidates.targets,
@@ -68,4 +90,27 @@ export async function getWeakJamoPractice(
   return exercises.length === 0
     ? null
     : { targets: candidates.targets, exercises }
+}
+
+/** Per-jamo stats for the Review grid; null only when stats cannot be read. */
+export async function getJamoOverview(
+  deps: WeakJamoDeps,
+  userId: string,
+): Promise<JamoOverview | null> {
+  let stats: JamoStats
+  try {
+    stats = await deps.jamoStatsRepo.getJamoStats(userId)
+  } catch {
+    return null
+  }
+  const [weakJamo, practicable] = await Promise.all([
+    getWeakJamoSummary(deps, userId),
+    deps.contentRepo
+      .getHomeContent()
+      .then((content) =>
+        content ? [...practicableJamo(homePracticeExercises(content))] : [],
+      )
+      .catch(() => []),
+  ])
+  return { stats, weakJamo, practicable }
 }

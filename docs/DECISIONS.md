@@ -1426,3 +1426,16 @@ Rankings are derived on read:
   - synthetic syllable drills (meaningless text);
   - reading completed Learning Path lessons (reads grow with progress);
   - reusing the `review` context (mixes stats).
+
+**Amendment (2026-10-09):** `/review` always shows the entry and a per-jamo
+accuracy grid.
+
+- **Grid:** the 33 letter keys in four groups. A cell is colored only from 20
+  attempts: < 70% red, 70–90% yellow, 90%+ green. Below that it shows the
+  accuracy in gray.
+- **Entry card:** stays locked with progress (the practiced jamo closest to 20
+  attempts) until a target exists.
+- **Chosen jamo:** tapping a red or yellow cell whose jamo appears in Home opens
+  `/review/weak-jamo?jamo=…`. That jamo becomes the only target under the same
+  ranking rule; otherwise the page redirects to `/review`.
+

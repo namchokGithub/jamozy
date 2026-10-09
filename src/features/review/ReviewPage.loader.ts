@@ -2,8 +2,8 @@ import { getDueReviewItems } from '../../application/get-review-items'
 import { getReviewPreviews } from '../../application/get-review-previews'
 import { getSettings } from '../../application/get-settings'
 import {
-  getWeakJamoSummary,
-  type WeakJamoSummary,
+  getJamoOverview,
+  type JamoOverview,
 } from '../../application/get-weak-jamo-practice'
 import type { HomeContentRepository } from '../../domain/repositories/home-content-repository'
 import type { JamoStatsRepository } from '../../domain/repositories/jamo-stats-repository'
@@ -16,8 +16,8 @@ import type { UserSettings } from '../../domain/models/user-profile'
 export interface ReviewLoaderData {
   previews: ReviewPreview[]
   settings: UserSettings
-  // Weak Jamo practice entry (DEC-051); null hides it.
-  weakJamo: WeakJamoSummary | null
+  // Per-jamo grid and Weak Jamo practice entry (DEC-051); null hides both.
+  jamoOverview: JamoOverview | null
 }
 
 export function createReviewLoader(deps: {
@@ -31,14 +31,14 @@ export function createReviewLoader(deps: {
   return async (): Promise<ReviewLoaderData> => {
     const user = await deps.ensureUser()
     const { jamoStatsRepo, contentRepo } = deps
-    const [items, settings, weakJamo] = await Promise.all([
+    const [items, settings, jamoOverview] = await Promise.all([
       getDueReviewItems(deps.reviewRepo, user.uid, new Date(), 20),
       getSettings(deps.userProfileRepo, user.uid),
       jamoStatsRepo && contentRepo
-        ? getWeakJamoSummary({ jamoStatsRepo, contentRepo }, user.uid)
+        ? getJamoOverview({ jamoStatsRepo, contentRepo }, user.uid)
         : null,
     ])
     const previews = await getReviewPreviews(deps.lessonRepo, items)
-    return { previews, settings, weakJamo }
+    return { previews, settings, jamoOverview }
   }
 }

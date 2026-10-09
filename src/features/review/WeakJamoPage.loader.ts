@@ -1,4 +1,8 @@
-import { redirect, type ShouldRevalidateFunction } from 'react-router'
+import {
+  redirect,
+  type LoaderFunctionArgs,
+  type ShouldRevalidateFunction,
+} from 'react-router'
 import {
   getWeakJamoPractice,
   type WeakJamoDeps,
@@ -23,10 +27,15 @@ export function createWeakJamoLoader(
     ensureUser: () => Promise<{ uid: string }>
   },
 ) {
-  return async (): Promise<WeakJamoLoaderData> => {
+  return async ({
+    request,
+  }: Pick<LoaderFunctionArgs, 'request'>): Promise<WeakJamoLoaderData> => {
+    // `?jamo=ㄲ` drills one jamo tapped in the Review grid.
+    const focusJamo =
+      new URL(request.url).searchParams.get('jamo') ?? undefined
     const user = await deps.ensureUser()
     const [practice, settings] = await Promise.all([
-      getWeakJamoPractice(deps, user.uid),
+      getWeakJamoPractice(deps, user.uid, undefined, focusJamo),
       getSettings(deps.userProfileRepo, user.uid),
     ])
     // Nothing to practice yet: the Review page explains what is available.

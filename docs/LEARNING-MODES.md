@@ -90,6 +90,9 @@ from `/review` and play it at `/review/weak-jamo`.
   the sum of its target-jamo keys, weighted by each jamo's mistake rate.
   Exercises are drawn at random from the 30 highest scores, so the session reads
   no content from Firestore.
+- **Grid:** `/review` also shows per-jamo accuracy. Tapping a red or yellow
+  cell drills that jamo alone (`?jamo=`). Until a jamo ranks, the entry is
+  locked and shows progress.
 - **Recording:** each session is a `LearningSession` with context
   `{ mode: 'weak-jamo' }` and counts as `practicesCompleted` in Player Stats.
   It records jamo stats, never touches `ReviewItem` or `LessonProgress`, and

@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { Link, useLoaderData, useNavigate } from 'react-router'
+import { useLoaderData, useNavigate } from 'react-router'
 import type { ReviewLoaderData } from './ReviewPage.loader'
 import ReviewTypingSession from './ReviewTypingSession'
+import JamoAccuracyGrid from './JamoAccuracyGrid'
+import WeakJamoCard from './WeakJamoCard'
 import type { SubmitReviewSessionOutcome } from '../../application/submit-review-session'
 import { formatExerciseMeaning } from '../lesson/format-exercise-meaning'
 import { Button } from '../../components/ui/Button'
@@ -10,7 +12,7 @@ import { PageNav } from '../../components/ui/PageNav'
 import { PageSurface } from '../../components/ui/PageSurface'
 
 export default function ReviewPage() {
-  const { previews, settings, weakJamo } = useLoaderData() as ReviewLoaderData
+  const { previews, settings, jamoOverview } = useLoaderData() as ReviewLoaderData
   const items = previews.map((preview) => preview.item)
   const [started, setStarted] = useState(false)
   const [outcome, setOutcome] = useState<SubmitReviewSessionOutcome | null>(
@@ -56,24 +58,14 @@ export default function ReviewPage() {
       {nav}
       <PageHeading eyebrow="PRACTICE YOUR MISTAKES" title="Review" />
 
-      {weakJamo && (
-        <div className="mt-6 rounded-3xl border border-[#eadfd4] bg-white/85 p-4 text-[#253247] shadow-sm">
-          <div className="font-semibold">Practice weak jamo</div>
-          <p className="mt-1 text-sm text-[#667085]">
-            {weakJamo.targets
-              .map(
-                (target) =>
-                  `${target.jamo} ${Math.round(target.mistakeRate * 100)}%`,
-              )
-              .join(' · ')}
-          </p>
-          <Link
-            to="/review/weak-jamo"
-            className="mt-3 inline-flex items-center justify-center rounded-full border border-[#a85d4e] bg-[#a85d4e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#8d4c43] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bc6c5d]"
-          >
-            Practice {weakJamo.available} words
-          </Link>
-        </div>
+      {jamoOverview && (
+        <>
+          <WeakJamoCard overview={jamoOverview} />
+          <JamoAccuracyGrid
+            stats={jamoOverview.stats}
+            practicable={jamoOverview.practicable}
+          />
+        </>
       )}
 
       {items.length === 0 ? (

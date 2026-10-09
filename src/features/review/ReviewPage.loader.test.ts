@@ -93,7 +93,7 @@ describe('createReviewLoader', () => {
     expect(data.settings).toMatchObject({ romanizationEnabled: false, meaningLanguage: 'th' })
   })
 
-  it('keeps previews and returns no weak jamo summary when Home content fails', async () => {
+  it('keeps previews and the jamo grid, without practice, when Home content fails', async () => {
     const reviewRepo = new FakeReviewRepository()
     await reviewRepo.addReviewItem('user1', makeItem('due'))
     const loader = createReviewLoader({
@@ -108,6 +108,6 @@ describe('createReviewLoader', () => {
     const data = await loader()
 
     expect(data.previews).toHaveLength(1)
-    expect(data.weakJamo).toBeNull()
+    expect(data.jamoOverview).toEqual({ stats: {}, weakJamo: null, practicable: [] })
   })
 })
