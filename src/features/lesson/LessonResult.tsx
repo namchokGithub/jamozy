@@ -73,15 +73,17 @@ export default function LessonResult({
           Next lesson unlocked.
         </p>
       )}
-      <Button className="mt-6" variant="secondary" onClick={onRetry}>
-        Retry
-      </Button>
-      <Button className="ml-3" variant="secondary" onClick={onReview}>
-        Go to Review
-      </Button>
-      <Button className="ml-3" onClick={onContinue}>
-        {outcome.unlockedNextLessonId ? 'Next Lesson' : 'Course Map'}
-      </Button>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Button variant="secondary" onClick={onRetry}>
+          Retry
+        </Button>
+        <Button variant="secondary" onClick={onReview}>
+          Go to Review
+        </Button>
+        <Button onClick={onContinue}>
+          {outcome.unlockedNextLessonId ? 'Next Lesson' : 'Course Map'}
+        </Button>
+      </div>
     </>
   )
 }

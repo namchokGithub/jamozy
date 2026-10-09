@@ -41,8 +41,7 @@ export default function ReviewTypingSession({
   const { session, start, pressKey, generation, submissionId } =
     useLessonSessionStore()
   const fetcher = useFetcher<SubmitReviewSessionOutcome>()
-  const { feedback, previousFeedback, recordAttempt } =
-    useKeyboardFeedback()
+  const { feedback, previousFeedback, recordAttempt } = useKeyboardFeedback()
   const hasStarted = useRef(false)
   const hasSubmitted = useRef(false)
   // See LessonTypingSession.tsx / DEC-018 for why this needs to be a
@@ -138,7 +137,7 @@ export default function ReviewTypingSession({
     session.currentSession.expectedKeys[session.currentSession.keyIndex]
 
   return (
-    <div className="mt-5 rounded-3xl border border-[#eadfd4] bg-[#fffdf9] p-5 shadow-sm">
+    <div className="mt-5 rounded-3xl border border-[#eadfd4] bg-[#fffdf9] p-3 shadow-sm sm:p-5">
       <p className="text-sm font-semibold text-[#a85d4e]">
         {progress.current} / {progress.total}
       </p>
@@ -146,6 +145,7 @@ export default function ReviewTypingSession({
       <HangulTarget
         session={session.currentSession}
         className="mt-4 text-3xl"
+        compact
       />
       {/* <p className="mt-2 text-sm text-[#667085]">Typed: {composed}</p> */}
       {keyboardSettings.showKeyboard && (
@@ -158,8 +158,14 @@ export default function ReviewTypingSession({
             opacity={keyboardSettings.keyboardOpacity}
             onKeyPress={handleKeyPress}
             pressedCodes={pressedCodes}
+            mobileStyle
           />
-          <FingerPlacementGuide nextKey={nextKey} pressedCodes={pressedCodes} />
+          <div className="hidden sm:block">
+            <FingerPlacementGuide
+              nextKey={nextKey}
+              pressedCodes={pressedCodes}
+            />
+          </div>
         </>
       )}
     </div>

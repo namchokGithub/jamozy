@@ -232,7 +232,7 @@ export default function LessonTypingSession({
     session.currentSession.expectedKeys[session.currentSession.keyIndex]
 
   return (
-    <div className="mt-5 rounded-3xl border border-[#eadfd4] bg-[#fffdf9] p-5 shadow-sm">
+    <div className="mt-5 rounded-3xl border border-[#eadfd4] bg-[#fffdf9] p-3 shadow-sm sm:p-5">
       <div className="flex items-center justify-between gap-3">
         {onExit ? (
           <button
@@ -262,6 +262,7 @@ export default function LessonTypingSession({
       <HangulTarget
         session={session.currentSession}
         className="mt-4 text-3xl"
+        compact
       />
       {/* <p className="mt-2 text-sm text-[#667085]">Typed: {composed}</p> */}
       {keyboardSettings.showKeyboard && (
@@ -274,8 +275,14 @@ export default function LessonTypingSession({
             opacity={keyboardSettings.keyboardOpacity}
             onKeyPress={handleKeyPress}
             pressedCodes={pressedCodes}
+            mobileStyle
           />
-          <FingerPlacementGuide nextKey={nextKey} pressedCodes={pressedCodes} />
+          <div className="hidden sm:block">
+            <FingerPlacementGuide
+              nextKey={nextKey}
+              pressedCodes={pressedCodes}
+            />
+          </div>
         </>
       )}
     </div>
