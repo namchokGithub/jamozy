@@ -325,13 +325,13 @@ export default function VirtualKey({
             <>
               {jamo.shift && (
                 <span
-                  className={`absolute top-1 right-1 text-[10px] leading-none text-[#a85d4e] ${desktopOnly}`}
+                  className={`absolute top-1 right-1 text-[12px] leading-none text-[#a85d4e] ${desktopOnly}`}
                 >
                   {jamo.shift}
                 </span>
               )}
               {mobileStyle && (
-                <span className="text-[15px] leading-5 sm:hidden">
+                <span className="text-[25px] leading-5 sm:hidden">
                   {mobileJamo}
                 </span>
               )}
@@ -340,7 +340,7 @@ export default function VirtualKey({
               </span>
               {showEnglishKeys && (
                 <span
-                  className={`mt-0.5 text-[10px] leading-3 text-slate-400 ${hasHomeRowMarker ? 'mb-1.5' : ''} ${desktopOnly}`}
+                  className={`mt-0.5 text-[10px] leading-3 text-[#c7bfb2] ${hasHomeRowMarker ? 'mb-1.5' : ''} ${desktopOnly}`}
                 >
                   {englishLabel(code)}
                 </span>
