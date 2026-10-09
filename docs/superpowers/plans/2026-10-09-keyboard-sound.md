@@ -1,111 +1,158 @@
 # Keyboard Sound Implementation Plan
 
-**Goal:** Play a mechanical-keyboard press/release sound for every key a learner types — hardware or virtual keyboard — when `UserSettings.soundEnabled` is on.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` (recommended) or `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Architecture:** Web Audio API, no new dependency. A module-level player fetches and decodes each pack file once into an `AudioBuffer`, then plays each event through a fresh `AudioBufferSourceNode` (low latency, overlapping sounds during fast typing; `HTMLAudioElement` cannot overlap itself and lags). A pure mapper chooses the sound file from `KeyboardEvent.code`. A typing hook wires keydown/keyup and the virtual keyboard to the player and is mounted by each typing host.
+**Goal:** Play the chosen mechanical-keyboard sound for every physical or virtual key typed in a lesson, review, Weak Jamo practice, or Home player when `UserSettings.soundEnabled` is on.
 
-**Tech Stack:** React 19, TypeScript, Web Audio API, Vitest.
+**Architecture:** The bundled source assets stay under `src/assets/audio`; a typed asset manifest supplies Vite-generated URLs to a module-level Web Audio player. A pure key mapper selects a pack-relative press/release file, while `useKeyboardSound` owns loading, browser unlocking, physical listeners, and virtual-key playback. The selected pack is a persisted `UserSettings` preference, with `turquoise` as the backward-compatible default.
 
-## Constraints
+**Tech Stack:** React 19, TypeScript, Vite asset imports, Web Audio API, React Router loaders, Zod, Vitest + React Testing Library.
 
-- `soundEnabled` already exists in `UserSettings` (`src/domain/models/user-profile.ts`) and the Settings toggle already saves it. No schema, persistence, or migration change.
-- Sound is transient client presentation; never store it in typing-session or domain state.
-- Play the same sound for correct and wrong attempts. Sound does not signal correctness.
-- Skip `keydown` events with `event.repeat`.
-- A missing, still-loading, or undecodable file plays nothing and never throws.
-- When `soundEnabled` is false, register no listeners and fetch no files.
-- Browsers block audio until a user gesture: call `AudioContext.resume()` on the first keydown/pointerdown.
-- Sound files are not ready yet. Tasks 2–5 run against test doubles; Task 1 lands when the files exist.
+**Spec:** User-confirmed requirements in this plan update (2026-10-09).
 
-## Sound Pack Layout
+## Global Constraints
 
-```
-public/sounds/keyboard/blackink/
-  press/    BACKSPACE.mp3 ENTER.mp3 SPACE.mp3 GENERIC_R0.mp3 … GENERIC_R4.mp3
-  release/  BACKSPACE.mp3 ENTER.mp3 SPACE.mp3 GENERIC.mp3
-```
+- Do not add a dependency or persist typing audio events.
+- Keep sound playback transient and outside domain typing-session state.
+- Use only `src/assets/audio/{turquoise,mxblack,mxblue}`; do not duplicate or move media to `public/`.
+- Default existing and new users to `turquoise` (`Turquoise Tealio`) without requiring a migration.
+- The Settings dropdown order is: `turquoise` — Turquoise Tealio; `mxblack` — Cherry MX Blacks; `mxblue` — Cherry MX Blues.
+- Sound plays for correct and incorrect attempts alike; it must not encode correctness.
+- Ignore repeated physical `keydown` events. Missing, loading, or undecodable audio must be a silent no-op and never throw.
+- When sound is disabled, do not load audio or attach sound listeners.
+- Do not update automated tests for visual-only presentation. Add focused tests for domain/persistence, audio behavior, and changed non-visual UI behavior; run focused tests plus `pnpm lint`, not the full test suite by default.
 
-Press mapping by physical row (`GENERIC_R{n}`):
+## Review Focus
 
-| Sound          | `KeyboardEvent.code`                                                     |
-| -------------- | ------------------------------------------------------------------------ |
-| `BACKSPACE`    | `Backspace`                                                              |
-| `ENTER`        | `Enter`, `NumpadEnter`                                                   |
-| `SPACE`        | `Space`                                                                  |
-| `GENERIC_R0`   | `Escape`, `F1`–`F12`                                                     |
-| `GENERIC_R1`   | `Backquote`, `Digit0`–`Digit9`, `Minus`, `Equal`                         |
-| `GENERIC_R2`   | `Tab`, `KeyQ`–`KeyP`, `BracketLeft`, `BracketRight`, `Backslash`         |
-| `GENERIC_R3`   | `CapsLock`, `KeyA`–`KeyL`, `Semicolon`, `Quote`                          |
-| `GENERIC_R4`   | `ShiftLeft`, `ShiftRight`, `KeyZ`–`KeyM`, `Comma`, `Period`, `Slash`; fallback for any other code (Ctrl, Alt, Meta, arrows) |
+- Legacy profile with no `keyboardSoundPack` receives and persists `turquoise` when Settings is next saved.
+- Disabling sound before mount causes neither audio loading nor listener registration.
+- A failed decode for one asset does not prevent another asset from playing.
+- Holding a physical key produces one press sound, while virtual input produces a press and a delayed release.
+- Home-content and Learning-Path fallback both receive the same loader-provided settings without delaying static Home content unnecessarily.
 
-Release mapping: `BACKSPACE`, `ENTER`, `SPACE` as above; every other code → `GENERIC`.
+## File Structure
 
-### Task 1: Add sound assets and credits
+- `src/domain/models/user-profile.ts` — pack identifier, default, and validation.
+- `src/application/get-settings.ts` and `src/infrastructure/firebase/repositories/firebase-user-profile-repository.ts` — normalize legacy settings that lack the new field.
+- `src/features/settings/SettingsPage.tsx` — selected-pack dropdown beside the existing Sound toggle.
+- `src/features/typing/keyboard-sound-assets.ts` — typed Vite URLs for all bundled pack files.
+- `src/features/typing/keyboard-sound-map.ts` — pure physical-key to pack-file mapping.
+- `src/infrastructure/audio/keyboard-sound-player.ts` — Web Audio buffer cache and playback.
+- `src/features/typing/useKeyboardSound.ts` — sound lifecycle and physical/virtual entry points.
+- `src/features/{lesson,review,home}/...` and `src/features/course/...` — pass settings into all active typing hosts.
+- `docs/CREDITS.md`, `docs/DOMAIN-MODEL.md`, `docs/PROGRESS.md`, `docs/DECISIONS.md`, and `docs/log/2026-10.md` — attribution and durable product/architecture status.
 
-**Files:**
-
-- Create: `public/sounds/keyboard/blackink/press/*.mp3` (8 files)
-- Create: `public/sounds/keyboard/blackink/release/*.mp3` (4 files)
-- Modify: `docs/CREDITS.md`
-
-- [ ] Copy the `blackink` files into the layout above, keeping the file names.
-- [ ] Record the pack source, author, and license in `docs/CREDITS.md`.
-
-### Task 2: Add a tested key-to-sound mapper
+### Task 1: Model and normalize the selected sound pack
 
 **Files:**
+- Modify: `src/domain/models/user-profile.ts`
+- Modify: `src/domain/models/user-profile.test.ts`
+- Modify: `src/application/get-settings.ts`
+- Modify: `src/application/get-settings.test.ts`
+- Modify: `src/infrastructure/firebase/repositories/firebase-user-profile-repository.ts`
+- Modify: `src/infrastructure/firebase/repositories/firebase-user-profile-repository.test.ts`
+- Modify: `docs/DOMAIN-MODEL.md`
 
+**Produces:** `KeyboardSoundPack = 'turquoise' | 'mxblack' | 'mxblue'` and a complete `UserSettings` object whose `keyboardSoundPack` is always defined.
+
+- [ ] Add `KeyboardSoundPack`, `keyboardSoundPack` to `UserSettings`, and default it to `'turquoise'` in `defaultUserProfile`.
+- [ ] Extend `userSettingsSchema` to accept only the three pack IDs.
+- [ ] Add a shared domain normalizer that merges a missing `keyboardSoundPack` to `'turquoise'` while retaining every existing setting; never reset a profile or overwrite another preference.
+- [ ] Use that normalizer in `getSettings` so legacy Guest IndexedDB profiles and test fakes receive a complete settings object, and in Firebase's `toUserProfile` mapper for legacy cloud profiles.
+- [ ] Add focused tests for the default, accepted/rejected pack IDs, and a legacy persisted profile.
+- [ ] Run the focused domain/repository tests and confirm they pass.
+- [ ] Update the `UserSettings` table in `docs/DOMAIN-MODEL.md` with the field, allowed values, and default.
+
+### Task 2: Add the Settings pack control
+
+**Files:**
+- Modify: `src/features/settings/SettingsPage.tsx`
+- Modify: `src/features/settings/SettingsPage.test.tsx`
+- Modify: `src/features/settings/SettingsPage.action.test.ts`
+- Modify: `src/features/settings/SettingsPage.loader.test.ts`
+- Modify: affected `get-settings` / `update-settings` tests and fixtures
+
+**Consumes:** `UserSettings.keyboardSoundPack` from Task 1.
+
+- [ ] Add a `Keyboard sound` dropdown in the existing `Practice feel` section, retaining the existing Sound switch as the independent on/off control.
+- [ ] Render options exactly in this order: `Turquoise Tealio` (`turquoise`), `Cherry MX Blacks` (`mxblack`), `Cherry MX Blues` (`mxblue`).
+- [ ] Ensure a selected pack is included unchanged in the existing save request, even when sound is disabled.
+- [ ] Update affected fixtures and focused tests to prove selection, save payload, and round-trip loader value behavior.
+- [ ] Run the focused Settings/application tests and confirm they pass.
+
+### Task 3: Create Vite asset manifest and key mapper
+
+**Files:**
+- Create: `src/features/typing/keyboard-sound-assets.ts`
 - Create: `src/features/typing/keyboard-sound-map.ts`
 - Create: `src/features/typing/keyboard-sound-map.test.ts`
 
-- [ ] Write failing tests: Backspace/Enter/NumpadEnter/Space map to their own press and release sounds; one representative code per row maps to `GENERIC_R0`–`GENERIC_R4`; an unknown code (`ControlLeft`) falls back to `GENERIC_R4`; every non-special release maps to `GENERIC`.
-- [ ] Implement `pressSoundFor(code)`, `releaseSoundFor(code)`, and `KEYBOARD_SOUND_FILES` (pack-relative paths for preload).
-- [ ] Run `pnpm test src/features/typing/keyboard-sound-map.test.ts`.
+**Produces:** `keyboardSoundAssets(pack: KeyboardSoundPack): Record<KeyboardSoundName, string>`, `pressSoundFor(code)`, and `releaseSoundFor(code)`.
 
-### Task 3: Add the Web Audio player
+- [ ] Import the existing MP3 files from `src/assets/audio` into a typed manifest. Include all 12 Turquoise files, all 12 MX Black files, and the six available MX Blue generic files; do not reference files the selected pack does not contain.
+- [ ] Map Backspace, Enter/NumpadEnter, and Space to their dedicated names only when that pack supplies them. For MX Blue, fall back to its generic row sound on press and `GENERIC` on release.
+- [ ] Map physical rows to `GENERIC_R0` through `GENERIC_R4`; unknown codes fall back to `GENERIC_R4`. Map non-special releases to `GENERIC`.
+- [ ] Write failing mapper tests for dedicated Turquoise/MX Black keys, MX Blue fallback behavior, row representatives, unknown key fallback, and generic release behavior.
+- [ ] Implement the pure mapper and run its focused test file until it passes.
+
+### Task 4: Add the Web Audio player and hook
 
 **Files:**
-
 - Create: `src/infrastructure/audio/keyboard-sound-player.ts`
 - Create: `src/infrastructure/audio/keyboard-sound-player.test.ts`
-
-- [ ] Write failing tests with a fake `AudioContext` and `fetch`: `load()` decodes each file once even when called twice; `play()` before load finishes is a no-op; one failed file does not block the others; `unlock()` resumes a suspended context.
-- [ ] Implement a lazily created single `AudioContext`, `load(pack)`, `play(name)`, and `unlock()`.
-- [ ] Run `pnpm test src/infrastructure/audio/keyboard-sound-player.test.ts`.
-
-### Task 4: Add the `useKeyboardSound` hook
-
-**Files:**
-
 - Create: `src/features/typing/useKeyboardSound.ts`
 - Create: `src/features/typing/useKeyboardSound.test.ts`
 
-- [ ] Write failing tests with a mocked player: enabled → keydown plays the press sound and keyup plays the release sound; `event.repeat` plays nothing; disabled → no load and no play; unmount removes listeners.
-- [ ] Implement `useKeyboardSound(enabled)`: preload on enable, unlock on first gesture, window keydown/keyup listeners, and return `playVirtualKey(code)`, which plays press then release after ~60 ms.
-- [ ] Run `pnpm test src/features/typing/useKeyboardSound.test.ts`.
+**Consumes:** asset manifest and mapper from Task 3.
 
-### Task 5: Wire sound into every typing host
+**Produces:** `load(pack)`, `play(name)`, `unlock()`, and `useKeyboardSound({ enabled, pack })` returning `playVirtualKey(code)`.
+
+- [ ] Write fake-`AudioContext`/`fetch` tests: each URL decodes once across repeated loads, play before readiness is a no-op, one failed resource does not block others, and `unlock()` resumes a suspended context.
+- [ ] Implement a lazily created shared `AudioContext`; use a new `AudioBufferSourceNode` for every playback so fast typing can overlap.
+- [ ] Write hook tests: enabled physical keydown/keyup maps to press/release, repeated keydown is ignored, disabled mode has no loads or listeners, unmount cleans up, and virtual key emits press then release after about 60 ms.
+- [ ] Implement the hook: preload only when enabled, unlock in the user gesture, attach/remove listeners safely, and return virtual-key playback.
+- [ ] Run the two focused test files and confirm they pass.
+
+### Task 5: Deliver settings to every typing host and wire sound
 
 **Files:**
-
-- Modify: `src/features/lesson/LessonTypingSession.tsx`
-- Modify: `src/features/review/ReviewTypingSession.tsx`
+- Modify: `src/features/course/CourseListPage.loader.ts`
+- Modify: `src/features/course/CourseListPage.tsx`
+- Modify: `src/features/course/CourseListPage.loader.test.ts`
 - Modify: `src/features/home/HomePlayer.tsx`
 - Modify: `src/features/home/OnePageLearningPlayer.tsx`
+- Modify: `src/features/lesson/LessonTypingSession.tsx`
+- Modify: `src/features/review/ReviewTypingSession.tsx`
+- Modify: focused affected host tests
 
-- [ ] In each host, pass the learner's `settings.soundEnabled` to `useKeyboardSound`. Thread the value from the host's existing settings source; do not add a new loader request.
-- [ ] In each host's virtual-keyboard `onKeyPress` handler, call `playVirtualKey(code)` next to the existing `recordAttempt`/`pressKey` call.
-- [ ] Run `pnpm test`, `pnpm lint`, and `pnpm build`.
-- [ ] Manual check: type in Lesson, Review, and Home with sound on and off; toggle Settings → Sound and confirm it takes effect.
+**Consumes:** settings from Tasks 1–2 and `useKeyboardSound` from Task 4.
 
-### Task 6: Documentation
+- [ ] Load settings alongside the Course List’s other profile-owned data and expose it through `CourseListLoaderData`; preserve the page’s streamed/static-Home behavior.
+- [ ] Pass settings into `HomePlayer` and `OnePageLearningPlayer`; pass their `soundEnabled` and `keyboardSoundPack` into the hook.
+- [ ] Extend Lesson and Review keyboard-setting props to include the two sound fields; their existing route loaders already supply `UserSettings`.
+- [ ] In each physical typing host, call sound playback only for the same usable key input that reaches its typing session. In each virtual-keyboard handler, call `playVirtualKey(code)` beside the existing attempt handling.
+- [ ] Ensure `ReviewTypingSession` covers both Review and Weak Jamo practice through its existing callers; do not duplicate the hook in `WeakJamoPage`.
+- [ ] Add/update focused tests for settings propagation and virtual playback call sites; run only the affected host and Course List tests.
 
-- [ ] Tick the matching MVP checklist item in `README.md` and mirror it in `docs/PROGRESS.md`.
-- [ ] Append a log entry to `docs/log/2026-10.md`.
-- [ ] Add `DEC-052` to `docs/DECISIONS.md` and its index: Web Audio API buffers over howler or `<audio>` elements.
+### Task 6: Credits, decision record, status, and verification handoff
+
+**Files:**
+- Modify: `docs/CREDITS.md`
+- Modify: `docs/DECISIONS.md`
+- Modify: `docs/PROGRESS.md`
+- Modify: `README.md`
+- Modify: `docs/log/2026-10.md`
+
+- [ ] Credit `tplai/kbsim` as the sound-pack source, author `tplai`, and MIT license, linking to `https://github.com/tplai/kbsim/tree/master`; describe the included Turquoise Tealio, Cherry MX Blacks, and Cherry MX Blues derivatives.
+- [ ] Add `DEC-052` and its index entry: Vite-bundled Web Audio buffers are used rather than `<audio>` elements or a dependency, because they preload once and overlap during fast typing.
+- [ ] Update README’s sound-feedback checklist and PROGRESS to show the feature as implemented, including the persistent pack choice and its default.
+- [ ] Append the non-UI completion entry required by `docs/COMPLETE-LOG.md` to `docs/log/2026-10.md`.
+- [ ] Run all focused tests added or affected by this work, then run `pnpm lint`; record actual outcomes without claiming browser verification.
+- [ ] Hand off manual verification: toggle sound off/on; select and save all three packs; reload; type on physical and virtual keyboards in Lesson, Review, Weak Jamo, Home content, and Learning-Path fallback; verify a silent failure does not block typing.
 
 ## Out of Scope
 
-- Volume control.
-- Choosing a sound pack (for example `bluealps`) in Settings.
-- Distinct correct/wrong feedback sounds.
+- Volume controls or per-pack preview controls.
+- Additional sound packs beyond the three bundled sets.
+- Correct/incorrect feedback sounds.
+- Per-keystroke learner-state persistence.
