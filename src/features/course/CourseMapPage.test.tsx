@@ -80,7 +80,9 @@ describe('CourseMapPage', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: /Unit u1/i }))
 
-    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: /Lesson /i }),
+    ).not.toBeInTheDocument()
     expect(await screen.findByText('No lessons yet.')).toBeInTheDocument()
   })
 

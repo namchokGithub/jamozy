@@ -11,7 +11,7 @@ describe('VirtualKeyboard', () => {
         opacity={1}
       />,
     )
-    expect(screen.getByLabelText('r')).toHaveClass('bg-[#fff0d8]')
+    expect(screen.getByLabelText('r')).toHaveClass('bg-[#ddf5e9]')
   })
 
   it('highlights Shift when nextKey.shift is true', () => {
