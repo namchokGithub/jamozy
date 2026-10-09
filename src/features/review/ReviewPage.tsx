@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useLoaderData } from 'react-router'
+import { Link, useLoaderData, useNavigate } from 'react-router'
 import type { ReviewLoaderData } from './ReviewPage.loader'
 import ReviewTypingSession from './ReviewTypingSession'
 import type { SubmitReviewSessionOutcome } from '../../application/submit-review-session'
@@ -17,6 +17,7 @@ export default function ReviewPage() {
     null,
   )
 
+  const navigate = useNavigate()
   const nav = <PageNav backTo="/" backLabel="Home" />
 
   if (outcome) {
@@ -29,12 +30,9 @@ export default function ReviewPage() {
             more practice
           </p>
         </PageHeading>
-        <Link
-          to="/"
-          className="mt-4 inline-block text-sm text-slate-600 underline"
-        >
-          Back to Course List
-        </Link>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Button onClick={() => navigate('/')}>Back to Course List</Button>
+        </div>
       </PageSurface>
     )
   }

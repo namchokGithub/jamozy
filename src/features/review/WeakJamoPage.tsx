@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { Link, useLoaderData, useLocation, useNavigate } from 'react-router'
+import { useLoaderData, useLocation, useNavigate } from 'react-router'
 import type { WeakJamoLoaderData } from './WeakJamoPage.loader'
 import ReviewTypingSession from './ReviewTypingSession'
 import type { CompletedTypingSession } from './review-session-body'
@@ -94,19 +94,16 @@ function WeakJamoRound() {
             )
           })}
         </ul>
-        <div className="mt-6 flex gap-3">
+        <div className="mt-6 flex flex-wrap gap-3">
           <Button
             type="button"
             onClick={() => navigate('/review/weak-jamo', { replace: true })}
           >
             Practice again
           </Button>
-          <Link
-            to="/review"
-            className="inline-flex items-center text-sm text-slate-600 underline"
-          >
+          <Button variant="secondary" onClick={() => navigate('/review')}>
             Back to Review
-          </Link>
+          </Button>
         </div>
       </PageSurface>
     )
