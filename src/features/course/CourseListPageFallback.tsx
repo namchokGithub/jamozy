@@ -1,10 +1,12 @@
 // Shown only until the Home loader knows the user (page data and the Home
 // player stream in afterwards), so a refresh shows the page frame instead of
 // a blank screen.
+import { SiteFooter } from '../../components/ui/SiteFooter'
+
 export default function CourseListPageFallback() {
   return (
     <main
-      className="min-h-screen overflow-hidden bg-[#fffaf1] px-4 py-5 text-[#253247] sm:px-6 sm:py-8"
+      className="flex min-h-dvh flex-col overflow-hidden bg-[#fffaf1] px-4 py-5 text-[#253247] sm:px-6 sm:py-8"
       aria-busy="true"
     >
       <div
@@ -15,7 +17,7 @@ export default function CourseListPageFallback() {
         <div className="absolute -right-20 bottom-0 h-96 w-96 rounded-full bg-[#dce9c8]/50 blur-3xl" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-5xl">
+      <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col">
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <img
@@ -30,6 +32,7 @@ export default function CourseListPageFallback() {
             <div className="h-10 w-10 animate-pulse rounded-full bg-[#f2edf9]" />
           </div>
         </header>
+        <SiteFooter />
       </div>
     </main>
   )

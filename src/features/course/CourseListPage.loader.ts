@@ -13,6 +13,7 @@ import { getHomePlayer, refreshHomeProgress, type HomePlayerData } from '../../a
 import type { HomeContentRepository } from '../../domain/repositories/home-content-repository'
 import type { HomeLocalStateRepository } from '../../domain/repositories/home-local-state-repository'
 import type { Progress } from '../../domain/models/progress'
+import { resolveHomeResume } from '../../domain/home/home-session'
 
 export interface CourseListPageData {
   courses: Course[]
@@ -47,20 +48,32 @@ export function createCourseListLoader(deps: {
     contentRepo: HomeContentRepository
     localState: HomeLocalStateRepository
     pendingExerciseIds: (userId: string) => Promise<Map<string, Set<string>>>
+    // Warms the typing renderer for the lesson Home opens with.
+    prefetchTargets?: (targetTexts: string[]) => void
   }
   ensureUser: () => Promise<{ uid: string }>
   getSession?: () => Promise<{ kind: string }>
 }) {
   return async (args?: LoaderFunctionArgs): Promise<CourseListLoaderData> => {
+    // home.json does not depend on the user, so its request starts first.
+    const homeContent = deps.home?.contentRepo.getHomeContent()
     const user = await deps.ensureUser()
     const params = args ? new URL(args.request.url).searchParams : null
     const afterLesson = params?.get('afterLesson')
     const afterExercise = params?.get('afterExercise')
     const after = afterLesson && afterExercise ? { lessonId: afterLesson, exerciseId: afterExercise } : undefined
     const coursesRequest = getCourses(deps.courseRepo)
-    const homePlayer = deps.home
-      ? getHomePlayer(deps.home, user.uid)
+    const homePlayer = deps.home && homeContent
+      ? getHomePlayer({ ...deps.home, contentRepo: { getHomeContent: () => homeContent } }, user.uid)
       : Promise.resolve(null)
+    void homePlayer.then((player) => {
+      if (!player || !deps.home?.prefetchTargets) return
+      const opening = resolveHomeResume(player.content.units, player.resume)
+      const lesson = player.content.units
+        .flatMap(({ lessons }) => lessons)
+        .find(({ id }) => id === opening?.lessonId)
+      if (lesson) deps.home.prefetchTargets(lesson.exercises.map(({ targetText }) => targetText))
+    })
     const homeProgress = homePlayer.then((player) =>
       player && deps.home && deps.progressRepo
         ? refreshHomeProgress({ progressRepo: deps.progressRepo, localState: deps.home.localState }, user.uid, player.content).catch(() => null)

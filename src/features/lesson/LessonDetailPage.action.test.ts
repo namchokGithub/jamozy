@@ -43,7 +43,23 @@ describe('createCompleteLessonSessionAction', () => {
     const outcome = await action({ params: { lessonId: 'l1' }, request } as never)
 
     expect(deps.ensureUser).toHaveBeenCalledOnce()
-    expect(outcome.progress.status).toBe('completed')
+    expect('progress' in outcome && outcome.progress.status).toBe('completed')
+  })
+
+  it('returns a retryable error instead of throwing when saving fails', async () => {
+    const deps = makeDeps()
+    deps.ensureUser = vi.fn(async () => {
+      throw new Error('offline')
+    })
+    const action = createCompleteLessonSessionAction(deps)
+    const request = new Request('http://localhost/lessons/l1', {
+      method: 'POST',
+      body: JSON.stringify({ submissionId: 'session-1', accuracy: 100, speedWpm: 20, durationSeconds: 30, startedAtMs: 0, exercisesAttempted: 0, acceptedKeystrokes: 0, rejectedKeystrokes: 0, mistakes: [] }),
+    })
+
+    const outcome = await action({ params: { lessonId: 'l1' }, request } as never)
+
+    expect(outcome).toEqual({ error: expect.stringContaining('could not be saved') })
   })
 
   it('throws when lessonId is missing from params', async () => {

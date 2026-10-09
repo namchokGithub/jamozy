@@ -17,11 +17,12 @@ interface HomePlayerStore {
   // The lesson was already completed when this session started, so
   // finishing it is a replay.
   isReplay: boolean
+  // Counts startLesson calls. The store outlives a HomePlayer mount, so a
+  // player shows the session only once it has opened one itself.
+  generation: number
   // Transient UI state; loader data stays out of this store.
   selectedUnitId: string | null
-  notice: string | null
   selectUnit: (unitId: string) => void
-  showNotice: (notice: string | null) => void
   startLesson: (
     unitId: string,
     lesson: HomeLesson,
@@ -39,13 +40,13 @@ export const useHomePlayerStore = create<HomePlayerStore>((set, get) => ({
   exercises: [],
   session: null,
   isReplay: false,
+  generation: 0,
   selectedUnitId: null,
-  notice: null,
   selectUnit: (selectedUnitId) => set({ selectedUnitId }),
-  showNotice: (notice) => set({ notice }),
   startLesson: (unitId, lesson, { isReplay, random }) => {
     const exercises = shuffleExercises(lesson.exercises, random)
     set({
+      generation: get().generation + 1,
       unitId,
       selectedUnitId: unitId,
       lesson,

@@ -56,7 +56,8 @@ function makeKeyboardSettings(
 function renderSession(
   onComplete: (completion: LessonCompletion) => void,
   lesson: Lesson = makeLesson(),
-  action: () => Promise<CompleteLessonOutcome> = async () => fakeOutcome,
+  action: () => Promise<CompleteLessonOutcome | { error: string }> = async () =>
+    fakeOutcome,
   keyboardSettings = makeKeyboardSettings(),
 ) {
   const router = createMemoryRouter(
@@ -106,7 +107,7 @@ describe('LessonTypingSession', () => {
     expect(screen.queryByText('ㅂ')).not.toBeInTheDocument()
   })
 
-  it('passes English-label and opacity settings to a visible keyboard guide', async () => {
+  it('passes the English-label setting and ignores the held opacity setting', async () => {
     renderSession(
       vi.fn(),
       makeLesson(),
@@ -116,7 +117,7 @@ describe('LessonTypingSession', () => {
 
     await waitForTypingTarget('가')
     expect(screen.queryByText('r')).not.toBeInTheDocument()
-    expect(screen.getByLabelText('Virtual Korean keyboard')).toHaveStyle({ opacity: '0' })
+    expect(screen.getByLabelText('Virtual Korean keyboard')).toHaveStyle({ opacity: '1' })
   })
 
   it('prevents Space scrolling without recording a typing mistake', async () => {
@@ -150,6 +151,27 @@ describe('LessonTypingSession', () => {
       outcome: expect.objectContaining({ expGained: 100, level: 2 }),
       result: expect.objectContaining({ accuracy: 100, mistakes: [] }),
     }))
+  })
+
+  it('offers a retry when saving fails, then completes with the same submission', async () => {
+    const onComplete = vi.fn()
+    const action = vi
+      .fn<() => Promise<CompleteLessonOutcome | { error: string }>>()
+      .mockResolvedValueOnce({ error: 'Your result could not be saved.' })
+      .mockResolvedValue(fakeOutcome)
+    renderSession(onComplete, makeLesson(), action)
+    await waitForTypingTarget('가')
+
+    fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
+    fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('could not be saved')
+    expect(onComplete).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+
+    await waitFor(() => expect(onComplete).toHaveBeenCalledOnce())
+    expect(action).toHaveBeenCalledTimes(2)
   })
 
   it('submits the action exactly once even if extra keydowns fire after completion', async () => {

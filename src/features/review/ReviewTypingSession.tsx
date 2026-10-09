@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useFetcher } from 'react-router'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
 import {
@@ -8,19 +8,18 @@ import {
 import { isKoreanJamoKey } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
+import FingerPlacementGuide from '../home/FingerPlacementGuide'
+import { useKeyboardFeedback } from '../typing/keyboard-feedback'
 import type { ReviewItem } from '../../domain/models/review-item'
 import type { SubmitReviewSessionOutcome } from '../../application/submit-review-session'
 import type { UserSettings } from '../../domain/models/user-profile'
+import { usePressedKeyCodes } from '../typing/usePressedKeyCodes'
 
-type KeyboardSettings = Pick<
-  UserSettings,
-  'showKeyboard' | 'showEnglishKeys' | 'keyboardOpacity'
->
+type KeyboardSettings = Pick<UserSettings, 'showKeyboard' | 'showEnglishKeys'>
 
 const defaultKeyboardSettings: KeyboardSettings = {
   showKeyboard: true,
   showEnglishKeys: true,
-  keyboardOpacity: 0.7,
 }
 
 interface ReviewTypingSessionProps {
@@ -34,9 +33,11 @@ export default function ReviewTypingSession({
   onComplete,
   keyboardSettings = defaultKeyboardSettings,
 }: ReviewTypingSessionProps) {
+  const pressedCodes = usePressedKeyCodes()
   const { session, start, pressKey, generation, submissionId } =
     useLessonSessionStore()
   const fetcher = useFetcher<SubmitReviewSessionOutcome>()
+  const { feedback, previousFeedback, recordAttempt } = useKeyboardFeedback()
   const hasStarted = useRef(false)
   const hasSubmitted = useRef(false)
   // See LessonTypingSession.tsx / DEC-018 for why this needs to be a
@@ -54,6 +55,20 @@ export default function ReviewTypingSession({
     )
   }, [items, start])
 
+  const handleKeyPress = useCallback(
+    (code: string, shiftKey: boolean) => {
+      const currentSession =
+        useLessonSessionStore.getState().session?.currentSession
+      recordAttempt(
+        currentSession?.expectedKeys[currentSession.keyIndex],
+        code,
+        shiftKey,
+      )
+      pressKey(code, shiftKey)
+    },
+    [pressKey, recordAttempt],
+  )
+
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.metaKey || event.ctrlKey || event.altKey) return
@@ -62,12 +77,12 @@ export default function ReviewTypingSession({
         return
       }
       event.preventDefault()
-      pressKey(event.code, event.shiftKey)
+      handleKeyPress(event.code, event.shiftKey)
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [pressKey])
+  }, [handleKeyPress])
 
   useEffect(() => {
     if (generation !== myGenerationRef.current) {
@@ -118,7 +133,7 @@ export default function ReviewTypingSession({
     session.currentSession.expectedKeys[session.currentSession.keyIndex]
 
   return (
-    <div className="mt-5 rounded-3xl border border-[#eadfd4] bg-[#fffdf9] p-5 shadow-sm">
+    <div className="mt-5 rounded-3xl border border-[#eadfd4] bg-[#fffdf9] p-3 shadow-sm sm:p-5">
       <p className="text-sm font-semibold text-[#a85d4e]">
         {progress.current} / {progress.total}
       </p>
@@ -126,15 +141,30 @@ export default function ReviewTypingSession({
       <HangulTarget
         session={session.currentSession}
         className="mt-4 text-3xl"
+        compact
       />
       {/* <p className="mt-2 text-sm text-[#667085]">Typed: {composed}</p> */}
       {keyboardSettings.showKeyboard && (
-        <VirtualKeyboard
-          nextKey={nextKey}
-          showEnglishKeys={keyboardSettings.showEnglishKeys}
-          opacity={keyboardSettings.keyboardOpacity}
-          onKeyPress={pressKey}
-        />
+        <>
+          <VirtualKeyboard
+            nextKey={nextKey}
+            feedback={feedback}
+            previousFeedback={previousFeedback}
+            showEnglishKeys={keyboardSettings.showEnglishKeys}
+            // Keyboard opacity is on hold: the setting stays stored but is
+            // not offered, so the guide is always fully visible, as on Home.
+            opacity={1}
+            onKeyPress={handleKeyPress}
+            pressedCodes={pressedCodes}
+            mobileStyle
+          />
+          <div className="hidden sm:block">
+            <FingerPlacementGuide
+              nextKey={nextKey}
+              pressedCodes={pressedCodes}
+            />
+          </div>
+        </>
       )}
     </div>
   )

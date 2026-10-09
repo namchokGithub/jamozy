@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { StaticHomeContentRepository } from './static-home-content-repository'
 
 const content = {
@@ -80,5 +80,73 @@ describe('StaticHomeContentRepository', () => {
       },
     )
     expect(await repo.getHomeContent()).toBeNull()
+  })
+
+  describe('early request started by index.html', () => {
+    it('uses the early request instead of fetching again', async () => {
+      const fetchImpl = vi.fn(respond(JSON.stringify(content)))
+      const repo = new StaticHomeContentRepository(
+        '/content/home.json',
+        fetchImpl,
+        () => Promise.resolve(content),
+      )
+
+      expect(await repo.getHomeContent()).toEqual(content)
+      expect(fetchImpl).not.toHaveBeenCalled()
+    })
+
+    it('reuses loaded content for later loads, such as revalidations', async () => {
+      const fetchImpl = vi.fn(respond(JSON.stringify(content)))
+      const repo = new StaticHomeContentRepository(
+        '/content/home.json',
+        fetchImpl,
+        () => undefined,
+      )
+
+      expect(await repo.getHomeContent()).toEqual(content)
+      expect(await repo.getHomeContent()).toEqual(content)
+
+      expect(fetchImpl).toHaveBeenCalledOnce()
+    })
+
+    it('tries again after a load found no content', async () => {
+      const fetchImpl = vi.fn(respond(JSON.stringify(content)))
+      let early: Promise<unknown> | undefined = Promise.resolve(null)
+      const repo = new StaticHomeContentRepository(
+        '/content/home.json',
+        fetchImpl,
+        () => {
+          const taken = early
+          early = undefined
+          return taken
+        },
+      )
+
+      expect(await repo.getHomeContent()).toBeNull()
+      expect(await repo.getHomeContent()).toEqual(content)
+      expect(fetchImpl).toHaveBeenCalledOnce()
+    })
+
+    it('returns null without fetching when the early request found no content', async () => {
+      const fetchImpl = vi.fn(respond(JSON.stringify(content)))
+      const repo = new StaticHomeContentRepository(
+        '/content/home.json',
+        fetchImpl,
+        () => Promise.resolve(null),
+      )
+
+      expect(await repo.getHomeContent()).toBeNull()
+      expect(fetchImpl).not.toHaveBeenCalled()
+    })
+
+    it('validates early content against the schema', async () => {
+      const repo = new StaticHomeContentRepository(
+        '/content/home.json',
+        respond('{}'),
+        () => Promise.resolve({ ...content, schemaVersion: 2 }),
+      )
+
+      expect(await repo.getHomeContent()).toBeNull()
+    })
   })
 })

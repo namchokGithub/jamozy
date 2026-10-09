@@ -173,6 +173,56 @@ describe('createCourseListLoader', () => {
 
       await expect(data.homeProgress).resolves.toBeNull()
     })
+
+    it('requests home.json before the user is known', async () => {
+      const order: string[] = []
+      let releaseUser: () => void = () => {}
+      const userGate = new Promise<void>((resolve) => { releaseUser = resolve })
+      const loader = createCourseListLoader({
+        courseRepo: new FakeCourseRepository(),
+        reviewRepo: new FakeReviewRepository(),
+        home: {
+          contentRepo: { getHomeContent: async () => { order.push('content'); return content } },
+          localState,
+          pendingExerciseIds: async () => new Map(),
+        },
+        ensureUser: async () => { await userGate; order.push('user'); return { uid: 'user1' } },
+      })
+
+      const loading = loader()
+      await Promise.resolve()
+      releaseUser()
+      const data = await loading
+
+      await expect(data.homePlayer).resolves.toMatchObject({ content })
+      expect(order).toEqual(['content', 'user'])
+    })
+
+    it('prefetches the opening lesson\'s targets once Home content is known', async () => {
+      const prefetchTargets = vi.fn()
+      const twoLessons = {
+        ...content,
+        units: [{ ...content.units[0], lessons: [
+          content.units[0].lessons[0],
+          { ...content.units[0].lessons[0], id: 'l2', exercises: [{ ...content.units[0].lessons[0].exercises[0], id: 'e2', targetText: '가방' }] },
+        ] }],
+      }
+      const loader = createCourseListLoader({
+        courseRepo: new FakeCourseRepository(),
+        reviewRepo: new FakeReviewRepository(),
+        home: {
+          contentRepo: { getHomeContent: async () => twoLessons },
+          localState: { ...localState, getResume: async () => ({ unitId: 'u1', lessonId: 'l2' }) },
+          pendingExerciseIds: async () => new Map(),
+          prefetchTargets,
+        },
+        ensureUser: async () => ({ uid: 'user1' }),
+      })
+
+      await (await loader()).homePlayer
+
+      expect(prefetchTargets).toHaveBeenCalledWith(['가방'])
+    })
   })
 
   it('returns before the Firestore page data resolves', async () => {
@@ -193,4 +243,3 @@ describe('createCourseListLoader', () => {
     await expect(data.page).resolves.toMatchObject({ dueReviewCount: 0 })
   })
 })
-

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { HomePlayerData } from '../../application/get-home-player'
 import type { HomeContent } from '../../domain/models/home-content'
 import type { Progress } from '../../domain/models/progress'
+import { SnackbarProvider } from '../../components/ui/SnackbarProvider'
 import HomePlayer from './HomePlayer'
 import { useHomePlayerStore } from './home-player-store'
 import { HomeServicesProvider, type HomeServices } from './home-services'
@@ -90,9 +91,11 @@ function setup(
     ...overrides,
   }
   const view = render(
-    <HomeServicesProvider value={services}>
-      <HomePlayer data={data} liveProgress={liveProgress} random={() => 0} />
-    </HomeServicesProvider>,
+    <SnackbarProvider>
+      <HomeServicesProvider value={services}>
+        <HomePlayer data={data} liveProgress={liveProgress} random={() => 0} />
+      </HomeServicesProvider>
+    </SnackbarProvider>,
   )
   return { services, view, data }
 }
@@ -109,7 +112,6 @@ describe('HomePlayer', () => {
       lesson: null,
       unitId: null,
       selectedUnitId: null,
-      notice: null,
       isReplay: false,
       exercises: [],
     })
@@ -142,7 +144,7 @@ describe('HomePlayer', () => {
     expect(badge('First')).toContain('1/1')
   })
 
-  it('moves to the next lesson when a session ends, with a notice', async () => {
+  it('moves to the next lesson when a session ends, with a top notification', async () => {
     const { services } = setup()
     await waitFor(() =>
       expect(useHomePlayerStore.getState().lesson?.id).toBe('l1'),
@@ -157,7 +159,9 @@ describe('HomePlayer', () => {
       unitId: 'u1',
       lessonId: 'l2',
     })
-    expect(screen.getByRole('status').textContent).toContain('Next: Second')
+    const notification = screen.getByRole('status')
+    expect(notification).toHaveTextContent('Next: Second')
+    expect(notification.parentElement).toHaveClass('top-5')
     expect(services.recordReplay).not.toHaveBeenCalled()
   })
 
@@ -175,7 +179,7 @@ describe('HomePlayer', () => {
       expect(useHomePlayerStore.getState().lesson?.id).toBe('l1'),
     )
     expect(useHomePlayerStore.getState().unitId).toBe('u1')
-    expect(screen.getByRole('status').textContent).toContain(
+    expect(screen.getByRole('status')).toHaveTextContent(
       'Starting again: First',
     )
   })
@@ -222,19 +226,51 @@ describe('HomePlayer', () => {
     const session = useHomePlayerStore.getState().session
 
     view.rerender(
+      <SnackbarProvider>
+        <HomeServicesProvider value={services}>
+          <HomePlayer
+            data={{
+              content,
+              progress: [],
+              pendingExerciseIds: {},
+              resume: { unitId: 'u2', lessonId: 'l3' },
+            }}
+            liveProgress={Promise.resolve(null)}
+          />
+        </HomeServicesProvider>
+      </SnackbarProvider>,
+    )
+
+    expect(useHomePlayerStore.getState().session).toBe(session)
+  })
+
+  it('never shows a session left in the store by an earlier visit', async () => {
+    useHomePlayerStore
+      .getState()
+      .startLesson('u1', content.units[0].lessons[0], { isReplay: false })
+    const services: HomeServices = {
+      recordExercise: vi.fn(),
+      recordReplay: vi.fn(),
+      saveResume: vi.fn(),
+    }
+
+    render(
       <HomeServicesProvider value={services}>
         <HomePlayer
           data={{
-            content,
+            content: { ...content, units: [] },
             progress: [],
             pendingExerciseIds: {},
-            resume: { unitId: 'u2', lessonId: 'l3' },
+            resume: null,
           }}
           liveProgress={Promise.resolve(null)}
         />
       </HomeServicesProvider>,
     )
 
-    expect(useHomePlayerStore.getState().session).toBe(session)
+    expect(
+      screen.getByText('Pick a lesson above to start.'),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   })
 })

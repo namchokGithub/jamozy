@@ -86,6 +86,25 @@ describe('ReviewPage', () => {
     ).toBeInTheDocument()
   })
 
+  it('links back to the course list from the Review page', async () => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/',
+          Component: ReviewPage,
+          loader: async () => ({ previews: [], settings: makeSettings() }),
+        },
+      ],
+      { initialEntries: ['/'] },
+    )
+    render(<RouterProvider router={router} />)
+
+    expect(await screen.findByRole('link', { name: 'Home' })).toHaveAttribute(
+      'href',
+      '/',
+    )
+  })
+
   it('shows preference-aware metadata in the preview list', async () => {
     const router = createMemoryRouter(
       [

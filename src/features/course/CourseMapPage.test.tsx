@@ -45,7 +45,13 @@ function makeLesson(id: string, unitId: string): Lesson {
 
 function renderPage(courseMap: CourseMap) {
   const router = createMemoryRouter(
-    [{ path: '/', Component: CourseMapPage, loader: async () => ({ courseMap }) }],
+    [
+      {
+        path: '/',
+        Component: CourseMapPage,
+        loader: async () => ({ courseMap }),
+      },
+    ],
     { initialEntries: ['/'] },
   )
   return render(<RouterProvider router={router} />)
@@ -64,8 +70,7 @@ describe('CourseMapPage', () => {
     }
     renderPage(courseMap)
 
-    fireEvent.click(await screen.findByRole('button', { name: /Unit u1/i }))
-
+    // u1 opens on its own: it is the first unit with an unfinished lesson.
     const link = await screen.findByRole('link', { name: /Lesson l1/i })
     expect(link).toHaveAttribute('href', '/lessons/l1')
     expect(screen.getByText('Locked')).toBeInTheDocument()
@@ -80,8 +85,54 @@ describe('CourseMapPage', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: /Unit u1/i }))
 
-    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: /Lesson /i }),
+    ).not.toBeInTheDocument()
     expect(await screen.findByText('No lessons yet.')).toBeInTheDocument()
+  })
+
+  it('opens only the unit holding the unlocked lesson', async () => {
+    const progress = (lessonId: string, status: 'completed' | 'unlocked') => ({
+      lessonId,
+      status,
+      bestAccuracy: 0,
+      bestSpeedWpm: 0,
+      attempts: 0,
+      lastAttemptAt: null,
+      completedAt: null,
+    })
+    const courseMap: CourseMap = {
+      course: makeCourse(),
+      units: [
+        {
+          unit: makeUnit('u1', 1),
+          lessons: [
+            {
+              lesson: makeLesson('l1', 'u1'),
+              progress: progress('l1', 'completed'),
+            },
+          ],
+        },
+        {
+          unit: makeUnit('u2', 2),
+          lessons: [
+            {
+              lesson: makeLesson('l2', 'u2'),
+              progress: progress('l2', 'unlocked'),
+            },
+          ],
+        },
+      ],
+    }
+    renderPage(courseMap)
+
+    expect(
+      await screen.findByRole('button', { name: /Unit u2/i }),
+    ).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('button', { name: /Unit u1/i })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    )
   })
 
   it('shows an empty-state message for a course with no units, without crashing', async () => {

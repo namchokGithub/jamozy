@@ -9,5 +9,8 @@ export interface AuthRepository {
   signInWithGoogle(): Promise<AuthenticatedUser>
   signOut(): Promise<void>
   getCurrentUser(): AuthenticatedUser | null
-  onAuthStateChanged(listener: (user: AuthenticatedUser | null) => void): () => void
+  waitForInitialAuthState(): Promise<void>
+  onAuthStateChanged(
+    listener: (user: AuthenticatedUser | null) => void,
+  ): () => void
 }

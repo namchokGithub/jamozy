@@ -10,7 +10,9 @@ import type { CourseListLoaderData } from '../course/CourseListPage.loader'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
 import FingerPlacementGuide from './FingerPlacementGuide'
+import { useKeyboardFeedback } from '../typing/keyboard-feedback'
 import { useOnePagePlayerStore } from './one-page-player-store'
+import { usePressedKeyCodes } from '../typing/usePressedKeyCodes'
 
 interface OnePageLearningPlayerProps {
   learningPath: OnePageLearningPath
@@ -32,6 +34,7 @@ const REFILL_THRESHOLD = 3
 export default function OnePageLearningPlayer({
   learningPath,
 }: OnePageLearningPlayerProps) {
+  const pressedCodes = usePressedKeyCodes()
   const {
     entries,
     session,
@@ -46,7 +49,7 @@ export default function OnePageLearningPlayer({
   const fetcher = useFetcher<{ onePageCheckpointed?: boolean }>()
   const refill = useFetcher<CourseListLoaderData>()
   // The player owns its queue from mount on; later loader data for the same
-  // course (revalidations) never restarts it. The parent keys the player by
+  // course (revalidation) never restarts it. The parent keys the player by
   // course, so a course change mounts a fresh player.
   const [initialPath] = useState(learningPath)
   const courseId = initialPath.selectedCourseId
@@ -58,6 +61,7 @@ export default function OnePageLearningPlayer({
   const handledRefill = useRef(refill.data)
   const [checkpointVersion, setCheckpointVersion] = useState(0)
   const [nowMs, setNowMs] = useState(0)
+  const { feedback, previousFeedback, recordAttempt } = useKeyboardFeedback()
   const sessionStartedAtMs = session?.startedAt.getTime()
 
   useEffect(() => {
@@ -84,6 +88,13 @@ export default function OnePageLearningPlayer({
 
   const handleKeyPress = useCallback(
     (code: string, shiftKey: boolean) => {
+      const currentSession =
+        useOnePagePlayerStore.getState().session?.currentSession
+      recordAttempt(
+        currentSession?.expectedKeys[currentSession.keyIndex],
+        code,
+        shiftKey,
+      )
       const completed = pressKey(code, shiftKey)
       if (!completed || !courseId) return
       pendingCheckpoints.current.push({
@@ -94,7 +105,7 @@ export default function OnePageLearningPlayer({
       })
       setCheckpointVersion((version) => version + 1)
     },
-    [courseId, pressKey],
+    [courseId, pressKey, recordAttempt],
   )
 
   useEffect(() => {
@@ -197,10 +208,13 @@ export default function OnePageLearningPlayer({
   const totalSteps = session?.currentSession.expectedKeys.length ?? 0
   const progressPercent =
     totalSteps === 0 ? 0 : (completedSteps / totalSteps) * 100
+  const meaning = [active?.exercise.meaningTh, active?.exercise.meaningEn]
+    .filter((value): value is string => Boolean(value?.trim()))
+    .join(' : ')
 
   return (
     <section
-      className="mt-7 rounded-4xl border border-[#d9d1ed] bg-[#fffdf9] p-5 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:p-7"
+      className="mt-2 rounded-4xl border border-[#d9d1ed] bg-[#fffdf9] p-5 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] select-none! sm:p-7"
       aria-labelledby="one-page-player-heading"
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -269,26 +283,30 @@ export default function OnePageLearningPlayer({
                 />
               </div>
             </div>
-            <p className="mt-5 text-xs text-[#98a2b3]">
-              {active.exercise.meaningTh} : {active.exercise.meaningEn}
-            </p>
-            {/* <p className="mt-1 text-sm text-[#667085]">
-              {active.exercise.meaningEn}
-            </p> */}
-            {active.exercise.romanization && (
-              <p className="mt-1 text-xs italic text-[#a293bd]">
-                {active.exercise.romanization}
-              </p>
-            )}
+            <div className="mt-5 grid h-9 grid-rows-2">
+              <div className="h-4 max-w-full truncate text-xs text-[#98a2b3]">
+                {meaning || (
+                  <span className="italic text-[#e4e2df]">No meaning</span>
+                )}
+              </div>
+              <div className="h-4 max-w-full truncate text-xs italic text-[#a293bd]">
+                {active.exercise.romanization || (
+                  <span className="italic text-[#e4e2df]">No romanization</span>
+                )}
+              </div>
+            </div>
             {/* <p className="mt-4 text-xs text-[#98a2b3]">Typed: {getComposedText(session.currentSession)}</p> */}
           </div>
           <VirtualKeyboard
             nextKey={nextKey}
+            feedback={feedback}
+            previousFeedback={previousFeedback}
             showEnglishKeys
             opacity={1}
             onKeyPress={handleKeyPress}
+            pressedCodes={pressedCodes}
           />
-          <FingerPlacementGuide nextKey={nextKey} />
+          <FingerPlacementGuide nextKey={nextKey} pressedCodes={pressedCodes} />
         </div>
       ) : (
         <div className="mt-6 rounded-3xl border border-dashed border-[#dfcfc0] bg-white/60 p-6 text-center text-sm text-[#667085]">

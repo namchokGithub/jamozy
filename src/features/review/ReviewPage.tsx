@@ -5,6 +5,8 @@ import ReviewTypingSession from './ReviewTypingSession'
 import type { SubmitReviewSessionOutcome } from '../../application/submit-review-session'
 import { formatExerciseMeaning } from '../lesson/format-exercise-meaning'
 import { Button } from '../../components/ui/Button'
+import { PageHeading } from '../../components/ui/PageHeading'
+import { PageNav } from '../../components/ui/PageNav'
 import { PageSurface } from '../../components/ui/PageSurface'
 
 export default function ReviewPage() {
@@ -15,16 +17,18 @@ export default function ReviewPage() {
     null,
   )
 
+  const nav = <PageNav backTo="/" backLabel="Home" />
+
   if (outcome) {
     return (
       <PageSurface contentClassName="max-w-2xl">
-        <h1 className="text-2xl font-medium text-slate-900">
-          Review complete!
-        </h1>
-        <p className="mt-2 text-slate-700">
-          {outcome.correctCount} correct, {outcome.needsPracticeCount} need more
-          practice
-        </p>
+        {nav}
+        <PageHeading eyebrow="NICE WORK" title="Review complete!">
+          <p className="mt-2 text-[#667085]">
+            {outcome.correctCount} correct, {outcome.needsPracticeCount} need
+            more practice
+          </p>
+        </PageHeading>
         <Link
           to="/"
           className="mt-4 inline-block text-sm text-slate-600 underline"
@@ -38,7 +42,8 @@ export default function ReviewPage() {
   if (started) {
     return (
       <PageSurface contentClassName="max-w-2xl">
-        <h1 className="text-2xl font-medium text-slate-900">Review</h1>
+        {nav}
+        <PageHeading eyebrow="TYPING NOW" title="Review" />
         <ReviewTypingSession
           items={items}
           onComplete={setOutcome}
@@ -50,7 +55,8 @@ export default function ReviewPage() {
 
   return (
     <PageSurface contentClassName="max-w-2xl">
-      <h1 className="text-2xl font-medium text-slate-900">Review</h1>
+      {nav}
+      <PageHeading eyebrow="PRACTICE YOUR MISTAKES" title="Review" />
 
       {items.length === 0 ? (
         <p className="mt-6 text-sm text-slate-500">
@@ -75,8 +81,12 @@ export default function ReviewPage() {
                       {exercise.romanization}
                     </div>
                   )}
-                  {meaning && (
+                  {(meaning && (
                     <div className="mt-1 text-sm text-slate-700">{meaning}</div>
+                  )) || (
+                    <div className="mt-1 text-sm italic text-[#7c8795]">
+                      No meaning yet
+                    </div>
                   )}
                 </li>
               )

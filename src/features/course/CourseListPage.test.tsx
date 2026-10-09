@@ -47,8 +47,9 @@ describe('CourseListPage', () => {
         name: /learn hangul, at your pace/i,
       }),
     ).toBeInTheDocument()
+    // The learning-path section streams in after the static hero.
     expect(
-      screen.getByRole('heading', { name: /your learning path/i }),
+      await screen.findByRole('heading', { name: /your learning path/i }),
     ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /course c1/i })).toHaveAttribute(
       'href',

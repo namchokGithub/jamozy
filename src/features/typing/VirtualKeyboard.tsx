@@ -1,11 +1,7 @@
-import { useState } from 'react'
-import { isKoreanJamoKey, KEY_TO_JAMO } from '../../domain/korean/keymap'
-
-type KeyboardKey = {
-  code: string
-  label?: string
-  wide?: 'tab' | 'caps' | 'shift' | 'enter'
-}
+import { useMemo, useState } from 'react'
+import type { KeyboardFeedback } from './keyboard-feedback'
+import KeyboardRow from './KeyboardRow'
+import type { KeyboardKey, KeyFocusLevel } from './VirtualKey'
 
 const ROW_1: KeyboardKey[] = [
   { code: 'Tab', label: 'Tab', wide: 'tab' },
@@ -61,118 +57,152 @@ const ROW_3: KeyboardKey[] = [
   { code: 'ShiftRight', label: 'Shift ⇧', wide: 'shift' },
 ]
 
-function englishLabel(code: string): string {
-  if (code === 'Comma') return ','
-  if (code === 'Period') return '.'
-  if (code === 'Slash') return '/'
-  return code.replace('Key', '').toLowerCase()
+const VIRTUAL_KEY_CODES = new Set(
+  [...ROW_1, ...ROW_2, ...ROW_3].map(({ code }) => code),
+)
+
+const KEYBOARD_ROWS = [ROW_1, ROW_2, ROW_3]
+
+function closestCodeInRow(
+  index: number,
+  sourceLength: number,
+  row: KeyboardKey[],
+): string | undefined {
+  const position = index / Math.max(sourceLength - 1, 1)
+  let closestCode: string | undefined
+  let closestDistance = Infinity
+  row.forEach(({ code }, candidateIndex) => {
+    const candidatePosition = candidateIndex / Math.max(row.length - 1, 1)
+    const distance = Math.abs(position - candidatePosition)
+    if (distance < closestDistance) {
+      closestCode = code
+      closestDistance = distance
+    }
+  })
+  return closestCode
 }
 
-function keyWidth(wide: KeyboardKey['wide']): string {
-  if (wide === 'tab') return 'basis-[9%]'
-  if (wide === 'caps') return 'basis-[12%]'
-  if (wide === 'shift') return 'basis-[15%]'
-  if (wide === 'enter') return 'basis-[12%]'
-  return 'min-w-0 flex-1'
+function nearbyCodes(code: string): Set<string> {
+  const rowIndex = KEYBOARD_ROWS.findIndex((row) =>
+    row.some((key) => key.code === code),
+  )
+
+  if (rowIndex === -1) return new Set()
+
+  const row = KEYBOARD_ROWS[rowIndex]
+  const index = row.findIndex((key) => key.code === code)
+  const nearby = new Set<string>()
+
+  const spread = 2
+
+  // ซ้าย / ขวา {{spread}} ปุ่ม
+  for (let offset = 1; offset <= spread; offset++) {
+    if (row[index - offset]) nearby.add(row[index - offset].code)
+    if (row[index + offset]) nearby.add(row[index + offset].code)
+  }
+
+  // if (row[index - 1]) nearby.add(row[index - 1].code)
+  // if (row[index + 1]) nearby.add(row[index + 1].code)
+
+  // แถวบน / ล่าง
+  // const above = KEYBOARD_ROWS[rowIndex - 1]
+  // const below = KEYBOARD_ROWS[rowIndex + 1]
+
+  // const aboveCode = above && closestCodeInRow(index, row.length, above)
+  // const belowCode = below && closestCodeInRow(index, row.length, below)
+
+  // if (aboveCode) nearby.add(aboveCode)
+  // if (belowCode) nearby.add(belowCode)
+
+  // แถวบน / ล่าง + แนวทะแยง
+  for (const otherRow of [
+    KEYBOARD_ROWS[rowIndex - 1],
+    KEYBOARD_ROWS[rowIndex + 1],
+  ]) {
+    if (!otherRow) continue
+
+    const centerCode = closestCodeInRow(index, row.length, otherRow)
+    const centerIndex = otherRow.findIndex((key) => key.code === centerCode)
+
+    for (let offset = -spread; offset <= spread; offset++) {
+      const key = otherRow[centerIndex + offset]
+      if (key) nearby.add(key.code)
+    }
+  }
+
+  return nearby
+}
+
+function focusLevelsFor(
+  nextKey: VirtualKeyboardProps['nextKey'],
+): ReadonlyMap<string, KeyFocusLevel> {
+  const levels = new Map<string, KeyFocusLevel>()
+  if (!nextKey) {
+    for (const code of VIRTUAL_KEY_CODES) levels.set(code, 'nearby')
+    return levels
+  }
+  for (const code of VIRTUAL_KEY_CODES) levels.set(code, 'other')
+  levels.set(nextKey.code, 'target')
+  if (nextKey.shift) {
+    levels.set('ShiftLeft', 'target')
+    levels.set('ShiftRight', 'target')
+  }
+  for (const code of nearbyCodes(nextKey.code)) {
+    if (levels.get(code) !== 'target') levels.set(code, 'nearby')
+  }
+  return levels
 }
 
 interface VirtualKeyboardProps {
   nextKey?: { code: string; shift: boolean }
+  feedback?: KeyboardFeedback
+  previousFeedback?: KeyboardFeedback
   showEnglishKeys: boolean
   opacity: number
   onKeyPress?: (code: string, shiftKey: boolean) => void
+  pressedCodes?: ReadonlySet<string>
+  // Below `sm`, draws the keyboard like a phone keyboard; `sm` and up is unchanged.
+  mobileStyle?: boolean
 }
 
 export default function VirtualKeyboard({
   nextKey,
+  feedback,
+  previousFeedback,
   showEnglishKeys,
   opacity,
   onKeyPress,
+  pressedCodes = new Set(),
+  mobileStyle = false,
 }: VirtualKeyboardProps) {
   const [virtualShiftActive, setVirtualShiftActive] = useState(false)
-
-  const renderKey = ({ code, label, wide }: KeyboardKey) => {
-    const jamo = KEY_TO_JAMO[code]
-    const isNext = nextKey?.code === code
-    const isShiftKey = code === 'ShiftLeft' || code === 'ShiftRight'
-    const isActiveShift = isShiftKey && (nextKey?.shift || virtualShiftActive)
-    const displayLabel = label ?? englishLabel(code)
-    const isJamoKey = isKoreanJamoKey(code)
-    const hasHomeRowMarker = code === 'KeyF' || code === 'KeyJ'
-    const canPress = Boolean(onKeyPress && (isJamoKey || isShiftKey))
-
-    const handleClick = () => {
-      if (!onKeyPress) return
-      if (isShiftKey) {
-        setVirtualShiftActive((active) => !active)
-        return
-      }
-      if (!isJamoKey) return
-      onKeyPress(code, virtualShiftActive)
-      setVirtualShiftActive(false)
-    }
-
-    return (
-      <button
-        type="button"
-        key={code}
-        className={`relative flex h-12 ${keyWidth(wide)} flex-col items-center justify-center rounded-lg border px-1 text-sm sm:h-13 ${isNext || isActiveShift ? 'border-[#e4bd79] bg-[#fff0d8] text-[#8b6035]' : 'border-[#cfe0fb] bg-white/75 text-[#39465b]'} ${canPress ? 'cursor-pointer touch-manipulation active:scale-[0.98]' : 'cursor-default'}`}
-        aria-label={displayLabel}
-        aria-pressed={isShiftKey ? virtualShiftActive : undefined}
-        disabled={!canPress}
-        onClick={handleClick}
-      >
-        {jamo ? (
-          <>
-            {jamo.shift && (
-              <span className="absolute top-1 right-1 text-[10px] leading-none text-[#a85d4e]">
-                {jamo.shift}
-              </span>
-            )}
-            <span className="text-base leading-4">{jamo.base}</span>
-            {showEnglishKeys && (
-              <span
-                className={`mt-0.5 text-[10px] leading-3 text-slate-400 ${hasHomeRowMarker ? 'mb-1.5' : ''}`}
-              >
-                {englishLabel(code)}
-              </span>
-            )}
-            {hasHomeRowMarker && (
-              <span
-                aria-hidden="true"
-                className="absolute bottom-1 h-0.5 w-5 rounded-full bg-gray-300/50 sm:bottom-1.5 sm:h-px sm:w-4"
-              />
-            )}
-          </>
-        ) : (
-          <span className="text-[11px] font-semibold text-[#667085]">
-            {displayLabel}
-          </span>
-        )}
-      </button>
-    )
-  }
+  const focusLevels = useMemo(() => focusLevelsFor(nextKey), [nextKey])
 
   return (
     <div
-      className="mt-6 rounded-2xl bg-[#f5f9ff] p-4 shadow-[0_0_24px_-16px_rgba(54,78,112,0.4)] select-none sm:p-5"
+      className={`rounded-2xl shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)] select-none sm:p-5 ${mobileStyle ? 'mt-4 bg-[#EFE8DD] px-1 py-2 sm:mt-6 sm:bg-[#FFF8EF]' : 'mt-6 bg-[#FFF8EF] p-4'}`}
       aria-label="Virtual Korean keyboard"
       style={{ opacity }}
     >
-      {/* <div className="mb-3 flex justify-end">
-        <span
-          className={`flex items-center gap-1.5 text-xs font-semibold ${nextKey?.shift ? 'text-[#8b6035]' : 'text-[#667085]'}`}
-        >
-          <span
-            className={`h-2.5 w-2.5 rounded-sm ${nextKey?.shift ? 'bg-[#e4a455]' : 'bg-[#f08022]'}`}
+      <div
+        className={`mx-auto max-w-5xl sm:space-y-3 ${mobileStyle ? 'space-y-1.5' : 'space-y-2'}`}
+      >
+        {[ROW_1, ROW_2, ROW_3].map((keys) => (
+          <KeyboardRow
+            key={keys[0].code}
+            keys={keys}
+            nextKey={nextKey}
+            feedback={feedback}
+            previousFeedback={previousFeedback}
+            showEnglishKeys={showEnglishKeys}
+            virtualShiftActive={virtualShiftActive}
+            pressedCodes={pressedCodes}
+            focusLevels={focusLevels}
+            onKeyPress={onKeyPress}
+            onVirtualShiftChange={setVirtualShiftActive}
+            mobileStyle={mobileStyle}
           />
-          Shift
-        </span>
-      </div> */}
-      <div className="mx-auto max-w-4xl space-y-1.5">
-        <div className="flex gap-1.5">{ROW_1.map(renderKey)}</div>
-        <div className="flex gap-1.5">{ROW_2.map(renderKey)}</div>
-        <div className="flex gap-1.5">{ROW_3.map(renderKey)}</div>
+        ))}
       </div>
     </div>
   )

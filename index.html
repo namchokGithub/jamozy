@@ -5,6 +5,16 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Jamozy</title>
+    <!--
+      Starts the Home course download while the app bundle loads (DEC-043).
+      StaticHomeContentRepository takes this promise once, so the file is
+      requested a single time; a missing file resolves to null.
+    -->
+    <script>
+      window.__jamozyHomeContent = fetch('%BASE_URL%content/home.json')
+        .then((response) => (response.ok ? response.json() : null))
+        .catch(() => null)
+    </script>
   </head>
   <body>
     <div id="root"></div>

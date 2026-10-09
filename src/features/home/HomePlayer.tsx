@@ -11,16 +11,19 @@ import { isKoreanJamoKey } from '../../domain/korean/keymap'
 import type { Progress } from '../../domain/models/progress'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
+import { useSnackbar } from '../../components/ui/SnackbarProvider'
 import FingerPlacementGuide from './FingerPlacementGuide'
+import { useKeyboardFeedback } from '../typing/keyboard-feedback'
 import { useHomePlayerStore } from './home-player-store'
 import { useHomeServices } from './home-services'
-
-const NOTICE_MS = 3000
+import { prefetchHangulTargets } from '../typing/prefetch-hangul-targets'
+import { usePressedKeyCodes } from '../typing/usePressedKeyCodes'
 
 interface HomePlayerProps {
   data: HomePlayerData
   // Live Progress read in the background; null keeps the cached Progress.
   liveProgress: Promise<Progress[] | null>
+  courseId: string
   random?: () => number
 }
 
@@ -42,12 +45,19 @@ export default function HomePlayer({
     exercises,
     session,
     selectedUnitId,
-    notice,
+    generation,
     startLesson,
     pressKey,
     selectUnit,
-    showNotice,
   } = useHomePlayerStore()
+  const { showSuccess } = useSnackbar()
+  const pressedCodes = usePressedKeyCodes()
+  // A session left in the store by an earlier visit is not shown; this
+  // mount shows only the lesson it opens.
+  const [mountGeneration] = useState(
+    () => useHomePlayerStore.getState().generation,
+  )
+  const opened = generation > mountGeneration
   const [{ content, initialProgress, initialPending, resume }] = useState(
     () => ({
       content: data.content,
@@ -65,6 +75,7 @@ export default function HomePlayer({
   // Exercises completed on this device that the outbox may not have written.
   const [localDone, setLocalDone] = useState(initialPending)
   const [nowMs, setNowMs] = useState(0)
+  const { feedback, previousFeedback, recordAttempt } = useKeyboardFeedback()
 
   useEffect(() => {
     let active = true
@@ -107,8 +118,17 @@ export default function HomePlayer({
         random,
       })
       services.saveResume(ref)
+      // Warm the typing renderer for the lesson that follows this one.
+      const following =
+        nextHomeLesson(content.units, ref.lessonId) ??
+        resolveHomeResume(content.units, null)
+      const followingLesson = following && lessonById(following.lessonId)
+      if (followingLesson)
+        prefetchHangulTargets(
+          followingLesson.exercises.map(({ targetText }) => targetText),
+        )
     },
-    [isCompleted, lessonById, random, services, startLesson],
+    [content, isCompleted, lessonById, random, services, startLesson],
   )
 
   useEffect(() => {
@@ -117,12 +137,6 @@ export default function HomePlayer({
     // Opens once on mount; later data must not restart the session.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  useEffect(() => {
-    if (!notice) return
-    const timer = window.setTimeout(() => showNotice(null), NOTICE_MS)
-    return () => window.clearTimeout(timer)
-  }, [notice, showNotice])
 
   const sessionStartedAtMs = session?.startedAt.getTime()
   useEffect(() => {
@@ -136,6 +150,12 @@ export default function HomePlayer({
   const handleKeyPress = useCallback(
     (code: string, shiftKey: boolean) => {
       const current = useHomePlayerStore.getState()
+      const currentSession = current.session?.currentSession
+      recordAttempt(
+        currentSession?.expectedKeys[currentSession.keyIndex],
+        code,
+        shiftKey,
+      )
       const { result, finished } = pressKey(code, shiftKey)
       if (!result || !current.lesson) return
       const played = current.lesson
@@ -161,13 +181,13 @@ export default function HomePlayer({
       if (!target) return
       open(target)
       const title = lessonById(target.lessonId)?.title ?? ''
-      showNotice(
+      showSuccess(
         next
           ? `Lesson complete · Next: ${title}`
           : `Home course complete · Starting again: ${title}`,
       )
     },
-    [content, lessonById, open, pressKey, services, showNotice],
+    [content, lessonById, open, pressKey, recordAttempt, services, showSuccess],
   )
 
   useEffect(() => {
@@ -184,10 +204,13 @@ export default function HomePlayer({
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [handleKeyPress])
 
-  const visibleUnitId = selectedUnitId ?? unitId ?? content.units[0]?.id
+  const visibleUnitId = opened
+    ? (selectedUnitId ?? unitId ?? content.units[0]?.id)
+    : resolveHomeResume(content.units, resume)?.unitId
   const visibleUnit =
     content.units.find(({ id }) => id === visibleUnitId) ?? content.units[0]
-  const active = session ? exercises[session.currentIndex] : undefined
+  const active = opened && session ? exercises[session.currentIndex] : undefined
+  const hasLessons = content.units.some(({ lessons }) => lessons.length > 0)
   const nextKey =
     session?.currentSession.expectedKeys[session.currentSession.keyIndex]
   const acceptedKeystrokes = session
@@ -223,7 +246,7 @@ export default function HomePlayer({
 
   return (
     <section
-      className="mt-7 rounded-4xl border border-[#d9d1ed] bg-[#fffdf9] p-5 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:p-7"
+      className="mt-5 rounded-4xl border border-[#d9d1ed] bg-[#fffdf9] p-3 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:p-7 select-none!"
       aria-labelledby="home-player-heading"
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -238,74 +261,11 @@ export default function HomePlayer({
             {content.course.title}
           </h2>
         </div>
-        {session && lesson && (
-          <p className="rounded-full bg-[#f2edf9] px-3 py-1.5 text-sm font-semibold text-[#7863a8]">
-            {Math.min(session.currentIndex + 1, exercises.length)} /{' '}
-            {exercises.length}
-          </p>
-        )}
       </div>
-
-      <nav className="mt-5 flex flex-wrap gap-2" aria-label="Choose unit">
-        {content.units.map((unit) => (
-          <button
-            key={unit.id}
-            type="button"
-            aria-pressed={unit.id === visibleUnit?.id}
-            onClick={() => selectUnit(unit.id)}
-            className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${unit.id === visibleUnit?.id ? 'border-[#9d8bc8] bg-[#e9e1f8] text-[#5c4b88]' : 'border-[#eadfd4] bg-white text-[#667085] hover:border-[#c8b9e7]'}`}
-          >
-            {unit.title}
-          </button>
-        ))}
-      </nav>
-
-      {visibleUnit && (
-        <nav
-          className="mt-3 flex flex-wrap gap-2"
-          aria-label={`Lessons in ${visibleUnit.title}`}
-        >
-          {visibleUnit.lessons.map((entry) => {
-            const { done, total } = homeLessonProgress(
-              entry,
-              progressByLesson.get(entry.id) ?? null,
-              localDone.get(entry.id),
-            )
-            const current = entry.id === lesson?.id
-            return (
-              <button
-                key={entry.id}
-                type="button"
-                aria-current={current ? 'true' : undefined}
-                onClick={() =>
-                  open({ unitId: visibleUnit.id, lessonId: entry.id })
-                }
-                className={`flex items-center gap-2 rounded-2xl border px-3 py-1.5 text-sm font-semibold transition ${current ? 'border-[#c84f82] bg-[#fdf0f5] text-[#a8396a]' : 'border-[#eadfd4] bg-white text-[#667085] hover:border-[#e3b3c7]'}`}
-              >
-                {entry.title}
-                <span
-                  className={`rounded-full px-1.5 text-[11px] ${done === total ? 'bg-[#fdf0f5] text-[#a8396a]' : 'bg-[#f2edf9] text-[#7863a8]'}`}
-                >
-                  {done}/{total}
-                </span>
-              </button>
-            )
-          })}
-        </nav>
-      )}
-
-      <p
-        role="status"
-        aria-live="polite"
-        className={`mt-3 min-h-5 text-sm font-semibold text-[#4f7a35] transition-opacity ${notice ? 'opacity-100' : 'opacity-0'}`}
-      >
-        {notice}
-      </p>
 
       {active && session && lesson ? (
         <div className="mt-1">
-          <p className="text-sm font-semibold text-[#a85d4e]">{lesson.title}</p>
-          <div className="mt-2 rounded-3xl bg-[#fffaf6] p-4 text-center shadow-[0_0_30px_-20px_rgba(87,65,45,0.35)]">
+          <div className="mt-2 rounded-3xl bg-[#fffaf6] p-3 text-center sm:p-4 shadow-[0_0_30px_-20px_rgba(87,65,45,0.35)]">
             <div className="flex h-5 justify-end gap-1.5">
               <span className="rounded-lg border border-[#eadfd4] bg-[#fffdf9] px-2 py-0.5 text-[10px] font-semibold text-[#98a2b3]">
                 WPM <strong className="ml-0.5 text-[#667085]">{wpm}</strong>
@@ -314,12 +274,20 @@ export default function HomePlayer({
                 ACC{' '}
                 <strong className="ml-0.5 text-[#667085]">{accuracy}%</strong>
               </span>
+
+              {session && lesson && (
+                <span className="rounded-lg border border-[#eadfd4] bg-[#f2edf9] px-2 py-0.5 text-[10px] font-semibold text-[#7863a8]!">
+                  {Math.min(session.currentIndex + 1, exercises.length)} /{' '}
+                  {exercises.length}
+                </span>
+              )}
             </div>
             <HangulTarget
               session={session.currentSession}
-              className="mt-1 origin-center scale-120 text-4xl font-bold tracking-wide sm:text-5xl"
+              className="mt-3 origin-center text-6xl font-bold tracking-wide sm:scale-160 sm:text-7xl"
+              compact
             />
-            <div className="mx-auto mt-3 max-w-44">
+            <div className="mx-auto mt-4 max-w-44 sm:mt-10">
               <p className="text-[10px] font-semibold text-[#98a2b3]">
                 {completedSteps} / {totalSteps} steps
               </p>
@@ -337,27 +305,93 @@ export default function HomePlayer({
                 />
               </div>
             </div>
-            {meaning && (
-              <p className="mt-5 text-xs text-[#98a2b3]">{meaning}</p>
-            )}
-            {active.romanization && (
-              <p className="mt-1 text-xs italic text-[#a293bd]">
-                {active.romanization}
-              </p>
-            )}
+            <div className="mt-5 grid h-9 grid-rows-2">
+              <div className="h-4 max-w-full truncate text-xs text-[#98a2b3]">
+                {meaning || (
+                  <span className="italic text-[#e4e2df]">No meaning</span>
+                )}
+              </div>
+              <div className="h-4 max-w-full truncate text-xs italic text-[#a293bd]">
+                {active.romanization || (
+                  <span className="italic text-[#e4e2df]">No meaning</span>
+                )}
+              </div>
+            </div>
           </div>
           <VirtualKeyboard
             nextKey={nextKey}
+            feedback={feedback}
+            previousFeedback={previousFeedback}
             showEnglishKeys
             opacity={1}
             onKeyPress={handleKeyPress}
+            pressedCodes={pressedCodes}
+            mobileStyle
           />
-          <FingerPlacementGuide nextKey={nextKey} />
+          <div className="hidden sm:block">
+            <FingerPlacementGuide
+              nextKey={nextKey}
+              pressedCodes={pressedCodes}
+            />
+          </div>
         </div>
-      ) : (
+      ) : opened || !hasLessons ? (
         <div className="mt-4 rounded-3xl border border-dashed border-[#dfcfc0] bg-white/60 p-6 text-center text-sm text-[#667085]">
           Pick a lesson above to start.
         </div>
+      ) : null}
+
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <nav
+          className="mt-5 flex max-w-full gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible"
+          aria-label="Choose unit"
+        >
+          {content.units.map((unit) => (
+            <button
+              key={unit.id}
+              type="button"
+              aria-pressed={unit.id === visibleUnit?.id}
+              onClick={() => selectUnit(unit.id)}
+              className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-2 text-sm font-semibold transition sm:shrink sm:whitespace-normal ${unit.id === visibleUnit?.id ? 'border-[#9d8bc8] bg-[#e9e1f8] text-[#5c4b88]' : 'border-[#eadfd4] bg-white text-[#667085] hover:border-[#c8b9e7]'}`}
+            >
+              {unit.title}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {visibleUnit && (
+        <nav
+          className="mt-3 flex gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible"
+          aria-label={`Lessons in ${visibleUnit.title}`}
+        >
+          {visibleUnit.lessons.map((entry) => {
+            const { done, total } = homeLessonProgress(
+              entry,
+              progressByLesson.get(entry.id) ?? null,
+              localDone.get(entry.id),
+            )
+            const current = opened && entry.id === lesson?.id
+            return (
+              <button
+                key={entry.id}
+                type="button"
+                aria-current={current ? 'true' : undefined}
+                onClick={() =>
+                  open({ unitId: visibleUnit.id, lessonId: entry.id })
+                }
+                className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl border px-3 py-1.5 text-sm font-semibold transition sm:shrink sm:whitespace-normal ${current ? 'border-[#c84f82] bg-[#fdf0f5] text-[#a8396a]' : 'border-[#eadfd4] bg-white text-[#667085] hover:border-[#e3b3c7]'}`}
+              >
+                {entry.title}
+                <span
+                  className={`rounded-full px-1.5 text-[11px] ${done === total ? 'bg-[#fdf0f5] text-[#a8396a]' : 'bg-[#f2edf9] text-[#7863a8]'}`}
+                >
+                  {done}/{total}
+                </span>
+              </button>
+            )
+          })}
+        </nav>
       )}
     </section>
   )
