@@ -15,6 +15,7 @@ export default defineConfig({
         '**/tools/jamo-svg/cache/**',
       ],
     },
+    open: true,
   },
   build: {
     sourcemap: false,

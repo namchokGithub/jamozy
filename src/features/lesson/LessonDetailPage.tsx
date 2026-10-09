@@ -47,7 +47,7 @@ function LessonDetailContent({
 
   if (completion) {
     return (
-      <PageSurface contentClassName="max-w-2xl">
+      <PageSurface contentClassName="max-w-5xl">
         {nav}
         <LessonResult
           completion={completion}
@@ -70,7 +70,7 @@ function LessonDetailContent({
 
   if (started) {
     return (
-      <PageSurface contentClassName="max-w-2xl">
+      <PageSurface contentClassName="max-w-5xl">
         {nav}
         <PageHeading eyebrow="TYPING NOW" title={lesson.title} />
         <LessonTypingSession
@@ -84,7 +84,7 @@ function LessonDetailContent({
   }
 
   return (
-    <PageSurface contentClassName="max-w-2xl">
+    <PageSurface contentClassName="max-w-5xl">
       {nav}
       <PageHeading eyebrow="LESSON" title={lesson.title}>
         <p className="mt-3 flex flex-wrap items-center gap-2 text-sm text-[#667085]">

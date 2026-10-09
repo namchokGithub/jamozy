@@ -4,7 +4,7 @@
   "version": "0.3.0",
   "type": "module",
   "scripts": {
-    "dev": "cross-env BROWSER=chrome vite --open",
+    "dev": "vite",
     "build": "pnpm content:export-home && tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest",

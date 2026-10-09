@@ -111,7 +111,7 @@ export default function CourseMapPage() {
   const { courseMap } = useLoaderData() as CourseMapLoaderData
   const openUnitId = currentUnitId(courseMap.units)
   return (
-    <PageSurface contentClassName="max-w-3xl">
+    <PageSurface contentClassName="max-w-5xl">
       <PageNav backTo="/" backLabel="Home" />
       <PageHeading eyebrow="YOUR LEARNING PATH" title={courseMap.course.title}>
         <p className="mt-2 text-[#667085]">{courseMap.course.description}</p>
