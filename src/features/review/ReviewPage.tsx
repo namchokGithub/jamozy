@@ -12,7 +12,8 @@ import { PageNav } from '../../components/ui/PageNav'
 import { PageSurface } from '../../components/ui/PageSurface'
 
 export default function ReviewPage() {
-  const { previews, settings, jamoOverview } = useLoaderData() as ReviewLoaderData
+  const { previews, settings, jamoOverview } =
+    useLoaderData() as ReviewLoaderData
   const items = previews.map((preview) => preview.item)
   const [started, setStarted] = useState(false)
   const [outcome, setOutcome] = useState<SubmitReviewSessionOutcome | null>(
@@ -24,7 +25,7 @@ export default function ReviewPage() {
 
   if (outcome) {
     return (
-      <PageSurface contentClassName="max-w-2xl">
+      <PageSurface contentClassName="max-w-5xl">
         {nav}
         <PageHeading eyebrow="NICE WORK" title="Review complete!">
           <p className="mt-2 text-[#667085]">
@@ -41,7 +42,7 @@ export default function ReviewPage() {
 
   if (started) {
     return (
-      <PageSurface contentClassName="max-w-2xl">
+      <PageSurface contentClassName="max-w-5xl">
         {nav}
         <PageHeading eyebrow="TYPING NOW" title="Review" />
         <ReviewTypingSession<SubmitReviewSessionOutcome>
@@ -54,7 +55,7 @@ export default function ReviewPage() {
   }
 
   return (
-    <PageSurface contentClassName="max-w-2xl">
+    <PageSurface contentClassName="max-w-5xl">
       {nav}
       <PageHeading eyebrow="PRACTICE YOUR MISTAKES" title="Review" />
 

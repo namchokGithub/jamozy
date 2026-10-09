@@ -31,8 +31,10 @@ function WeakJamoRound() {
   const location = useLocation()
   const [finished, setFinished] = useState<Finished | null>(null)
   const handleComplete = useCallback(
-    (outcome: SubmitWeakJamoSessionOutcome, completed: CompletedTypingSession) =>
-      setFinished({ outcome, completed }),
+    (
+      outcome: SubmitWeakJamoSessionOutcome,
+      completed: CompletedTypingSession,
+    ) => setFinished({ outcome, completed }),
     [],
   )
   const title = `Practice ${targets.map((target) => target.jamo).join(' ')}`
@@ -68,7 +70,7 @@ function WeakJamoRound() {
   if (finished) {
     const counts = finished.completed.metrics.jamoCounts ?? {}
     return (
-      <PageSurface contentClassName="max-w-2xl">
+      <PageSurface contentClassName="max-w-5xl">
         {nav}
         <PageHeading eyebrow="NICE WORK" title="Practice complete!">
           <p className="mt-2 text-[#667085]">
@@ -115,7 +117,7 @@ function WeakJamoRound() {
   }
 
   return (
-    <PageSurface contentClassName="max-w-2xl">
+    <PageSurface contentClassName="max-w-5xl">
       {nav}
       <PageHeading eyebrow="WEAK JAMO" title={title} />
       <ReviewTypingSession<SubmitWeakJamoSessionOutcome>

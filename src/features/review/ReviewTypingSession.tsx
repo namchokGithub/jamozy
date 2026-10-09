@@ -172,9 +172,10 @@ export default function ReviewTypingSession<Outcome extends object>({
 
       <HangulTarget
         session={session.currentSession}
-        className="mt-4 text-3xl"
+        className="mt-4 mb-8 scale-120 text-8xl font-bold sm:text-8xl"
         compact
       />
+
       {/* <p className="mt-2 text-sm text-[#667085]">Typed: {composed}</p> */}
       {keyboardSettings.showKeyboard && (
         <>
