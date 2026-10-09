@@ -49,9 +49,10 @@ describe('ProfilePage', () => {
   it('links back to the course list', async () => {
     renderPage(makeSummary())
 
-    expect(
-      await screen.findByRole('link', { name: 'Back to Course List' }),
-    ).toHaveAttribute('href', '/')
+    expect(await screen.findByRole('link', { name: 'Home' })).toHaveAttribute(
+      'href',
+      '/',
+    )
   })
 
   it('rounds fractional accuracy/speed stats for display without rescaling them', async () => {
