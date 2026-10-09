@@ -99,5 +99,6 @@ export function homeReplayTotals(
     exercisesAttempted: result.exercisesAttempted,
     acceptedKeystrokes: result.acceptedKeystrokes,
     rejectedKeystrokes: result.rejectedKeystrokes,
+    exercises: result.exercises ?? [],
   }
 }

@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import type { LegacyBaseline, SessionAggregate } from './session-aggregate'
+import type { PlayerStats } from './player-stats'
 
 export interface UserSettings {
   soundEnabled: boolean
@@ -30,6 +31,8 @@ export interface UserProfile {
   updatedAt?: Date
   legacyBaseline?: LegacyBaseline
   sessionAggregate?: SessionAggregate
+  timezone?: string
+  playerStats?: PlayerStats
 }
 
 export interface LevelProgress {

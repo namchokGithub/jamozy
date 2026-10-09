@@ -35,6 +35,6 @@ export const useLessonSessionStore = create<LessonSessionStore>((set, get) => ({
   pressKey: (code, shiftKey) => {
     const { session } = get()
     if (!session) return
-    set({ session: pressKeyReducer(session, code, shiftKey) })
+    set({ session: pressKeyReducer(session, code, shiftKey, Date.now()) })
   },
 }))

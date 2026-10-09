@@ -158,6 +158,7 @@ describe('homeReplayTotals', () => {
       exercisesAttempted: 1,
       acceptedKeystrokes: 2,
       rejectedKeystrokes: 1,
+      exercises: [{ targetText: '가', mistakeCount: 1, typingSeconds: 0, elapsedSeconds: 0 }],
     })
   })
 })

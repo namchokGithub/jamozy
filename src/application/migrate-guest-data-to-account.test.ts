@@ -58,4 +58,12 @@ describe('migrateGuestDataToAccount', () => {
     expect(source.checkpoints.at(-1)).toMatchObject({ status: 'started' })
     expect(destination.marker).toBeNull()
   })
+
+  it('migrates session outcomes oldest first', async () => {
+    const outcome = (id: string, completedAt: string) => ({ session: { id, completedAt: new Date(completedAt) } } as GuestMigrationSnapshot['sessionOutcomes'][number])
+    const source = new FakeGuestMigrationRepository({ ...snapshot, sessionOutcomes: [outcome('late', '2026-10-10'), outcome('early', '2026-10-09')] })
+    const destination = new FakeAccountMigrationRepository()
+    await migrateGuestDataToAccount(source, destination, 'guest-1', 'account-1')
+    expect(destination.migratedSessions).toEqual(['early', 'late'])
+  })
 })

@@ -17,7 +17,7 @@ export interface RecordHomeExerciseDeps extends HomeSessionDeps {
 
 export interface RecordHomeExerciseInput {
   userId: string
-  lesson: { id: string; exercises: Array<{ id: string }> }
+  lesson: { id: string; type?: import('../domain/models/lesson').LessonType; exercises: Array<{ id: string }> }
   result: ExerciseResult
   // Used only when this is the lesson's first recorded exercise; it becomes
   // the first-completion session ID.
@@ -63,6 +63,7 @@ export async function recordHomeExercise(
     ...previous,
     acceptedKeystrokes: previous.acceptedKeystrokes + result.correctKeyCount,
     rejectedKeystrokes: previous.rejectedKeystrokes + result.mistakes.length,
+    exercises: [...(previous.exercises ?? []), { targetText: result.targetText, mistakeCount: result.mistakes.length, typingSeconds: result.typingSeconds ?? 0, elapsedSeconds: result.elapsedSeconds ?? 0 }],
   }
   const ids = [...completedIds, result.exerciseId]
 
@@ -88,6 +89,7 @@ export async function recordHomeExercise(
     exercisesAttempted: ids.length,
     acceptedKeystrokes: partial.acceptedKeystrokes,
     rejectedKeystrokes: partial.rejectedKeystrokes,
+    exercises: partial.exercises,
   }
   const progress = homeAttemptProgress(lesson.id, existing, totals, now, {
     status: 'completed',
@@ -101,6 +103,8 @@ export async function recordHomeExercise(
     expGained: expForAccuracy(accuracyOf(totals)),
     progress,
     now,
+    lessonType: lesson.type,
+    isReplay: false,
   })
   return { progress: completed.progress, completed }
 }

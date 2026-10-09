@@ -31,6 +31,7 @@ const input = {
   expGained: 170,
   progress,
   now,
+  isReplay: false,
 }
 
 describe('submitHomeSession', () => {

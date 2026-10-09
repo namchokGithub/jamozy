@@ -11,7 +11,7 @@ export interface HomeServices {
     lesson: HomeLesson
     result: ExerciseResult
   }) => void
-  recordReplay: (input: { lessonId: string; totals: HomeSessionTotals }) => void
+  recordReplay: (input: { lessonId: string; lessonType?: import('../../domain/models/lesson').LessonType; totals: HomeSessionTotals }) => void
   saveResume: (resume: HomeLessonRef) => void
 }
 

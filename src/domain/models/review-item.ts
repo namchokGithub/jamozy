@@ -1,9 +1,12 @@
+import type { LessonType } from './lesson'
+
 export type ReviewReason = 'mistake' | 'slow' | 'low-accuracy'
 
 export interface ReviewItem {
   id: string
   sourceLessonId: string
   sourceExerciseId: string
+  sourceLessonType?: LessonType
   targetText: string
   reason: ReviewReason
   mistakeCount: number
@@ -12,7 +15,6 @@ export interface ReviewItem {
   box: number
   nextReviewAt: Date
 }
-
 const LEITNER_INTERVAL_DAYS: Record<number, number> = {
   1: 1,
   2: 3,

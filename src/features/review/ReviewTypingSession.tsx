@@ -98,6 +98,9 @@ export default function ReviewTypingSession({
       const results = session.completedResults.map((result) => ({
         itemId: result.exerciseId,
         wasCorrect: result.mistakes.length === 0,
+        mistakeCount: result.mistakes.length,
+        typingSeconds: result.typingSeconds ?? 0,
+        elapsedSeconds: result.elapsedSeconds ?? 0,
       }))
       fetcher.submit(
         {
@@ -110,6 +113,9 @@ export default function ReviewTypingSession({
           results: results.map((result) => ({
             itemId: result.itemId,
             wasCorrect: result.wasCorrect,
+            mistakeCount: result.mistakeCount,
+            typingSeconds: result.typingSeconds,
+            elapsedSeconds: result.elapsedSeconds,
           })),
         },
         { method: 'post', encType: 'application/json' },

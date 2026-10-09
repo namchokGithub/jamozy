@@ -3,6 +3,8 @@ import type { LearningSession } from '../domain/models/learning-session'
 import type { Progress } from '../domain/models/progress'
 import type { SessionSubmissionRepository } from '../domain/repositories/session-submission-repository'
 import type { UserProfileRepository } from '../domain/repositories/user-profile-repository'
+import type { LessonType } from '../domain/models/lesson'
+import { deviceTimeZone, sessionStatsFrom } from '../domain/models/player-stats'
 import {
   defaultUserProfile,
   levelFromExp,
@@ -50,8 +52,11 @@ export async function submitHomeSession(
     expGained: number
     progress: Progress
     now: Date
+    lessonType?: LessonType
+    isReplay: boolean
   },
 ): Promise<HomeSessionOutcome> {
+  const profile = (await deps.userProfileRepo.getUserProfile(userId)) ?? defaultUserProfile(userId, input.now)
   const session: LearningSession = {
     id: input.sessionId,
     context: { mode: 'home', lessonId: input.lessonId },
@@ -62,10 +67,10 @@ export async function submitHomeSession(
     acceptedKeystrokes: input.totals.acceptedKeystrokes,
     rejectedKeystrokes: input.totals.rejectedKeystrokes,
     expGained: input.expGained,
+    ...sessionStatsFrom(input.totals.exercises ?? [], input.lessonType, profile.timezone ?? deviceTimeZone(), input.now),
+    learningSeconds: (input.totals.exercises ?? []).reduce((sum, exercise) => sum + exercise.elapsedSeconds, 0),
+    isReplay: input.isReplay,
   }
-  const profile =
-    (await deps.userProfileRepo.getUserProfile(userId)) ??
-    defaultUserProfile(userId, input.now)
   const submission = await deps.sessionSubmissionRepo.submit(userId, session, {
     progress: [input.progress],
     reviewItems: [],

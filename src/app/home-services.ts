@@ -24,6 +24,7 @@ export function createHomeServices(deps: {
           userId: uid,
           lesson: {
             id: lesson.id,
+            type: lesson.type,
             exercises: lesson.exercises.map(({ id }) => ({ id })),
           },
           result,
@@ -31,7 +32,7 @@ export function createHomeServices(deps: {
           submissionId: crypto.randomUUID(),
         })
       }),
-    recordReplay: ({ lessonId, totals }) =>
+    recordReplay: ({ lessonId, lessonType, totals }) =>
       inBackground(async () => {
         const { uid } = await deps.getActiveUser()
         await deps.outbox.enqueueReplay({
@@ -39,6 +40,7 @@ export function createHomeServices(deps: {
           lessonId,
           sessionId: crypto.randomUUID(),
           totals,
+          lessonType,
         })
       }),
     saveResume: (resume) =>

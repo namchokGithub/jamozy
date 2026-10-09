@@ -79,4 +79,13 @@ describe('FirebaseAccountMigrationRepository', () => {
 
     expect(documents.get('users/account-1')?.sessionAggregate).toMatchObject({ exp: 100, exercisesAttempted: 1 })
   })
+
+  it('applies player stats when migrating an outcome, once', async () => {
+    const outcomeWithStats: SessionSubmissionOutcome = { ...sessionOutcome, session: { ...sessionOutcome.session, id: 'stats-1', localDate: '2026-10-09', timeZone: 'Asia/Bangkok', typingSeconds: 10, charactersTyped: 1, wordsPracticed: 1, sentencesPracticed: 0, exerciseMistakes: [0], expGained: 25 }, aggregate: { ...sessionOutcome.aggregate, exp: 25 } }
+    const { repository, documents } = createRepository()
+    await repository.migrateSessionOutcome('account-1', outcomeWithStats)
+    await repository.migrateSessionOutcome('account-1', outcomeWithStats)
+    expect(documents.get('users/account-1/dailyStats/2026-10-09')).toMatchObject({ expEarned: 25 })
+    expect(documents.get('users/account-1')).toMatchObject({ playerStats: { activeDays: 1 } })
+  })
 })

@@ -29,5 +29,9 @@ describe('recordOnePageExercise', () => {
     expect(first.completedLesson).toBeNull()
     expect(second.completedLesson).toMatchObject({ lessonId: 'lesson-1', result: { exercisesAttempted: 2, acceptedKeystrokes: 4, rejectedKeystrokes: 0 } })
     expect(second.completedLesson?.submissionId).toBe(first.checkpoint.partialLessonResults['lesson-1'].submissionId)
+    expect(second.completedLesson?.result.exercises).toEqual([
+      { targetText: '가', mistakeCount: 0, typingSeconds: 0, elapsedSeconds: 0 },
+      { targetText: '나', mistakeCount: 0, typingSeconds: 0, elapsedSeconds: 0 },
+    ])
   })
 })

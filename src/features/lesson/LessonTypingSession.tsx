@@ -127,6 +127,7 @@ export default function LessonTypingSession({
         exercisesAttempted: result.exercisesAttempted,
         acceptedKeystrokes: result.acceptedKeystrokes,
         rejectedKeystrokes: result.rejectedKeystrokes,
+        exercises: result.exercises,
         mistakes: result.mistakes.map((mistake) => ({
           sourceExerciseId: mistake.sourceExerciseId,
           targetText: mistake.targetText,

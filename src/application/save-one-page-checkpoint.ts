@@ -39,6 +39,7 @@ function lessonResult(partial: OnePagePartialLessonResult, now: Date): LessonRes
     acceptedKeystrokes: partial.acceptedKeystrokes,
     rejectedKeystrokes: partial.rejectedKeystrokes,
     mistakes: partial.mistakes,
+    exercises: partial.exercises ?? [],
   }
 }
 
@@ -81,6 +82,12 @@ export async function recordOnePageExercise(
         mistakes: input.result.mistakes.length > 0
           ? [...existing.mistakes, { sourceExerciseId: input.result.exerciseId, targetText: input.result.targetText }]
           : existing.mistakes,
+        exercises: [...(existing.exercises ?? []), {
+          targetText: input.result.targetText,
+          mistakeCount: input.result.mistakes.length,
+          typingSeconds: input.result.typingSeconds ?? 0,
+          elapsedSeconds: input.result.elapsedSeconds ?? 0,
+        }],
       }
   const nextCheckpoint: OnePageLearningCheckpoint = {
     ...checkpoint,

@@ -298,6 +298,7 @@ export const router = createBrowserRouter([
     action: createSubmitReviewSessionAction({
       reviewRepo,
       sessionSubmissionRepo,
+      userProfileRepo,
       ensureUser: getActiveUser,
     }),
     ErrorBoundary: RouteError,

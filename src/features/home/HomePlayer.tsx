@@ -172,6 +172,7 @@ export default function HomePlayer({
       if (current.isReplay && finishedSession)
         services.recordReplay({
           lessonId: played.id,
+          lessonType: played.type,
           totals: homeReplayTotals(finishedSession),
         })
       // After the last lesson, Home loops back to the first one.
