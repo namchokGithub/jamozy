@@ -128,6 +128,7 @@ export default function LessonTypingSession({
         acceptedKeystrokes: result.acceptedKeystrokes,
         rejectedKeystrokes: result.rejectedKeystrokes,
         exercises: result.exercises,
+        ...(result.jamoCounts ? { jamoCounts: result.jamoCounts } : {}),
         mistakes: result.mistakes.map((mistake) => ({
           sourceExerciseId: mistake.sourceExerciseId,
           targetText: mistake.targetText,

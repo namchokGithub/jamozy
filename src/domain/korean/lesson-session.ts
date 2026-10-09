@@ -7,6 +7,7 @@ import {
 } from './typing-session'
 import type { LessonExercise } from '../models/lesson'
 import type { ExerciseStat } from '../models/player-stats'
+import { jamoCountsFrom, jamoCountsSchema, type JamoCounts } from '../models/jamo-stat'
 
 export const TYPING_GAP_LIMIT_MS = 10_000
 
@@ -189,6 +190,7 @@ export interface LessonResult {
   rejectedKeystrokes: number
   mistakes: MistakeReport[]
   exercises?: ExerciseStat[]
+  jamoCounts?: JamoCounts
 }
 
 export function getLessonResult(state: LessonSessionState, now: Date = new Date()): LessonResult {
@@ -221,6 +223,7 @@ export function getLessonResult(state: LessonSessionState, now: Date = new Date(
       typingSeconds: result.typingSeconds ?? 0,
       elapsedSeconds: result.elapsedSeconds ?? 0,
     })),
+    jamoCounts: jamoCountsFrom(state.completedResults),
   }
 }
 
@@ -253,4 +256,9 @@ export const lessonResultSchema = z.object({
     )
     .max(100)
     .optional(),
-})
+  // Invalid counts are dropped so the lesson result still saves (DEC-050).
+  jamoCounts: jamoCountsSchema.optional().catch(undefined),
+}).transform(
+  ({ jamoCounts, ...rest }): typeof rest & { jamoCounts?: JamoCounts } =>
+    jamoCounts ? { ...rest, jamoCounts } : rest,
+)

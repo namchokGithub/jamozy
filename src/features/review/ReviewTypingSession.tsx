@@ -110,6 +110,7 @@ export default function ReviewTypingSession({
           exercisesAttempted: metrics.exercisesAttempted,
           acceptedKeystrokes: metrics.acceptedKeystrokes,
           rejectedKeystrokes: metrics.rejectedKeystrokes,
+          ...(metrics.jamoCounts ? { jamoCounts: metrics.jamoCounts } : {}),
           results: results.map((result) => ({
             itemId: result.itemId,
             wasCorrect: result.wasCorrect,

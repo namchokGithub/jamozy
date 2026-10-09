@@ -225,12 +225,14 @@ field exists in MVP.
 
 ## JamoStat (per-user)
 
-**Path:** `users/{userId}/jamoStats/{jamoId}`
-**Planned file:** `domain/models/jamo-stat.ts`
+**Path ([[DEC-050]]):** one map document, `users/{userId}/learnerStats/jamo`
+→ `{ jamo: Record<jamoId, JamoStat> }`. Guests use IndexedDB store
+`learnerStats`, key `${userId}:jamo`.
+**File:** `domain/models/jamo-stat.ts`
 
 | Field              | Type   | Notes                                                       |
 | ------------------ | ------ | ----------------------------------------------------------- |
-| jamoId             | string | document ID; expected Korean jamo                           |
+| jamoId             | string | map key; key-level expected jamo                            |
 | acceptedKeystrokes | number | incremented for correct input of the expected jamo          |
 | rejectedKeystrokes | number | incremented for rejected input while this jamo was expected |
 | firstPracticedAt   | Date   | first submitted session containing this expected jamo       |
@@ -240,6 +242,27 @@ Accuracy is derived from the raw counters. Keyboard Position is a view/filter
 over shared jamo and keyboard metadata; it has no separate progress entity.
 All counters and timestamps are aggregated from a submitted session result,
 never persisted per keystroke.
+
+**Counting rules ([[DEC-050]]):**
+
+- Jamo are counted at the key level (`ExpectedKey.jamo`): `ㅘ` is one `ㅗ`
+  and one `ㅏ`, and `ㄲ` is one key.
+- Literal keys (space, punctuation) are skipped.
+- A rejected input counts for the jamo that was expected.
+
+Clients send per-session `JamoCounts` as `SessionSubmissionEffects.jamoCounts`.
+The submit transaction folds them into the map with `applyJamoCounts`.
+`LearningSession` stores no per-jamo data. Guest jamo stats are not migrated to
+an account.
+
+Rankings are derived on read by `jamoRankings`:
+
+- Most Practiced and Most Mistyped consider every jamo.
+- Weakest and Strongest consider only jamo with at least 20 attempts, ranked by
+  mistake rate; ties go to more attempts.
+
+Best Accuracy Lesson and Most Replayed Lesson are derived from completed
+`LessonProgress` by `lessonRankings`.
 
 **Jamo and keyboard metadata:** the existing Korean typing domain is the
 canonical content source for jamo, physical key, Shift requirement, and keyboard

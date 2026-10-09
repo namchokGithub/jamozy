@@ -33,5 +33,10 @@ describe('recordOnePageExercise', () => {
       { targetText: '가', mistakeCount: 0, typingSeconds: 0, elapsedSeconds: 0 },
       { targetText: '나', mistakeCount: 0, typingSeconds: 0, elapsedSeconds: 0 },
     ])
+    expect(second.completedLesson?.result.jamoCounts).toEqual({
+      ㄱ: { accepted: 1, rejected: 0 },
+      ㄴ: { accepted: 1, rejected: 0 },
+      ㅏ: { accepted: 2, rejected: 0 },
+    })
   })
 })

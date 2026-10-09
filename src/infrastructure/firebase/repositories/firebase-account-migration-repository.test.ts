@@ -88,4 +88,13 @@ describe('FirebaseAccountMigrationRepository', () => {
     expect(documents.get('users/account-1/dailyStats/2026-10-09')).toMatchObject({ expEarned: 25 })
     expect(documents.get('users/account-1')).toMatchObject({ playerStats: { activeDays: 1 } })
   })
+
+  it('does not migrate jamo stats', async () => {
+    const { repository, documents } = createRepository()
+    await repository.migrateSessionOutcome('account-1', {
+      ...sessionOutcome,
+      effects: { ...sessionOutcome.effects, jamoCounts: { ㄱ: { accepted: 1, rejected: 0 } } },
+    })
+    expect(documents.has('users/account-1/learnerStats/jamo')).toBe(false)
+  })
 })

@@ -1,6 +1,7 @@
 import type { ExerciseResult } from '../korean/lesson-session'
 import type { ExerciseStat } from './player-stats'
 import type { LessonType } from './lesson'
+import type { JamoCounts } from './jamo-stat'
 
 export interface HomeSessionTotals {
   startedAtMs: number
@@ -9,6 +10,7 @@ export interface HomeSessionTotals {
   acceptedKeystrokes: number
   rejectedKeystrokes: number
   exercises?: ExerciseStat[]
+  jamoCounts?: JamoCounts
 }
 
 interface HomeSyncJobBase {

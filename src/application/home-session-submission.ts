@@ -74,6 +74,9 @@ export async function submitHomeSession(
   const submission = await deps.sessionSubmissionRepo.submit(userId, session, {
     progress: [input.progress],
     reviewItems: [],
+    ...(input.totals.jamoCounts && Object.keys(input.totals.jamoCounts).length > 0
+      ? { jamoCounts: input.totals.jamoCounts }
+      : {}),
   })
   return {
     progress: submission.effects.progress[0] ?? input.progress,

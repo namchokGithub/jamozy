@@ -53,4 +53,36 @@ describeWithFirestoreEmulator('FirebaseSessionSubmissionRepository player stats'
     await assertFails(getDoc(doc(other, 'users/learner-1/dailyStats/2026-10-09')))
     await assertFails(getDoc(doc(other, 'users/learner-1/monthlyStats/2026-10')))
   })
+
+  const jamoEffects = {
+    progress: [],
+    reviewItems: [],
+    jamoCounts: { ㄱ: { accepted: 2, rejected: 1 }, ㅏ: { accepted: 2, rejected: 0 } },
+  }
+
+  it('writes jamo stats once per session ID and keeps firstPracticedAt', async () => {
+    const { firestore, repo } = learnerRepository()
+    await repo.submit('learner-1', session, jamoEffects)
+    await repo.submit('learner-1', session, jamoEffects) // retry: no double count
+    const later = { ...session, id: 'session-2', completedAt: new Date('2026-10-10T01:00:00Z') }
+    await repo.submit('learner-1', later, jamoEffects) // reads stored Timestamps back
+
+    const data = (await getDoc(doc(firestore, 'users/learner-1/learnerStats/jamo'))).data()
+    expect(data?.jamo.ㄱ).toMatchObject({ acceptedKeystrokes: 4, rejectedKeystrokes: 2 })
+    expect(data?.jamo.ㄱ.firstPracticedAt.toDate()).toEqual(session.completedAt)
+    expect(data?.jamo.ㄱ.lastPracticedAt.toDate()).toEqual(later.completedAt)
+  })
+
+  it('does not create the jamo doc without counts', async () => {
+    const { firestore, repo } = learnerRepository()
+    await repo.submit('learner-1', session, noEffects)
+    expect((await getDoc(doc(firestore, 'users/learner-1/learnerStats/jamo'))).exists()).toBe(false)
+  })
+
+  it('lets only the owner read learnerStats', async () => {
+    const { repo } = learnerRepository()
+    await repo.submit('learner-1', session, jamoEffects)
+    const other = testEnvironment.authenticatedContext('learner-2').firestore() as unknown as Firestore
+    await assertFails(getDoc(doc(other, 'users/learner-1/learnerStats/jamo')))
+  })
 })

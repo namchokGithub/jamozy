@@ -4,6 +4,7 @@ import { addSessionAggregate, aggregateFromSession, emptySessionAggregate, type 
 import type { LearningSession } from '../../../domain/models/learning-session'
 import type { SessionSubmissionEffects, SessionSubmissionOutcome, SessionSubmissionRepository } from '../../../domain/repositories/session-submission-repository'
 import { readSessionStatsWrites } from './firestore-player-stats'
+import { readJamoStatsWrite } from './firestore-jamo-stats'
 
 type FirebaseSessionSubmissionDependencies = {
   db: typeof db
@@ -37,6 +38,7 @@ export class FirebaseSessionSubmissionRepository implements SessionSubmissionRep
         profileValues,
         session,
       )
+      const writeJamo = await readJamoStatsWrite({ db, doc }, transaction, userId, effects.jamoCounts, session.completedAt)
       transaction.set(doc(db, 'users', userId, 'learningSessions', session.id), { ...session, startedAt: session.startedAt, completedAt: session.completedAt })
       transaction.set(receipt, outcome)
       const profileUpdate: Record<string, unknown> = {
@@ -53,6 +55,7 @@ export class FirebaseSessionSubmissionRepository implements SessionSubmissionRep
       for (const reviewItem of effects.reviewItems) {
         transaction.set(doc(db, 'users', userId, 'reviewItems', reviewItem.id), reviewItem)
       }
+      writeJamo(transaction)
       return outcome
     })
   }

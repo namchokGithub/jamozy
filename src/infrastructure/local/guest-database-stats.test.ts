@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { guestStatsWrites } from './guest-database'
+import { guestJamoWrite, guestStatsWrites } from './guest-database'
 import { defaultUserProfile } from '../../domain/models/user-profile'
 
 const session = {
@@ -15,5 +15,17 @@ describe('guestStatsWrites', () => {
     expect(writes.profile.playerStats).toMatchObject({ activeDays: 1, perfectStreak: { current: 0 } })
     const kept = guestStatsWrites({ ...profile, timezone: 'Asia/Seoul' }, writes.daily, writes.monthly, session)
     expect(kept.profile.timezone).toBe('Asia/Seoul')
+  })
+})
+
+describe('guestJamoWrite', () => {
+  const now = new Date('2026-10-09T00:00:00Z')
+
+  it('skips the write without counts and applies counts otherwise', () => {
+    expect(guestJamoWrite(undefined, undefined, now)).toBeNull()
+    expect(guestJamoWrite(undefined, {}, now)).toBeNull()
+    expect(guestJamoWrite(undefined, { ㄱ: { accepted: 1, rejected: 0 } }, now)).toEqual({
+      ㄱ: { acceptedKeystrokes: 1, rejectedKeystrokes: 0, firstPracticedAt: now, lastPracticedAt: now },
+    })
   })
 })

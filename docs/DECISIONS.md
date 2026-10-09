@@ -45,7 +45,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-025 | Vocabulary import identity and nullable meanings; simplify persisted Progress states                                                                              | Accepted                                                                                               | 2026-09-27 |
 | DEC-026 | Learning Modes, shared learner state, and contiguous progression frontier                                                                                         | Accepted (Home course exception: DEC-043)                                                              | 2026-09-27 |
 | DEC-027 | Guest local persistence and migration to authenticated accounts                                                                                                   | Accepted                                                                                               | 2026-09-27 |
-| DEC-028 | Shared learner-state checkpoints and Daily Quest completion                                                                                                       | Accepted                                                                                               | 2026-09-27 |
+| DEC-028 | Shared learner-state checkpoints and Daily Quest completion                                                                                                       | Accepted (JamoStat storage amended by DEC-050)                                                         | 2026-09-27 |
 | DEC-029 | Session history separated from learner state and lifetime aggregates                                                                                              | Accepted (`home` session context: DEC-043)                                                             | 2026-09-28 |
 | DEC-030 | Guest-to-account migration merge policy                                                                                                                           | Accepted (Home exercise-progress merge: DEC-043)                                                       | 2026-09-28 |
 | DEC-031 | Preserve pre-session learner values as a compatibility baseline                                                                                                   | Accepted                                                                                               | 2026-09-28 |
@@ -64,6 +64,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-047 | Content documents store descendant counts, kept by atomic writes                                                                                                  | Accepted                                                                                               | 2026-10-08 |
 | DEC-048 | Level is derived, never stored, using the LEVELING.md curve                                                                                                       | Accepted                                                                                               | 2026-10-08 |
 | DEC-049 | Player stats fold into lifetime, daily, and monthly state in the submit transaction                                                                               | Accepted                                                                                               | 2026-10-09 |
+| DEC-050 | Key-level jamo stats live in one map document, updated in the submit transaction                                                                                  | Accepted                                                                                               | 2026-10-09 |
 
 ## Superseded index (history only)
 
@@ -1325,3 +1326,61 @@ identical, deduplicated by the receipt, and unit-testable.
   Profile UI are out of scope.
 - Rejected alternatives: blind increments; read-time aggregation; weekly and
   yearly docs (a Week view reads 7 day docs, a Year view 12 month docs).
+
+## DEC-050 — Key-level jamo stats live in one map document, updated in the submit transaction
+
+**Date:** 2026-10-09
+**Status:** Accepted
+**Amends:** [[DEC-028]] (JamoStat storage)
+**Related:** [[DEC-030]], [[DEC-049]]; spec
+`docs/superpowers/specs/2026-10-09-jamo-stats-design.md`
+
+**Decision:** JamoStat keeps [[DEC-028]]'s fields and counting rule. Its
+storage moves from one document per jamo to one map document,
+`users/{userId}/learnerStats/jamo`. Guests use IndexedDB store `learnerStats`
+(DB version 8). Jamo are counted at the key level, `ExpectedKey.jamo`:
+
+- `ㅘ` = `ㅗ` + `ㅏ`, `ㄳ` = `ㄱ` + `ㅅ`, and `ㄲ` is one key.
+- Literal keys (space, punctuation) are skipped.
+- A target the keymap cannot type contributes only its mistakes.
+
+The flow per submit:
+
+1. Clients derive `JamoCounts` from finished exercises.
+2. Use cases pass them as `SessionSubmissionEffects.jamoCounts`, never as a
+   `LearningSession` field.
+3. Both adapters read the map, apply `applyJamoCounts`, and write it back
+   inside the existing receipt-gated submit transaction.
+4. Actions drop invalid counts (unknown key, or not an integer in 0..10,000)
+   and still save the session.
+
+Rankings are derived on read:
+
+- Most Practiced and Most Mistyped.
+- Weakest and Strongest, by mistake rate over jamo with at least 20 attempts;
+  ties go to more attempts.
+- Best Accuracy Lesson and Most Replayed Lesson, from completed
+  `LessonProgress`.
+
+**Why:**
+
+- About 33 key-level jamo fit one small document (a few KB). Each submit then
+  costs one read and one write, not one for each of the 10–20 distinct jamo in
+  a session.
+- Rankings read one document.
+- A pure fold inside the existing transaction stays deduplicated by the receipt
+  and identical across Firestore and IndexedDB.
+
+**Consequences:**
+
+- **Rules:** owner-only `learnerStats/{statsId}`.
+- **Migration (an exception to [[DEC-030]]):** `migrateSessionOutcome` does not
+  apply jamo counts, so an account starts its jamo stats at login. Guest counts
+  remain only in Guest receipts.
+- **Queries:** no server-side query over individual jamo; the map is filtered on
+  the client.
+- **Out of scope:** composed-jamo stats, word stats (pending `VocabularyEntry`),
+  Personalized Review (next spec), and UI.
+- **Rejected:** per-jamo documents (10–20 reads and writes per submit),
+  fire-and-forget writes (lost or double counts), and `increment()` per field
+  (still needs `firstPracticedAt`, and splits logic from IndexedDB).

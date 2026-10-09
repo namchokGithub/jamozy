@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { jamoCountsSchema } from '../../domain/models/jamo-stat'
 import type { ActionFunctionArgs } from 'react-router'
 import {
   submitReviewSession,
@@ -24,6 +25,8 @@ const reviewSessionResultSchema = z.object({
       elapsedSeconds: z.number().min(0).optional(),
     }),
   ),
+  // Invalid counts are dropped so the review still saves (DEC-050).
+  jamoCounts: jamoCountsSchema.optional().catch(undefined),
 })
 
 export function createSubmitReviewSessionAction(deps: {
@@ -35,6 +38,7 @@ export function createSubmitReviewSessionAction(deps: {
   return async ({ request }: ActionFunctionArgs): Promise<SubmitReviewSessionOutcome> => {
     const body = reviewSessionResultSchema.parse(await request.json())
     const user = await deps.ensureUser()
-    return submitReviewSession(deps, user.uid, body)
+    const { jamoCounts, ...rest } = body
+    return submitReviewSession(deps, user.uid, jamoCounts ? { ...rest, jamoCounts } : rest)
   }
 }

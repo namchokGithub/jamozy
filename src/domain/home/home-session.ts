@@ -100,5 +100,6 @@ export function homeReplayTotals(
     acceptedKeystrokes: result.acceptedKeystrokes,
     rejectedKeystrokes: result.rejectedKeystrokes,
     exercises: result.exercises ?? [],
+    jamoCounts: result.jamoCounts ?? {},
   }
 }

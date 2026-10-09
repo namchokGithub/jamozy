@@ -209,7 +209,7 @@ describe('getLessonResult', () => {
   it('returns all zeros for a lesson with no exercises', () => {
     const state = startLessonSession([])
     const result = getLessonResult(state, state.startedAt) // same instant, duration 0
-    expect(result).toEqual({ accuracy: 0, speedWpm: 0, durationSeconds: 0, startedAtMs: state.startedAt.getTime(), exercisesAttempted: 0, acceptedKeystrokes: 0, rejectedKeystrokes: 0, mistakes: [], exercises: [] })
+    expect(result).toEqual({ accuracy: 0, speedWpm: 0, durationSeconds: 0, startedAtMs: state.startedAt.getTime(), exercisesAttempted: 0, acceptedKeystrokes: 0, rejectedKeystrokes: 0, mistakes: [], exercises: [], jamoCounts: {} })
   })
 })
 
@@ -314,5 +314,43 @@ describe('compactLessonSession', () => {
     const appended = appendExercises(compacted, [{ id: 'e2', targetText: '나' }])
     expect(appended.currentIndex).toBe(1)
     expect(appended.currentSession.targetText).toBe('나')
+  })
+})
+
+describe('jamo counts', () => {
+  it('reports key-level jamo counts in the lesson result', () => {
+    let state = startLessonSession([{ id: 'e1', targetText: '가' }])
+    state = pressKey(state, 'KeyQ', false, 0) // wrong: expected ㄱ
+    state = pressKey(state, 'KeyR', false, 1_000)
+    state = pressKey(state, 'KeyK', false, 2_000)
+    expect(getLessonResult(state).jamoCounts).toEqual({
+      ㄱ: { accepted: 1, rejected: 1 },
+      ㅏ: { accepted: 1, rejected: 0 },
+    })
+  })
+
+  it('drops invalid jamo counts instead of rejecting the lesson result', () => {
+    const base = {
+      accuracy: 100,
+      speedWpm: 0,
+      durationSeconds: 1,
+      startedAtMs: 0,
+      exercisesAttempted: 1,
+      acceptedKeystrokes: 2,
+      rejectedKeystrokes: 0,
+      mistakes: [],
+    }
+    expect(
+      lessonResultSchema.parse({
+        ...base,
+        jamoCounts: { x: { accepted: -1, rejected: 0 } },
+      }),
+    ).not.toHaveProperty('jamoCounts')
+    expect(
+      lessonResultSchema.parse({
+        ...base,
+        jamoCounts: { ㄱ: { accepted: 1, rejected: 0 } },
+      }).jamoCounts,
+    ).toEqual({ ㄱ: { accepted: 1, rejected: 0 } })
   })
 })

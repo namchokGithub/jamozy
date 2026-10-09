@@ -151,6 +151,7 @@ export async function completeLessonSession(
       isReplay: wasAlreadyCompleted,
     },
     {
+      ...(result.jamoCounts ? { jamoCounts: result.jamoCounts } : {}),
       progress,
       reviewItems: wasAlreadyCompleted
         ? []

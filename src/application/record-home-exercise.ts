@@ -1,3 +1,4 @@
+import { jamoCountsFrom, mergeJamoCounts } from '../domain/models/jamo-stat'
 import { ValidationError } from '../domain/errors'
 import type { ExerciseResult } from '../domain/korean/lesson-session'
 import type { LessonType } from '../domain/models/lesson'
@@ -65,6 +66,7 @@ export async function recordHomeExercise(
     acceptedKeystrokes: previous.acceptedKeystrokes + result.correctKeyCount,
     rejectedKeystrokes: previous.rejectedKeystrokes + result.mistakes.length,
     exercises: [...(previous.exercises ?? []), { targetText: result.targetText, mistakeCount: result.mistakes.length, typingSeconds: result.typingSeconds ?? 0, elapsedSeconds: result.elapsedSeconds ?? 0 }],
+    jamoCounts: mergeJamoCounts(previous.jamoCounts, jamoCountsFrom([result])),
   }
   const ids = [...completedIds, result.exerciseId]
 
@@ -91,6 +93,7 @@ export async function recordHomeExercise(
     acceptedKeystrokes: partial.acceptedKeystrokes,
     rejectedKeystrokes: partial.rejectedKeystrokes,
     exercises: partial.exercises,
+    jamoCounts: partial.jamoCounts,
   }
   const progress = homeAttemptProgress(lesson.id, existing, totals, now, {
     status: 'completed',

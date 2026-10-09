@@ -51,4 +51,19 @@ describe('createSubmitReviewSessionAction', () => {
 
     await expect(action({ request } as never)).rejects.toThrow()
   })
+
+  it('passes valid jamo counts and drops invalid ones without failing the review', async () => {
+    const sessionSubmissionRepo = new FakeSessionSubmissionRepository()
+    const action = createSubmitReviewSessionAction({ reviewRepo: new FakeReviewRepository(), sessionSubmissionRepo, ensureUser: async () => ({ uid: 'user1' }) })
+    const body = (submissionId: string, jamoCounts: unknown) => new Request('http://localhost/review', {
+      method: 'POST',
+      body: JSON.stringify({ submissionId, startedAtMs: 0, durationSeconds: 30, exercisesAttempted: 0, acceptedKeystrokes: 0, rejectedKeystrokes: 0, results: [], jamoCounts }),
+    })
+
+    await action({ request: body('valid', { ㄱ: { accepted: 1, rejected: 0 } }) } as never)
+    await action({ request: body('invalid', { x: { accepted: -1, rejected: 0 } }) } as never)
+
+    expect(sessionSubmissionRepo.submissions[0]?.effects.jamoCounts).toEqual({ ㄱ: { accepted: 1, rejected: 0 } })
+    expect(sessionSubmissionRepo.submissions[1]?.effects).not.toHaveProperty('jamoCounts')
+  })
 })

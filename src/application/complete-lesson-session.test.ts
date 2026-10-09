@@ -266,4 +266,13 @@ describe('completeLessonSession', () => {
     await completeLessonSession(deps, 'user1', 'l1', { ...result, mistakes: [{ sourceExerciseId: 'ex2', targetText: '가' }] }, 'missing-2', new Date('2026-01-03'))
     expect(deps.sessionSubmissionRepo.submissions[1]?.effects.reviewItems[0]).not.toHaveProperty('sourceLessonType')
   })
+
+  it('passes jamo counts to the submission effects only when the result has them', async () => {
+    const deps = { courseRepo: new FakeCourseRepository([], [makeUnit('u1')]), lessonRepo: new FakeLessonRepository([makeLesson('l1', 'u1')]), progressRepo: new FakeProgressRepository(), userProfileRepo: new FakeUserProfileRepository(), reviewRepo: new FakeReviewRepository(), sessionSubmissionRepo: new FakeSessionSubmissionRepository() }
+    const result = { accuracy: 100, speedWpm: 20, durationSeconds: 30, startedAtMs: 0, exercisesAttempted: 1, acceptedKeystrokes: 2, rejectedKeystrokes: 0, mistakes: [] }
+    await completeLessonSession(deps, 'user1', 'l1', { ...result, jamoCounts: { ㄱ: { accepted: 1, rejected: 0 } } }, 'jamo-1')
+    await completeLessonSession(deps, 'user1', 'l1', result, 'jamo-2')
+    expect(deps.sessionSubmissionRepo.submissions[0]?.effects.jamoCounts).toEqual({ ㄱ: { accepted: 1, rejected: 0 } })
+    expect(deps.sessionSubmissionRepo.submissions[1]?.effects).not.toHaveProperty('jamoCounts')
+  })
 })

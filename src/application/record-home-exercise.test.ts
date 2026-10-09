@@ -212,6 +212,25 @@ describe('recordHomeExercise', () => {
     })
   })
 
+  it('accumulates jamo counts across exercises and submits them on completion', async () => {
+    const { deps, submissions } = setup()
+    for (const id of ['e1', 'e2', 'e3'])
+      await recordHomeExercise(deps, { userId: 'u1', lesson, result: result(id, 2, id === 'e2' ? 1 : 0), submissionId: `s-${id}`, now: at(0) })
+    // Each target is '가'; the mistake fixture expects ㄱ.
+    expect(submissions[0].effects.jamoCounts).toEqual({ ㄱ: { accepted: 3, rejected: 1 }, ㅏ: { accepted: 3, rejected: 0 } })
+  })
+
+  it('counts only new exercises for a partial result saved before jamo counts', async () => {
+    const { deps, progressRepo, submissions } = setup()
+    await progressRepo.saveProgress('u1', {
+      lessonId: 'lesson-1', status: 'unlocked', bestAccuracy: 0, bestSpeedWpm: 0, attempts: 0, lastAttemptAt: at(0), completedAt: null,
+      completedExerciseIds: ['e1', 'e2'],
+      homePartialResult: { submissionId: 's-old', startedAtMs: at(0).getTime(), acceptedKeystrokes: 4, rejectedKeystrokes: 0 },
+    })
+    await recordHomeExercise(deps, { userId: 'u1', lesson, result: result('e3'), submissionId: 'x', now: at(10) })
+    expect(submissions[0].effects.jamoCounts).toEqual({ ㄱ: { accepted: 1, rejected: 0 }, ㅏ: { accepted: 1, rejected: 0 } })
+  })
+
   it('rejects an exercise that is not part of the lesson', async () => {
     const { deps } = setup()
     await expect(

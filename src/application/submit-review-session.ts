@@ -1,3 +1,4 @@
+import type { JamoCounts } from '../domain/models/jamo-stat'
 import type { ReviewRepository } from '../domain/repositories/review-repository'
 import type { SessionSubmissionRepository } from '../domain/repositories/session-submission-repository'
 import { nextBox, nextReviewDate, type ReviewItem } from '../domain/models/review-item'
@@ -25,6 +26,7 @@ export interface SubmitReviewSessionInput {
   acceptedKeystrokes: number
   rejectedKeystrokes: number
   results: SubmitReviewSessionResult[]
+  jamoCounts?: JamoCounts
 }
 
 function updatedReview(item: ReviewItem, wasCorrect: boolean, now: Date): ReviewItem {
@@ -77,7 +79,7 @@ export async function submitReviewSession(
     rejectedKeystrokes: input.rejectedKeystrokes,
     expGained: 0,
     ...sessionStatsFrom(stats, undefined, timeZone, now),
-  }, { progress: [], reviewItems })
+  }, { progress: [], reviewItems, ...(input.jamoCounts ? { jamoCounts: input.jamoCounts } : {}) })
 
   return { correctCount, needsPracticeCount }
 }
