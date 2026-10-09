@@ -60,7 +60,11 @@ describe('createHomeServices', () => {
     expect(outbox.enqueueExercise).toHaveBeenCalledWith(
       expect.objectContaining({
         userId: 'u1',
-        lesson: { id: 'l1', exercises: [{ id: 'e1' }] },
+        lesson: expect.objectContaining({
+          id: 'l1',
+          type: 'character',
+          exercises: [{ id: 'e1' }],
+        }),
         result,
       }),
     )

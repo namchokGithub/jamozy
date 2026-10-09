@@ -117,6 +117,6 @@ A fresh whole-branch review (Opus) found no Critical issues. The one Important f
 
 **Still open, not forgotten:** [[DEC-022]]'s vocabulary-backed `ReviewItem` identity is documented but not yet implemented or migrated. [[DEC-019]]'s review-system Minor findings remain deferred. Settings round's deferred Minor findings remain: Save re-enables during post-save loader revalidation; "Saved" can show a moment early when nothing was edited; `getSettings` does not merge stored settings over defaults field-by-field; a Save failure replaces the whole page via `RouteError`; no Firestore transaction wraps the settings read-modify-write; the multi-phase fetcher-state test does not separately assert the Save button was disabled mid-flight; "Saved" has no `aria-live`; and the opacity slider shows no numeric value. `ProfileSummary.exp`/`stats` default to zero for a hypothetical pre-field profile, while one loader test has a harmless nondeterministic `createdAt` fixture.
 
-`pnpm test`/`pnpm exec tsc -b`/`pnpm lint` all pass (627tests, 17 skipped).
+`pnpm test`/`pnpm exec tsc -b`/`pnpm lint` all pass (668 tests, 20 skipped).
 
 Next real steps, not blocked on each other: (1) decide whether to defer the misleading sound control to post-MVP or implement real sound; build real dark-mode CSS as a separate cross-cutting change, (2) a proper Lesson Result screen (currently an inline MVP result).
