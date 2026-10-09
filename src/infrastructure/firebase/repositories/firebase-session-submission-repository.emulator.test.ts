@@ -3,6 +3,7 @@ import { doc, getDoc, runTransaction, type Firestore } from 'firebase/firestore'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import type { LearningSession } from '../../../domain/models/learning-session'
 import { FirebaseSessionSubmissionRepository } from './firebase-session-submission-repository'
+import { FirebaseJamoStatsRepository } from './firestore-jamo-stats'
 import firestoreRules from '../../../../firestore.rules?raw'
 
 const emulatorHost = (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env.FIRESTORE_EMULATOR_HOST
@@ -84,5 +85,15 @@ describeWithFirestoreEmulator('FirebaseSessionSubmissionRepository player stats'
     await repo.submit('learner-1', session, jamoEffects)
     const other = testEnvironment.authenticatedContext('learner-2').firestore() as unknown as Firestore
     await assertFails(getDoc(doc(other, 'users/learner-1/learnerStats/jamo')))
+  })
+
+  it('reads jamo stats back as Dates, and {} without a doc', async () => {
+    const { firestore, repo } = learnerRepository()
+    const reader = new FirebaseJamoStatsRepository(firestore)
+    expect(await reader.getJamoStats('learner-1')).toEqual({})
+    await repo.submit('learner-1', session, jamoEffects)
+    const stats = await reader.getJamoStats('learner-1')
+    expect(stats.ㄱ).toMatchObject({ acceptedKeystrokes: 2, rejectedKeystrokes: 1 })
+    expect(stats.ㄱ.firstPracticedAt).toBeInstanceOf(Date)
   })
 })

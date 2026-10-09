@@ -11,9 +11,11 @@ import {
   LocalProgressRepository,
   LocalReviewRepository,
   LocalUserProfileRepository,
+  LocalJamoStatsRepository,
 } from '../infrastructure/local/local-repositories'
 import { LocalSessionSubmissionRepository } from '../infrastructure/local/local-session-submission-repository'
 import { FirebaseSessionSubmissionRepository } from '../infrastructure/firebase/repositories/firebase-session-submission-repository'
+import { FirebaseJamoStatsRepository } from '../infrastructure/firebase/repositories/firestore-jamo-stats'
 import { LocalGuestMigrationRepository } from '../infrastructure/local/local-guest-migration-repository'
 import { LocalOnePageLearningCheckpointRepository } from '../infrastructure/local/local-one-page-learning-checkpoint-repository'
 import { FirebaseAccountMigrationRepository } from '../infrastructure/firebase/repositories/firebase-account-migration-repository'
@@ -40,6 +42,12 @@ import { createCompleteLessonSessionAction } from '../features/lesson/LessonDeta
 import ReviewPage from '../features/review/ReviewPage'
 import { createReviewLoader } from '../features/review/ReviewPage.loader'
 import { createSubmitReviewSessionAction } from '../features/review/ReviewPage.action'
+import WeakJamoPage from '../features/review/WeakJamoPage'
+import {
+  createWeakJamoLoader,
+  weakJamoShouldRevalidate,
+} from '../features/review/WeakJamoPage.loader'
+import { createSubmitWeakJamoSessionAction } from '../features/review/WeakJamoPage.action'
 import SettingsPage from '../features/settings/SettingsPage'
 import { createSettingsLoader } from '../features/settings/SettingsPage.loader'
 import { createUpdateSettingsAction } from '../features/settings/SettingsPage.action'
@@ -96,12 +104,14 @@ const learners = createLearnerRepositories({
     reviewRepo: new LocalReviewRepository(),
     userProfileRepo: localUserProfileRepo,
     sessionSubmissionRepo: new LocalSessionSubmissionRepository(),
+    jamoStatsRepo: new LocalJamoStatsRepository(),
   },
   authenticated: {
     progressRepo: firebaseProgressRepo,
     reviewRepo: firebaseReviewRepo,
     userProfileRepo: firebaseUserProfileRepo,
     sessionSubmissionRepo: new FirebaseSessionSubmissionRepository(),
+    jamoStatsRepo: new FirebaseJamoStatsRepository(),
   },
 })
 const {
@@ -109,8 +119,11 @@ const {
   reviewRepo,
   userProfileRepo,
   sessionSubmissionRepo,
+  jamoStatsRepo,
   getActiveUser,
 } = learners
+// One instance so Home and Weak Jamo practice share its cached export.
+const homeContentRepo = new StaticHomeContentRepository()
 
 // Background writer for Home progress (DEC-043). It drains on start, when
 // the browser comes back online, and when the signed-in user changes, since
@@ -230,7 +243,7 @@ export const router = createBrowserRouter([
       progressRepo,
       checkpointRepo: onePageCheckpointRepo,
       home: {
-        contentRepo: new StaticHomeContentRepository(),
+        contentRepo: homeContentRepo,
         localState: homeLocalState,
         pendingExerciseIds: (userId) => homeOutbox.pendingExerciseIds(userId),
         prefetchTargets: prefetchHangulTargets,
@@ -293,6 +306,8 @@ export const router = createBrowserRouter([
       reviewRepo,
       lessonRepo,
       userProfileRepo,
+      jamoStatsRepo,
+      contentRepo: homeContentRepo,
       ensureUser: getActiveUser,
     }),
     action: createSubmitReviewSessionAction({
@@ -301,6 +316,23 @@ export const router = createBrowserRouter([
       userProfileRepo,
       ensureUser: getActiveUser,
     }),
+    ErrorBoundary: RouteError,
+  },
+  {
+    path: '/review/weak-jamo',
+    Component: WeakJamoPage,
+    loader: createWeakJamoLoader({
+      jamoStatsRepo,
+      contentRepo: homeContentRepo,
+      userProfileRepo,
+      ensureUser: getActiveUser,
+    }),
+    action: createSubmitWeakJamoSessionAction({
+      sessionSubmissionRepo,
+      userProfileRepo,
+      ensureUser: getActiveUser,
+    }),
+    shouldRevalidate: weakJamoShouldRevalidate,
     ErrorBoundary: RouteError,
   },
   {

@@ -330,6 +330,7 @@ type LearningSessionContext =
   | { mode: 'topic'; topicId: string }
   | { mode: 'keyboard-position'; positionId: string }
   | { mode: 'review' }
+  | { mode: 'weak-jamo' } // Weak Jamo practice (DEC-051)
   | { mode: 'random' }
 ```
 
@@ -429,7 +430,7 @@ the same numeric fields:
 
 - `expEarned`
 - `lessonsCompleted` (lesson-mode sessions, replays included), `lessonsReplayed`
-- `reviewsCompleted`
+- `reviewsCompleted`, `practicesCompleted` (`weak-jamo` sessions, [[DEC-051]])
 - `perfectLessons` (lesson mode, `rejectedKeystrokes === 0`)
 - `correctKeystrokes`, `incorrectKeystrokes`
 - `charactersTyped`, `wordsPracticed`, `sentencesPracticed`
@@ -498,7 +499,7 @@ it keeps the legacy averages because their raw denominators are unavailable.
 `sessionAggregate` also carries Player Stats totals ([[DEC-049]]), optional on
 older profiles and read as zero:
 
-- Sums: `lessonsCompleted`, `lessonsReplayed`, `reviewsCompleted`,
+- Sums: `lessonsCompleted`, `lessonsReplayed`, `reviewsCompleted`, `practicesCompleted`,
   `perfectLessons`, `charactersTyped`, `wordsPracticed`, `sentencesPracticed`,
   `typingSeconds`.
 - Maximums: `longestSessionSeconds`, `bestWpm` (accepted ÷ 5 ÷ typing

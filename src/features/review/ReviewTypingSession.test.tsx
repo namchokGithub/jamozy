@@ -43,7 +43,7 @@ function renderSession(
       {
         path: '/',
         Component: () => (
-          <ReviewTypingSession items={items} onComplete={onComplete} keyboardSettings={keyboardSettings} />
+          <ReviewTypingSession exercises={items} onComplete={onComplete} keyboardSettings={keyboardSettings} />
         ),
         action,
       },
@@ -105,7 +105,7 @@ describe('ReviewTypingSession', () => {
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
 
     await waitFor(() => expect(onComplete).toHaveBeenCalledOnce())
-    expect(onComplete).toHaveBeenCalledWith(fakeOutcome)
+    expect(onComplete.mock.calls[0][0]).toEqual(fakeOutcome)
   })
 
   it('submits wasCorrect:false for an item typed with at least one mistake, even once finished', async () => {
@@ -125,7 +125,7 @@ describe('ReviewTypingSession', () => {
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
 
     await waitFor(() => expect(onComplete).toHaveBeenCalledOnce())
-    expect(onComplete).toHaveBeenCalledWith({ correctCount: 0, needsPracticeCount: 1 })
+    expect(onComplete.mock.calls[0][0]).toEqual({ correctCount: 0, needsPracticeCount: 1 })
   })
 
   it('stops handling keydowns after unmount', async () => {

@@ -100,6 +100,25 @@ describe('periodStatsFrom', () => {
     })
   })
 
+  it('counts a weak jamo practice only as a practice', () => {
+    expect(
+      periodStatsFrom(
+        session({
+          context: { mode: 'weak-jamo' },
+          rejectedKeystrokes: 0,
+          isReplay: true,
+        }),
+      ),
+    ).toMatchObject({
+      practicesCompleted: 1,
+      lessonsCompleted: 0,
+      lessonsReplayed: 0,
+      perfectLessons: 0,
+      reviewsCompleted: 0,
+    })
+    expect(periodStatsFrom(session()).practicesCompleted).toBe(0)
+  })
+
   it('counts a replay as completed and replayed; a review as neither', () => {
     expect(periodStatsFrom(session({ isReplay: true }))).toMatchObject({ lessonsCompleted: 1, lessonsReplayed: 1 })
     expect(periodStatsFrom(session({ context: { mode: 'review' }, rejectedKeystrokes: 0 }))).toMatchObject({ lessonsCompleted: 0, reviewsCompleted: 1, perfectLessons: 0 })

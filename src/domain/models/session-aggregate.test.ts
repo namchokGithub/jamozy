@@ -28,4 +28,11 @@ describe('session aggregate stats', () => {
     expect(aggregateFromSession({ ...base, typingSeconds: undefined }).bestWpm).toBe(0)
     expect(emptySessionAggregate().bestWpm).toBe(0)
   })
+
+  it('adds practicesCompleted onto an aggregate without it', () => {
+    const legacy = { exp: 0, exercisesAttempted: 0, acceptedKeystrokes: 0, rejectedKeystrokes: 0, totalTypingTimeSeconds: 0, bestAccuracy: 0 }
+    const practice = aggregateFromSession({ ...base, context: { mode: 'weak-jamo' } })
+    expect(practice).toMatchObject({ practicesCompleted: 1, lessonsCompleted: 0 })
+    expect(addSessionAggregate(legacy, practice).practicesCompleted).toBe(1)
+  })
 })

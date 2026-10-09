@@ -46,13 +46,20 @@ function typeableKeys(targetText: string) {
   }
 }
 
+/** Key-level jamo of a target; literal keys and untypeable targets give none. */
+export function jamoKeysOf(targetText: string): string[] {
+  return typeableKeys(targetText)
+    .filter((key) => key.slot !== 'literal' && isJamo(key.jamo))
+    .map((key) => key.jamo)
+}
+
 export function jamoCountsFrom(
   results: Array<Pick<ExerciseResult, 'targetText' | 'mistakes'>>,
 ): JamoCounts {
   const counts: JamoCounts = {}
   for (const result of results) {
-    for (const key of typeableKeys(result.targetText))
-      if (key.slot !== 'literal') bump(counts, key.jamo, 'accepted')
+    for (const jamo of jamoKeysOf(result.targetText))
+      bump(counts, jamo, 'accepted')
     for (const mistake of result.mistakes)
       bump(counts, mistake.expectedJamo, 'rejected')
   }

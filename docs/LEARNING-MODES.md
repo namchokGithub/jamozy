@@ -76,8 +76,24 @@ Initial practice experiences are:
 - Topics
 - Keyboard Position
 
-Weak Jamo, Weak Vocabulary, Random Practice, TOPIK, and Favorites remain
-future experiences without dedicated persisted entities yet.
+Weak Vocabulary, Random Practice, TOPIK, and Favorites remain future
+experiences without dedicated persisted entities yet.
+
+### Weak Jamo practice ([[DEC-051]])
+
+Weak Jamo practice drills the learner's weakest key-level jamo. You start it
+from `/review` and play it at `/review/weak-jamo`.
+
+- **Targets:** up to 3 jamo from `learnerStats/jamo`, each with at least 20
+  attempts and a mistake rate above 0. The highest rate comes first.
+- **Content:** up to 10 exercises from the Home static export. Each one scores
+  the sum of its target-jamo keys, weighted by each jamo's mistake rate.
+  Exercises are drawn at random from the 30 highest scores, so the session reads
+  no content from Firestore.
+- **Recording:** each session is a `LearningSession` with context
+  `{ mode: 'weak-jamo' }` and counts as `practicesCompleted` in Player Stats.
+  It records jamo stats, never touches `ReviewItem` or `LessonProgress`, and
+  awards no EXP until practice EXP ([[DEC-045]]) ships for every practice mode.
 
 ### Daily Quest
 

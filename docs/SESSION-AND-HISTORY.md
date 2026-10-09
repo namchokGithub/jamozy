@@ -40,7 +40,8 @@ Submitted Session Result
 
 All effects above belong to one logical submission. Lesson and Review use a
 receipt keyed by `sessionId`: Guest storage uses one IndexedDB transaction and
-authenticated storage uses one Firestore transaction. Other modes must adopt
+authenticated storage uses one Firestore transaction. Weak Jamo practice
+(`weak-jamo`, [[DEC-051]]) uses the same receipt boundary. Other modes must adopt
 the same checkpoint boundary when implemented.
 
 No record is written per keystroke. MVP history contains submitted/completed

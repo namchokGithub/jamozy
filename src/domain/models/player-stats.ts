@@ -18,6 +18,7 @@ export interface PeriodStats {
   lessonsCompleted: number
   lessonsReplayed: number
   reviewsCompleted: number
+  practicesCompleted: number
   perfectLessons: number
   correctKeystrokes: number
   incorrectKeystrokes: number
@@ -108,6 +109,7 @@ export const emptyPeriodStats = (): PeriodStats => ({
   lessonsCompleted: 0,
   lessonsReplayed: 0,
   reviewsCompleted: 0,
+  practicesCompleted: 0,
   perfectLessons: 0,
   correctKeystrokes: 0,
   incorrectKeystrokes: 0,
@@ -126,13 +128,14 @@ export const emptyPlayerStats = (): PlayerStats => ({
 })
 
 export function periodStatsFrom(session: LearningSession): PeriodStats {
-  const isReview = session.context.mode === 'review'
-  const isLesson = !isReview
+  const mode = session.context.mode
+  const isLesson = mode === 'learning-path' || mode === 'home'
   return {
     expEarned: session.expGained,
     lessonsCompleted: isLesson ? 1 : 0,
     lessonsReplayed: isLesson && session.isReplay ? 1 : 0,
-    reviewsCompleted: isReview ? 1 : 0,
+    reviewsCompleted: mode === 'review' ? 1 : 0,
+    practicesCompleted: mode === 'weak-jamo' ? 1 : 0,
     perfectLessons: isLesson && session.rejectedKeystrokes === 0 ? 1 : 0,
     correctKeystrokes: session.acceptedKeystrokes,
     incorrectKeystrokes: session.rejectedKeystrokes,

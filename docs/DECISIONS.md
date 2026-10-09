@@ -65,6 +65,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-048 | Level is derived, never stored, using the LEVELING.md curve                                                                                                       | Accepted                                                                                               | 2026-10-08 |
 | DEC-049 | Player stats fold into lifetime, daily, and monthly state in the submit transaction                                                                               | Accepted                                                                                               | 2026-10-09 |
 | DEC-050 | Key-level jamo stats live in one map document, updated in the submit transaction                                                                                  | Accepted                                                                                               | 2026-10-09 |
+| DEC-051 | Weak Jamo practice picks Home exercises by the learner's weakest key-level jamo                                                                                   | Accepted                                                                                               | 2026-10-09 |
 
 ## Superseded index (history only)
 
@@ -1384,3 +1385,44 @@ Rankings are derived on read:
 - **Rejected:** per-jamo documents (10–20 reads and writes per submit),
   fire-and-forget writes (lost or double counts), and `increment()` per field
   (still needs `firstPracticedAt`, and splits logic from IndexedDB).
+
+## DEC-051 — Weak Jamo practice picks Home exercises by the learner's weakest key-level jamo
+
+**Date:** 2026-10-09
+**Status:** Accepted
+**Related:** [[DEC-043]], [[DEC-045]], [[DEC-049]], [[DEC-050]]; spec
+`docs/superpowers/specs/2026-10-09-weak-jamo-practice-design.md`
+
+**Decision:** A `weak-jamo` practice mode, opened from `/review` and played at
+`/review/weak-jamo`:
+
+- **Targets:** up to 3 key-level jamo with at least 20 attempts and a mistake
+  rate above 0, highest rate first; ties go to more attempts.
+- **Content:** up to 10 Home static-export exercises, drawn at random from the
+  30 highest scores. Score = Σ (target-jamo keys × that jamo's mistake rate).
+  Exercises that score 0 are skipped, and IDs are `${lessonId}:${exerciseId}`.
+- **Recording:** sessions use context `{ mode: 'weak-jamo' }` with
+  `expGained: 0`. Their effects are only `jamoCounts`; no `ReviewItem` or
+  `Progress` change.
+- **Stats:** Player Stats gain `practicesCompleted`. `periodStatsFrom` now names
+  lesson modes explicitly (`learning-path`, `home`), so practice modes no longer
+  count as lessons or perfect lessons.
+- **UI:** the Review typing session is generalized (exercises plus a body
+  builder) and offers a same-ID retry when saving fails.
+
+**Why:**
+
+- The Home export is already loaded and cached, so building a session reads no
+  Firestore content.
+- It reuses jamo stats ([[DEC-050]]) and the Review player.
+- Leaving `ReviewItem` alone keeps the Leitner queue meaningful.
+
+**Consequences:**
+
+- Practice EXP ([[DEC-045]]) stays deferred for every practice mode.
+- Learners whose weak jamo appear in no Home exercise see no entry.
+- Rejected:
+  - selecting from `ReviewItem` (too few items);
+  - synthetic syllable drills (meaningless text);
+  - reading completed Learning Path lessons (reads grow with progress);
+  - reusing the `review` context (mixes stats).

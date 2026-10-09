@@ -10,7 +10,7 @@ import { PageNav } from '../../components/ui/PageNav'
 import { PageSurface } from '../../components/ui/PageSurface'
 
 export default function ReviewPage() {
-  const { previews, settings } = useLoaderData() as ReviewLoaderData
+  const { previews, settings, weakJamo } = useLoaderData() as ReviewLoaderData
   const items = previews.map((preview) => preview.item)
   const [started, setStarted] = useState(false)
   const [outcome, setOutcome] = useState<SubmitReviewSessionOutcome | null>(
@@ -44,8 +44,8 @@ export default function ReviewPage() {
       <PageSurface contentClassName="max-w-2xl">
         {nav}
         <PageHeading eyebrow="TYPING NOW" title="Review" />
-        <ReviewTypingSession
-          items={items}
+        <ReviewTypingSession<SubmitReviewSessionOutcome>
+          exercises={items}
           onComplete={setOutcome}
           keyboardSettings={settings}
         />
@@ -57,6 +57,26 @@ export default function ReviewPage() {
     <PageSurface contentClassName="max-w-2xl">
       {nav}
       <PageHeading eyebrow="PRACTICE YOUR MISTAKES" title="Review" />
+
+      {weakJamo && (
+        <div className="mt-6 rounded-3xl border border-[#eadfd4] bg-white/85 p-4 text-[#253247] shadow-sm">
+          <div className="font-semibold">Practice weak jamo</div>
+          <p className="mt-1 text-sm text-[#667085]">
+            {weakJamo.targets
+              .map(
+                (target) =>
+                  `${target.jamo} ${Math.round(target.mistakeRate * 100)}%`,
+              )
+              .join(' · ')}
+          </p>
+          <Link
+            to="/review/weak-jamo"
+            className="mt-3 inline-flex items-center justify-center rounded-full border border-[#a85d4e] bg-[#a85d4e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#8d4c43] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bc6c5d]"
+          >
+            Practice {weakJamo.available} words
+          </Link>
+        </div>
+      )}
 
       {items.length === 0 ? (
         <p className="mt-6 text-sm text-slate-500">
