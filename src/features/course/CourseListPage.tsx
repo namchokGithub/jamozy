@@ -32,7 +32,7 @@ export default function CourseListPage() {
     useLoaderData() as CourseListLoaderData
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#fffaf1] px-4 py-5 text-[#253247] sm:px-6 sm:py-8 select-none!">
+    <main className="flex min-h-dvh flex-col overflow-hidden bg-[#fffaf1] px-4 py-5 text-[#253247] sm:px-6 sm:py-8 select-none!">
       <div
         className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
         aria-hidden="true"
@@ -41,7 +41,7 @@ export default function CourseListPage() {
         <div className="absolute -right-20 bottom-0 h-96 w-96 rounded-full bg-[#dce9c8]/50 blur-3xl" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-5xl">
+      <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col">
         <header className="flex items-center justify-between">
           <Link
             to="/"
@@ -332,7 +332,7 @@ function LearningPathSection({
       )}
 
       <section
-        className="mt-10  select-none! hidden!"
+        className="mt-10  select-none!"
         aria-labelledby="learning-path-heading"
       >
         <div className="flex items-end justify-between gap-4">
