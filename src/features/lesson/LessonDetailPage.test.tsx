@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 import LessonDetailPage from './LessonDetailPage'
@@ -98,6 +104,15 @@ describe('LessonDetailPage', () => {
     expect(await screen.findByText('안녕')).toBeInTheDocument()
     expect(screen.getByText('annyeong')).toBeInTheDocument()
     expect(screen.getByText('สวัสดี / Hello')).toBeInTheDocument()
+  })
+
+  it('labels the lesson type and marks an exercise without a meaning', async () => {
+    renderPage(makeLesson())
+
+    expect(await screen.findByText('Words')).toBeInTheDocument()
+    expect(screen.getByText('1 exercise', { exact: false })).toBeInTheDocument()
+    expect(screen.getByText('No meaning yet')).toBeInTheDocument()
+    expect(screen.queryByText('word')).not.toBeInTheDocument()
   })
 
   it('hides romanization when romanizationEnabled is false', async () => {
@@ -246,7 +261,9 @@ describe('LessonDetailPage', () => {
     expect(summary).toHaveTextContent(/Typing speed \d+ WPM/)
     expect(summary).toHaveTextContent(/Time \d+s/)
     expect(summary).toHaveTextContent('Mistakes 0')
-    expect(within(summary).getByText('No mistakes — nice work!')).toBeInTheDocument()
+    expect(
+      within(summary).getByText('No mistakes — nice work!'),
+    ).toBeInTheDocument()
   })
 
   it('counts every wrong keystroke while listing a mistyped word once', async () => {
@@ -296,7 +313,9 @@ describe('LessonDetailPage', () => {
           path: '/',
           Component: LessonDetailPage,
           loader: async () => ({
-            lesson: makeLesson({ exercises: [makeLesson().exercises[0], duplicateExercise] }),
+            lesson: makeLesson({
+              exercises: [makeLesson().exercises[0], duplicateExercise],
+            }),
             settings: makeSettings(),
             courseId: 'c1',
           }),
@@ -380,7 +399,9 @@ describe('LessonDetailPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Go to Review' }))
 
-    expect(await screen.findByRole('heading', { name: 'Review queue' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Review queue' }),
+    ).toBeInTheDocument()
   })
 
   it('continues to the newly unlocked lesson from the completion block', async () => {
@@ -410,8 +431,12 @@ describe('LessonDetailPage', () => {
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
     fireEvent.click(await screen.findByRole('button', { name: 'Next Lesson' }))
 
-    expect(await screen.findByRole('heading', { name: 'Lesson two' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Start Lesson' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Lesson two' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Start Lesson' }),
+    ).toBeInTheDocument()
   })
 
   it('returns to the course map when no next lesson was unlocked', async () => {

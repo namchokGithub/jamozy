@@ -10,6 +10,15 @@ import { Button } from '../../components/ui/Button'
 import { PageHeading } from '../../components/ui/PageHeading'
 import { PageNav } from '../../components/ui/PageNav'
 import { PageSurface } from '../../components/ui/PageSurface'
+import type { LessonType } from '../../domain/models/lesson'
+
+const lessonTypeLabels: Record<LessonType, string> = {
+  character: 'Characters',
+  syllable: 'Syllables',
+  word: 'Words',
+  phrase: 'Phrases',
+  sentence: 'Sentences',
+}
 
 export default function LessonDetailPage() {
   const { lesson, settings, courseId } =
@@ -78,7 +87,13 @@ function LessonDetailContent({
     <PageSurface contentClassName="max-w-2xl">
       {nav}
       <PageHeading eyebrow="LESSON" title={lesson.title}>
-        <p className="mt-2 text-[#667085]">{lesson.type}</p>
+        <p className="mt-3 flex flex-wrap items-center gap-2 text-sm text-[#667085]">
+          <span className="rounded-full bg-[#f2edf9] px-3 py-1 text-xs font-semibold text-[#7863a8]">
+            {lessonTypeLabels[lesson.type]}
+          </span>
+          {lesson.exercises.length}{' '}
+          {lesson.exercises.length === 1 ? 'exercise' : 'exercises'}
+        </p>
       </PageHeading>
 
       {lesson.exercises.length === 0 ? (
@@ -107,7 +122,9 @@ function LessonDetailContent({
                   {(meaning && (
                     <div className="mt-2 text-sm text-slate-700">{meaning}</div>
                   )) || (
-                    <span className="italic text-[#e4e2df]">No meaning</span>
+                    <div className="mt-2 text-sm italic text-[#7c8795]">
+                      No meaning yet
+                    </div>
                   )}
                 </li>
               )

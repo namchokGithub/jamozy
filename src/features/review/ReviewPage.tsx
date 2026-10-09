@@ -84,7 +84,9 @@ export default function ReviewPage() {
                   {(meaning && (
                     <div className="mt-1 text-sm text-slate-700">{meaning}</div>
                   )) || (
-                    <span className="italic text-[#e4e2df]">No meaning</span>
+                    <div className="mt-1 text-sm italic text-[#7c8795]">
+                      No meaning yet
+                    </div>
                   )}
                 </li>
               )
