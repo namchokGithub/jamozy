@@ -129,6 +129,7 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 - `docs/research/HANGUL_SVG_ANALYSIS.md` — glyph-outline measurements behind the Tagger.
 - `docs/informations/korean_words.txt` — Korean 5800 frequency list that feeds the Tagger queue.
 - `docs/informations/korean-inflection-sample.md` — inflection/particle syllables the dictionary-form list lacks.
+- `docs/releases/README.md` — release-notes format and tag/GitHub pre-release handoff workflow.
 - `docs/superpowers/plans/` — implementation plans for completed and in-flight work.
 - `CLAUDE.md` — Claude Code-specific workflow additions.
 
@@ -140,13 +141,10 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 - Use Zustand only for transient interactive session state such as typing input,
   current exercise, mistakes, timers, and in-progress accuracy.
 
-Git Releases
+## Git Releases
 
-- git add package.json {{file_name}}
-- git commit -m "chore(release): v{{version_no}}"
-- git tag -a v{{version_no}}-m "v{{version_no}}"
-- git push origin <branch></branch> && git push origin v{{version_no}}
-- gh release create v{{version_no}} --prerelease --title "Jamozy v{{version_no}}" --{{file_name}}
+- Follow `docs/releases/README.md` when creating release notes or handing off a tag and GitHub pre-release.
+- Do not create commits, tags, pushes, or GitHub Releases unless the user explicitly requests the action.
 
 ## Git Commit Message
 
