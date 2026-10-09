@@ -63,6 +63,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-046 | Difficulty-based EXP rewards for completed-lesson replays                                                                                                         | Accepted                                                                                               | 2026-10-06 |
 | DEC-047 | Content documents store descendant counts, kept by atomic writes                                                                                                  | Accepted                                                                                               | 2026-10-08 |
 | DEC-048 | Level is derived, never stored, using the LEVELING.md curve                                                                                                       | Accepted                                                                                               | 2026-10-08 |
+| DEC-049 | Player stats fold into lifetime, daily, and monthly state in the submit transaction                                                                               | Accepted                                                                                               | 2026-10-09 |
 
 ## Superseded index (history only)
 
@@ -1268,3 +1269,59 @@ legacy plus session-tracked EXP (`totalExp`). Rebirth, Rank, Perk, and `Progress
 scoped by `docs/superpowers/specs/2026-10-06-player-progression-models-design.md`
 and are not adopted here. Alternative considered: starting the soft cap at
 Level 110; rejected, the Level 100 wall is intended.
+
+## DEC-049 — Player stats fold into lifetime, daily, and monthly state in the submit transaction
+
+**Date:** 2026-10-09
+**Status:** Accepted
+**Related:** [[DEC-029]], [[DEC-030]], [[DEC-031]], [[DEC-043]], [[DEC-048]];
+spec `docs/superpowers/specs/2026-10-09-player-stats-design.md`
+
+**Decision:** Clients measure a small `ExerciseStat` per finished exercise:
+target text, mistakes, typing seconds, and elapsed seconds. Use cases fold
+these into optional `LearningSession` fields. The fields are `localDate`,
+`timeZone`, `typingSeconds`, `learningSeconds` (Home), `charactersTyped`,
+`wordsPracticed`, `sentencesPracticed`, `exerciseMistakes`, and `isReplay`.
+
+Every adapter calls one pure function, `applySessionStats`, inside its existing
+receipt-gated submit transaction. That covers the Firestore submit, the
+IndexedDB `putSessionOnce`, and Guest→account `migrateSessionOutcome`. The
+function updates three things together:
+
+- `UserProfile.playerStats`: active days, streak, perfect streak, and records.
+- `users/{id}/dailyStats/{YYYY-MM-DD}`.
+- `users/{id}/monthlyStats/{YYYY-MM}`.
+
+`sessionAggregate` gains lifetime sums and maximums.
+
+| Topic | Rule |
+| --- | --- |
+| Words / sentences / characters | By lesson type: `word` → words; `phrase`/`sentence` → sentences. Characters are Hangul syllables of finished targets, spaces excluded. Review uses each item's `sourceLessonType`, and counts characters only when it is absent. |
+| Perfect lesson | Lesson modes (`learning-path`, `home`) with `rejectedKeystrokes === 0`, replays included; Review never. |
+| Perfect streak | Exercises without a mistake in a row, continuing across sessions. |
+| Typing vs Learning Time | Typing runs from the first to the last keystroke per exercise, skipping gaps over 10 seconds. Learning is session length (`sessionAggregate.totalTypingTimeSeconds` keeps its name). Home uses summed per-exercise elapsed time, so a lesson resumed the next day does not count the night. |
+| Active day / streak | A `localDate` with at least one submitted session in any mode. A late session adds to its day but never changes the streak. |
+| Timezone | `UserProfile.timezone` (IANA) per adapter, filled from the first session's device zone. `localDate` is fixed on the session at submit. |
+| Old data | Not backfilled; all new stats start at zero on deploy. |
+
+**Why:** Day and month totals, streaks, and records need the current state, so
+blind `increment()` writes would still need reads. That would also split the
+logic between Firestore and IndexedDB. Computing from `learningSessions` on
+read would scan all history on every Profile view, which is what [[DEC-029]]'s
+aggregates avoid. One pure fold in the existing transaction keeps both adapters
+identical, deduplicated by the receipt, and unit-testable.
+
+**Consequences:**
+
+- Each submit reads and writes two more documents.
+- Firestore Rules allow owner-only `dailyStats` and `monthlyStats`.
+- The Guest IndexedDB moves to version 7.
+- Optional fields are omitted rather than stored as `undefined`, because
+  Firestore rejects undefined values. For example, `toReviewItem` leaves out
+  `sourceLessonType` when it is absent.
+- Migration applies Guest outcomes oldest first and never merges Guest
+  `playerStats` directly.
+- Item stats (per jamo or word), Rebirth/Rank/Perk state, Streak Guard, and
+  Profile UI are out of scope.
+- Rejected alternatives: blind increments; read-time aggregation; weekly and
+  yearly docs (a Week view reads 7 day docs, a Year view 12 month docs).

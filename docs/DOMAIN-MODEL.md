@@ -286,6 +286,15 @@ target-model work).
 | acceptedKeystrokes | number                   | raw accepted input in this activity                                                             |
 | rejectedKeystrokes | number                   | raw rejected input in this activity                                                             |
 | expGained          | number                   | EXP actually awarded by this submitted activity;`0` when none is awarded                        |
+| localDate?         | string                   | `'YYYY-MM-DD'` of `completedAt` in `timeZone`, fixed at submit ([[DEC-049]])                     |
+| timeZone?          | string                   | IANA zone used for `localDate`                                                                  |
+| typingSeconds?     | number                   | per exercise, first to last keystroke; gaps over 10 seconds skipped                             |
+| learningSeconds?   | number                   | Home only: sum of per-exercise elapsed time; otherwise Learning Time is `durationSeconds`       |
+| charactersTyped?   | number                   | Hangul syllables of finished targets, spaces excluded                                           |
+| wordsPracticed?    | number                   | finished exercises from `word` lessons                                                          |
+| sentencesPracticed?| number                   | finished exercises from `phrase`/`sentence` lessons                                             |
+| exerciseMistakes?  | number[]                 | mistakes per exercise in play order (drives the perfect streak)                                 |
+| isReplay?          | boolean                  | lesson modes: the lesson was already completed before this session                              |
 
 `LearningSessionContext` is a discriminated union, persisted as an embedded
 object:
@@ -306,8 +315,9 @@ zero guards and five-keystrokes-per-word convention as `UserStats`. This is a
 historical activity record, not a source of truth for current learner state,
 rewards, or curriculum progression. A retry after a failed logical submission
 uses the same `id`; a real replay starts a new session and receives a new ID.
-No raw keystrokes, `MistakeEvent` arrays, exercise snapshots, or per-jamo maps
-are persisted in MVP. Guest records use the equivalent IndexedDB adapter and
+The optional Player Stats fields ([[DEC-049]]) are absent on sessions submitted
+before them and read as zero. No raw keystrokes, `MistakeEvent` arrays,
+exercise snapshots, or per-jamo maps are persisted in MVP. Guest records use the equivalent IndexedDB adapter and
 retain the same ID for future account migration. See `docs/SESSION-AND-HISTORY.md`.
 
 ---
@@ -329,6 +339,7 @@ retain the same ID for future account migration. See `docs/SESSION-AND-HISTORY.m
 | reason           | `'mistake' \| 'slow' \| 'low-accuracy'` | why this word entered review ([[DEC-012]])                                                                  |
 | box              | number                                  | Leitner box, 1–5 ([[DEC-008]]); starts at 1, +1 on a correct review (capped at 5), resets to 1 on a mistake |
 | nextReviewAt     | Date                                    | when this item is next due; computed from`box` at write time                                                |
+| sourceLessonType?| `LessonType`                            | type of the source lesson, for Review word/sentence stats ([[DEC-049]]); absent on older items, key omitted |
 
 **Identity and deduplication ([[DEC-022]]):** a vocabulary-backed item has `id === vocabularyId`, yielding one review history per learner per reusable word across all lessons. A non-vocabulary item has `id === \`${sourceLessonId}:${sourceExerciseId}\``, yielding one review history per lesson exercise. Therefore the deduplication rule is one active item per vocabulary entry, or one active item per non-vocabulary exercise.
 
@@ -359,8 +370,52 @@ Not in README's original domain file list, but required to home EXP/Level and Se
 | stats       | `UserStats`    | see below ([[DEC-011]])                                                                              |
 | createdAt   | Date           |                                                                                                      |
 | updatedAt   | Date           | set with`createdAt` on creation; changed on every persisted profile mutation ([[DEC-023]])           |
+| timezone?   | string         | IANA zone for `localDate`; filled from the first submitted session ([[DEC-049]])                       |
+| playerStats?| `PlayerStats`  | non-additive Player Stats state, see below ([[DEC-049]])                                             |
 
 **Level formula ([[DEC-048]]):** `level` is derived, not stored. It uses the LEVELING.md curve: the EXP to go from `level` to `level + 1` is `round(50 × level^1.2 × (1 + 0.15 × rebirthCount) × softCap)`, where `softCap` is `1` below Level 100 and `3^(floor((level − 100) / 10) + 1)` from Level 100. `levelFromExp(cycleExp, rebirthCount)` returns the highest level whose cumulative requirement from Level 1 is no greater than `cycleExp`. Until rebirth state exists, `rebirthCount` is `0` and `exp` is the cycle EXP. Lives as pure functions next to `UserProfile` in `domain/models/user-profile.ts` (`expRequiredForNextLevel`, `levelProgress`, `levelFromExp`); the EXP input is `totalExp(profile)`, legacy `exp` plus `sessionAggregate.exp`. Changing the curve needs no data migration because no level value is persisted.
+
+**Player Stats ([[DEC-049]]):** every submitted session runs the pure
+`applySessionStats` (`domain/models/player-stats.ts`) inside its submit
+transaction. It updates `playerStats`, the day doc, and the month doc together.
+
+```ts
+interface PlayerStats {
+  activeDays: number // +1 when the session's day doc is new
+  streak: { current: number; longest: number; lastActiveDate: string | null }
+  perfectStreak: { current: number; longest: number } // exercises, across sessions
+  records: {
+    mostExpDay: { value: number; period: string } | null // 'YYYY-MM-DD'
+    mostExpMonth: { value: number; period: string } | null // 'YYYY-MM'
+    mostLessonsDay: { value: number; period: string } | null
+  }
+}
+```
+
+Streak rules:
+
+- A session on the same day as `lastActiveDate` keeps the streak.
+- A session on the next day adds 1; a later day resets it to 1.
+- A session dated before `lastActiveDate` adds to its day doc but never changes the streak.
+- Display treats a `lastActiveDate` older than yesterday as a current streak of 0, without writing.
+
+Period docs are `users/{userId}/dailyStats/{YYYY-MM-DD}` and
+`users/{userId}/monthlyStats/{YYYY-MM}`. Guests use IndexedDB stores
+`dailyStats` and `monthlyStats`, keyed `${userId}:${period}`. Both docs hold
+the same numeric fields:
+
+- `expEarned`
+- `lessonsCompleted` (lesson-mode sessions, replays included), `lessonsReplayed`
+- `reviewsCompleted`
+- `perfectLessons` (lesson mode, `rejectedKeystrokes === 0`)
+- `correctKeystrokes`, `incorrectKeystrokes`
+- `charactersTyped`, `wordsPracticed`, `sentencesPracticed`
+- `typingSeconds`, `learningSeconds`
+
+A day doc that exists marks an active day.
+
+Highest Level and Rank are not stored: they equal the current values until
+Rebirth exists.
 
 **Cross-checked against `docs/requirement.md`:** that doc's own example ("Level 7, 430/600 EXP") implies an increasing per-level curve (~`level × 100` to reach the next level), not this flat formula, and separately lists "Level" as something to save (implying a stored field). Both reaffirmed against the flat, derived-only formula — 2026-09-23. Revisit the curve shape later if game-design balance needs it; the derived approach means no migration either way.
 
@@ -417,6 +472,17 @@ records with `status: 'completed'`, not from `UserStats` or
 Lessons. When the legacy baseline is all zero, the profile derives accuracy and
 WPM from aggregate accepted/rejected keystrokes and typing time; when it is not,
 it keeps the legacy averages because their raw denominators are unavailable.
+`sessionAggregate` also carries Player Stats totals ([[DEC-049]]), optional on
+older profiles and read as zero:
+
+- Sums: `lessonsCompleted`, `lessonsReplayed`, `reviewsCompleted`,
+  `perfectLessons`, `charactersTyped`, `wordsPracticed`, `sentencesPracticed`,
+  `typingSeconds`.
+- Maximums: `longestSessionSeconds`, `bestWpm` (accepted ÷ 5 ÷ typing
+  minutes).
+
+Its `totalTypingTimeSeconds` keeps its name and meaning, session length,
+and is the **Learning Time**. Typing Time is `typingSeconds`.
 Guest-to-account migration preserves this compatibility layer: a Cloud baseline
 wins when both profiles have one, and newly submitted session effects remain
 receipt-gated.

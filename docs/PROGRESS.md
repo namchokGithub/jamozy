@@ -48,17 +48,17 @@ Development-only data pipeline; the learner SVG renderer is behind a build flag,
 
 ## Planned Session History
 
-| Item                                 | Status      | Notes                                                                                                                                              |
-| ------------------------------------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| LearningSession domain model         | Done        | Lesson and Review submitted activity with stable session IDs and raw counters; remaining modes are deferred ([[DEC-029]]).                         |
-| LearningSession repository interface | Done        | Shared local/Firebase history and checkpoint contracts.                                                                                            |
-| Local IndexedDB session persistence  | Done        | Guest session history, receipt, aggregate, progress, and review effects share one IndexedDB transaction.                                           |
-| Firestore session persistence        | Done        | Authenticated history at`users/{userId}/learningSessions/{sessionId}` is written in a Firestore transaction.                                       |
-| Exactly-once submission integration  | Done        | A receipt keyed by`sessionId` returns the original outcome and prevents duplicate aggregate/progress/review effects for Lesson and Review retries. |
-| Session history recording            | Done        | Lesson and Review create one LearningSession per logical submitted session; a real replay creates a new ID.                                        |
-| History read/query use case          | Not started | Future read model over LearningSession records; no UI in this task.                                                                                |
-| History UI                           | Not started | Future presentation of session history.                                                                                                            |
-| Summary and analytics                | Not started | Future consumers of LearningSession; no persisted period aggregates or analytics schema yet.                                                       |
+| Item                                 | Status      | Notes                                                                                                                                                                                   |
+| ------------------------------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| LearningSession domain model         | Done        | Lesson and Review submitted activity with stable session IDs and raw counters; remaining modes are deferred ([[DEC-029]]).                                                              |
+| LearningSession repository interface | Done        | Shared local/Firebase history and checkpoint contracts.                                                                                                                                 |
+| Local IndexedDB session persistence  | Done        | Guest session history, receipt, aggregate, progress, and review effects share one IndexedDB transaction.                                                                                |
+| Firestore session persistence        | Done        | Authenticated history at`users/{userId}/learningSessions/{sessionId}` is written in a Firestore transaction.                                                                            |
+| Exactly-once submission integration  | Done        | A receipt keyed by`sessionId` returns the original outcome and prevents duplicate aggregate/progress/review effects for Lesson and Review retries.                                      |
+| Session history recording            | Done        | Lesson and Review create one LearningSession per logical submitted session; a real replay creates a new ID.                                                                             |
+| History read/query use case          | Not started | Future read model over LearningSession records; no UI in this task.                                                                                                                     |
+| History UI                           | Not started | Future presentation of session history.                                                                                                                                                 |
+| Summary and analytics                | In progress | Player Stats data ships ([[DEC-049]]): `playerStats`, `dailyStats`, `monthlyStats` written in the submit transaction for every mode; Profile UI and item (jamo/word) stats not started. |
 
 ## Planned Authentication and Persistence
 

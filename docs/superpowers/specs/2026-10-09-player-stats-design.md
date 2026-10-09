@@ -1,7 +1,7 @@
 # Player Stats (Spec A) — Design
 
 **Date:** 2026-10-09
-**Status:** Proposed (จะบันทึกเป็น DEC-049 เมื่อ implement)
+**Status:** Accepted as [[DEC-049]] (2026-10-09)
 **Related:** [[DEC-029]] (session history แยกจาก aggregate), [[DEC-030]] (Guest migration merge), [[DEC-043]] (Home), [[DEC-048]] (Level derived), `docs/LEVELING.md` → Jamozy Player Stats
 
 ## Problem
@@ -84,15 +84,20 @@ Learning Time ของ Home = `learningSeconds` (ผลรวมเวลาร
 
 ### Profile (state ที่ไม่ใช่ผลบวก)
 
+ตอน implement รวม state ไว้ใน field เดียว `playerStats` (ไม่แยกเป็น field ระดับบนของ profile)
+และ record ใช้ `period` แทน `date` / `month`:
+
 ```ts
 timezone?: string                 // IANA เช่น 'Asia/Bangkok'
-activeDays?: number
-streak?: { current: number; longest: number; lastActiveDate: string }
-perfectStreak?: { current: number; longest: number }
-records?: {
-  mostExpDay?: { value: number; date: string }
-  mostExpMonth?: { value: number; month: string }
-  mostLessonsDay?: { value: number; date: string }
+playerStats?: {
+  activeDays: number
+  streak: { current: number; longest: number; lastActiveDate: string | null }
+  perfectStreak: { current: number; longest: number }
+  records: {
+    mostExpDay: { value: number; period: string } | null    // 'YYYY-MM-DD'
+    mostExpMonth: { value: number; period: string } | null  // 'YYYY-MM'
+    mostLessonsDay: { value: number; period: string } | null
+  }
 }
 ```
 
