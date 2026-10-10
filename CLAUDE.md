@@ -39,7 +39,10 @@ This repo overrides Claude Code's default git attribution: do not append `Co-Aut
 
 ## Testing
 
-Use Vitest + React Testing Library once test infra exists (`pnpm test`). Favor testing use cases (`application/`) and repository contracts over UI snapshot tests, in line with the layered architecture.
+Vitest + React Testing Library (`pnpm test`). Follow `AGENTS.md` → Working Conventions → Testing policy and the UI-only verification checklist. In short:
+
+- **UI-only change** (styling, layout, presentation, page appearance): no new or updated tests, no `pnpm test`, no `pnpm build`, no dev server or browser automation unless asked. Run only Prettier and ESLint on the touched files, then hand verification to the user.
+- **Logic, persistence, or security change:** add tests for use cases (`application/`) and repository contracts rather than UI snapshots, and run only the focused test files that cover the change. Remind the user to run `pnpm test` locally.
 
 ## Firebase Caution
 

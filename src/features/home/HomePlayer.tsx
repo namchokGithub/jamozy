@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Check } from 'lucide-react'
 import type { HomePlayerData } from '../../application/get-home-player'
 import {
   homeLessonProgress,
@@ -31,6 +32,28 @@ interface HomePlayerProps {
   liveProgress: Promise<Progress[] | null>
   settings: SoundSettings | Promise<SoundSettings>
   random?: () => number
+}
+
+// Lesson cards: Mint marks a finished lesson, Coral one under way.
+const lessonCardLooks = {
+  completed: {
+    label: 'Completed',
+    border: 'border-[#b9e2cf]',
+    bar: 'bg-[#5fae94]',
+    chip: 'bg-[#ddf5e9] text-[#2f7a62]',
+  },
+  inProgress: {
+    label: 'In progress',
+    border: 'border-[#eadfd4]',
+    bar: 'bg-[#e08a9f]',
+    chip: 'bg-[#fdf0f5] text-[#a8396a]',
+  },
+  notStarted: {
+    label: 'Not started',
+    border: 'border-[#eadfd4]',
+    bar: 'bg-[#d8d2ca]',
+    chip: 'bg-[#f3f0eb] text-[#8a94a6]',
+  },
 }
 
 const toProgressMap = (progress: Progress[]) =>
@@ -300,10 +323,10 @@ export default function HomePlayer({
               session={session.currentSession}
               // The negative top margin keeps the tiles where the earlier
               // 160% scale drew them, now that they take their real size.
-              className="mt-3 text-6xl font-bold tracking-wide sm:-mt-[19px] sm:text-7xl"
+              className="mt-3 text-6xl font-bold tracking-wide sm:-mt-4.75 sm:text-7xl"
               size={homeTargetSize(session.currentSession.targetText)}
             />
-            <div className="mx-auto mt-4 max-w-44 sm:mt-[9px]">
+            <div className="mx-auto mt-4 max-w-44 sm:mt-2.25">
               <p className="text-[10px] font-semibold text-[#98a2b3]">
                 {completedSteps} / {totalSteps} steps
               </p>
@@ -360,57 +383,93 @@ export default function HomePlayer({
         </div>
       ) : null}
 
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <nav
-          className="mt-5 flex max-w-full gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible"
-          aria-label="Choose unit"
-        >
-          {content.units.map((unit) => (
-            <button
-              key={unit.id}
-              type="button"
-              aria-pressed={unit.id === visibleUnit?.id}
-              onClick={() => selectUnit(unit.id)}
-              className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-2 text-sm font-semibold transition sm:shrink sm:whitespace-normal ${unit.id === visibleUnit?.id ? 'border-[#9d8bc8] bg-[#e9e1f8] text-[#5c4b88]' : 'border-[#eadfd4] bg-white text-[#667085] hover:border-[#c8b9e7]'}`}
-            >
-              {unit.title}
-            </button>
-          ))}
-        </nav>
-      </div>
+      <nav
+        className="mt-5 flex max-w-full gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible"
+        aria-label="Choose unit"
+      >
+        {content.units.map((unit) => (
+          <button
+            key={unit.id}
+            type="button"
+            aria-pressed={unit.id === visibleUnit?.id}
+            onClick={() => selectUnit(unit.id)}
+            className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-2 text-sm font-semibold transition sm:shrink sm:whitespace-normal ${unit.id === visibleUnit?.id ? 'border-[#9d8bc8] bg-[#e9e1f8] text-[#4b3a7a]' : 'border-[#f0e6dc] bg-transparent text-[#8a94a6] hover:border-[#c8b9e7] hover:text-[#667085]'}`}
+          >
+            {unit.title}
+          </button>
+        ))}
+      </nav>
 
       {visibleUnit && (
-        <nav
-          className="mt-3 flex gap-2 overflow-x-auto sm:flex-wrap sm:overflow-visible"
-          aria-label={`Lessons in ${visibleUnit.title}`}
-        >
-          {visibleUnit.lessons.map((entry) => {
-            const { done, total } = homeLessonProgress(
-              entry,
-              progressByLesson.get(entry.id) ?? null,
-              localDone.get(entry.id),
-            )
-            const current = opened && entry.id === lesson?.id
-            return (
-              <button
-                key={entry.id}
-                type="button"
-                aria-current={current ? 'true' : undefined}
-                onClick={() =>
-                  open({ unitId: visibleUnit.id, lessonId: entry.id })
-                }
-                className={`flex shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl border px-3 py-1.5 text-sm font-semibold transition sm:shrink sm:whitespace-normal ${current ? 'border-[#c84f82] bg-[#fdf0f5] text-[#a8396a]' : 'border-[#eadfd4] bg-white text-[#667085] hover:border-[#e3b3c7]'}`}
-              >
-                {entry.title}
-                <span
-                  className={`rounded-full px-1.5 text-[11px] ${done === total ? 'bg-[#fdf0f5] text-[#a8396a]' : 'bg-[#f2edf9] text-[#7863a8]'}`}
+        <div className="mt-5 border-t border-[#f0e6dc] pt-5">
+          <h3 className="text-xl font-bold tracking-tight text-[#253247]">
+            {visibleUnit.title}
+          </h3>
+          {visibleUnit.description && (
+            <p className="mt-1 text-sm text-[#667085]">
+              {visibleUnit.description}
+            </p>
+          )}
+          <nav
+            className="-mx-1 mt-4 flex gap-3 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] sm:overflow-visible sm:px-0 sm:pb-0"
+            aria-label={`Lessons in ${visibleUnit.title}`}
+          >
+            {visibleUnit.lessons.map((entry, index) => {
+              const { done, total } = homeLessonProgress(
+                entry,
+                progressByLesson.get(entry.id) ?? null,
+                localDone.get(entry.id),
+              )
+              const current = opened && entry.id === lesson?.id
+              const status =
+                done >= total && total > 0
+                  ? 'completed'
+                  : done > 0
+                    ? 'inProgress'
+                    : 'notStarted'
+              const look = lessonCardLooks[status]
+              return (
+                <button
+                  key={entry.id}
+                  type="button"
+                  aria-current={current ? 'true' : undefined}
+                  onClick={() =>
+                    open({ unitId: visibleUnit.id, lessonId: entry.id })
+                  }
+                  className={`flex w-44 shrink-0 flex-col rounded-3xl border bg-[#fffdf9] p-4 text-left shadow-[0_14px_35px_-28px_rgba(54,41,31,0.7)] transition hover:-translate-y-0.5 sm:w-auto ${current ? 'border-[#e08a9f] ring-1 ring-[#e08a9f]' : look.border}`}
                 >
-                  {done}/{total}
-                </span>
-              </button>
-            )
-          })}
-        </nav>
+                  <span className="w-fit rounded-lg bg-[#f2edf9] px-2 py-1 text-xs font-bold text-[#7863a8]">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <span className="mt-3 text-base font-bold text-[#253247]">
+                    {entry.title}
+                  </span>
+                  <span className="mt-3 flex items-center gap-2">
+                    <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#efeae4]">
+                      <span
+                        className={`block h-full rounded-full ${look.bar}`}
+                        style={{
+                          width: `${total === 0 ? 0 : (done / total) * 100}%`,
+                        }}
+                      />
+                    </span>
+                    <span className="text-xs font-semibold text-[#667085]">
+                      {done} / {total}
+                    </span>
+                  </span>
+                  <span
+                    className={`mt-3 flex w-fit items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${look.chip}`}
+                  >
+                    {status === 'completed' && (
+                      <Check aria-hidden="true" size={12} />
+                    )}
+                    {look.label}
+                  </span>
+                </button>
+              )
+            })}
+          </nav>
+        </div>
       )}
     </section>
   )

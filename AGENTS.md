@@ -104,8 +104,14 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 - Don't add features, refactors, or abstractions beyond what's asked. This project favors small, focused, calm implementations (see README "Development Principles").
 - When adding a new domain concept, add the model to `domain/models`, the interface to `domain/repositories`, the required persistence adapter(s), and an `application/` use case — don't skip layers. Target learner-state behavior must work through either Guest-local or authenticated-Firebase adapters.
 - **Testing policy:** Do not create or update automated tests for UI-only work (visual styling, layout, presentation components, or page appearance); the user performs that verification manually. Add automated tests for domain, application, repository, persistence, security-rule, migration, and other non-visual logic. Only change a UI test when the user explicitly asks for it or a UI change also changes non-visual behavior.
-- For logic, persistence, or security changes, run the focused test command(s) that cover the changed behavior. Do not run the full `pnpm test` suite by default; remind the user to run `pnpm test` locally instead. For UI-only changes, hand off manual verification to the user and run only the lowest-cost relevant static check.
-- **Build verification:** Do not run `pnpm build` by default for small, isolated work that touches only a few files, especially UI-only changes. Run it only when the change's risk warrants it, the user requests it, or it materially validates the work; otherwise, tell the user that they can build locally.
+- **UI-only changes — verification checklist:**
+  1. Do not write or update tests.
+  2. Do not run `pnpm test` (full or focused), `pnpm build`, or `tsc -b`.
+  3. Do not start the dev server or drive a browser (Playwright, Chrome automation) unless the user asks.
+  4. Run only Prettier and ESLint on the touched files, e.g. `pnpm exec prettier --write <files>` and `pnpm exec eslint <files>`.
+  5. Hand off: tell the user what to check by eye (pages, widths such as 360px and 1280px, states), and name any existing test that may break because visible text or markup changed.
+- For logic, persistence, or security changes, run the focused test command(s) that cover the changed behavior. Do not run the full `pnpm test` suite by default; remind the user to run `pnpm test` locally instead.
+- **Build verification:** Do not run `pnpm build` by default for small, isolated work that touches only a few files, and never for UI-only changes. Run it only when the change's risk warrants it, the user requests it, or it materially validates the work; otherwise, tell the user that they can build locally.
 - For a multi-step implementation plan, when a build is warranted, run `pnpm build` once during final verification—not after each step.
 - Record non-obvious architectural choices in `docs/DECISIONS.md`, not as scattered code comments. Update the authoritative topic document when a decision changes its model or policy.
 - Track detailed implementation status in `docs/PROGRESS.md`. Read its
