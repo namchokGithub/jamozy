@@ -41,9 +41,10 @@ and sentences while improving typing accuracy and speed.
 - Accuracy and typing speed tracking
 - Lesson results
 - Review mistyped words
-- Practice mode
+- Weak Jamo practice with a per-jamo accuracy grid
 - Learning progress tracking
-- Simple EXP and Level system
+- Player stats: daily and monthly totals, streaks, records, and per-jamo accuracy
+- EXP and a soft-capped Level curve
 - Guest-local or account-backed learning progress
 - Configurable learning settings
 
@@ -383,9 +384,16 @@ topics/{topicId}
 
 users/{userId} (authenticated Firebase Auth UID only)
 users/{userId}/lessonProgress/{lessonId}
-users/{userId}/vocabularyProgress/{vocabularyId}
-users/{userId}/jamoStats/{jamoId}
 users/{userId}/reviewItems/{itemId}
+users/{userId}/learningSessions/{sessionId}
+users/{userId}/sessionOutcomes/{sessionId}
+users/{userId}/dailyStats/{YYYY-MM-DD}
+users/{userId}/monthlyStats/{YYYY-MM}
+users/{userId}/learnerStats/jamo
+users/{userId}/migrations/{guestId}
+
+# planned
+users/{userId}/vocabularyProgress/{vocabularyId}
 users/{userId}/dailyQuestProgress/{dateKey}
 ```
 
@@ -414,8 +422,11 @@ Current sources:
 
 The core MVP is functionally complete: Learning Path, lessons, results,
 review, guest and authenticated persistence, settings, profile, and Admin BO
-are implemented. Keyboard sound feedback is implemented with three persisted
-pack choices and Turquoise Tealio as the default ([[DEC-052]]). The Home player
+are implemented. Player Stats ([[DEC-049]]), key-level jamo stats
+([[DEC-050]]), and Weak Jamo practice with a per-jamo accuracy grid
+([[DEC-051]]) record data for every mode. Keyboard sound feedback is
+implemented with three persisted pack choices and Turquoise Tealio as the
+default ([[DEC-052]]). The Home player
 and keyboard sounds are awaiting final manual verification. See the
 [Progress Tracker](docs/PROGRESS.md) for the detailed current status.
 
@@ -438,15 +449,19 @@ checklist and post-MVP roadmap.
   for release checks.
 - Dark-mode CSS
 - Dedicated Lesson Result visual redesign
-- History, summaries, and analytics
-- Learning Modes: VocabularyProgress, JamoStats, Practice, and Daily Quest
+- Difficulty-based EXP rewards ([[DEC-045]], [[DEC-046]])
+- Profile UI for Player Stats (today/week/month, streaks, records, jamo
+  rankings) and session history
+- Learning Modes: VocabularyProgress, Topic/Keyboard Position practice, and
+  Daily Quest
 - Per-step Jamo SVG rendering is enabled in Production through
   `VITE_JAMO_SVG_RENDERER=1` with 1,858 approved syllables (DEC-039, DEC-044).
   Check it on mobile and raise lesson-vocabulary coverage so fewer targets
   fall back to Canvas. See the
   [Progress Tracker](docs/PROGRESS.md#dev-tooling-jamo-svg).
 - Account linking between authentication providers
-- Achievements, daily streaks, pronunciation audio, and additional curriculum
+- Achievements, streak UI and Streak Guard, pronunciation audio, and
+  additional curriculum
 
 ### Admin BO operator checklist
 

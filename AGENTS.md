@@ -108,15 +108,17 @@ Firebase config lives in `.env.local` (see `README.md` for required `VITE_FIREBA
 - **Build verification:** Do not run `pnpm build` by default for small, isolated work that touches only a few files, especially UI-only changes. Run it only when the change's risk warrants it, the user requests it, or it materially validates the work; otherwise, tell the user that they can build locally.
 - For a multi-step implementation plan, when a build is warranted, run `pnpm build` once during final verification—not after each step.
 - Record non-obvious architectural choices in `docs/DECISIONS.md`, not as scattered code comments. Update the authoritative topic document when a decision changes its model or policy.
-- Track detailed implementation status in `docs/PROGRESS.md`. `README.md`
-  carries the high-level MVP/post-MVP overview; keep its summary and roadmap
-  aligned with material status changes.
+- Track detailed implementation status in `docs/PROGRESS.md`. Read its
+  **Open work index** (every item not `Done`) first and open only the section
+  you need; when a status changes, update the item's row and keep the index in
+  sync. `README.md` carries the high-level MVP/post-MVP overview; keep its
+  summary and roadmap aligned with material status changes.
 - Log completed non-UI units of work by appending a short entry to the current month's file, `docs/log/YYYY-MM.md` (rules in `docs/COMPLETE-LOG.md`). Do not update the completion log for UI-only visual, layout, or presentation changes. Do not read earlier months to add an entry.
 
 ## Document Map
 
 - `README.md` — product overview, scope, theme, architecture overview, and MVP checklist.
-- `docs/PROGRESS.md` — current implementation status, blockers, and next work; mirrors README's checklist.
+- `docs/PROGRESS.md` — current implementation status, blockers, and next work; starts with an Open work index of every item not `Done`; mirrors README's checklist.
 - `docs/DOMAIN-MODEL.md` — authoritative target field-level schemas, identities, collection paths, and model constraints.
 - `docs/LEARNING-MODES.md` — boundaries and shared-state rules for Learning Path, Review, Practice, and Daily Quest.
 - `docs/AUTH-AND-PERSISTENCE.md` — Guest/authenticated session model, adapter selection, retention, and Guest-to-account merge policy.
