@@ -40,6 +40,16 @@ function isExpectedHeader(values: string[]): boolean {
   )
 }
 
+/** Keeps the seven import fields while ignoring worksheet-formatting blanks. */
+function importFields(values: string[]): string[] | null {
+  if (values.slice(expectedHeader.length).some((value) => value.trim()))
+    return null
+  return Array.from(
+    { length: expectedHeader.length },
+    (_, index) => values[index] ?? '',
+  )
+}
+
 export function parseLessonExerciseWorkbook(
   bytes: ArrayBuffer,
   createId: () => string,
@@ -60,14 +70,16 @@ export function parseLessonExerciseWorkbook(
     return { exercises: [], errors: [{ row: 1, reason: 'invalidWorkbook' }] }
   }
 
-  if (!isExpectedHeader(rows[0] ?? []))
+  const header = importFields(rows[0] ?? [])
+  if (!header || !isExpectedHeader(header))
     return { exercises: [], errors: [{ row: 1, reason: 'invalidHeader' }] }
 
   const exercises: LessonExercise[] = []
   const errors: LessonXlsxImportError[] = []
-  for (const [index, values] of rows.slice(1).entries()) {
+  for (const [index, rowValues] of rows.slice(1).entries()) {
     const row = index + 2
-    if (values.length !== expectedHeader.length) {
+    const values = importFields(rowValues)
+    if (!values) {
       errors.push({ row, reason: 'invalidColumnCount' })
       continue
     }

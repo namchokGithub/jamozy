@@ -124,7 +124,7 @@ export default function LessonEditorPage() {
   }
   const importXlsx = async (file: File) => {
     const bytes = await file.arrayBuffer()
-    setXlsxImport(parseLessonExerciseWorkbook(bytes, crypto.randomUUID))
+    setXlsxImport(parseLessonExerciseWorkbook(bytes, () => crypto.randomUUID()))
   }
   const update = (index: number, field: keyof LessonExercise, value: string) =>
     setExercises((items) =>

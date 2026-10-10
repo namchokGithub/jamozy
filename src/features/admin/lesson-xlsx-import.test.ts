@@ -70,6 +70,29 @@ describe('parseLessonExerciseWorkbook', () => {
     ])
   })
 
+  it('ignores empty trailing columns caused by worksheet formatting', () => {
+    const trailingEmptyCells = ['', '', '', '', '', '']
+    const result = parseLessonExerciseWorkbook(
+      workbookBytes([
+        [...header, ...trailingEmptyCells],
+        [
+          1,
+          'ㅏ',
+          'อา / a',
+          'a',
+          'a',
+          'Easy',
+          'เส้นสั้นชี้ขวา',
+          ...trailingEmptyCells,
+        ],
+      ]),
+      () => 'exercise-1',
+    )
+
+    expect(result.exercises).toHaveLength(1)
+    expect(result.errors).toEqual([])
+  })
+
   it('rejects a missing or misordered header', () => {
     const result = parseLessonExerciseWorkbook(
       workbookBytes([
