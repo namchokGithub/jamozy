@@ -22,7 +22,7 @@ Learners progress from basic characters and syllables to words, phrases,
 and sentences while improving typing accuracy and speed.
 
 <img
-    src="public/screenshot/jamozy-0.1.0.png"
+    src="public/screenshot/jamozy-0.4.0.png"
     alt="Jamozy SC-0.1.0"
     width="1024"
     height="1024"
