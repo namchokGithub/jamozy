@@ -2,9 +2,19 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { jamoSvgTaggerPlugin } from './tools/jamo-svg/vite-plugin'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), jamoSvgTaggerPlugin()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    jamoSvgTaggerPlugin(),
+    visualizer({
+      filename: 'dist/stats.html',
+      gzipSize: true,
+      brotliSize: true,
+    }),
+  ],
   server: {
     watch: {
       // Jamo SVG Tagger data is written by its dev API on every save; watching
@@ -15,6 +25,7 @@ export default defineConfig({
         '**/tools/jamo-svg/cache/**',
       ],
     },
+    open: true,
   },
   build: {
     sourcemap: false,

@@ -9,6 +9,8 @@ describe('development command', () => {
       scripts: Record<string, string>
     }
 
-    expect(packageJson.scripts.dev).toBe("BROWSER='Google Chrome' vite --open")
+    expect(packageJson.scripts.dev).toBe(
+      'cross-env BROWSER="Google Chrome" vite --open',
+    )
   })
 })

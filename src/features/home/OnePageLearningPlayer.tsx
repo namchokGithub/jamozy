@@ -5,7 +5,7 @@ import type {
   OnePageQueueExercise,
 } from '../../application/get-one-page-learning-path'
 import type { ExerciseResult } from '../../domain/korean/lesson-session'
-import { isKoreanJamoKey } from '../../domain/korean/keymap'
+import { isTypingInputKey } from '../../domain/korean/keymap'
 import type { CourseListLoaderData } from '../course/CourseListPage.loader'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
@@ -13,9 +13,12 @@ import FingerPlacementGuide from './FingerPlacementGuide'
 import { useKeyboardFeedback } from '../typing/keyboard-feedback'
 import { useOnePagePlayerStore } from './one-page-player-store'
 import { usePressedKeyCodes } from '../typing/usePressedKeyCodes'
+import { useKeyboardSound } from '../typing/useKeyboardSound'
+import { useResolvedSoundSettings, type SoundSettings } from '../typing/useResolvedSoundSettings'
 
 interface OnePageLearningPlayerProps {
   learningPath: OnePageLearningPath
+  settings: SoundSettings | Promise<SoundSettings>
 }
 
 type PendingCheckpoint =
@@ -33,6 +36,7 @@ const REFILL_THRESHOLD = 3
 
 export default function OnePageLearningPlayer({
   learningPath,
+  settings,
 }: OnePageLearningPlayerProps) {
   const pressedCodes = usePressedKeyCodes()
   const {
@@ -46,6 +50,12 @@ export default function OnePageLearningPlayer({
     append,
     pressKey,
   } = useOnePagePlayerStore()
+  const soundSettings = useResolvedSoundSettings(settings)
+  const playVirtualKey = useKeyboardSound(
+    soundSettings.soundEnabled,
+    soundSettings.keyboardSoundPack,
+    session?.status === 'typing',
+  )
   const fetcher = useFetcher<{ onePageCheckpointed?: boolean }>()
   const refill = useFetcher<CourseListLoaderData>()
   // The player owns its queue from mount on; later loader data for the same
@@ -111,10 +121,7 @@ export default function OnePageLearningPlayer({
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return
-      if (!isKoreanJamoKey(event.code)) {
-        if (event.code === 'Space') event.preventDefault()
-        return
-      }
+      if (!isTypingInputKey(event.code)) return
       event.preventDefault()
       handleKeyPress(event.code, event.shiftKey)
     }
@@ -303,7 +310,10 @@ export default function OnePageLearningPlayer({
             previousFeedback={previousFeedback}
             showEnglishKeys
             opacity={1}
-            onKeyPress={handleKeyPress}
+            onKeyPress={(code, shiftKey) => {
+              playVirtualKey(code)
+              handleKeyPress(code, shiftKey)
+            }}
             pressedCodes={pressedCodes}
           />
           <FingerPlacementGuide nextKey={nextKey} pressedCodes={pressedCodes} />

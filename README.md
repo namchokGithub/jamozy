@@ -22,7 +22,7 @@ Learners progress from basic characters and syllables to words, phrases,
 and sentences while improving typing accuracy and speed.
 
 <img
-    src="public/screenshot/jamozy-0.1.0.png"
+    src="public/screenshot/jamozy-0.4.0.png"
     alt="Jamozy SC-0.1.0"
     width="1024"
     height="1024"
@@ -35,14 +35,16 @@ and sentences while improving typing accuracy and speed.
 - Home player for one Admin-managed Home course, exported to static JSON at build
 - Korean typing exercises
 - Virtual Korean keyboard guide
+- Configurable mechanical-keyboard sound feedback for physical and virtual typing
 - Finger-placement reference for Korean keyboard practice
 - Correct / incorrect typing feedback
 - Accuracy and typing speed tracking
 - Lesson results
 - Review mistyped words
-- Practice mode
+- Weak Jamo practice with a per-jamo accuracy grid
 - Learning progress tracking
-- Simple EXP and Level system
+- Player stats: daily and monthly totals, streaks, records, and per-jamo accuracy
+- EXP and a soft-capped Level curve
 - Guest-local or account-backed learning progress
 - Configurable learning settings
 
@@ -382,9 +384,16 @@ topics/{topicId}
 
 users/{userId} (authenticated Firebase Auth UID only)
 users/{userId}/lessonProgress/{lessonId}
-users/{userId}/vocabularyProgress/{vocabularyId}
-users/{userId}/jamoStats/{jamoId}
 users/{userId}/reviewItems/{itemId}
+users/{userId}/learningSessions/{sessionId}
+users/{userId}/sessionOutcomes/{sessionId}
+users/{userId}/dailyStats/{YYYY-MM-DD}
+users/{userId}/monthlyStats/{YYYY-MM}
+users/{userId}/learnerStats/jamo
+users/{userId}/migrations/{guestId}
+
+# planned
+users/{userId}/vocabularyProgress/{vocabularyId}
 users/{userId}/dailyQuestProgress/{dateKey}
 ```
 
@@ -396,7 +405,7 @@ For document-backed domain entities, the domain `id` is the Firestore document I
 
 ## Content Credits
 
-Vocabulary sources, attribution, and licenses are recorded in [docs/CREDITS.md](docs/CREDITS.md) before their data is imported.
+Vocabulary and keyboard-audio sources, attribution, and licenses are recorded in [docs/CREDITS.md](docs/CREDITS.md).
 
 Current sources:
 
@@ -404,6 +413,7 @@ Current sources:
   National Institute of Korean Language (국립국어원) —
   [https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=71&amp;pageIndex=1](https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=71&pageIndex=1)
 - 현대 국어 사용 빈도 조사 2, National Institute of Korean Language (국립국어원)
+- [Mechanical Keyboard Simulator](https://github.com/tplai/kbsim/tree/master) sound packs, Thomas Lai (`tplai`) — [MIT license](https://github.com/tplai/kbsim/blob/master/LICENSE.md)
 
 > Lesson content is treated as shared application data, while progress, review
 > history, EXP, levels, and statistics belong to individual users.
@@ -412,14 +422,19 @@ Current sources:
 
 The core MVP is functionally complete: Learning Path, lessons, results,
 review, guest and authenticated persistence, settings, profile, and Admin BO
-are implemented. The Home player ([[DEC-043]]) is awaiting its final manual
-verification pass. See the [Progress Tracker](docs/PROGRESS.md) for
-the detailed current status.
+are implemented. Player Stats ([[DEC-049]]), key-level jamo stats
+([[DEC-050]]), and Weak Jamo practice with a per-jamo accuracy grid
+([[DEC-051]]) record data for every mode. Keyboard sound feedback is
+implemented with three persisted pack choices and Turquoise Tealio as the
+default ([[DEC-052]]). The Home player
+and keyboard sounds are awaiting final manual verification. See the
+[Progress Tracker](docs/PROGRESS.md) for the detailed current status.
 
 ### MVP
 
-MVP is complete apart from final user-owned verification of the Home player. See [Progress Tracker](docs/PROGRESS.md) for the
-verification checklist and post-MVP roadmap.
+MVP is complete apart from final user-owned verification of the Home player and
+keyboard sounds. See [Progress Tracker](docs/PROGRESS.md) for the verification
+checklist and post-MVP roadmap.
 
 ### Next / Post-MVP
 
@@ -432,19 +447,21 @@ verification checklist and post-MVP roadmap.
   ([[DEC-047]]).
 - Set up a Cloudflare Pages deployment pipeline and use Preview deployments
   for release checks.
-- Decide whether sound feedback ships or is deferred, then implement the
-  selected behavior
 - Dark-mode CSS
 - Dedicated Lesson Result visual redesign
-- History, summaries, and analytics
-- Learning Modes: VocabularyProgress, JamoStats, Practice, and Daily Quest
+- Difficulty-based EXP rewards ([[DEC-045]], [[DEC-046]])
+- Profile UI for Player Stats (today/week/month, streaks, records, jamo
+  rankings) and session history
+- Learning Modes: VocabularyProgress, Topic/Keyboard Position practice, and
+  Daily Quest
 - Per-step Jamo SVG rendering is enabled in Production through
   `VITE_JAMO_SVG_RENDERER=1` with 1,858 approved syllables (DEC-039, DEC-044).
   Check it on mobile and raise lesson-vocabulary coverage so fewer targets
   fall back to Canvas. See the
   [Progress Tracker](docs/PROGRESS.md#dev-tooling-jamo-svg).
 - Account linking between authentication providers
-- Achievements, daily streaks, pronunciation audio, and additional curriculum
+- Achievements, streak UI and Streak Guard, pronunciation audio, and
+  additional curriculum
 
 ### Admin BO operator checklist
 

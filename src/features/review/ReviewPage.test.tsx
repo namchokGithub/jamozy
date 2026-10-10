@@ -51,6 +51,7 @@ function makePreview(
 function makeSettings(overrides: Partial<UserSettings> = {}): UserSettings {
   return {
     soundEnabled: true,
+    keyboardSoundPack: 'turquoise',
     showKeyboard: true,
     showEnglishKeys: true,
     keyboardOpacity: 0.7,

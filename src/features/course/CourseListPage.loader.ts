@@ -14,6 +14,7 @@ import type { HomeContentRepository } from '../../domain/repositories/home-conte
 import type { HomeLocalStateRepository } from '../../domain/repositories/home-local-state-repository'
 import type { Progress } from '../../domain/models/progress'
 import { resolveHomeResume } from '../../domain/home/home-session'
+import { defaultUserProfile, normalizeUserSettings, type UserSettings } from '../../domain/models/user-profile'
 
 export interface CourseListPageData {
   courses: Course[]
@@ -35,6 +36,7 @@ export interface CourseListLoaderData {
   homeProgress: Promise<Progress[] | null>
   // The Learning Path player, used only when there is no Home content.
   onePageLearningPath: Promise<OnePageLearningPath | null>
+  settings: Promise<UserSettings>
 }
 
 export function createCourseListLoader(deps: {
@@ -63,6 +65,10 @@ export function createCourseListLoader(deps: {
     const afterExercise = params?.get('afterExercise')
     const after = afterLesson && afterExercise ? { lessonId: afterLesson, exerciseId: afterExercise } : undefined
     const coursesRequest = getCourses(deps.courseRepo)
+    const profileRequest = deps.userProfileRepo?.getUserProfile(user.uid) ?? Promise.resolve(null)
+    const settings = profileRequest.then((profile) =>
+      normalizeUserSettings(profile?.settings ?? defaultUserProfile(user.uid, new Date()).settings),
+    )
     const homePlayer = deps.home && homeContent
       ? getHomePlayer({ ...deps.home, contentRepo: { getHomeContent: () => homeContent } }, user.uid)
       : Promise.resolve(null)
@@ -93,7 +99,7 @@ export function createCourseListLoader(deps: {
     const page = Promise.all([
       coursesRequest,
       getDueReviewItems(deps.reviewRepo, user.uid),
-      deps.userProfileRepo?.getUserProfile(user.uid) ?? null,
+      profileRequest,
       deps.getSession?.(),
     ]).then(([courses, items, profile, session]) => ({
       courses,
@@ -101,6 +107,6 @@ export function createCourseListLoader(deps: {
       displayName: profile?.displayName ?? 'Guest',
       isAuthenticated: session?.kind === 'authenticated',
     }))
-    return { page, homePlayer, homeProgress, onePageLearningPath }
+    return { page, homePlayer, homeProgress, onePageLearningPath, settings }
   }
 }

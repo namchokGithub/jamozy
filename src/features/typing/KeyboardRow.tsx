@@ -30,7 +30,9 @@ export default function KeyboardRow({
   mobileStyle = false,
 }: KeyboardRowProps) {
   return (
-    <div className={`flex ${mobileStyle ? 'gap-[3px] sm:gap-1.5' : 'gap-1.5'}`}>
+    <div
+      className={`flex justify-center ${mobileStyle ? 'gap-[3px] sm:gap-1.5' : 'gap-1.5'}`}
+    >
       {keys.map((keyboardKey) => (
         <VirtualKey
           key={keyboardKey.code}

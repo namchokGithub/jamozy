@@ -2,8 +2,12 @@ import { z } from 'zod'
 import type { LegacyBaseline, SessionAggregate } from './session-aggregate'
 import type { PlayerStats } from './player-stats'
 
+export const keyboardSoundPacks = ['turquoise', 'mxblack', 'mxblue'] as const
+export type KeyboardSoundPack = (typeof keyboardSoundPacks)[number]
+
 export interface UserSettings {
   soundEnabled: boolean
+  keyboardSoundPack: KeyboardSoundPack
   showKeyboard: boolean
   showEnglishKeys: boolean
   keyboardOpacity: number
@@ -88,6 +92,7 @@ export function defaultUserProfile(
     exp: 0,
     settings: {
       soundEnabled: true,
+      keyboardSoundPack: 'turquoise',
       showKeyboard: true,
       showEnglishKeys: true,
       keyboardOpacity: 0.7,
@@ -110,6 +115,7 @@ export function defaultUserProfile(
 
 export const userSettingsSchema = z.object({
   soundEnabled: z.boolean(),
+  keyboardSoundPack: z.enum(keyboardSoundPacks),
   showKeyboard: z.boolean(),
   showEnglishKeys: z.boolean(),
   keyboardOpacity: z.number().min(0).max(1),
@@ -117,3 +123,10 @@ export const userSettingsSchema = z.object({
   meaningLanguage: z.enum(['th', 'en', 'both']),
   theme: z.enum(['light', 'dark']),
 })
+
+export function normalizeUserSettings(
+  settings: Omit<UserSettings, 'keyboardSoundPack'> &
+    Partial<Pick<UserSettings, 'keyboardSoundPack'>>,
+): UserSettings {
+  return { ...settings, keyboardSoundPack: settings.keyboardSoundPack ?? 'turquoise' }
+}

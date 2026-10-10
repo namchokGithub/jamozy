@@ -66,6 +66,10 @@ describe('findUntypeableCharacters', () => {
     expect(findUntypeableCharacters('ㄱㄲㅏ')).toEqual([])
   })
 
+  it('returns nothing for standalone compound vowels', () => {
+    expect(findUntypeableCharacters('ㅘㅙㅚㅝㅞㅟㅢ')).toEqual([])
+  })
+
   it('returns each distinct character the keyboard cannot type, in order', () => {
     // U+1100/U+1101 are conjoining jamo that look like ㄱ/ㄲ (U+3131/U+3132).
     expect(findUntypeableCharacters('\u1100가\u1101\u1100a')).toEqual(['\u1100', '\u1101', 'a'])

@@ -57,11 +57,13 @@ const ROW_3: KeyboardKey[] = [
   { code: 'ShiftRight', label: 'Shift ⇧', wide: 'shift' },
 ]
 
+const ROW_4: KeyboardKey[] = [{ code: 'Space', label: 'Space', wide: 'space' }]
+
 const VIRTUAL_KEY_CODES = new Set(
-  [...ROW_1, ...ROW_2, ...ROW_3].map(({ code }) => code),
+  [...ROW_1, ...ROW_2, ...ROW_3, ...ROW_4].map(({ code }) => code),
 )
 
-const KEYBOARD_ROWS = [ROW_1, ROW_2, ROW_3]
+const KEYBOARD_ROWS = [ROW_1, ROW_2, ROW_3, ROW_4]
 
 function closestCodeInRow(
   index: number,
@@ -187,7 +189,7 @@ export default function VirtualKeyboard({
       <div
         className={`mx-auto max-w-5xl sm:space-y-3 ${mobileStyle ? 'space-y-1.5' : 'space-y-2'}`}
       >
-        {[ROW_1, ROW_2, ROW_3].map((keys) => (
+        {KEYBOARD_ROWS.map((keys) => (
           <KeyboardRow
             key={keys[0].code}
             keys={keys}

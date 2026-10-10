@@ -8,6 +8,15 @@ import type { Lesson } from '../../domain/models/lesson'
 import type { CompleteLessonOutcome } from '../../application/complete-lesson'
 import type { UserSettings } from '../../domain/models/user-profile'
 
+const { playSound, loadSound, unlockSound } = vi.hoisted(() => ({
+  playSound: vi.fn(),
+  loadSound: vi.fn(async () => undefined),
+  unlockSound: vi.fn(async () => undefined),
+}))
+vi.mock('../../infrastructure/audio/keyboard-sound-player', () => ({
+  keyboardSoundPlayer: { play: playSound, load: loadSound, unlock: unlockSound },
+}))
+
 function makeLesson(overrides: Partial<Lesson> = {}): Lesson {
   return {
     id: 'l1',
@@ -48,9 +57,9 @@ const fakeOutcome: CompleteLessonOutcome = {
 }
 
 function makeKeyboardSettings(
-  overrides: Partial<Pick<UserSettings, 'showKeyboard' | 'showEnglishKeys' | 'keyboardOpacity'>> = {},
+  overrides: Partial<Pick<UserSettings, 'showKeyboard' | 'showEnglishKeys' | 'keyboardOpacity' | 'soundEnabled' | 'keyboardSoundPack'>> = {},
 ) {
-  return { showKeyboard: true, showEnglishKeys: true, keyboardOpacity: 1, ...overrides }
+  return { showKeyboard: true, showEnglishKeys: true, keyboardOpacity: 1, soundEnabled: false, keyboardSoundPack: 'turquoise' as const, ...overrides }
 }
 
 function renderSession(
@@ -90,6 +99,22 @@ function waitForTypingTarget(target: string) {
 describe('LessonTypingSession', () => {
   beforeEach(() => {
     useLessonSessionStore.setState({ session: null })
+    playSound.mockClear()
+  })
+
+  it('plays the selected pack when a virtual key records an attempt', async () => {
+    renderSession(
+      vi.fn(),
+      makeLesson(),
+      undefined,
+      makeKeyboardSettings({ soundEnabled: true, keyboardSoundPack: 'mxblack' }),
+    )
+    await waitForTypingTarget('가')
+
+    fireEvent.click(screen.getByRole('button', { name: 'r' }))
+
+    expect(playSound).toHaveBeenCalledWith('press/GENERIC_R2')
+    expect(useLessonSessionStore.getState().session?.currentSession.keyIndex).toBe(1)
   })
 
   /* it('highlights the current character and updates the composed text on a correct keydown', async () => {
@@ -120,9 +145,21 @@ describe('LessonTypingSession', () => {
     expect(screen.getByLabelText('Virtual Korean keyboard')).toHaveStyle({ opacity: '1' })
   })
 
-  it('prevents Space scrolling without recording a typing mistake', async () => {
-    renderSession(vi.fn())
-    await waitForTypingTarget('가')
+  it('uses Space as typing input while preventing page scrolling', async () => {
+    renderSession(
+      vi.fn(),
+      makeLesson({
+        exercises: [
+          {
+            ...makeLesson().exercises[0],
+            targetText: '가 나',
+          },
+        ],
+      }),
+    )
+    await waitForTypingTarget('가 나')
+    fireEvent.keyDown(window, { code: 'KeyR' })
+    fireEvent.keyDown(window, { code: 'KeyK' })
     const spaceEvent = new KeyboardEvent('keydown', {
       bubbles: true,
       cancelable: true,
@@ -133,7 +170,7 @@ describe('LessonTypingSession', () => {
 
     expect(wasNotPrevented).toBe(false)
     expect(useLessonSessionStore.getState().session?.currentSession).toMatchObject({
-      keyIndex: 0,
+      keyIndex: 3,
       mistakes: [],
     })
   })

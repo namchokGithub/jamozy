@@ -37,6 +37,11 @@ export function isKoreanJamoKey(code: string): boolean {
   return code.startsWith('Key') && code in KEY_TO_JAMO
 }
 
+/** Physical keys accepted as lesson input: Korean jamo positions plus Space. */
+export function isTypingInputKey(code: string): boolean {
+  return isKoreanJamoKey(code) || code === 'Space'
+}
+
 export const JAMO_TO_KEY: Record<string, { code: string; shift: boolean }> =
   Object.entries(KEY_TO_JAMO).reduce<
     Record<string, { code: string; shift: boolean }>

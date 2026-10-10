@@ -6,6 +6,7 @@ import type { UserProfileRepository } from '../../domain/repositories/user-profi
 function makeSettingsBody() {
   return {
     soundEnabled: false,
+    keyboardSoundPack: 'mxblue',
     showKeyboard: true,
     showEnglishKeys: false,
     keyboardOpacity: 0.7,

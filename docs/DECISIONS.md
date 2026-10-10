@@ -66,6 +66,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-049 | Player stats fold into lifetime, daily, and monthly state in the submit transaction                                                                               | Accepted                                                                                               | 2026-10-09 |
 | DEC-050 | Key-level jamo stats live in one map document, updated in the submit transaction                                                                                  | Accepted                                                                                               | 2026-10-09 |
 | DEC-051 | Weak Jamo practice picks Home exercises by the learner's weakest key-level jamo                                                                                   | Accepted                                                                                               | 2026-10-09 |
+| DEC-052 | Vite-bundled Web Audio buffers provide configurable keyboard sound packs                                                                                          | Accepted                                                                                               | 2026-10-10 |
 
 ## Superseded index (history only)
 
@@ -1456,4 +1457,16 @@ accuracy grid.
   - Rarely practiced jamo keep old data longer.
   - The decay factor cannot be applied retroactively.
 - **Rejected:** keeping the last 50 attempts per jamo (a larger document).
+
+## DEC-052 — Vite-bundled Web Audio buffers provide configurable keyboard sound packs
+
+**Date:** 2026-10-10
+
+**Status:** Accepted
+
+**Decision:** Keep the three kbsim-derived packs under `src/assets/audio` and use Vite-generated, non-inlined asset URLs. Preload and decode the selected pack only while sound is enabled and a typing session is active. Reuse decoded buffers, but create a new `AudioBufferSourceNode` for each key press or release so rapid keystrokes can overlap. Persist the selected pack in `UserSettings`, defaulting missing or new preferences to Turquoise Tealio (`turquoise`). Audio failure remains silent and never blocks typing.
+
+**Why:** A shared, lazily created Web Audio context and cached buffers avoid repeated decoding, while independent sources support overlapping feedback. Vite URLs keep the bundled files on the normal asset pipeline; preventing inlining avoids downloading all three packs when sound is off. The sound is transient presentation feedback, not a typing-session or learner-state checkpoint.
+
+**Alternatives rejected:** Recreating `<audio>` elements for each key and adding an audio dependency add playback or maintenance complexity; moving the files to `public/` and fetching hard-coded paths bypasses Vite's asset URLs.
 

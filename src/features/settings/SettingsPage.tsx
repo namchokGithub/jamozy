@@ -83,6 +83,18 @@ export default function SettingsPage() {
             checked={settings.soundEnabled}
             onChange={(value) => update('soundEnabled', value)}
           />
+          <DropdownRow>
+            <Dropdown
+              label="Keyboard sound"
+              value={settings.keyboardSoundPack}
+              onChange={(value) => update('keyboardSoundPack', value)}
+              options={[
+                { value: 'turquoise', label: 'Turquoise Tealio' },
+                { value: 'mxblack', label: 'Cherry MX Blacks' },
+                { value: 'mxblue', label: 'Cherry MX Blues' },
+              ]}
+            />
+          </DropdownRow>
           <Switch
             label="Romanization"
             accent="coral"

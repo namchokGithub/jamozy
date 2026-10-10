@@ -28,7 +28,7 @@ type CourseListActionData = {
 }
 
 export default function CourseListPage() {
-  const { page, homePlayer, homeProgress, onePageLearningPath } =
+  const { page, homePlayer, homeProgress, onePageLearningPath, settings } =
     useLoaderData() as CourseListLoaderData
 
   return (
@@ -79,9 +79,9 @@ export default function CourseListPage() {
                   key={player.content.exportedAt}
                   data={player}
                   liveProgress={homeProgress}
+                  settings={settings}
                 />
               ) : (
-                // No Home content deployed: keep the Learning Path player.
                 <Suspense fallback={<HomePlayerSkeleton />}>
                   <Await resolve={onePageLearningPath}>
                     {(learningPath) =>
@@ -89,6 +89,7 @@ export default function CourseListPage() {
                         <OnePageLearningPlayer
                           key={learningPath.selectedCourseId}
                           learningPath={learningPath}
+                          settings={settings}
                         />
                       )
                     }

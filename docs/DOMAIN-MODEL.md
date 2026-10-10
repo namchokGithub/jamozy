@@ -460,6 +460,7 @@ are separate from `UserProfile`; do not store `email`, provider details, or
 | Field               | Type                     | Notes                                 |
 | ------------------- | ------------------------ | ------------------------------------- |
 | soundEnabled        | boolean                  |                                       |
+| keyboardSoundPack   | `'turquoise' \| 'mxblack' \| 'mxblue'` | persisted mechanical-key sound pack; defaults to `'turquoise'` (Turquoise Tealio) |
 | showKeyboard        | boolean                  | show/hide the virtual keyboard widget |
 | keyboardOpacity     | number                   | 0–1                                   |
 | romanizationEnabled | boolean                  |                                       |

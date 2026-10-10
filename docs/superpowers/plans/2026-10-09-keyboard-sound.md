@@ -45,6 +45,7 @@
 ### Task 1: Model and normalize the selected sound pack
 
 **Files:**
+
 - Modify: `src/domain/models/user-profile.ts`
 - Modify: `src/domain/models/user-profile.test.ts`
 - Modify: `src/application/get-settings.ts`
@@ -66,6 +67,7 @@
 ### Task 2: Add the Settings pack control
 
 **Files:**
+
 - Modify: `src/features/settings/SettingsPage.tsx`
 - Modify: `src/features/settings/SettingsPage.test.tsx`
 - Modify: `src/features/settings/SettingsPage.action.test.ts`
@@ -83,6 +85,7 @@
 ### Task 3: Create Vite asset manifest and key mapper
 
 **Files:**
+
 - Create: `src/features/typing/keyboard-sound-assets.ts`
 - Create: `src/features/typing/keyboard-sound-map.ts`
 - Create: `src/features/typing/keyboard-sound-map.test.ts`
@@ -98,6 +101,7 @@
 ### Task 4: Add the Web Audio player and hook
 
 **Files:**
+
 - Create: `src/infrastructure/audio/keyboard-sound-player.ts`
 - Create: `src/infrastructure/audio/keyboard-sound-player.test.ts`
 - Create: `src/features/typing/useKeyboardSound.ts`
@@ -116,6 +120,7 @@
 ### Task 5: Deliver settings to every typing host and wire sound
 
 **Files:**
+
 - Modify: `src/features/course/CourseListPage.loader.ts`
 - Modify: `src/features/course/CourseListPage.tsx`
 - Modify: `src/features/course/CourseListPage.loader.test.ts`
@@ -137,6 +142,7 @@
 ### Task 6: Credits, decision record, status, and verification handoff
 
 **Files:**
+
 - Modify: `docs/CREDITS.md`
 - Modify: `docs/DECISIONS.md`
 - Modify: `docs/PROGRESS.md`

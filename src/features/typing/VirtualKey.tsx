@@ -5,7 +5,11 @@ import {
   useReducedMotion,
 } from 'motion/react'
 import { useEffect } from 'react'
-import { isKoreanJamoKey, KEY_TO_JAMO } from '../../domain/korean/keymap'
+import {
+  isKoreanJamoKey,
+  isTypingInputKey,
+  KEY_TO_JAMO,
+} from '../../domain/korean/keymap'
 import type { KeyboardFeedback } from './keyboard-feedback'
 
 export type KeyVisualState =
@@ -42,7 +46,7 @@ const focusStyles: Record<KeyFocusLevel, FocusStyle> = {
 export type KeyboardKey = {
   code: string
   label?: string
-  wide?: 'tab' | 'caps' | 'shift' | 'enter'
+  wide?: 'tab' | 'caps' | 'shift' | 'enter' | 'space'
 }
 
 interface VirtualKeyProps {
@@ -81,6 +85,7 @@ function keyWidth(wide: KeyboardKey['wide']): string {
   if (wide === 'caps') return 'basis-[12%]'
   if (wide === 'shift') return 'basis-[15%]'
   if (wide === 'enter') return 'basis-[12%]'
+  if (wide === 'space') return 'basis-[45%]'
   return 'min-w-0 flex-1'
 }
 
@@ -194,11 +199,12 @@ export default function VirtualKey({
   const jamo = KEY_TO_JAMO[code]
   const isShiftKey = code === 'ShiftLeft' || code === 'ShiftRight'
   const isJamoKey = isKoreanJamoKey(code)
+  const isTypingKey = isTypingInputKey(code)
   const displayLabel = label ?? englishLabel(code)
   const hasHomeRowMarker = code === 'KeyF' || code === 'KeyJ'
   const wrongAnimation = useAnimationControls()
   const shouldReduceMotion = useReducedMotion()
-  const canPress = canInteract && (isJamoKey || isShiftKey)
+  const canPress = canInteract && (isTypingKey || isShiftKey)
   const visualState = getVisualState(
     code,
     isJamoKey,
@@ -263,7 +269,7 @@ export default function VirtualKey({
       onShiftToggle()
       return
     }
-    if (isJamoKey) onPress(code, virtualShiftActive)
+    if (isTypingKey) onPress(code, virtualShiftActive)
   }
 
   return (
@@ -325,13 +331,13 @@ export default function VirtualKey({
             <>
               {jamo.shift && (
                 <span
-                  className={`absolute top-1 right-1 text-[10px] leading-none text-[#a85d4e] ${desktopOnly}`}
+                  className={`absolute top-1 right-1 text-[12px] leading-none text-[#a85d4e] ${desktopOnly}`}
                 >
                   {jamo.shift}
                 </span>
               )}
               {mobileStyle && (
-                <span className="text-[15px] leading-5 sm:hidden">
+                <span className="text-[25px] leading-5 sm:hidden">
                   {mobileJamo}
                 </span>
               )}
@@ -340,7 +346,7 @@ export default function VirtualKey({
               </span>
               {showEnglishKeys && (
                 <span
-                  className={`mt-0.5 text-[10px] leading-3 text-slate-400 ${hasHomeRowMarker ? 'mb-1.5' : ''} ${desktopOnly}`}
+                  className={`mt-0.5 text-[10px] leading-3 text-[#c7bfb2] ${hasHomeRowMarker ? 'mb-1.5' : ''} ${desktopOnly}`}
                 >
                   {englishLabel(code)}
                 </span>

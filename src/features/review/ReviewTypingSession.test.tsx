@@ -8,6 +8,15 @@ import type { ReviewItem } from '../../domain/models/review-item'
 import type { SubmitReviewSessionOutcome } from '../../application/submit-review-session'
 import type { UserSettings } from '../../domain/models/user-profile'
 
+const { playSound, loadSound, unlockSound } = vi.hoisted(() => ({
+  playSound: vi.fn(),
+  loadSound: vi.fn(async () => undefined),
+  unlockSound: vi.fn(async () => undefined),
+}))
+vi.mock('../../infrastructure/audio/keyboard-sound-player', () => ({
+  keyboardSoundPlayer: { play: playSound, load: loadSound, unlock: unlockSound },
+}))
+
 function makeItem(id: string, overrides: Partial<ReviewItem> = {}): ReviewItem {
   return {
     id,
@@ -27,9 +36,9 @@ function makeItem(id: string, overrides: Partial<ReviewItem> = {}): ReviewItem {
 const fakeOutcome: SubmitReviewSessionOutcome = { correctCount: 1, needsPracticeCount: 0 }
 
 function makeKeyboardSettings(
-  overrides: Partial<Pick<UserSettings, 'showKeyboard' | 'showEnglishKeys' | 'keyboardOpacity'>> = {},
+  overrides: Partial<Pick<UserSettings, 'showKeyboard' | 'showEnglishKeys' | 'keyboardOpacity' | 'soundEnabled' | 'keyboardSoundPack'>> = {},
 ) {
-  return { showKeyboard: true, showEnglishKeys: true, keyboardOpacity: 1, ...overrides }
+  return { showKeyboard: true, showEnglishKeys: true, keyboardOpacity: 1, soundEnabled: false, keyboardSoundPack: 'turquoise' as const, ...overrides }
 }
 
 function renderSession(
@@ -66,6 +75,21 @@ function waitForTypingTarget(target: string) {
 describe('ReviewTypingSession', () => {
   beforeEach(() => {
     useLessonSessionStore.setState({ session: null })
+    playSound.mockClear()
+  })
+
+  it('plays a virtual key through the session shared with Weak Jamo', async () => {
+    renderSession(
+      vi.fn(),
+      [makeItem('a')],
+      undefined,
+      makeKeyboardSettings({ soundEnabled: true, keyboardSoundPack: 'turquoise' }),
+    )
+    await waitForTypingTarget('가')
+
+    fireEvent.click(screen.getByRole('button', { name: 'r' }))
+
+    expect(playSound).toHaveBeenCalledWith('press/GENERIC_R2')
   })
 
   /* it('highlights the current character and updates the composed text on a correct keydown', async () => {

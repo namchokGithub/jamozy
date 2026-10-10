@@ -22,7 +22,7 @@ describe('local learner repositories', () => {
     const database = new MemoryDatabase() as never
     const profiles = new LocalUserProfileRepository(database)
     const reviews = new LocalReviewRepository(database)
-    await profiles.saveUserProfile('guest-a', { id: 'guest-a', displayName: 'Guest#0042', exp: 0, settings: { soundEnabled: true, showKeyboard: true, showEnglishKeys: true, keyboardOpacity: 0.7, romanizationEnabled: true, meaningLanguage: 'both', theme: 'light' }, stats: { lessonsCompleted: 0, wordsPracticed: 0, averageAccuracy: 0, bestAccuracy: 0, averageSpeedWpm: 0, totalTypingTimeSeconds: 0 }, createdAt: new Date('2026-01-01'), updatedAt: new Date('2026-01-01') })
+    await profiles.saveUserProfile('guest-a', { id: 'guest-a', displayName: 'Guest#0042', exp: 0, settings: { soundEnabled: true, keyboardSoundPack: 'turquoise', showKeyboard: true, showEnglishKeys: true, keyboardOpacity: 0.7, romanizationEnabled: true, meaningLanguage: 'both', theme: 'light' }, stats: { lessonsCompleted: 0, wordsPracticed: 0, averageAccuracy: 0, bestAccuracy: 0, averageSpeedWpm: 0, totalTypingTimeSeconds: 0 }, createdAt: new Date('2026-01-01'), updatedAt: new Date('2026-01-01') })
     await reviews.addReviewItem('guest-a', { id: 'word', sourceLessonId: 'l', sourceExerciseId: 'e', targetText: '가', reason: 'mistake', mistakeCount: 1, lastMistakeAt: new Date(), resolved: false, box: 1, nextReviewAt: new Date() })
     expect((await profiles.getUserProfile('guest-a'))?.displayName).toBe('Guest#0042')
     expect(await reviews.getReviewItems('guest-b')).toEqual([])

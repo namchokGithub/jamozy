@@ -5,7 +5,7 @@ Claude Code specific guidance for the Jamozy repository. Shared agent rules (arc
 ## Before Starting Work
 
 1. Read `AGENTS.md`, then `README.md` for shared rules, product scope, and the MVP checklist.
-2. Check `docs/PROGRESS.md` for current status, blockers, and next work.
+2. Check `docs/PROGRESS.md` for current status, blockers, and next work: read its **Open work index** (every item not `Done`) first, then open only the section you need.
 3. Read the document that owns the task's topic before changing it:
    - model shape, IDs, or Firestore/IndexedDB paths → `docs/DOMAIN-MODEL.md`
    - Guest/account authentication, persistence, retention, or migration → `docs/AUTH-AND-PERSISTENCE.md`
@@ -26,7 +26,7 @@ Pre-MVP, with core lesson, review, profile, and settings flows already present. 
 
 When you complete a meaningful unit of work in this repo:
 
-- Tick the relevant box(es) in `README.md`'s MVP checklist and mirror the change in `docs/PROGRESS.md`.
+- Tick the relevant box(es) in `README.md`'s MVP checklist and mirror the change in `docs/PROGRESS.md`, including its Open work index (add a row when an item is not `Done`, remove it when it becomes `Done`).
 - Append a 3–5 bullet entry (date, what shipped, commit, link to plan/spec/DEC) to the current month's `docs/log/YYYY-MM.md`; see `docs/COMPLETE-LOG.md`. Append without reading the whole file (for example, read only its last lines).
 - If the work involved a non-obvious tradeoff (library choice, data-model shape, layering exception), add an entry to `docs/DECISIONS.md` and a row to its index.
 - Keep the owning topic document aligned with an accepted decision: schema in `DOMAIN-MODEL`, persistence/migration in `AUTH-AND-PERSISTENCE`, learning-mode behavior in `LEARNING-MODES`, and historical-session semantics in `SESSION-AND-HISTORY`.
@@ -39,7 +39,10 @@ This repo overrides Claude Code's default git attribution: do not append `Co-Aut
 
 ## Testing
 
-Use Vitest + React Testing Library once test infra exists (`pnpm test`). Favor testing use cases (`application/`) and repository contracts over UI snapshot tests, in line with the layered architecture.
+Vitest + React Testing Library (`pnpm test`). Follow `AGENTS.md` → Working Conventions → Testing policy and the UI-only verification checklist. In short:
+
+- **UI-only change** (styling, layout, presentation, page appearance): no new or updated tests, no `pnpm test`, no `pnpm build`, no dev server or browser automation unless asked. Run only Prettier and ESLint on the touched files, then hand verification to the user.
+- **Logic, persistence, or security change:** add tests for use cases (`application/`) and repository contracts rather than UI snapshots, and run only the focused test files that cover the change. Remind the user to run `pnpm test` locally.
 
 ## Firebase Caution
 

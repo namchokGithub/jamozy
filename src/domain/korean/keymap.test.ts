@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { isKoreanJamoKey, JAMO_TO_KEY, KEY_TO_JAMO } from './keymap'
+import {
+  isKoreanJamoKey,
+  isTypingInputKey,
+  JAMO_TO_KEY,
+  KEY_TO_JAMO,
+} from './keymap'
 
 describe('KEY_TO_JAMO', () => {
   it('maps a plain consonant key', () => {
@@ -43,4 +48,12 @@ describe('isKoreanJamoKey', () => {
       expect(isKoreanJamoKey(code)).toBe(false)
     },
   )
+})
+
+describe('isTypingInputKey', () => {
+  it('accepts Korean jamo positions and Space only', () => {
+    expect(isTypingInputKey('KeyR')).toBe(true)
+    expect(isTypingInputKey('Space')).toBe(true)
+    expect(isTypingInputKey('Period')).toBe(false)
+  })
 })

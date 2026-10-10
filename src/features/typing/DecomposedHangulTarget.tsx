@@ -8,11 +8,16 @@ import {
   type GuideOperation,
   type SyllableGuide,
 } from './hangul-segmentation-guides'
+import {
+  HANGUL_TARGET_SIZES,
+  type HangulTargetSize,
+} from './hangul-target-layout'
+import { TargetWords } from './JamoSvgHangulTarget'
 
 interface DecomposedHangulTargetProps {
   session: TypingSessionState
   className?: string
-  compact?: boolean
+  size?: HangulTargetSize
 }
 
 interface Rect {
@@ -534,12 +539,12 @@ function SyllableCanvas({
   glyph,
   keys,
   keyIndex,
-  compact,
+  size,
 }: {
   glyph: string
   keys: PositionedKey[]
   keyIndex: number
-  compact: boolean
+  size: HangulTargetSize
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
@@ -558,7 +563,7 @@ function SyllableCanvas({
       ref={canvasRef}
       width={TILE_SIZE}
       height={TILE_SIZE}
-      className={`${compact ? 'h-16 w-16 sm:h-26 sm:w-26' : 'h-26 w-26'} rounded-md border border-[#D9CFF5] bg-[#FFFCF7] shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)]`}
+      className={`${HANGUL_TARGET_SIZES[size].tile} rounded-md border border-[#D9CFF5] bg-[#FFFCF7] shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)]`}
       aria-hidden="true"
     />
   )
@@ -568,7 +573,7 @@ function SyllableCanvas({
 export default function DecomposedHangulTarget({
   session,
   className = '',
-  compact = false,
+  size = 'regular',
 }: DecomposedHangulTargetProps) {
   const syllables = new Map<number, PositionedKey[]>()
   const characters = Array.from(session.targetText)
@@ -580,19 +585,24 @@ export default function DecomposedHangulTarget({
 
   return (
     <div
-      className={`flex flex-wrap justify-center gap-2 ${className}`}
+      className={`flex flex-wrap justify-center ${HANGUL_TARGET_SIZES[size].gap} ${className}`}
       aria-label={session.targetText}
       role="img"
     >
-      {[...syllables.entries()].map(([syllableIndex, keys]) => (
-        <SyllableCanvas
-          key={syllableIndex}
-          glyph={characters[syllableIndex] ?? ''}
-          keys={keys}
-          keyIndex={session.keyIndex}
-          compact={compact}
-        />
-      ))}
+      <TargetWords
+        items={[...syllables.entries()]}
+        isSpace={([syllableIndex]) => characters[syllableIndex] === ' '}
+        size={size}
+        renderTile={([syllableIndex, keys]) => (
+          <SyllableCanvas
+            key={syllableIndex}
+            glyph={characters[syllableIndex] ?? ''}
+            keys={keys}
+            keyIndex={session.keyIndex}
+            size={size}
+          />
+        )}
+      />
     </div>
   )
 }
