@@ -1,6 +1,7 @@
-import type { LessonExercise } from '../../domain/models/lesson'
-import { findUntypeableCharacters } from '../../domain/korean/target-sequence'
+import * as XLSX from 'xlsx'
 import { normalizeHangulText } from '../../domain/korean/hangul'
+import { findUntypeableCharacters } from '../../domain/korean/target-sequence'
+import type { LessonExercise } from '../../domain/models/lesson'
 
 const expectedHeader = [
   'no',
@@ -12,87 +13,58 @@ const expectedHeader = [
   'hint',
 ]
 
-export type LessonCsvImportErrorReason =
+export type LessonXlsxImportErrorReason =
   | 'invalidHeader'
   | 'invalidColumnCount'
   | 'wordRequired'
   | 'untypeableWord'
   | 'invalidDifficulty'
-  | 'invalidCsv'
+  | 'invalidWorkbook'
 
-export interface LessonCsvImportError {
+export interface LessonXlsxImportError {
   row: number
-  reason: LessonCsvImportErrorReason
+  reason: LessonXlsxImportErrorReason
 }
 
-export interface LessonCsvImportResult {
+export interface LessonXlsxImportResult {
   exercises: LessonExercise[]
-  errors: LessonCsvImportError[]
-}
-
-function parseCsvRows(source: string): string[][] | null {
-  const rows: string[][] = []
-  let row: string[] = []
-  let field = ''
-  let quoted = false
-
-  for (let index = 0; index < source.length; index += 1) {
-    const character = source[index]
-    if (character === '"') {
-      if (quoted && source[index + 1] === '"') {
-        field += '"'
-        index += 1
-      } else {
-        quoted = !quoted
-      }
-      continue
-    }
-    if (character === ',' && !quoted) {
-      row.push(field)
-      field = ''
-      continue
-    }
-    if ((character === '\n' || character === '\r') && !quoted) {
-      if (character === '\r' && source[index + 1] === '\n') index += 1
-      row.push(field)
-      rows.push(row)
-      row = []
-      field = ''
-      continue
-    }
-    field += character
-  }
-
-  if (quoted) return null
-  if (field || row.length > 0) rows.push([...row, field])
-  return rows.filter((values) => values.some((value) => value.trim()))
+  errors: LessonXlsxImportError[]
 }
 
 function isExpectedHeader(values: string[]): boolean {
   return (
     values.length === expectedHeader.length &&
     values.every(
-      (value, index) =>
-        value
-          .replace(/^\uFEFF/, '')
-          .trim()
-          .toLowerCase() === expectedHeader[index],
+      (value, index) => value.trim().toLowerCase() === expectedHeader[index],
     )
   )
 }
 
-export function parseLessonExerciseCsv(
-  source: string,
+export function parseLessonExerciseWorkbook(
+  bytes: ArrayBuffer,
   createId: () => string,
-): LessonCsvImportResult {
-  const rows = parseCsvRows(source)
-  if (!rows)
-    return { exercises: [], errors: [{ row: 1, reason: 'invalidCsv' }] }
+): LessonXlsxImportResult {
+  let rows: string[][]
+  try {
+    const workbook = XLSX.read(bytes, { type: 'array' })
+    const sheet = workbook.Sheets[workbook.SheetNames[0] ?? '']
+    if (!sheet)
+      return {
+        exercises: [],
+        errors: [{ row: 1, reason: 'invalidWorkbook' }],
+      }
+    rows = XLSX.utils
+      .sheet_to_json<unknown[]>(sheet, { header: 1, defval: '' })
+      .map((row) => row.map((value) => String(value ?? '')))
+  } catch {
+    return { exercises: [], errors: [{ row: 1, reason: 'invalidWorkbook' }] }
+  }
+
   if (!isExpectedHeader(rows[0] ?? []))
     return { exercises: [], errors: [{ row: 1, reason: 'invalidHeader' }] }
 
   const exercises: LessonExercise[] = []
-  const errors: LessonCsvImportError[] = []
+  const errors: LessonXlsxImportError[] = []
   for (const [index, values] of rows.slice(1).entries()) {
     const row = index + 2
     if (values.length !== expectedHeader.length) {
@@ -139,6 +111,12 @@ export function parseLessonExerciseCsv(
   return { exercises, errors }
 }
 
-export function lessonCsvTemplate(): string {
-  return `\uFEFF${expectedHeader.join(',')}\n`
+export function lessonXlsxTemplate(): ArrayBuffer {
+  const workbook = XLSX.utils.book_new()
+  const worksheet = XLSX.utils.aoa_to_sheet([
+    expectedHeader,
+    [1, '안녕하세요', 'สวัสดี', 'Hello', 'annyeonghaseyo', 'easy', 'ใช้ทักทาย'],
+  ])
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Exercises')
+  return XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
 }

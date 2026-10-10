@@ -39,8 +39,8 @@ export const en = {
   'action.createUnit': 'Create Unit',
   'action.createLesson': 'Create Lesson',
   'action.addExercise': 'Add Exercise',
-  'action.downloadCsvTemplate': '.csv Template',
-  'action.importCsv': 'Import .csv',
+  'action.downloadXlsxTemplate': '.xlsx Template',
+  'action.importXlsx': 'Import .xlsx',
   'action.importValidRows': 'Import valid rows',
   'action.publish': 'Publish',
   'action.archive': 'Archive',
@@ -112,21 +112,22 @@ export const en = {
   'lesson.exerciseContent': 'Content',
   'lesson.exerciseTranslation': 'Translation',
   'lesson.exerciseMetadata': 'Learning metadata',
-  'lesson.csvImport.title': 'Review CSV import',
-  'lesson.csvImport.validRows': '{count} valid rows to add',
-  'lesson.csvImport.invalidRows': '{count} invalid rows skipped',
-  'lesson.csvImport.preview': 'Preview',
-  'lesson.csvImport.errors': 'Rows with errors',
-  'lesson.csvImport.noValidRows': 'No valid rows to import.',
-  'lesson.csvImport.error.invalidHeader':
+  'lesson.xlsxImport.title': 'Review XLSX import',
+  'lesson.xlsxImport.validRows': '{count} valid rows to add',
+  'lesson.xlsxImport.invalidRows': '{count} invalid rows skipped',
+  'lesson.xlsxImport.preview': 'Preview',
+  'lesson.xlsxImport.errors': 'Rows with errors',
+  'lesson.xlsxImport.noValidRows': 'No valid rows to import.',
+  'lesson.xlsxImport.error.invalidHeader':
     'Header must be: no, word, meaning_th, meaning_en, romanization, difficulty, hint.',
-  'lesson.csvImport.error.invalidColumnCount': 'Expected 7 columns.',
-  'lesson.csvImport.error.wordRequired': 'Word is required.',
-  'lesson.csvImport.error.untypeableWord':
+  'lesson.xlsxImport.error.invalidColumnCount': 'Expected 7 columns.',
+  'lesson.xlsxImport.error.wordRequired': 'Word is required.',
+  'lesson.xlsxImport.error.untypeableWord':
     'Word contains characters the Korean keyboard cannot type.',
-  'lesson.csvImport.error.invalidDifficulty':
+  'lesson.xlsxImport.error.invalidDifficulty':
     'Difficulty must be easy, medium, or hard.',
-  'lesson.csvImport.error.invalidCsv': 'CSV has an unclosed quoted value.',
+  'lesson.xlsxImport.error.invalidWorkbook':
+    'The XLSX workbook could not be read.',
 
   'draft.courseTitle': 'Untitled Course',
   'draft.courseDescription': 'Describe this learning path.',
@@ -254,8 +255,8 @@ export const th: Record<AdminMessageKey, string> = {
   'action.createUnit': 'สร้างยูนิต',
   'action.createLesson': 'สร้างบทเรียน',
   'action.addExercise': 'เพิ่มแบบฝึกหัด',
-  'action.downloadCsvTemplate': 'ดาวน์โหลดเทมเพลต CSV',
-  'action.importCsv': 'นำเข้า CSV',
+  'action.downloadXlsxTemplate': 'ดาวน์โหลดเทมเพลต XLSX',
+  'action.importXlsx': 'นำเข้า XLSX',
   'action.importValidRows': 'นำเข้าแถวที่ถูกต้อง',
   'action.publish': 'เผยแพร่',
   'action.archive': 'เก็บถาวร',
@@ -326,21 +327,22 @@ export const th: Record<AdminMessageKey, string> = {
   'lesson.exerciseContent': 'เนื้อหา',
   'lesson.exerciseTranslation': 'คำแปล',
   'lesson.exerciseMetadata': 'ข้อมูลสำหรับการเรียนรู้',
-  'lesson.csvImport.title': 'ตรวจสอบการนำเข้า CSV',
-  'lesson.csvImport.validRows': 'เพิ่มได้ {count} แถว',
-  'lesson.csvImport.invalidRows': 'ข้าม {count} แถวที่ไม่ถูกต้อง',
-  'lesson.csvImport.preview': 'ตัวอย่างข้อมูล',
-  'lesson.csvImport.errors': 'แถวที่มีข้อผิดพลาด',
-  'lesson.csvImport.noValidRows': 'ไม่มีแถวที่นำเข้าได้',
-  'lesson.csvImport.error.invalidHeader':
+  'lesson.xlsxImport.title': 'ตรวจสอบการนำเข้า XLSX',
+  'lesson.xlsxImport.validRows': 'เพิ่มได้ {count} แถว',
+  'lesson.xlsxImport.invalidRows': 'ข้าม {count} แถวที่ไม่ถูกต้อง',
+  'lesson.xlsxImport.preview': 'ตัวอย่างข้อมูล',
+  'lesson.xlsxImport.errors': 'แถวที่มีข้อผิดพลาด',
+  'lesson.xlsxImport.noValidRows': 'ไม่มีแถวที่นำเข้าได้',
+  'lesson.xlsxImport.error.invalidHeader':
     'หัวตารางต้องเป็น: no, word, meaning_th, meaning_en, romanization, difficulty, hint',
-  'lesson.csvImport.error.invalidColumnCount': 'ต้องมี 7 คอลัมน์',
-  'lesson.csvImport.error.wordRequired': 'ต้องระบุคำ',
-  'lesson.csvImport.error.untypeableWord':
+  'lesson.xlsxImport.error.invalidColumnCount': 'ต้องมี 7 คอลัมน์',
+  'lesson.xlsxImport.error.wordRequired': 'ต้องระบุคำ',
+  'lesson.xlsxImport.error.untypeableWord':
     'คำมีตัวอักษรที่พิมพ์ด้วยแป้นพิมพ์เกาหลีไม่ได้',
-  'lesson.csvImport.error.invalidDifficulty':
+  'lesson.xlsxImport.error.invalidDifficulty':
     'ระดับความยากต้องเป็น easy, medium หรือ hard',
-  'lesson.csvImport.error.invalidCsv': 'CSV มีเครื่องหมายคำพูดที่ปิดไม่ครบ',
+  'lesson.xlsxImport.error.invalidWorkbook':
+    'ไม่สามารถอ่านไฟล์ XLSX ได้',
 
   'draft.courseTitle': 'คอร์สใหม่',
   'draft.courseDescription': 'อธิบายเส้นทางการเรียนนี้',
