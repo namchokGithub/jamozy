@@ -145,9 +145,21 @@ describe('LessonTypingSession', () => {
     expect(screen.getByLabelText('Virtual Korean keyboard')).toHaveStyle({ opacity: '1' })
   })
 
-  it('prevents Space scrolling without recording a typing mistake', async () => {
-    renderSession(vi.fn())
-    await waitForTypingTarget('가')
+  it('uses Space as typing input while preventing page scrolling', async () => {
+    renderSession(
+      vi.fn(),
+      makeLesson({
+        exercises: [
+          {
+            ...makeLesson().exercises[0],
+            targetText: '가 나',
+          },
+        ],
+      }),
+    )
+    await waitForTypingTarget('가 나')
+    fireEvent.keyDown(window, { code: 'KeyR' })
+    fireEvent.keyDown(window, { code: 'KeyK' })
     const spaceEvent = new KeyboardEvent('keydown', {
       bubbles: true,
       cancelable: true,
@@ -158,7 +170,7 @@ describe('LessonTypingSession', () => {
 
     expect(wasNotPrevented).toBe(false)
     expect(useLessonSessionStore.getState().session?.currentSession).toMatchObject({
-      keyIndex: 0,
+      keyIndex: 3,
       mistakes: [],
     })
   })

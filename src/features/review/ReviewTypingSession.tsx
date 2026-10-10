@@ -9,7 +9,7 @@ import {
   reviewSessionBody,
   type CompletedTypingSession,
 } from './review-session-body'
-import { isKoreanJamoKey } from '../../domain/korean/keymap'
+import { isTypingInputKey } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
 import FingerPlacementGuide from '../home/FingerPlacementGuide'
@@ -92,10 +92,7 @@ export default function ReviewTypingSession<Outcome extends object>({
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.metaKey || event.ctrlKey || event.altKey) return
-      if (!isKoreanJamoKey(event.code)) {
-        if (event.code === 'Space') event.preventDefault()
-        return
-      }
+      if (!isTypingInputKey(event.code)) return
       event.preventDefault()
       handleKeyPress(event.code, event.shiftKey)
     }

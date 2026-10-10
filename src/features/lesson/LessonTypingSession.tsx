@@ -7,7 +7,7 @@ import {
   getLessonResult,
   type LessonResult,
 } from '../../domain/korean/lesson-session'
-import { isKoreanJamoKey } from '../../domain/korean/keymap'
+import { isTypingInputKey } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
 import FingerPlacementGuide from '../home/FingerPlacementGuide'
@@ -103,10 +103,7 @@ export default function LessonTypingSession({
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.metaKey || event.ctrlKey || event.altKey) return
-      if (!isKoreanJamoKey(event.code)) {
-        if (event.code === 'Space') event.preventDefault()
-        return
-      }
+      if (!isTypingInputKey(event.code)) return
       event.preventDefault()
       handleKeyPress(event.code, event.shiftKey)
     }

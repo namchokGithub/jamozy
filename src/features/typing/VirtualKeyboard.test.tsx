@@ -96,6 +96,17 @@ describe('VirtualKeyboard', () => {
     expect(onKeyPress).toHaveBeenCalledWith('KeyQ', true)
   })
 
+  it('sends a touched Space key through the supplied physical-key callback', () => {
+    const onKeyPress = vi.fn()
+    render(
+      <VirtualKeyboard showEnglishKeys opacity={1} onKeyPress={onKeyPress} />,
+    )
+
+    fireEvent.click(screen.getByLabelText('Space'))
+
+    expect(onKeyPress).toHaveBeenCalledWith('Space', false)
+  })
+
   it('does not submit a punctuation key as typing input', () => {
     const onKeyPress = vi.fn()
     render(

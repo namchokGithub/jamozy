@@ -8,7 +8,7 @@ import {
   resolveHomeResume,
   type HomeLessonRef,
 } from '../../domain/home/home-session'
-import { isKoreanJamoKey } from '../../domain/korean/keymap'
+import { isTypingInputKey } from '../../domain/korean/keymap'
 import type { Progress } from '../../domain/models/progress'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
@@ -230,10 +230,7 @@ export default function HomePlayer({
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return
-      if (!isKoreanJamoKey(event.code)) {
-        if (event.code === 'Space') event.preventDefault()
-        return
-      }
+      if (!isTypingInputKey(event.code)) return
       event.preventDefault()
       handleKeyPress(event.code, event.shiftKey)
     }

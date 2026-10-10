@@ -5,7 +5,7 @@ import type {
   OnePageQueueExercise,
 } from '../../application/get-one-page-learning-path'
 import type { ExerciseResult } from '../../domain/korean/lesson-session'
-import { isKoreanJamoKey } from '../../domain/korean/keymap'
+import { isTypingInputKey } from '../../domain/korean/keymap'
 import type { CourseListLoaderData } from '../course/CourseListPage.loader'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
@@ -121,10 +121,7 @@ export default function OnePageLearningPlayer({
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return
-      if (!isKoreanJamoKey(event.code)) {
-        if (event.code === 'Space') event.preventDefault()
-        return
-      }
+      if (!isTypingInputKey(event.code)) return
       event.preventDefault()
       handleKeyPress(event.code, event.shiftKey)
     }
