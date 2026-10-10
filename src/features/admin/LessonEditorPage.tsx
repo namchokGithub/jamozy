@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useFetcher, useLoaderData } from 'react-router'
 import type { Lesson, LessonExercise } from '../../domain/models/lesson'
 import type { Unit } from '../../domain/models/unit'
@@ -8,6 +8,7 @@ import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { Dropdown } from '../../components/ui/Dropdown'
 import { PageSurface } from '../../components/ui/PageSurface'
+import { Modal } from '../../components/ui/Modal'
 import { AdminStatusActions } from './AdminStatusActions'
 import { AdminStatusBadge } from './AdminStatusBadge'
 import { AdminHomeDeployNotice } from './AdminHomeDeployNotice'
@@ -19,6 +20,11 @@ import { AdminTopBar } from './AdminTopBar'
 import { useAdminTranslation } from './i18n/admin-i18n'
 import { AdminSortableList } from './AdminSortableList'
 import { lessonTypes } from './lesson-types'
+import {
+  lessonCsvTemplate,
+  parseLessonExerciseCsv,
+  type LessonCsvImportResult,
+} from './lesson-csv-import'
 
 const difficulties: LessonExercise['difficulty'][] = ['easy', 'medium', 'hard']
 
@@ -44,6 +50,8 @@ export default function LessonEditorPage() {
   const [exerciseErrors, setExerciseErrors] = useState<Record<string, string>>(
     {},
   )
+  const [csvImport, setCsvImport] = useState<LessonCsvImportResult | null>(null)
+  const csvFileInput = useRef<HTMLInputElement>(null)
   const isPending = useAdminMutationPending()
   const hasUnsavedChanges =
     title !== lesson.title ||
@@ -97,6 +105,22 @@ export default function LessonEditorPage() {
       },
       { method: 'post' },
     )
+  }
+  const downloadCsvTemplate = () => {
+    const url = URL.createObjectURL(
+      new Blob([lessonCsvTemplate()], { type: 'text/csv;charset=utf-8' }),
+    )
+    const now = new Date()
+    const fileName = `jamozy-lesson-exercises-template-${now.toISOString()}.csv`
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileName
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+  const importCsv = async (file: File) => {
+    const source = await file.text()
+    setCsvImport(parseLessonExerciseCsv(source, crypto.randomUUID))
   }
   const update = (index: number, field: keyof LessonExercise, value: string) =>
     setExercises((items) =>
@@ -159,6 +183,104 @@ export default function LessonEditorPage() {
   return (
     <PageSurface className="px-6 lg:px-8" contentClassName="max-w-[1200px]">
       <AdminUnsavedChangesDialog blocker={unsavedChangesBlocker} />
+      <Modal
+        open={Boolean(csvImport)}
+        title={t('lesson.csvImport.title')}
+        sizeClassName="max-w-4xl"
+        onClose={() => setCsvImport(null)}
+      >
+        {csvImport && (
+          <div className="mt-5 grid gap-5">
+            <div className="flex flex-wrap gap-2 text-sm font-semibold">
+              <span className="rounded-full bg-[#e6f4ea] px-3 py-1.5 text-[#357a47]">
+                {t('lesson.csvImport.validRows', {
+                  count: csvImport.exercises.length,
+                })}
+              </span>
+              {csvImport.errors.length > 0 && (
+                <span className="rounded-full bg-[#fff1d8] px-3 py-1.5 text-[#92703e]">
+                  {t('lesson.csvImport.invalidRows', {
+                    count: csvImport.errors.length,
+                  })}
+                </span>
+              )}
+            </div>
+            {csvImport.exercises.length > 0 ? (
+              <div className="grid gap-2">
+                <h3 className="font-bold text-[#39465b]">
+                  {t('lesson.csvImport.preview')}
+                </h3>
+                <div className="max-h-64 overflow-auto rounded-xl border border-[#eadfd4]">
+                  <table className="w-full min-w-160 text-left text-sm">
+                    <thead className="sticky top-0 bg-[#fffaf5] text-[#39465b]">
+                      <tr>
+                        <th className="px-3 py-2">{t('field.targetText')}</th>
+                        <th className="px-3 py-2">{t('field.meaningTh')}</th>
+                        <th className="px-3 py-2">{t('field.meaningEn')}</th>
+                        <th className="px-3 py-2">{t('field.romanization')}</th>
+                        <th className="px-3 py-2">{t('field.difficulty')}</th>
+                        <th className="px-3 py-2">{t('field.hint')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {csvImport.exercises.map((exercise) => (
+                        <tr
+                          key={exercise.id}
+                          className="border-t border-[#eadfd4]"
+                        >
+                          <td className="px-3 py-2 font-semibold">
+                            {exercise.targetText}
+                          </td>
+                          <td className="px-3 py-2">{exercise.meaningTh}</td>
+                          <td className="px-3 py-2">{exercise.meaningEn}</td>
+                          <td className="px-3 py-2">{exercise.romanization}</td>
+                          <td className="px-3 py-2">
+                            {t(`difficulty.${exercise.difficulty}`)}
+                          </td>
+                          <td className="px-3 py-2">{exercise.hint}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-[#667085]">
+                {t('lesson.csvImport.noValidRows')}
+              </p>
+            )}
+            {csvImport.errors.length > 0 && (
+              <div className="grid gap-2">
+                <h3 className="font-bold text-[#39465b]">
+                  {t('lesson.csvImport.errors')}
+                </h3>
+                <ul className="max-h-36 overflow-auto rounded-xl bg-[#fff1d8] px-4 py-3 text-sm text-[#92703e]">
+                  {csvImport.errors.map((error) => (
+                    <li key={`${error.row}-${error.reason}`}>
+                      {t('lesson.exerciseNumber', { number: error.row })}:{' '}
+                      {t(`lesson.csvImport.error.${error.reason}`)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <div className="flex flex-wrap gap-2">
+              <Button
+                disabled={isPending || csvImport.exercises.length === 0}
+                onClick={() => {
+                  setExercises((items) => [...items, ...csvImport.exercises])
+                  setCsvImport(null)
+                }}
+              >
+                {t('action.importValidRows')}
+              </Button>
+              <Button variant="secondary" onClick={() => setCsvImport(null)}>
+                {t('action.cancel')}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
       <AdminTopBar
         breadcrumb={[
           { label: t('breadcrumb.admin'), to: '/admin' },
@@ -285,16 +407,43 @@ export default function LessonEditorPage() {
               {t('lesson.exercisesHint')}
             </p>
           </div>
-          <Button
-            disabled={isPending}
-            onClick={() => {
-              const exercise = makeExercise(crypto.randomUUID())
-              setExercises((items) => [...items, exercise])
-              setEditingExerciseId(exercise.id)
-            }}
-          >
-            {t('action.addExercise')}
-          </Button>
+          <div className="flex flex-wrap gap-1">
+            <Button
+              disabled={isPending}
+              onClick={() => {
+                const exercise = makeExercise(crypto.randomUUID())
+                setExercises((items) => [...items, exercise])
+                setEditingExerciseId(exercise.id)
+              }}
+            >
+              {t('action.addExercise')}
+            </Button>
+            <Button
+              variant="secondary"
+              disabled={isPending}
+              onClick={downloadCsvTemplate}
+            >
+              {t('action.downloadCsvTemplate')}
+            </Button>
+            <Button
+              variant="secondary"
+              disabled={isPending}
+              onClick={() => csvFileInput.current?.click()}
+            >
+              {t('action.importCsv')}
+            </Button>
+            <input
+              ref={csvFileInput}
+              type="file"
+              accept=".csv,text/csv"
+              className="sr-only"
+              onChange={(event) => {
+                const file = event.currentTarget.files?.[0]
+                event.currentTarget.value = ''
+                if (file) void importCsv(file)
+              }}
+            />
+          </div>
         </div>
         <section className="mt-4 rounded-2xl border border-[#eadfd4] bg-white/70 p-4">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
