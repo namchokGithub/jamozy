@@ -413,6 +413,12 @@ export default function LessonEditorPage() {
           </div>
           <div className="flex flex-wrap gap-1">
             <Button
+              disabled={isPending || !hasUnsavedChanges}
+              onClick={() => submit('save')}
+            >
+              {isPending ? t('action.saving') : t('action.saveAllChanges')}
+            </Button>
+            <Button
               disabled={isPending}
               onClick={() => {
                 const exercise = makeExercise(crypto.randomUUID())
