@@ -43,7 +43,11 @@ export function buildExpectedKeys(targetText: string): ExpectedKey[] {
     const decomposed = decomposeSyllable(char)
 
     if (!decomposed) {
-      keys.push(toExpectedKey(char, syllableIndex, 'literal'))
+      // Standalone compound vowels (for example ㅘ) have no direct physical
+      // key, but are typeable through their two 2-beolsik vowel keys.
+      for (const jamo of expandParts(char, COMPOUND_JUNGSEONG_PARTS)) {
+        keys.push(toExpectedKey(jamo, syllableIndex, 'literal'))
+      }
       return
     }
 
