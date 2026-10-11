@@ -40,13 +40,13 @@ representative queue.
 
 The Tagger consists of five deep modules with narrow interfaces:
 
-| Module | Interface responsibility | Implementation responsibility |
-| --- | --- | --- |
-| Extraction cache | Load a source glyph by syllable and report its exact source identity | Parse the font, derive steps/signals, serialize paths/commands, invalidate stale output |
-| Review store | Read/write reviewed glyph records and expose their compatibility state | Layout-agnostic API; choseong-sharded, versioned review files; manifest validation; dev-only local writes |
-| Queue store | Read/write review workflow entries and priorities | Separate, versioned queue document; it references reviews but never owns geometry or recipes |
-| Recipe compiler | Compile a review record plus source glyph into ordered per-step paths | Resolve contour refs, replay split tokens, preserve command references |
-| Validator | Return machine-readable errors/warnings and a reconstruction result | Structural checks, fingerprint checks, geometric comparison, approval eligibility |
+| Module           | Interface responsibility                                               | Implementation responsibility                                                                             |
+| ---------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Extraction cache | Load a source glyph by syllable and report its exact source identity   | Parse the font, derive steps/signals, serialize paths/commands, invalidate stale output                   |
+| Review store     | Read/write reviewed glyph records and expose their compatibility state | Layout-agnostic API; choseong-sharded, versioned review files; manifest validation; dev-only local writes |
+| Queue store      | Read/write review workflow entries and priorities                      | Separate, versioned queue document; it references reviews but never owns geometry or recipes              |
+| Recipe compiler  | Compile a review record plus source glyph into ordered per-step paths  | Resolve contour refs, replay split tokens, preserve command references                                    |
+| Validator        | Return machine-readable errors/warnings and a reconstruction result    | Structural checks, fingerprint checks, geometric comparison, approval eligibility                         |
 
 The UI calls these modules; it does not reconstruct paths or infer ownership
 itself. This gives the Tagger a stable seam: future persistence or extraction
@@ -59,7 +59,10 @@ type ReviewStore = {
   get(syllable: string): Promise<GlyphReview | undefined>
   list(filter?: ReviewFilter): Promise<GlyphReviewSummary[]>
   getManifest(): Promise<ReviewManifest>
-  save(review: GlyphReview, expectedRevision?: string): Promise<SaveReviewResult>
+  save(
+    review: GlyphReview,
+    expectedRevision?: string,
+  ): Promise<SaveReviewResult>
 }
 
 type QueueStore = {
@@ -258,11 +261,11 @@ type GlyphReview = {
 
 This supports the proven cases without special cases in the schema:
 
-| Syllable | Ownership representation |
-| --- | --- |
-| `가` | two whole contour refs, one per step |
-| `하` | `ㅏ` references Contour 1; `ㅎ` references Contours 2–4 in one step, including the counter contour |
-| `값` | `ㄱ`, `ㅏ`, and the final `ㅂ` counter use whole contours; the mixed source contour is replaced by two recipe pieces owned by `ㅂ` and `ㅅ` |
+| Syllable | Ownership representation                                                                                                                    |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `가`     | two whole contour refs, one per step                                                                                                        |
+| `하`     | `ㅏ` references Contour 1; `ㅎ` references Contours 2–4 in one step, including the counter contour                                          |
+| `값`     | `ㄱ`, `ㅏ`, and the final `ㅂ` counter use whole contours; the mixed source contour is replaced by two recipe pieces owned by `ㅂ` and `ㅅ` |
 
 No step is inferred from contour order. The `steps` array is ordered from the
 cache's Jamozy physical typing sequence, so a compiled output always uses
@@ -423,6 +426,46 @@ rebuilt locally and remains gitignored.
 After enqueueing, open `/dev/jamo-svg-tagger` with `pnpm dev`, review the
 queued syllables, then follow [Maintaining the runtime dataset](#maintaining-the-runtime-dataset)
 after any approvals.
+
+### Proposing and prioritizing reviews
+
+`jamo-svg:propose` creates unapproved `proposed` review drafts by copying
+whole-contour ownership, and any safely transferable split recipes, from the
+closest compatible **approved** glyph. It does not approve a glyph: inspect
+every proposed result in the Tagger before approving it.
+
+First preview the changes without writing review or queue data:
+
+```bash
+pnpm jamo-svg:propose --dry-run
+```
+
+If the proposals are suitable, commit current review-data changes and run:
+
+```bash
+pnpm jamo-svg:propose
+```
+
+The default maximum geometric matching cost is `250` font units. Use
+`--max-cost N` only when deliberately changing that guard, and use
+`--exclude 가,나` to prevent particular approved glyphs from becoming
+templates. Existing approved reviews are never changed. By default, existing
+unapproved reviews are also left intact. `--replace-reviewing` additionally
+replaces only `reviewing` drafts, so inspect it with `--dry-run` first and use
+it only when intentionally regenerating those drafts.
+
+To decide which unreviewed glyph to approve first, run:
+
+```bash
+pnpm jamo-svg:propose --rank
+```
+
+`--rank` writes nothing. It groups similar unreviewed glyphs as
+`template → candidates`: approving the first glyph with whole-contour ownership
+would give `propose` the strongest compatible template for the listed
+candidates. Review and approve that first glyph, then run `propose` again.
+Glyphs listed as `Alone` have no compatible group within the selected maximum
+cost and need an independent review.
 
 ## 7. Development-only Tagger workflow
 
@@ -650,10 +693,10 @@ revalidate them (Cloudflare Pages serves unhashed assets with
 **Format changes.** The shard format is the JSON shape in
 `src/domain/korean/jamo-svg-runtime.ts`.
 
-- *Additive, no version change:* a new optional field that the renderer can
+- _Additive, no version change:_ a new optional field that the renderer can
   ignore (for example `slot` per path or `bounds` per glyph). Older clients
   skip unknown fields.
-- *Breaking, version change required:* anything an older client would
+- _Breaking, version change required:_ anything an older client would
   misread or render incompletely, such as:
   - a new coordinate system (another em size, flipped axis, moved origin);
   - renamed or restructured fields (`paths` → `steps`, `d` as an array);
@@ -737,10 +780,10 @@ existing blocker and approving the review.
 
 The first six manually reviewed split candidates define its scope:
 
-| Family | Candidates | Measured/reviewed condition | Intended representation |
-| --- | --- | --- | --- |
-| Mixed final `ㅂ + ㅅ` | `값`, `낪`, `닶` | An outer contour contains both physical final steps; a separate counter may belong to `ㅂ`. | Replace only the mixed contour with two recipe pieces; keep independently owned counter contours as whole refs. |
-| Compact / monolithic | `굵`, `굸`, `귟`, `귌` | One or a very small number of contours carries several physical steps. `귌` has two cached contours despite its current note describing one compact source case. | A reviewer selects the relevant contour(s) and creates as many manually owned recipe pieces as required; unaffected contours remain whole refs. |
+| Family               | Candidates             | Measured/reviewed condition                                                                                                                                     | Intended representation                                                                                                                         |
+| -------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mixed final`ㅂ + ㅅ` | `값`, `낪`, `닶`       | An outer contour contains both physical final steps; a separate counter may belong to`ㅂ`.                                                                      | Replace only the mixed contour with two recipe pieces; keep independently owned counter contours as whole refs.                                 |
+| Compact / monolithic | `굵`, `굸`, `귟`, `귌` | One or a very small number of contours carries several physical steps.`귌` has two cached contours despite its current note describing one compact source case. | A reviewer selects the relevant contour(s) and creates as many manually owned recipe pieces as required; unaffected contours remain whole refs. |
 
 `값` remains the verified reference recipe. `낪` and `닶` are not assumed to
 share its exact command ranges or seams: they share only a family hypothesis
@@ -780,9 +823,18 @@ type ReviewedStepV2 = {
 }
 
 type RecipeTokenV2 =
-  | { kind: 'source-range'; fromCommand: number; toCommand: number; contourId?: number }
+  | {
+      kind: 'source-range'
+      fromCommand: number
+      toCommand: number
+      contourId?: number
+    }
   | { kind: 'move-to-anchor'; anchor: SourceAnchor }
-  | { kind: 'line-to-anchor'; anchor: SourceAnchor; reason: 'interior-closure-seam' }
+  | {
+      kind: 'line-to-anchor'
+      anchor: SourceAnchor
+      reason: 'interior-closure-seam'
+    }
   | { kind: 'close-to-start'; reason: 'interior-closure-seam' }
 
 type SplitPieceV2 = {
@@ -836,7 +888,12 @@ type ReviewManifestV2 = {
   splitRecipeSchemaVersion: 2
   activeFontFingerprint: string
   physicalStepAlgorithmVersion: 3
-  shards: Array<{ choseong: string; file: string; reviewCount: number; sha256: string }>
+  shards: Array<{
+    choseong: string
+    file: string
+    reviewCount: number
+    sha256: string
+  }>
 }
 ```
 

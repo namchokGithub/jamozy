@@ -18890,7 +18890,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "곌"
+      ]
     },
     {
       "syllable": "곪",

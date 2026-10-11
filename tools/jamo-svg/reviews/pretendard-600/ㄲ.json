@@ -5426,6 +5426,147 @@
         "validationHash": "2cb68c1c102f0446bb3ff36f8078c5545cef7df27304fd5384355fc3bd98e5ea"
       }
     },
+    "꿔": {
+      "reviewSchemaVersion": 2,
+      "syllable": "꿔",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "c2d14761478032c6ab3fcabb67e70621a85be493867110b3a7c45fba59ac08b4"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄲ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-1-1",
+              "pieceId": "piece-1"
+            },
+            {
+              "kind": "split-piece",
+              "recipeId": "split-1-1",
+              "pieceId": "piece-3"
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅜ",
+          "geometry": [
+            {
+              "kind": "split-piece",
+              "recipeId": "split-1-1",
+              "pieceId": "piece-2"
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "jamo": "ㅓ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [
+        {
+          "id": "split-1-1",
+          "sourceContourId": 1,
+          "sourceContourHash": "f8b1621877d0b9a15356b857b928c2679fca521f5fb00c13760ef2591e2dbe08",
+          "splitRecipeSchemaVersion": 2,
+          "method": "source-command-partition",
+          "rationale": "Manual source-command partition.",
+          "visualValidation": {
+            "sourceContourHash": "f8b1621877d0b9a15356b857b928c2679fca521f5fb00c13760ef2591e2dbe08"
+          },
+          "pieces": [
+            {
+              "id": "piece-1",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 2,
+                  "toCommand": 13
+                },
+                {
+                  "kind": "close-to-start",
+                  "reason": "interior-closure-seam"
+                }
+              ]
+            },
+            {
+              "id": "piece-2",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 0,
+                  "toCommand": 1
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 1,
+                    "commandIndex": 13,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 14,
+                  "toCommand": 14
+                },
+                {
+                  "kind": "line-to-anchor",
+                  "anchor": {
+                    "contourId": 1,
+                    "commandIndex": 25,
+                    "point": "end"
+                  },
+                  "reason": "interior-closure-seam"
+                },
+                {
+                  "kind": "source-range",
+                  "fromCommand": 26,
+                  "toCommand": 36
+                }
+              ]
+            },
+            {
+              "id": "piece-3",
+              "tokens": [
+                {
+                  "kind": "source-range",
+                  "fromCommand": 15,
+                  "toCommand": 25
+                },
+                {
+                  "kind": "close-to-start",
+                  "reason": "interior-closure-seam"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "approved": {
+        "at": "2026-10-11T06:20:47.706Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "8ccdbe88928d4ffa7d2f469400d681e0f87fe18074578064250aadbba781a175"
+      }
+    },
     "꿰": {
       "reviewSchemaVersion": 2,
       "syllable": "꿰",
