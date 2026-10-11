@@ -381,6 +381,49 @@ then unresolved split blockers; then one-contour multi-step; compound finals;
 high contour surplus/complexity; then normal proposals. Queue signals overlap
 and are not summed as a difficulty score.
 
+### Adding words to the review queue
+
+The Tagger reviews **precomposed Hangul syllables**, not words. To expand
+coverage, add words to a plain UTF-8 text file with one word or syllable per
+line, then enqueue its distinct syllables in first-appearance order.
+
+- The default vocabulary source is
+  `docs/informations/korean_words.txt`.
+- Put particles, inflections, contracted forms, or another supplemental list
+  in a separate file. The current example is
+  `docs/informations/korean-inflection-sample.md`.
+- Do not edit `tools/jamo-svg/queue/pretendard-600/queue.json` by hand. It is
+  generated queue data; `jamo-svg:enqueue` calculates its family metadata and
+  builds the ignored extraction cache that the dev Tagger reads.
+
+Before an enqueue that writes data, commit any existing review-data changes.
+First inspect the proposed queue update:
+
+```bash
+pnpm jamo-svg:enqueue \
+  --words docs/informations/korean-inflection-sample.md \
+  --reason inflection-sample \
+  --dry-run
+```
+
+If the output is correct, run the same command without `--dry-run`:
+
+```bash
+pnpm jamo-svg:enqueue \
+  --words docs/informations/korean-inflection-sample.md \
+  --reason inflection-sample
+```
+
+For the default frequency list, omit `--words` and `--reason`; use `--top N`
+to add only its first `N` words. Enqueue is idempotent: it keeps existing queue
+rows and reviews, and adds only new syllables. The changed queue JSON is
+version-controlled; the extraction cache under `tools/jamo-svg/cache/` is
+rebuilt locally and remains gitignored.
+
+After enqueueing, open `/dev/jamo-svg-tagger` with `pnpm dev`, review the
+queued syllables, then follow [Maintaining the runtime dataset](#maintaining-the-runtime-dataset)
+after any approvals.
+
 ## 7. Development-only Tagger workflow
 
 ```text
