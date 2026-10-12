@@ -14,7 +14,10 @@ import { useKeyboardFeedback } from '../typing/keyboard-feedback'
 import { useOnePagePlayerStore } from './one-page-player-store'
 import { usePressedKeyCodes } from '../typing/usePressedKeyCodes'
 import { useKeyboardSound } from '../typing/useKeyboardSound'
-import { useResolvedSoundSettings, type SoundSettings } from '../typing/useResolvedSoundSettings'
+import {
+  useResolvedSoundSettings,
+  type SoundSettings,
+} from '../typing/useResolvedSoundSettings'
 
 interface OnePageLearningPlayerProps {
   learningPath: OnePageLearningPath
@@ -316,7 +319,12 @@ export default function OnePageLearningPlayer({
             }}
             pressedCodes={pressedCodes}
           />
-          <FingerPlacementGuide nextKey={nextKey} pressedCodes={pressedCodes} />
+          <FingerPlacementGuide
+            nextKey={nextKey}
+            pressedCodes={pressedCodes}
+            hint={active.exercise.hint}
+            exerciseId={active.exercise.id}
+          />
         </div>
       ) : (
         <div className="mt-6 rounded-3xl border border-dashed border-[#dfcfc0] bg-white/60 p-6 text-center text-sm text-[#667085]">

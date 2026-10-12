@@ -11,6 +11,7 @@ import { isTypingInputKey } from '../../domain/korean/keymap'
 import VirtualKeyboard from '../typing/VirtualKeyboard'
 import HangulTarget from '../typing/HangulTarget'
 import FingerPlacementGuide from '../home/FingerPlacementGuide'
+import ExerciseHint from '../home/ExerciseHint'
 import { useKeyboardFeedback } from '../typing/keyboard-feedback'
 import type { Lesson } from '../../domain/models/lesson'
 import type { CompleteLessonOutcome } from '../../application/complete-lesson'
@@ -235,6 +236,7 @@ export default function LessonTypingSession({
   // const composed = getComposedText(session.currentSession)
   const nextKey =
     session.currentSession.expectedKeys[session.currentSession.keyIndex]
+  const currentExercise = lesson.exercises[session.currentIndex]
 
   return (
     <div className="mt-5 rounded-3xl border border-[#eadfd4] bg-[#fffdf9] p-3 shadow-sm sm:p-5">
@@ -291,9 +293,23 @@ export default function LessonTypingSession({
             <FingerPlacementGuide
               nextKey={nextKey}
               pressedCodes={pressedCodes}
+              hint={currentExercise?.hint}
+              exerciseId={currentExercise?.id}
+            />
+          </div>
+          <div className="sm:hidden">
+            <ExerciseHint
+              key={currentExercise?.id}
+              hint={currentExercise?.hint ?? null}
             />
           </div>
         </>
+      )}
+      {!keyboardSettings.showKeyboard && (
+        <ExerciseHint
+          key={currentExercise?.id}
+          hint={currentExercise?.hint ?? null}
+        />
       )}
     </div>
   )

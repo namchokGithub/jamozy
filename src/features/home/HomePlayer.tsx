@@ -15,6 +15,7 @@ import HangulTarget from '../typing/HangulTarget'
 import { homeTargetSize } from '../typing/hangul-target-layout'
 import { useSnackbar } from '../../components/ui/SnackbarProvider'
 import FingerPlacementGuide from './FingerPlacementGuide'
+import ExerciseHint from './ExerciseHint'
 import { useKeyboardFeedback } from '../typing/keyboard-feedback'
 import { useHomePlayerStore } from './home-player-store'
 import { useHomeServices } from './home-services'
@@ -371,7 +372,12 @@ export default function HomePlayer({
             <FingerPlacementGuide
               nextKey={nextKey}
               pressedCodes={pressedCodes}
+              hint={active.hint}
+              exerciseId={active.id}
             />
+          </div>
+          <div className="sm:hidden">
+            <ExerciseHint key={active.id} hint={active.hint} />
           </div>
         </div>
       ) : opened || !hasLessons ? (
