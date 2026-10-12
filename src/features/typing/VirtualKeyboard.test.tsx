@@ -107,7 +107,7 @@ describe('VirtualKeyboard', () => {
     expect(onKeyPress).toHaveBeenCalledWith('Space', false)
   })
 
-  it('does not submit a punctuation key as typing input', () => {
+  it('sends a touched punctuation key through the supplied physical-key callback', () => {
     const onKeyPress = vi.fn()
     render(
       <VirtualKeyboard showEnglishKeys opacity={1} onKeyPress={onKeyPress} />,
@@ -115,6 +115,25 @@ describe('VirtualKeyboard', () => {
 
     fireEvent.click(screen.getByLabelText(','))
 
-    expect(onKeyPress).not.toHaveBeenCalled()
+    expect(onKeyPress).toHaveBeenCalledWith('Comma', false)
+  })
+
+  it('highlights and sends Shift+Slash for a question mark', () => {
+    const onKeyPress = vi.fn()
+    render(
+      <VirtualKeyboard
+        nextKey={{ code: 'Slash', shift: true }}
+        showEnglishKeys
+        opacity={1}
+        onKeyPress={onKeyPress}
+      />,
+    )
+
+    expect(screen.getByLabelText('/')).toHaveClass('bg-[#ddf5e9]')
+    expect(screen.getByLabelText('/')).toHaveTextContent('?')
+    fireEvent.click(screen.getAllByLabelText('Shift ⇧')[0])
+    fireEvent.click(screen.getByLabelText('/'))
+
+    expect(onKeyPress).toHaveBeenCalledWith('Slash', true)
   })
 })

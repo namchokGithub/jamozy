@@ -2,7 +2,9 @@ import { StrictMode } from 'react'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import LessonTypingSession, { type LessonCompletion } from './LessonTypingSession'
+import LessonTypingSession, {
+  type LessonCompletion,
+} from './LessonTypingSession'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
 import type { Lesson } from '../../domain/models/lesson'
 import type { CompleteLessonOutcome } from '../../application/complete-lesson'
@@ -14,7 +16,11 @@ const { playSound, loadSound, unlockSound } = vi.hoisted(() => ({
   unlockSound: vi.fn(async () => undefined),
 }))
 vi.mock('../../infrastructure/audio/keyboard-sound-player', () => ({
-  keyboardSoundPlayer: { play: playSound, load: loadSound, unlock: unlockSound },
+  keyboardSoundPlayer: {
+    play: playSound,
+    load: loadSound,
+    unlock: unlockSound,
+  },
 }))
 
 function makeLesson(overrides: Partial<Lesson> = {}): Lesson {
@@ -57,9 +63,25 @@ const fakeOutcome: CompleteLessonOutcome = {
 }
 
 function makeKeyboardSettings(
-  overrides: Partial<Pick<UserSettings, 'showKeyboard' | 'showEnglishKeys' | 'keyboardOpacity' | 'soundEnabled' | 'keyboardSoundPack'>> = {},
+  overrides: Partial<
+    Pick<
+      UserSettings,
+      | 'showKeyboard'
+      | 'showEnglishKeys'
+      | 'keyboardOpacity'
+      | 'soundEnabled'
+      | 'keyboardSoundPack'
+    >
+  > = {},
 ) {
-  return { showKeyboard: true, showEnglishKeys: true, keyboardOpacity: 1, soundEnabled: false, keyboardSoundPack: 'turquoise' as const, ...overrides }
+  return {
+    showKeyboard: true,
+    showEnglishKeys: true,
+    keyboardOpacity: 1,
+    soundEnabled: false,
+    keyboardSoundPack: 'turquoise' as const,
+    ...overrides,
+  }
 }
 
 function renderSession(
@@ -74,7 +96,11 @@ function renderSession(
       {
         path: '/',
         Component: () => (
-          <LessonTypingSession lesson={lesson} onComplete={onComplete} keyboardSettings={keyboardSettings} />
+          <LessonTypingSession
+            lesson={lesson}
+            onComplete={onComplete}
+            keyboardSettings={keyboardSettings}
+          />
         ),
         action,
       },
@@ -107,14 +133,19 @@ describe('LessonTypingSession', () => {
       vi.fn(),
       makeLesson(),
       undefined,
-      makeKeyboardSettings({ soundEnabled: true, keyboardSoundPack: 'mxblack' }),
+      makeKeyboardSettings({
+        soundEnabled: true,
+        keyboardSoundPack: 'mxblack',
+      }),
     )
     await waitForTypingTarget('가')
 
     fireEvent.click(screen.getByRole('button', { name: 'r' }))
 
     expect(playSound).toHaveBeenCalledWith('press/GENERIC_R2')
-    expect(useLessonSessionStore.getState().session?.currentSession.keyIndex).toBe(1)
+    expect(
+      useLessonSessionStore.getState().session?.currentSession.keyIndex,
+    ).toBe(1)
   })
 
   /* it('highlights the current character and updates the composed text on a correct keydown', async () => {
@@ -126,7 +157,12 @@ describe('LessonTypingSession', () => {
   }) */
 
   it('hides the keyboard guide when showKeyboard is false', async () => {
-    renderSession(vi.fn(), makeLesson(), undefined, makeKeyboardSettings({ showKeyboard: false }))
+    renderSession(
+      vi.fn(),
+      makeLesson(),
+      undefined,
+      makeKeyboardSettings({ showKeyboard: false }),
+    )
 
     await waitForTypingTarget('가')
     expect(screen.queryByText('ㅂ')).not.toBeInTheDocument()
@@ -142,7 +178,9 @@ describe('LessonTypingSession', () => {
 
     await waitForTypingTarget('가')
     expect(screen.queryByText('r')).not.toBeInTheDocument()
-    expect(screen.getByLabelText('Virtual Korean keyboard')).toHaveStyle({ opacity: '1' })
+    expect(screen.getByLabelText('Virtual Korean keyboard')).toHaveStyle({
+      opacity: '1',
+    })
   })
 
   it('uses Space as typing input while preventing page scrolling', async () => {
@@ -169,7 +207,37 @@ describe('LessonTypingSession', () => {
     const wasNotPrevented = window.dispatchEvent(spaceEvent)
 
     expect(wasNotPrevented).toBe(false)
-    expect(useLessonSessionStore.getState().session?.currentSession).toMatchObject({
+    expect(
+      useLessonSessionStore.getState().session?.currentSession,
+    ).toMatchObject({
+      keyIndex: 3,
+      mistakes: [],
+    })
+  })
+
+  it('accepts Shift+Slash as a question-mark typing input', async () => {
+    renderSession(
+      vi.fn(),
+      makeLesson({
+        exercises: [{ ...makeLesson().exercises[0], targetText: '가?' }],
+      }),
+    )
+    await waitForTypingTarget('가?')
+    fireEvent.keyDown(window, { code: 'KeyR' })
+    fireEvent.keyDown(window, { code: 'KeyK' })
+    const questionMarkEvent = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      code: 'Slash',
+      shiftKey: true,
+    })
+
+    const wasNotPrevented = window.dispatchEvent(questionMarkEvent)
+
+    expect(wasNotPrevented).toBe(false)
+    expect(
+      useLessonSessionStore.getState().session?.currentSession,
+    ).toMatchObject({
       keyIndex: 3,
       mistakes: [],
     })
@@ -184,10 +252,12 @@ describe('LessonTypingSession', () => {
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
 
     await waitFor(() => expect(onComplete).toHaveBeenCalledOnce())
-    expect(onComplete).toHaveBeenCalledWith(expect.objectContaining({
-      outcome: expect.objectContaining({ expGained: 100, level: 2 }),
-      result: expect.objectContaining({ accuracy: 100, mistakes: [] }),
-    }))
+    expect(onComplete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        outcome: expect.objectContaining({ expGained: 100, level: 2 }),
+        result: expect.objectContaining({ accuracy: 100, mistakes: [] }),
+      }),
+    )
   })
 
   it('offers a retry when saving fails, then completes with the same submission', async () => {
@@ -202,7 +272,9 @@ describe('LessonTypingSession', () => {
     fireEvent.keyDown(window, { code: 'KeyR', shiftKey: false })
     fireEvent.keyDown(window, { code: 'KeyK', shiftKey: false })
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('could not be saved')
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'could not be saved',
+    )
     expect(onComplete).not.toHaveBeenCalled()
 
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }))

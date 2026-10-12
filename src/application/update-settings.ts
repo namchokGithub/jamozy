@@ -1,5 +1,8 @@
 import type { UserProfileRepository } from '../domain/repositories/user-profile-repository'
-import { defaultUserProfile, type UserSettings } from '../domain/models/user-profile'
+import {
+  defaultUserProfile,
+  type UserSettings,
+} from '../domain/models/user-profile'
 
 export async function updateSettings(
   userProfileRepo: UserProfileRepository,
@@ -9,7 +12,7 @@ export async function updateSettings(
 ): Promise<void> {
   const existing = await userProfileRepo.getUserProfile(userId)
   const profile = existing
-    ? { ...existing, settings }
+    ? { ...existing, settings, updatedAt: now }
     : { ...defaultUserProfile(userId, now), settings }
   await userProfileRepo.saveUserProfile(userId, profile)
 }

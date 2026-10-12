@@ -6,10 +6,20 @@ describe('buildExpectedKeys', () => {
     const keys = buildExpectedKeys('사랑')
 
     expect(keys.map((k) => k.jamo)).toEqual(['ㅅ', 'ㅏ', 'ㄹ', 'ㅏ', 'ㅇ'])
-    expect(keys.map((k) => k.code)).toEqual(['KeyT', 'KeyK', 'KeyF', 'KeyK', 'KeyD'])
+    expect(keys.map((k) => k.code)).toEqual([
+      'KeyT',
+      'KeyK',
+      'KeyF',
+      'KeyK',
+      'KeyD',
+    ])
     expect(keys.map((k) => k.syllableIndex)).toEqual([0, 0, 1, 1, 1])
     expect(keys.map((k) => k.slot)).toEqual([
-      'choseong', 'jungseong', 'choseong', 'jungseong', 'jongseong',
+      'choseong',
+      'jungseong',
+      'choseong',
+      'jungseong',
+      'jongseong',
     ])
   })
 
@@ -18,7 +28,11 @@ describe('buildExpectedKeys', () => {
 
     expect(keys.map((k) => k.jamo)).toEqual(['ㅎ', 'ㅗ', 'ㅏ'])
     expect(keys.map((k) => k.code)).toEqual(['KeyG', 'KeyH', 'KeyK'])
-    expect(keys.map((k) => k.slot)).toEqual(['choseong', 'jungseong', 'jungseong'])
+    expect(keys.map((k) => k.slot)).toEqual([
+      'choseong',
+      'jungseong',
+      'jungseong',
+    ])
     expect(keys.every((k) => k.syllableIndex === 0)).toBe(true)
   })
 
@@ -27,25 +41,48 @@ describe('buildExpectedKeys', () => {
 
     expect(keys.map((k) => k.jamo)).toEqual(['ㄱ', 'ㅏ', 'ㅂ', 'ㅅ'])
     expect(keys.map((k) => k.slot)).toEqual([
-      'choseong', 'jungseong', 'jongseong', 'jongseong',
+      'choseong',
+      'jungseong',
+      'jongseong',
+      'jongseong',
     ])
   })
 
-  it('gives space/period/comma their own literal single-key entry', () => {
-    const keys = buildExpectedKeys('안, 녕.')
+  it('gives space and punctuation their own literal single-key entry', () => {
+    const keys = buildExpectedKeys('안? 녕.')
 
     expect(keys.map((k) => k.jamo)).toEqual([
-      'ㅇ', 'ㅏ', 'ㄴ', ',', ' ', 'ㄴ', 'ㅕ', 'ㅇ', '.',
+      'ㅇ',
+      'ㅏ',
+      'ㄴ',
+      '?',
+      ' ',
+      'ㄴ',
+      'ㅕ',
+      'ㅇ',
+      '.',
     ])
     expect(keys.map((k) => k.code)).toEqual([
-      'KeyD', 'KeyK', 'KeyS', 'Comma', 'Space', 'KeyS', 'KeyU', 'KeyD', 'Period',
+      'KeyD',
+      'KeyK',
+      'KeyS',
+      'Slash',
+      'Space',
+      'KeyS',
+      'KeyU',
+      'KeyD',
+      'Period',
     ])
-    expect(keys.map((k) => k.syllableIndex)).toEqual([0, 0, 0, 1, 2, 3, 3, 3, 4])
+    expect(keys.map((k) => k.syllableIndex)).toEqual([
+      0, 0, 0, 1, 2, 3, 3, 3, 4,
+    ])
     expect(keys.filter((k) => k.slot === 'literal')).toHaveLength(3)
   })
 
   it('throws for a character with no keymap entry', () => {
-    expect(() => buildExpectedKeys('a')).toThrow('No keymap entry for character: "a"')
+    expect(() => buildExpectedKeys('a')).toThrow(
+      'No keymap entry for character: "a"',
+    )
   })
 
   it('marks strictShift true only for keys that have a Shift variant', () => {
@@ -62,7 +99,7 @@ describe('buildExpectedKeys', () => {
 
 describe('findUntypeableCharacters', () => {
   it('returns nothing for syllables, compatibility jamo, spaces, and punctuation', () => {
-    expect(findUntypeableCharacters('안녕하세요, 친구.')).toEqual([])
+    expect(findUntypeableCharacters('안녕하세요? 친구.')).toEqual([])
     expect(findUntypeableCharacters('ㄱㄲㅏ')).toEqual([])
   })
 
@@ -72,7 +109,10 @@ describe('findUntypeableCharacters', () => {
 
   it('returns each distinct character the keyboard cannot type, in order', () => {
     // U+1100/U+1101 are conjoining jamo that look like ㄱ/ㄲ (U+3131/U+3132).
-    expect(findUntypeableCharacters('\u1100가\u1101\u1100a')).toEqual(['\u1100', '\u1101', 'a'])
+    expect(findUntypeableCharacters('\u1100가\u1101\u1100a')).toEqual([
+      '\u1100',
+      '\u1101',
+      'a',
+    ])
   })
 })
-
