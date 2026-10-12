@@ -1,0 +1,1499 @@
+{
+  "shardSchemaVersion": 2,
+  "choseong": "standalone-jamo",
+  "fontFingerprint": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+  "physicalStepAlgorithmVersion": 3,
+  "splitRecipeSchemaVersion": 2,
+  "reviews": {
+    "ㄱ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㄱ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "09cfb8a1a031b006d25c53bdcb38f9804f5db9e921399e8d7d41e151d991e23c"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄱ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:49:13.352Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "2f6622eaff84a8451f261f94070145db9e4bfeb943fccf95d785e2aae7f45220"
+      }
+    },
+    "ㄲ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㄲ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "c5e0a7b29a2bef06d0f4122f71bbd599d54fced2d022e7f781cb3a40a730c6f8"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄲ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:49:23.099Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "1be2cc6ad25bf8ebee2aeab18a119aac454703cb407bf9f344adf7a570ff2847"
+      }
+    },
+    "ㄴ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㄴ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "90943488e63f676d18ea949c2e3c5352c4490d0444edd817eb9223806526434d"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄴ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:49:29.370Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "b6025aa8bff722461b2c049db7f5bc6e4ecd5453dd8d19ac3206b10c67230753"
+      }
+    },
+    "ㄷ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㄷ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "a17d20dc55cad0ffed9fb79689d39b2bc818c17ab882137062c074c1148929eb"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄷ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:49:49.993Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "2ddcc4a5ef301e49bd4e81f86c883b32912ff0da01fd982841c32b836790bd54"
+      }
+    },
+    "ㄸ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㄸ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "f9068725abd89a70f85e94af13dff81f07c022623e832004d42299ba687f978c"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄸ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:49:43.503Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "c8a1d87dc15dff4829c7c5de44648f961148f023c2c63033ec0fd016facdc991"
+      }
+    },
+    "ㄹ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㄹ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "23d08cf55491b7ba56f58c14b49b76cc5a28672c96e547c8cf33e42cebf7e143"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㄹ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:49:53.577Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "17ea83f369c3ac908a70765096b3d60f1e2e744e808f455f931a3e1580000abc"
+      }
+    },
+    "ㅁ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅁ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "6c57ed21a2413b04465cf7712d78ea36d511ee50e356cdf6c35c731e2a761cd4"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅁ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:49:57.147Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "f7360bb39a8061b99c45e10b84644f0af3b2484de6e40c0da7672944ed2e6774"
+      }
+    },
+    "ㅂ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅂ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "ecf7ad0618233878fb6bff21875e618dedc5a0b83b340808a47263329ea8f2fc"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅂ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:50:04.124Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "49e01f4e3e6a268e87553ce1c7d91dafacec83943f10a83ed43eef04a7574d7a"
+      }
+    },
+    "ㅃ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅃ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "508803fac9016d79a9ca5a4b7c8f2265657cfaa440fd62ee838131b7712bc5db"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅃ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            },
+            {
+              "kind": "contour",
+              "contourId": 2
+            },
+            {
+              "kind": "contour",
+              "contourId": 3
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:50:19.482Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "ab7a09a04152530bce21e3b5a2daf50b7c4a46bbac5c9d828e143998cf21aed6"
+      }
+    },
+    "ㅅ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅅ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "25879c29f05cb4cf0c3d85532aab22cf673e6922d206b47bfec81a9caec520eb"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅅ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:50:22.091Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "c9976ff5aea7eeda71927765343f22dd5b10ec186b37bd8263c4179e11102e51"
+      }
+    },
+    "ㅆ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅆ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "1f93c085b5e29250a8c10d83ca3e2d918d642d4a009dd43fedd66a67f219a287"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅆ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:50:25.811Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "ec44860e87d439d4dbb021627fff71174785e8f409a99863a19b988aad9013f7"
+      }
+    },
+    "ㅇ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅇ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "93ffb454f32828757ed04f523dcac03837231a55c02d40baaf44db0e339b98a4"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅇ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:50:27.842Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "7a52c9a55afcb4eb3ccd74dd9e383f749b0ea4cf92070be0a72f77e7624449d7"
+      }
+    },
+    "ㅈ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅈ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "f525cd4ada23069d2ed5ac413443b18de54c944c79558173831890ff1129875a"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅈ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:50:29.891Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "323936c0f43ad49df81bd6d316786c886c4d6b186a7dc74bf97e4ae5e62be7fd"
+      }
+    },
+    "ㅉ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅉ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "f850659ecf8b28d7f20492ab3b4e8840723b0239bc2621f17e68d37a57e18c64"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅉ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:50:31.515Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "84e150ee95ff49615cf7fa923371d3a3d3859c8d4c6d449ed4dec3be99ef14f6"
+      }
+    },
+    "ㅊ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅊ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "7323a8c95c85a3efa0c552fd8cf4976161ccaa112e642e7a0dc39ce82f2aa432"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅊ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:50:33.150Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "1f7a60093204f5906aee50d30d28b1425d325a8bb07aeec89e2e5112053992f1"
+      }
+    },
+    "ㅋ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅋ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "9d301904644426f710d0601d92b2bd6310eecf08d482c9a594bc11ad81361cee"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅋ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:50:35.877Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "d94aeb5c3dc9e55035901fe1fbf87725858f33de24d784d8c36067bb9bc7791e"
+      }
+    },
+    "ㅌ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅌ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "7406984898fff5fce24d4271c7c0c59071926aaf3c8d8f56b8b4ad727328ea0b"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅌ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:50:37.136Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "40a475856a41ebf489bc7b776c9912cc106c9fc3bb594e261d9da3c5652e5c34"
+      }
+    },
+    "ㅍ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅍ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "9042c705e7681310e6d0968bbe2d7907db78988e2d6374217648efee9b9dd8e0"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅍ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:50:38.743Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "fdd2e81b59ff28cb52319d1b39f6f1e28fcbd445e21bf4e24d99631a66b6da7f"
+      }
+    },
+    "ㅎ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅎ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "05afbba0009c52af48cfd1df2fecc6aa606e0032a4ea22efb2a4d8e717c8451b"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅎ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            },
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:50:42.943Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "dca417a438e2e3d72fe1358364b345f836317a24e377b69207fb640f6c170d3e"
+      }
+    },
+    "ㅏ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅏ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "b075e229870b9c2243781769ecb30007927bcc081f0ed3d903839ce87a67760a"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅏ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:50:45.691Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "e812707804ecd6112ed6396dd05dc75b9e14d0306869e22ce5d46541a76e2b4c"
+      }
+    },
+    "ㅐ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅐ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "784ccef727f153df2522d384e8a0d55a2fefdadccd97c7ab15d678e24a816917"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅐ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:50:47.230Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "2b0011cbbca6f8fa225be70280f02438f5559b78bd2ed4c5c7848ef80c9657e4"
+      }
+    },
+    "ㅑ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅑ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "e83c448b1f5568bb6a970243cbd09953827d64d0dab29bf056c8a3e908a15580"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅑ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:50:48.552Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "ab431b7ca925ab31387dec7514dced92ed2f236b18d17a9e9216c63abeddb508"
+      }
+    },
+    "ㅒ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅒ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "fc09ba7a05238a93721c1ad11335a71305fbe3f15045a3634a96cc00bf542ba6"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅒ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:50:50.276Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "6d7ea7d2d11514d48aea26ed9c1af678724f48c8a41d44d3697f04d583d555b6"
+      }
+    },
+    "ㅓ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅓ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "b6b4fbea23aedb3e7a903efbd5a7f89bf490631a156c216fbda5fe032636f373"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅓ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:50:52.437Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "b96bc0d07da59c545b2c4c39febc7c9085eee9371296f683df12f6d004f69542"
+      }
+    },
+    "ㅔ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅔ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "649d3118ee4c29a1be4bac066eb9365fc9c952f05cd5a2557233533a9f6e5d11"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅔ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:50:56.955Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "02e2453f89702b935cbf02e4eadb490d996e75c000f0c06b4c44f87df41883cc"
+      }
+    },
+    "ㅕ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅕ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "9900d279be7f6bfd0605c0ffadea1ff44f0e9d9723ef93062e7e7ba0a243b24d"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅕ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:51:00.222Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "71df42774580762ad92643dbfdba316dd5685a4ae55cfbd52ea068f645e0f9ed"
+      }
+    },
+    "ㅖ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅖ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "6c89f7e7a4c0851f8ace5959dfe6b1c494999d90121a51095d5134c8c3e940ac"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅖ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:51:04.109Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "d9abd95597714570018bd9df21599f498fa126efb7574c36fd9b3da07c7050d3"
+      }
+    },
+    "ㅗ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅗ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "a8f5b41e9ab23b31aabd139075dc70a4d9d6bd42aa7fb1d1ae6be05967fea468"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅗ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:51:06.043Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "2bc1435298f24848680af63be62a1bc698b86e91a24f96bacf68f45b5d12233f"
+      }
+    },
+    "ㅘ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅘ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "537aea28be1396c04e055cd4b5befebaa1b56f475c1859226645bdbdd3a50edf"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅗ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅏ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:51:12.553Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "bcf8bb4c4dad23761293b70e64ec575664695bdeb52a1254fb5973f13a5ebaca"
+      }
+    },
+    "ㅙ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅙ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "d6b7573ca34e4df6e6da85aec7e83962aeb9ca5cd55379fe739ee61443a971c8"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅗ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅐ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:51:20.126Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "cd4e5ace4411ae0aabdb4d3f83db73ad7fe5c1eca2138eef212c318964364c76"
+      }
+    },
+    "ㅚ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅚ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "4e930a036dd14833e892ff1de3f5ec1caab4b684e53e943f2f219e56ae992d3e"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅗ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅣ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:51:23.236Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "140283b8eeaa0920ff708583d87f995f5406a3d0b4726bf5e33eaa4728759dc0"
+      }
+    },
+    "ㅛ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅛ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "1d7d8d10371c88cc5a6ceadf88162bdb49144203c04453c8ab91284ad5d954e3"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅛ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:51:25.407Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "ce02a50c5884702c3f213069185508fb0f70209c3f672d9cc84c74c558e2b4d7"
+      }
+    },
+    "ㅜ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅜ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "9b326e5d77e4ad25f50b7ad07ac873de737e984271d8c061c0b38b8371412a96"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅜ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:51:26.652Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "9daec0fd6ec706ed1d4f3c2476c4d5035eab717b2c14ed18bc3655c5e988a86e"
+      }
+    },
+    "ㅝ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅝ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "b469c30bedcda9a33d38b8a677dfe8f72248598852391f67edd74664cbb4f3ae"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅜ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅓ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:51:30.524Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "1624c8376fef8f93b98c77862529ef9abfb1d5c63f5a72933231d8bf403933d7"
+      }
+    },
+    "ㅞ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅞ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "cbd1f11e7b69b2fee213255b5d3896c9df28f4b532101de25f1eb9bb74b13e4f"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅜ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 2
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅔ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            },
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:51:36.620Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "f13a36f30b0ccf0dd7e192e09121254ac1ed13edf60a79ed463bda75b9c85003"
+      }
+    },
+    "ㅟ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅟ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "f2ff2a8f6048ada86556abcf683634fd80098296c20c57c2cee72852419f315c"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅜ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅣ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:51:40.588Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "2bef7326ac2e7378ef30d65bc355613fcbd8e0321cf278d1840abd8a0f11fec5"
+      }
+    },
+    "ㅠ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅠ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "83752cbfa0cf76e26b7f81a1a5846bf6f58a22fd5faac824aae844ca0717c8e7"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅠ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:51:42.522Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "679062f0e5256d89a7e529ba259cbe37a98918a2be94dc56376bac8a885bdad4"
+      }
+    },
+    "ㅡ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅡ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "80f3718e54440463d2d127cc0122e4dde2340a1aaa05609f150c107c10778b4c"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅡ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:51:44.696Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "25be6514c110a5123c23738795ff0775f84acd56e86c7a40a05c2f5e6979bf63"
+      }
+    },
+    "ㅢ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅢ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "b1796367d70d5c9b22af4041200ce62655a19024e6690e433fb5444a4fb47fdc"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅡ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 1
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "jamo": "ㅣ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:51:48.314Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "0ca3b5bce50064df28d02a03d2c321ede3fa829670cdf0153a630e643789504b"
+      }
+    },
+    "ㅣ": {
+      "reviewSchemaVersion": 2,
+      "syllable": "ㅣ",
+      "source": {
+        "extraction": {
+          "fontSha256": "c1ce939460d32f510daf3c4aa737515414037998f8cd6dfedc23537066c42997",
+          "extractionSchema": 1,
+          "pathNormalization": 1,
+          "physicalStepAlgorithm": 3
+        },
+        "sourceGlyphHash": "048ed0715770e870cd04d96e48ce80e3c8206ce7b6e9326f3cca52189cf94fa6"
+      },
+      "status": "approved",
+      "blockers": [],
+      "steps": [
+        {
+          "order": 0,
+          "jamo": "ㅣ",
+          "geometry": [
+            {
+              "kind": "contour",
+              "contourId": 0
+            }
+          ]
+        }
+      ],
+      "splitRecipes": [],
+      "approved": {
+        "at": "2026-10-12T02:51:50.040Z",
+        "reviewer": "local-reviewer",
+        "validatorVersion": 1,
+        "validationHash": "fe30d304b3e0bc0554f0b146345d6bcd48d9ad4bd711f35b398bebc001b2bcfe"
+      }
+    }
+  }
+}

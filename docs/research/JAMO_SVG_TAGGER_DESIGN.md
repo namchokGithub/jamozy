@@ -386,9 +386,11 @@ and are not summed as a difficulty score.
 
 ### Adding words to the review queue
 
-The Tagger reviews **precomposed Hangul syllables**, not words. To expand
-coverage, add words to a plain UTF-8 text file with one word or syllable per
-line, then enqueue its distinct syllables in first-appearance order.
+The Tagger reviews **precomposed Hangul syllables** and the 40 modern
+compatibility jamo (19 consonants and 21 vowels), not words. To expand
+syllable coverage, add words to a plain UTF-8 text file with one word or
+syllable per line, then enqueue its distinct syllables in first-appearance
+order.
 
 - The default vocabulary source is
   `docs/informations/korean_words.txt`.
@@ -407,6 +409,8 @@ pnpm jamo-svg:enqueue \
   --words docs/informations/korean-inflection-sample.md \
   --reason inflection-sample \
   --dry-run
+
+pnpm jamo-svg:enqueue --include-basic-jamo --reason basic-jamo --dry-run
 ```
 
 If the output is correct, run the same command without `--dry-run`:
@@ -415,6 +419,8 @@ If the output is correct, run the same command without `--dry-run`:
 pnpm jamo-svg:enqueue \
   --words docs/informations/korean-inflection-sample.md \
   --reason inflection-sample
+
+pnpm jamo-svg:enqueue --include-basic-jamo --reason basic-jamo
 ```
 
 For the default frequency list, omit `--words` and `--reason`; use `--top N`
@@ -422,6 +428,10 @@ to add only its first `N` words. Enqueue is idempotent: it keeps existing queue
 rows and reviews, and adds only new syllables. The changed queue JSON is
 version-controlled; the extraction cache under `tools/jamo-svg/cache/` is
 rebuilt locally and remains gitignored.
+
+`--include-basic-jamo` adds the 40 compatibility jamo independently of the
+word list. Compound vowels retain their physical key sequence: for example,
+`ㅝ` has the two review steps `ㅜ`, then `ㅓ`.
 
 After enqueueing, open `/dev/jamo-svg-tagger` with `pnpm dev`, review the
 queued syllables, then follow [Maintaining the runtime dataset](#maintaining-the-runtime-dataset)
@@ -679,7 +689,9 @@ The derived dataset and its integration are designed in DEC-039 and
 returned to draft) never change the format and need no version change:
 
 1. Review and approve in the Tagger; run `pnpm jamo-svg:audit`.
-2. Run `pnpm jamo-svg:compile-runtime`. Unchanged shards stay byte-identical.
+2. Run `pnpm jamo-svg:compile-runtime`. Unchanged syllable shards stay
+   byte-identical; it also writes `standalone-jamo.json` for approved
+   compatibility-jamo reviews.
 3. Run `pnpm test`; `runtime-dataset-committed.test.ts` fails if step 2 was
    skipped.
 4. Commit the reviews and the shards together, then deploy. Learners get the

@@ -5,6 +5,7 @@ export type RuntimeJamoSvgGlyph = {
 }
 
 export type RuntimeJamoSvgDataset = Record<string, RuntimeJamoSvgGlyph>
+export const STANDALONE_JAMO_SHARD_FILE = 'standalone-jamo.json'
 
 /**
  * A choseong shard file under public/jamo-svg/pretendard-600/ (DEC-039).

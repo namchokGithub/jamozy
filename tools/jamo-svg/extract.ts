@@ -2,9 +2,11 @@ import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import {
+  CHOSEONG_LIST,
   COMPOUND_JONGSEONG_PARTS,
   COMPOUND_JUNGSEONG_PARTS,
   decomposeSyllable,
+  JUNGSEONG_LIST,
 } from '../../src/domain/korean/hangul'
 import {
   EXTRACTION_SCHEMA_VERSION,
@@ -149,9 +151,12 @@ export async function extractGlyph(
   fontPath = FONT_PATH,
 ): Promise<CachedGlyph> {
   const decomposed = decomposeSyllable(syllable)
-  if (!decomposed)
+  const isStandaloneJamo =
+    CHOSEONG_LIST.includes(syllable as (typeof CHOSEONG_LIST)[number]) ||
+    JUNGSEONG_LIST.includes(syllable as (typeof JUNGSEONG_LIST)[number])
+  if (!decomposed && !isStandaloneJamo)
     throw new Error(
-      `Expected a modern precomposed Hangul syllable, received ${syllable}.`,
+      `Expected a modern precomposed Hangul syllable or supported compatibility jamo, received ${syllable}.`,
     )
   const { font, sha256: fontSha256 } = await loadFont(fontPath)
   const glyph = font.charToGlyph(syllable)
@@ -161,22 +166,35 @@ export async function extractGlyph(
   const contourCommands = splitContours(
     glyph.getPath(0, baselineY, font.unitsPerEm).commands.map(normalizeCommand),
   )
-  const steps: Array<{ jamo: string; slot: JamoSlot }> = [
-    { jamo: decomposed.choseong, slot: 'choseong' },
-    // Algorithm v3: one step per typed key, so a compound medial contributes
-    // both of its keys, as compound finals do (DEC-037).
-    ...(
-      COMPOUND_JUNGSEONG_PARTS[decomposed.jungseong] ?? [decomposed.jungseong]
-    ).map((jamo) => ({ jamo, slot: 'jungseong' as const })),
-    ...(decomposed.jongseong
-      ? (
-          COMPOUND_JONGSEONG_PARTS[decomposed.jongseong] ?? [
-            decomposed.jongseong,
+  const standaloneHangul = {
+    choseong: 'standalone-jamo',
+    jungseong: syllable,
+    jongseong: '',
+  }
+  const normalizedHangul = decomposed ?? standaloneHangul
+  const steps: Array<{ jamo: string; slot: JamoSlot }> = decomposed
+    ? [
+        { jamo: decomposed.choseong, slot: 'choseong' },
+        // Algorithm v3: one step per typed key, so a compound medial contributes
+        // both of its keys, as compound finals do (DEC-037).
+        ...(
+          COMPOUND_JUNGSEONG_PARTS[decomposed.jungseong] ?? [
+            decomposed.jungseong,
           ]
-        ).map((jamo) => ({ jamo, slot: 'jongseong' as const }))
-      : []),
-  ]
-  const layout = medialLayout(decomposed.jungseong)
+        ).map((jamo) => ({ jamo, slot: 'jungseong' as const })),
+        ...(decomposed.jongseong
+          ? (
+              COMPOUND_JONGSEONG_PARTS[decomposed.jongseong] ?? [
+                decomposed.jongseong,
+              ]
+            ).map((jamo) => ({ jamo, slot: 'jongseong' as const }))
+          : []),
+      ]
+    : (COMPOUND_JUNGSEONG_PARTS[syllable] ?? [syllable]).map((jamo) => ({
+        jamo,
+        slot: 'literal' as const,
+      }))
+  const layout = decomposed ? medialLayout(decomposed.jungseong) : 'standalone'
   const sourcePath = contourCommands.map(commandsToSvg).join(' ')
   const relation =
     contourCommands.length === steps.length
@@ -185,6 +203,7 @@ export async function extractGlyph(
         ? 'deficit'
         : 'surplus'
   return {
+    kind: decomposed ? 'syllable' : 'standalone-jamo',
     syllable,
     codePoint: `U+${syllable.codePointAt(0)!.toString(16).toUpperCase()}`,
     extraction: {
@@ -196,14 +215,16 @@ export async function extractGlyph(
     sourceGlyphHash: hash(sourcePath),
     physicalSteps: steps.map((step, order) => ({ ...step, order })),
     hangul: {
-      ...decomposed,
+      ...normalizedHangul,
       medialLayout: layout,
-      compoundMedial: COMPOUND_JUNGSEONG_PARTS[decomposed.jungseong]
-        ? decomposed.jungseong
-        : null,
-      compoundFinal: COMPOUND_JONGSEONG_PARTS[decomposed.jongseong]
-        ? decomposed.jongseong
-        : null,
+      compoundMedial:
+        decomposed && COMPOUND_JUNGSEONG_PARTS[decomposed.jungseong]
+          ? decomposed.jungseong
+          : null,
+      compoundFinal:
+        decomposed && COMPOUND_JONGSEONG_PARTS[decomposed.jongseong]
+          ? decomposed.jongseong
+          : null,
     },
     advanceWidth: glyph.advanceWidth,
     bounds: glyph.getBoundingBox(),
@@ -224,17 +245,19 @@ export async function extractGlyph(
     family: {
       queueKey: {
         medialLayout: layout,
-        hasFinal: Boolean(decomposed.jongseong),
-        compoundMedial: COMPOUND_JUNGSEONG_PARTS[decomposed.jungseong]
-          ? decomposed.jungseong
-          : null,
-        compoundFinal: COMPOUND_JONGSEONG_PARTS[decomposed.jongseong]
-          ? decomposed.jongseong
-          : null,
+        hasFinal: Boolean(normalizedHangul.jongseong),
+        compoundMedial:
+          decomposed && COMPOUND_JUNGSEONG_PARTS[decomposed.jungseong]
+            ? decomposed.jungseong
+            : null,
+        compoundFinal:
+          decomposed && COMPOUND_JONGSEONG_PARTS[decomposed.jongseong]
+            ? decomposed.jongseong
+            : null,
         physicalStepCount: steps.length,
         contourRelation: relation,
       },
-      semanticKey: { ...decomposed, medialLayout: layout },
+      semanticKey: { ...normalizedHangul, medialLayout: layout },
     },
   }
 }

@@ -167,7 +167,8 @@ test('Preview reads the unsaved target text from the exercise editor', async () 
     target: { value: 'ㅝ' },
   })
   fireEvent.click(screen.getAllByRole('button', { name: 'Preview' })[0])
-  expect(screen.getByRole('dialog', { name: /ㅝ/ })).toHaveTextContent('Canvas')
+  const dialog = screen.getByRole('dialog', { name: /ㅝ/ })
+  expect(await within(dialog).findByText('Canvas')).toBeInTheDocument()
 })
 
 test('preview colors approved SVG steps and uses Canvas for standalone vowels', async () => {
@@ -209,6 +210,10 @@ test('preview colors approved SVG steps and uses Canvas for standalone vowels', 
       onClose={() => undefined}
     />,
   )
-  expect(screen.getByRole('dialog', { name: /ㅝ/ })).toHaveTextContent('Canvas')
-  expect(loadJamoSvgGlyphs).toHaveBeenCalledTimes(1)
+  expect(
+    await within(screen.getByRole('dialog', { name: /ㅝ/ })).findByText(
+      'Canvas',
+    ),
+  ).toBeInTheDocument()
+  expect(loadJamoSvgGlyphs).toHaveBeenCalledTimes(2)
 })

@@ -6,16 +6,22 @@
   "physicalStepAlgorithmVersion": 3,
   "shards": [
     {
+      "choseong": "standalone-jamo",
+      "file": "standalone-jamo.json",
+      "reviewCount": 40,
+      "sha256": "701acc29547e1175fc6c0d0c22a6e7d569b5bc4ad8335a76d4998aa8c21bc7ac"
+    },
+    {
       "choseong": "ㄱ",
       "file": "ㄱ.json",
-      "reviewCount": 156,
-      "sha256": "b940b0acf421787afa9d6cbcf488fe60bd9f0bca32c5bf638acb7db7754c6a32"
+      "reviewCount": 159,
+      "sha256": "787e95d8553f92d8aa9f0864fd70fd985767835dd925ee264acd0dad48f9cb1c"
     },
     {
       "choseong": "ㄲ",
       "file": "ㄲ.json",
-      "reviewCount": 89,
-      "sha256": "d7afeb22168606af0035eec0cfc903a84964ec71d165c3cd5cdfdaa9fdb966d1"
+      "reviewCount": 91,
+      "sha256": "0178361759c309c1e1b9d56775bdd528b25c06a2410fb9bced36ed92186ab3e5"
     },
     {
       "choseong": "ㄴ",

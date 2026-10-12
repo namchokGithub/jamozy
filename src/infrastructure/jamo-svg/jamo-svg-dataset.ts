@@ -1,5 +1,6 @@
 import {
   getChoseongShardIndex,
+  isBasicCompatibilityJamo,
   shardFileName,
 } from '../../domain/korean/hangul'
 import type {
@@ -7,11 +8,14 @@ import type {
   RuntimeJamoSvgGlyph,
   RuntimeJamoSvgShard,
 } from '../../domain/korean/jamo-svg-runtime'
+import { STANDALONE_JAMO_SHARD_FILE } from '../../domain/korean/jamo-svg-runtime'
 
 // Static, read-only content; not learner state (DEC-039).
-const shardCache = new Map<number, Promise<RuntimeJamoSvgShard>>()
+type ShardKey = number | 'standalone-jamo'
+
+const shardCache = new Map<ShardKey, Promise<RuntimeJamoSvgShard>>()
 // Shards that finished loading, readable synchronously by peekJamoSvgGlyphs.
-const loadedShards = new Map<number, RuntimeJamoSvgShard>()
+const loadedShards = new Map<ShardKey, RuntimeJamoSvgShard>()
 
 function warn(message: string) {
   if (import.meta.env.DEV) console.warn(`[jamo-svg] ${message}`)
@@ -20,8 +24,11 @@ function warn(message: string) {
 /** A shard request that has not finished by then is aborted, so a later target can retry. */
 export const JAMO_SVG_SHARD_FETCH_TIMEOUT_MS = 10_000
 
-async function fetchShard(index: number): Promise<RuntimeJamoSvgShard> {
-  const file = shardFileName(index)
+async function fetchShard(index: ShardKey): Promise<RuntimeJamoSvgShard> {
+  const file =
+    index === 'standalone-jamo'
+      ? STANDALONE_JAMO_SHARD_FILE
+      : shardFileName(index)
   const controller = new AbortController()
   const timer = setTimeout(
     () => controller.abort(),
@@ -46,7 +53,7 @@ async function fetchShard(index: number): Promise<RuntimeJamoSvgShard> {
   return shard
 }
 
-function loadShard(index: number) {
+function loadShard(index: ShardKey) {
   let pending = shardCache.get(index)
   if (!pending) {
     const request = fetchShard(index)
@@ -63,8 +70,12 @@ function loadShard(index: number) {
 }
 
 /** Shard indexes the syllables need, or undefined for any non-syllable. */
-function shardIndexesOf(syllables: string[]) {
-  const indexes = syllables.map(getChoseongShardIndex)
+function shardIndexesOf(syllables: string[]): ShardKey[] | undefined {
+  const indexes = syllables.map(
+    (syllable) =>
+      getChoseongShardIndex(syllable) ??
+      (isBasicCompatibilityJamo(syllable) ? 'standalone-jamo' : undefined),
+  )
   if (!indexes.length || indexes.some((index) => index === undefined))
     return undefined
   return indexes as number[]
@@ -72,8 +83,8 @@ function shardIndexesOf(syllables: string[]) {
 
 function pickGlyphs(
   syllables: string[],
-  indexes: number[],
-  shardAt: (index: number) => RuntimeJamoSvgShard,
+  indexes: ShardKey[],
+  shardAt: (index: ShardKey) => RuntimeJamoSvgShard,
 ): LoadedJamoSvgGlyphs | undefined {
   const shards = [...new Set(indexes)].map(shardAt)
   const [first] = shards

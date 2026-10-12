@@ -14,13 +14,14 @@ export type OutlineCommand = {
   x2?: number
   y2?: number
 }
-export type JamoSlot = 'choseong' | 'jungseong' | 'jongseong'
+export type JamoSlot = 'choseong' | 'jungseong' | 'jongseong' | 'literal'
 export type MedialLayoutClass =
   | 'vertical'
   | 'horizontal'
   | 'compound-horizontal-leading'
   | 'compound-vertical-leading'
   | 'mixed-eui'
+  | 'standalone'
 
 export type ExtractionFingerprint = {
   fontSha256: string
@@ -53,6 +54,7 @@ export type GlyphFamilyKey = {
   }
 }
 export type CachedGlyph = {
+  kind: 'syllable' | 'standalone-jamo'
   syllable: string
   codePoint?: `U+${string}`
   extraction: ExtractionFingerprint

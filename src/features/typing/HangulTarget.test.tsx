@@ -91,10 +91,19 @@ test('one missing syllable renders Canvas for the whole target', async () => {
   expect(await screen.findByTestId('canvas-target')).toBeInTheDocument()
 })
 
-test('a standalone jamo renders Canvas without loading data', () => {
-  render(<HangulTarget session={startTypingSession('ㄱ')} />)
-  expect(screen.getByTestId('canvas-target')).toBeInTheDocument()
-  expect(loadJamoSvgGlyphs).not.toHaveBeenCalled()
+test('a standalone compound vowel renders SVG when its approved data loads', async () => {
+  vi.mocked(loadJamoSvgGlyphs).mockResolvedValue(
+    loaded({ ㅝ: glyph('ㅜ', 'ㅓ') }),
+  )
+  const { container } = render(
+    <HangulTarget session={startTypingSession('ㅝ')} />,
+  )
+
+  await act(async () => {})
+
+  expect(loadJamoSvgGlyphs).toHaveBeenCalledWith(['ㅝ'])
+  expect(container.querySelectorAll('svg')).toHaveLength(1)
+  expect(fills(container)).toEqual(['#c84f82', '#c7c3bc'])
 })
 
 test('a target with a space renders SVG with a space step between words', async () => {
