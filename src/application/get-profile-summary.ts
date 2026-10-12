@@ -40,12 +40,12 @@ export async function getProfileSummary(
     sessionAttempts === 0
       ? 0
       : (sessionAggregate.acceptedKeystrokes / sessionAttempts) * 100
+  const sessionTypingSeconds =
+    sessionAggregate.typingSeconds ?? sessionAggregate.totalTypingTimeSeconds
   const sessionWpm =
-    sessionAggregate.totalTypingTimeSeconds === 0
+    sessionTypingSeconds === 0
       ? 0
-      : sessionAggregate.acceptedKeystrokes /
-        5 /
-        (sessionAggregate.totalTypingTimeSeconds / 60)
+      : sessionAggregate.acceptedKeystrokes / 5 / (sessionTypingSeconds / 60)
   return {
     exp,
     ...levelProgress(exp),
@@ -62,7 +62,7 @@ export async function getProfileSummary(
         sessionAggregate.bestAccuracy,
       ),
       averageSpeedWpm:
-        hasLegacyBaseline || sessionAggregate.totalTypingTimeSeconds === 0
+        resolved.stats.averageSpeedWpm > 0 || sessionTypingSeconds === 0
           ? resolved.stats.averageSpeedWpm
           : sessionWpm,
       totalTypingTimeSeconds:
