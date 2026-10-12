@@ -62,7 +62,19 @@ export default function LessonEditorPage() {
   const hasUnsavedChanges =
     title !== lesson.title ||
     type !== lesson.type ||
-    JSON.stringify(exercises) !== JSON.stringify(lesson.exercises)
+    exercises.length !== lesson.exercises.length ||
+    exercises.some((exercise, index) => {
+      const saved = lesson.exercises[index]
+      return (
+        exercise.id !== saved.id ||
+        exercise.targetText !== saved.targetText ||
+        exercise.romanization !== saved.romanization ||
+        exercise.meaningTh !== saved.meaningTh ||
+        exercise.meaningEn !== saved.meaningEn ||
+        exercise.difficulty !== saved.difficulty ||
+        exercise.hint !== saved.hint
+      )
+    })
   const unsavedChangesBlocker = useAdminUnsavedChanges(
     hasUnsavedChanges,
     t('feedback.unsavedChangesWarning'),
