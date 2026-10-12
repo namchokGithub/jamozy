@@ -37,7 +37,7 @@ const words =
         0,
         top,
       )
-const wanted = [
+const wanted: Array<{ syllable: string; rank?: number }> = [
   ...syllablesByFirstAppearance(words),
   ...(values['include-basic-jamo']
     ? basicJamo().map((syllable) => ({ syllable }))
