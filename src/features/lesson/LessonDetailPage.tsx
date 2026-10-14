@@ -11,6 +11,11 @@ import { PageHeading } from '../../components/ui/PageHeading'
 import { PageNav } from '../../components/ui/PageNav'
 import { PageSurface } from '../../components/ui/PageSurface'
 import type { LessonType } from '../../domain/models/lesson'
+import {
+  clearLessonResume,
+  getLessonResume,
+  saveLessonResume,
+} from './lesson-resume'
 
 const lessonTypeLabels: Record<LessonType, string> = {
   character: 'Characters',
@@ -18,6 +23,12 @@ const lessonTypeLabels: Record<LessonType, string> = {
   word: 'Words',
   phrase: 'Phrases',
   sentence: 'Sentences',
+}
+
+function navigationType(): string {
+  const entry = performance.getEntriesByType('navigation')[0] as
+    PerformanceNavigationTiming | undefined
+  return entry?.type ?? 'navigate'
 }
 
 export default function LessonDetailPage() {
@@ -40,8 +51,35 @@ function LessonDetailContent({
   courseId,
 }: LessonDetailLoaderData) {
   const navigate = useNavigate()
-  const [started, setStarted] = useState(false)
+  const [started, setStarted] = useState(() => {
+    const nowMs = Date.now()
+    const resume = getLessonResume(
+      window.sessionStorage,
+      lesson.id,
+      navigationType(),
+      nowMs,
+    )
+    if (!resume) return false
+    saveLessonResume(window.sessionStorage, lesson.id, nowMs)
+    return true
+  })
   const [completion, setCompletion] = useState<LessonCompletion | null>(null)
+
+  const startLesson = () => {
+    saveLessonResume(window.sessionStorage, lesson.id, Date.now())
+    setCompletion(null)
+    setStarted(true)
+  }
+
+  const exitLesson = () => {
+    clearLessonResume(window.sessionStorage)
+    setStarted(false)
+  }
+
+  const completeLesson = (value: LessonCompletion) => {
+    clearLessonResume(window.sessionStorage)
+    setCompletion(value)
+  }
 
   const nav = <PageNav backTo={`/courses/${courseId}`} backLabel="Course map" />
 
@@ -52,8 +90,7 @@ function LessonDetailContent({
         <LessonResult
           completion={completion}
           onRetry={() => {
-            setCompletion(null)
-            setStarted(true)
+            startLesson()
           }}
           onReview={() => navigate('/review')}
           onContinue={() =>
@@ -75,9 +112,9 @@ function LessonDetailContent({
         <PageHeading eyebrow="TYPING NOW" title={lesson.title} />
         <LessonTypingSession
           lesson={lesson}
-          onComplete={setCompletion}
+          onComplete={completeLesson}
           keyboardSettings={settings}
-          onExit={() => setStarted(false)}
+          onExit={exitLesson}
         />
       </PageSurface>
     )
@@ -130,11 +167,7 @@ function LessonDetailContent({
               )
             })}
           </ul>
-          <Button
-            type="button"
-            onClick={() => setStarted(true)}
-            className="mt-6"
-          >
+          <Button type="button" onClick={startLesson} className="mt-6">
             Start Lesson
           </Button>
         </>

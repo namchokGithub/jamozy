@@ -22,7 +22,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC     | Decision                                                                                                                                                          | Status                                                                                                 | Date       |
 | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------- |
 | DEC-002 | Layered architecture: domain / application / infrastructure / features                                                                                            | Accepted                                                                                               | 2026-09-23 |
-| DEC-003 | Keystroke-level state stays client-side; Firestore writes only at checkpoints                                                                                     | Accepted (Home exercise-completion checkpoint: DEC-043)                                                | 2026-09-23 |
+| DEC-003 | Keystroke-level state stays client-side; Firestore writes only at checkpoints                                                                                     | Accepted (refresh-resume consequence amended by DEC-054; Home exercise-completion checkpoint: DEC-043) | 2026-09-23 |
 | DEC-004 | MVP excludes multiplayer, leaderboards, and social/competitive features                                                                                           | Accepted                                                                                               | 2026-09-23 |
 | DEC-005 | Pin`@vitejs/plugin-react` to 5.2.0, not latest                                                                                                                    | Accepted                                                                                               | 2026-09-23 |
 | DEC-007 | Settings live as a field on the user doc                                                                                                                          | Accepted                                                                                               | 2026-09-23 |
@@ -68,6 +68,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-051 | Weak Jamo practice picks Home exercises by the learner's weakest key-level jamo                                                                                   | Accepted                                                                                               | 2026-10-09 |
 | DEC-052 | Vite-bundled Web Audio buffers provide configurable keyboard sound packs                                                                                          | Accepted                                                                                               | 2026-10-10 |
 | DEC-053 | Canonical Rebirth cycle state, immutable operation records, and migration reconciliation                                                                          | Accepted                                                                                               | 2026-10-14 |
+| DEC-054 | Learning Path lesson refresh resume stays tab-local and restarts the session                                                                                      | Accepted                                                                                               | 2026-10-14 |
 
 ## Superseded index (history only)
 
@@ -121,7 +122,10 @@ implementation context only, not the target architecture.
 
 **Why:** Avoids excessive Firestore write costs/rate limits and keeps typing feedback latency independent of network round-trips.
 
-**Consequences:** In-progress lesson state is lost on hard refresh/crash before a checkpoint. Acceptable for MVP; no mid-lesson resume requirement.
+**Consequences:** In-progress lesson state is not persisted as learner state.
+Learning Path may offer its narrowly scoped, tab-local refresh resume under
+[[DEC-054]]; it always starts a fresh typing session rather than restoring
+keystrokes, errors, or elapsed time.
 
 ---
 
@@ -1518,3 +1522,31 @@ Firestore SDK cannot read a collection query inside a transaction, so a
 simultaneous Rebirth after the migration record-set read can temporarily leave
 its aggregate counter stale; a later reconciliation is required to repair that
 race.
+
+---
+
+## DEC-054 — Learning Path lesson refresh resume stays tab-local and restarts the session
+
+**Date:** 2026-10-14
+**Status:** Accepted
+**Amends:** [[DEC-003]]
+
+**Decision:** When a learner starts a Learning Path lesson, retain only its
+`lessonId` and a five-minute expiry in browser `sessionStorage`. Reloading the
+same lesson route before expiry opens its typing player automatically, then
+renews the five-minute window and starts a new lesson session from its first
+exercise. It does not restore typed keys, mistakes, per-exercise progress, or
+elapsed time.
+
+The token is tab-local: a newly opened tab, ordinary navigation, or a different
+lesson never resumes it. Exit, successful lesson completion, a mismatched
+lesson, and expiry clear the token.
+
+**Why:** A short reload grace period prevents an accidental refresh from
+dropping a learner at the lesson preview, while preserving the existing
+checkpoint-only persistence model and avoiding cross-tab ambiguity.
+
+**Consequences:** This narrowly replaces DEC-003's former hard-refresh-loss
+consequence for Learning Path lesson selection only. It adds no Firebase,
+IndexedDB, or per-keystroke writes, does not resume after a browser session is
+closed, and does not interrupt an already-active typing session in another tab.
