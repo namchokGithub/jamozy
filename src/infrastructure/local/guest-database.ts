@@ -3,10 +3,11 @@ import type { UserProfile } from '../../domain/models/user-profile'
 import type { LearningSession } from '../../domain/models/learning-session'
 import { applySessionStats, FALLBACK_TIME_ZONE, localDateIn, type PeriodStats } from '../../domain/models/player-stats'
 import { applyJamoCounts, type JamoCounts, type JamoStats } from '../../domain/models/jamo-stat'
+import { rebirthProfile, type RebirthRecord, type RebirthResult } from '../../domain/models/rebirth'
 
 const DB_NAME = 'jamozy-guest'
-const VERSION = 8
-const stores = ['guestSessions', 'profiles', 'progress', 'reviewItems', 'learningSessions', 'sessionOutcomes', 'migrationCheckpoints', 'onePageLearningCheckpoints', 'homeSyncJobs', 'homeProgressCache', 'homeResume', 'dailyStats', 'monthlyStats', 'learnerStats'] as const
+const VERSION = 9
+const stores = ['guestSessions', 'profiles', 'progress', 'reviewItems', 'learningSessions', 'sessionOutcomes', 'migrationCheckpoints', 'onePageLearningCheckpoints', 'homeSyncJobs', 'homeProgressCache', 'homeResume', 'dailyStats', 'monthlyStats', 'learnerStats', 'rebirths'] as const
 type StoreName = (typeof stores)[number]
 
 export function guestStatsWrites(
@@ -93,6 +94,30 @@ export class GuestDatabase {
       const request = db.transaction(store, 'readwrite').objectStore(store).delete(key)
       request.onsuccess = () => resolve()
       request.onerror = () => reject(request.error)
+    })
+  }
+
+  async rebirth(userId: string, operationId: string, now: Date): Promise<RebirthResult> {
+    const db = await this.open()
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(['profiles', 'rebirths'], 'readwrite')
+      const recordKey = `${userId}:${operationId}`
+      const existing = transaction.objectStore('rebirths').get(recordKey)
+      existing.onsuccess = () => {
+        if (existing.result) return resolve({ status: 'already-applied', record: existing.result as RebirthRecord })
+        const profileRequest = transaction.objectStore('profiles').get(`${userId}:`)
+        profileRequest.onsuccess = () => {
+          const profile = profileRequest.result as UserProfile | undefined
+          if (!profile) return reject(new Error('User profile is required'))
+          const result = rebirthProfile(profile, operationId, now)
+          if ('level' in result) return resolve({ status: 'ineligible', level: result.level })
+          transaction.objectStore('profiles').put(result.profile, `${userId}:`)
+          transaction.objectStore('rebirths').put(result.record, recordKey)
+          resolve({ status: 'rebirthed', record: result.record })
+        }
+      }
+      transaction.onerror = () => reject(transaction.error)
+      transaction.onabort = () => reject(transaction.error)
     })
   }
 

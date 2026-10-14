@@ -16,6 +16,8 @@ import {
 import { LocalSessionSubmissionRepository } from '../infrastructure/local/local-session-submission-repository'
 import { FirebaseSessionSubmissionRepository } from '../infrastructure/firebase/repositories/firebase-session-submission-repository'
 import { FirebaseJamoStatsRepository } from '../infrastructure/firebase/repositories/firestore-jamo-stats'
+import { LocalRebirthRepository } from '../infrastructure/local/local-rebirth-repository'
+import { FirebaseRebirthRepository } from '../infrastructure/firebase/repositories/firebase-rebirth-repository'
 import { LocalGuestMigrationRepository } from '../infrastructure/local/local-guest-migration-repository'
 import { LocalOnePageLearningCheckpointRepository } from '../infrastructure/local/local-one-page-learning-checkpoint-repository'
 import { FirebaseAccountMigrationRepository } from '../infrastructure/firebase/repositories/firebase-account-migration-repository'
@@ -53,6 +55,7 @@ import { createSettingsLoader } from '../features/settings/SettingsPage.loader'
 import { createUpdateSettingsAction } from '../features/settings/SettingsPage.action'
 import ProfilePage from '../features/profile/ProfilePage'
 import { createProfileLoader } from '../features/profile/ProfilePage.loader'
+import { createRebirthAction } from '../features/profile/ProfilePage.action'
 import RouteError from './RouteError'
 import NotFoundPage from './NotFoundPage'
 import { migrateGuestDataToAccount } from '../application/migrate-guest-data-to-account'
@@ -113,6 +116,7 @@ const learners = createLearnerRepositories({
     sessionSubmissionRepo: new FirebaseSessionSubmissionRepository(),
     jamoStatsRepo: new FirebaseJamoStatsRepository(),
   },
+  rebirth: { guest: new LocalRebirthRepository(), authenticated: new FirebaseRebirthRepository() },
 })
 const {
   progressRepo,
@@ -120,6 +124,7 @@ const {
   userProfileRepo,
   sessionSubmissionRepo,
   jamoStatsRepo,
+  rebirthRepo,
   getActiveUser,
 } = learners
 // One instance so Home and Weak Jamo practice share its cached export.
@@ -362,6 +367,7 @@ export const router = createBrowserRouter([
       progressRepo,
       ensureUser: getActiveUser,
     }),
+    action: createRebirthAction({ rebirthRepo, ensureUser: getActiveUser }),
     ErrorBoundary: RouteError,
   },
   ...developmentRoutes,

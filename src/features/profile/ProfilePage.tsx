@@ -1,10 +1,13 @@
 import type { ReactNode } from 'react'
-import { useLoaderData } from 'react-router'
+import { useLoaderData, useFetcher } from 'react-router'
+import { useState } from 'react'
 import { Award, BookOpen, Clock, Gauge, Keyboard, Target } from 'lucide-react'
 import type { ProfileLoaderData } from './ProfilePage.loader'
 import { formatTypingTime } from './format-typing-time'
 import { PageNav } from '../../components/ui/PageNav'
 import { PageSurface } from '../../components/ui/PageSurface'
+import { Button } from '../../components/ui/Button'
+import { Modal } from '../../components/ui/Modal'
 
 // Pastel accents follow Home: color stays on the icon, cards stay warm white.
 const accents = {
@@ -18,6 +21,9 @@ const cardClass =
 
 export default function ProfilePage() {
   const { summary } = useLoaderData() as ProfileLoaderData
+  const fetcher = useFetcher()
+  const [confirming, setConfirming] = useState(false)
+  const [operationId] = useState(() => crypto.randomUUID())
   const metrics: {
     label: string
     value: ReactNode
@@ -103,7 +109,21 @@ export default function ProfilePage() {
           className="mt-2 block h-3 w-full appearance-none overflow-hidden rounded-full bg-[#eef3ee] [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-[#5fae94] [&::-webkit-progress-bar]:bg-[#eef3ee] [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-[#5fae94]"
           aria-label="EXP progress"
         />
+        <dl className="mt-5 grid grid-cols-2 gap-3 text-sm text-[#667085]">
+          <div><dt>Rebirths</dt><dd className="font-bold text-[#253247]">{summary.rebirthCount ?? 0}</dd></div>
+          <div><dt>Perk Points earned</dt><dd className="font-bold text-[#253247]">{summary.perkPointsEarned ?? 0}</dd></div>
+        </dl>
+        {summary.level >= 100 && (
+          <Button className="mt-5" onClick={() => setConfirming(true)}>Rebirth</Button>
+        )}
       </section>
+      <Modal open={confirming} title="Begin a new Rebirth?" onClose={() => setConfirming(false)}>
+        <p className="mt-3 text-sm leading-6 text-[#667085]">Your current cycle EXP resets to 0. Your learning progress and statistics stay. You earn 1 Perk Point. Pending Home results can add EXP to the new cycle.</p>
+        <div className="mt-5 flex justify-end gap-2">
+          <Button variant="ghost" onClick={() => setConfirming(false)}>Cancel</Button>
+          <Button disabled={fetcher.state !== 'idle'} onClick={() => fetcher.submit({ operationId }, { method: 'post', encType: 'application/json' })}>Confirm Rebirth</Button>
+        </div>
+      </Modal>
 
       <section className="mt-10" aria-label="Learning statistics">
         <SectionHeader eyebrow="LOOK HOW FAR YOU'VE COME">
