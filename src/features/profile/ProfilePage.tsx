@@ -101,7 +101,8 @@ export default function ProfilePage() {
         </h1>
         <div className="mt-5 flex justify-end">
           <p className="text-sm font-semibold text-[#667085]">
-            {summary.expIntoLevel} / {summary.expToNextLevel} EXP
+            {formatExp(summary.expIntoLevel)} /{' '}
+            {formatExp(summary.expToNextLevel)} EXP
           </p>
         </div>
         <progress
@@ -208,6 +209,13 @@ export default function ProfilePage() {
       )}
     </PageSurface>
   )
+}
+
+function formatExp(value: number): string {
+  if (value < 1_000) return String(value)
+  if (value < 1_000_000) return `${(value / 1_000).toFixed(2)}K`
+  if (value < 1_000_000_000) return `${(value / 1_000_000).toFixed(2)}M`
+  return `${(value / 1_000_000_000).toFixed(2)}B`
 }
 
 function SectionHeader({
