@@ -66,7 +66,7 @@ describe('FirebaseAccountMigrationRepository', () => {
     const guest = { ...defaultUserProfile('guest-1', new Date('2026-01-01'), 'Guest#0042'), exp: 200 }
     const { repository, documents } = createRepository({ 'users/account-1': persist(cloud) as Record<string, unknown> })
 
-    await repository.mergeInitialState('account-1', 'guest-1', { guestId: 'guest-1', profile: guest, progress: [], reviewItems: [], sessions: [], sessionOutcomes: [] })
+    await repository.mergeInitialState('account-1', 'guest-1', { guestId: 'guest-1', profile: guest, progress: [], reviewItems: [], sessions: [], sessionOutcomes: [], rebirths: [] })
 
     expect(documents.get('users/account-1')?.displayName).toBe('Cloud')
     expect((documents.get('users/account-1')?.legacyBaseline as { exp: number }).exp).toBe(10)

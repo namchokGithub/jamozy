@@ -4,6 +4,8 @@ import { mergeProfile, mergeProgress, mergeReviewItem, type GuestMigrationSnapsh
 import { addSessionAggregate, emptySessionAggregate, type SessionAggregate } from '../../../domain/models/session-aggregate'
 import type { AccountMigrationRepository } from '../../../domain/repositories/account-migration-repository'
 import type { SessionSubmissionOutcome } from '../../../domain/repositories/session-submission-repository'
+import type { RebirthRecord } from '../../../domain/models/rebirth'
+import { progressionOf } from '../../../domain/models/user-profile'
 import { toProgress, toProgressDoc } from '../mappers/progress-mapper'
 import { toReviewItem, toReviewItemDoc } from './firebase-review-repository'
 import { toUserProfile, toUserProfileDoc } from './firebase-user-profile-repository'
@@ -94,6 +96,28 @@ export class FirebaseAccountMigrationRepository implements AccountMigrationRepos
       transaction.set(doc(db, 'users', accountId, 'learningSessions', outcome.session.id), sessionDoc(outcome.session))
       transaction.set(receiptRef, outcome)
       transaction.set(profileRef, { sessionAggregate: addSessionAggregate(current, outcome.aggregate), ...writeStats(transaction) }, { merge: true })
+    })
+  }
+
+  async migrateRebirth(accountId: string, record: RebirthRecord): Promise<void> {
+    const { db, doc, runTransaction } = this.dependencies
+    await runTransaction(db, async (transaction) => {
+      const recordRef = doc(db, 'users', accountId, 'rebirths', record.id)
+      if ((await transaction.get(recordRef)).exists()) return
+      const profileRef = doc(db, 'users', accountId)
+      const profileSnapshot = await transaction.get(profileRef)
+      if (!profileSnapshot.exists()) throw new Error('User profile is required')
+      const profile = toUserProfile(accountId, profileSnapshot.data())
+      const progression = progressionOf(profile)
+      transaction.set(recordRef, record)
+      transaction.set(profileRef, {
+        progression: {
+          ...progression,
+          rebirthCount: progression.rebirthCount + 1,
+          perkPointsEarned: progression.perkPointsEarned + 1,
+          highestLevel: Math.max(progression.highestLevel, record.levelAtRebirth),
+        },
+      }, { merge: true })
     })
   }
 

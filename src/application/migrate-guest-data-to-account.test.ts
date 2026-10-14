@@ -19,10 +19,11 @@ class FakeAccountMigrationRepository implements AccountMigrationRepository {
   async getMarker() { return this.marker }
   async mergeInitialState() { this.initialMergeCount += 1 }
   async migrateSessionOutcome(_accountId: string, outcome: GuestMigrationSnapshot['sessionOutcomes'][number]) { this.migratedSessions.push(outcome.session.id) }
+  async migrateRebirth() {}
   async markComplete(marker: MigrationMarker) { this.marker = marker }
 }
 
-const snapshot: GuestMigrationSnapshot = { guestId: 'guest-1', profile: null, progress: [], reviewItems: [], sessions: [], sessionOutcomes: [] }
+const snapshot: GuestMigrationSnapshot = { guestId: 'guest-1', profile: null, progress: [], reviewItems: [], sessions: [], sessionOutcomes: [], rebirths: [] }
 
 describe('migrateGuestDataToAccount', () => {
   it('merges state, records a Cloud marker, and keeps the Guest checkpoint recoverable', async () => {

@@ -3,6 +3,7 @@ import type { ReviewItem } from './review-item'
 import type { LearningSession } from './learning-session'
 import type { SessionSubmissionOutcome } from '../repositories/session-submission-repository'
 import type { UserProfile } from './user-profile'
+import type { RebirthRecord } from './rebirth'
 
 export interface GuestMigrationSnapshot {
   guestId: string
@@ -11,6 +12,7 @@ export interface GuestMigrationSnapshot {
   reviewItems: ReviewItem[]
   sessions: LearningSession[]
   sessionOutcomes: SessionSubmissionOutcome[]
+  rebirths: RebirthRecord[]
 }
 
 export interface MigrationCheckpoint {
@@ -48,6 +50,10 @@ export function mergeProfile(cloud: UserProfile | null, guest: UserProfile | nul
     timezone: cloud.timezone ?? guest.timezone,
     legacyBaseline: baseline,
     updatedAt: later(cloud.updatedAt ?? null, guest.updatedAt ?? null) ?? cloud.createdAt,
+    progression:
+      cloud.progression?.rebirthCount || cloud.progression?.totalExpEarned
+        ? cloud.progression
+        : guest.progression,
   }
 }
 
