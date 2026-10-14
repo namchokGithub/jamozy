@@ -313,20 +313,18 @@ export class FirebaseAccountMigrationRepository implements AccountMigrationRepos
   }
 
   async reconcileRebirths(accountId: string): Promise<void> {
-    const { db, collection, doc, runTransaction } = this.dependencies
+    const { db, collection, doc, getDocs, runTransaction } = this.dependencies
     const profileRef = doc(db, 'users', accountId)
     const recordsRef = collection(db, 'users', accountId, 'rebirths')
+    const recordsSnapshot = await getDocs(recordsRef)
+    const records: RebirthRecord[] = recordsSnapshot.docs.map(
+      (recordSnapshot) => recordSnapshot.data() as RebirthRecord,
+    )
     await runTransaction(db, async (transaction) => {
-      const [profileSnapshot, recordsSnapshot] = await Promise.all([
-        transaction.get(profileRef),
-        transaction.get(recordsRef),
-      ])
+      const profileSnapshot = await transaction.get(profileRef)
       if (!profileSnapshot.exists()) throw new Error('User profile is required')
       const profile = toUserProfile(accountId, profileSnapshot.data())
       const progression = progressionOf(profile)
-      const records = recordsSnapshot.docs.map(
-        (recordSnapshot) => recordSnapshot.data() as RebirthRecord,
-      )
       transaction.set(
         profileRef,
         {

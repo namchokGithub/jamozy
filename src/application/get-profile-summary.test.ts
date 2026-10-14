@@ -26,6 +26,9 @@ describe('getProfileSummary', () => {
 
     expect(summary).toEqual({
       exp: 0,
+      currentExp: 0,
+      rebirthCount: 0,
+      perkPointsEarned: 0,
       level: 1,
       expIntoLevel: 0,
       expToNextLevel: 50,
@@ -38,6 +41,7 @@ describe('getProfileSummary', () => {
     const userProfileRepo = new FakeUserProfileRepository()
     const profile: UserProfile = {
       ...defaultUserProfile('user1', new Date('2025-01-01')),
+      progression: undefined,
       exp: 250,
       stats: sampleStats,
     }
@@ -47,6 +51,9 @@ describe('getProfileSummary', () => {
 
     expect(summary).toEqual({
       exp: 250,
+      currentExp: 250,
+      rebirthCount: 0,
+      perkPointsEarned: 0,
       level: 3,
       expIntoLevel: 85,
       expToNextLevel: 187,
@@ -59,6 +66,7 @@ describe('getProfileSummary', () => {
     const userProfileRepo = new FakeUserProfileRepository()
     await userProfileRepo.saveUserProfile('user1', {
       ...defaultUserProfile('user1', new Date('2025-01-01')),
+      progression: undefined,
       exp: 250,
       stats: sampleStats,
       sessionAggregate: {
@@ -109,6 +117,7 @@ describe('getProfileSummary', () => {
     const userProfileRepo = new FakeUserProfileRepository()
     await userProfileRepo.saveUserProfile('user1', {
       ...defaultUserProfile('user1', new Date('2025-01-01')),
+      progression: undefined,
       exp: 250,
       sessionAggregate: {
         exp: 120,
@@ -131,10 +140,12 @@ describe('getProfileSummary', () => {
     const userProfileRepo = new FakeUserProfileRepository()
     await userProfileRepo.saveUserProfile('below', {
       ...defaultUserProfile('below', new Date('2025-01-01')),
+      progression: undefined,
       exp: 164,
     })
     await userProfileRepo.saveUserProfile('at', {
       ...defaultUserProfile('at', new Date('2025-01-01')),
+      progression: undefined,
       exp: 165,
     })
 

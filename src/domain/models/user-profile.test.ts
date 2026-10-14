@@ -131,8 +131,9 @@ describe('defaultUserProfile', () => {
 
 describe('canonical progression', () => {
   it('normalizes legacy lifetime exp once', () => {
-    const { progression: _progression, ...profile } = {
+    const profile = {
       ...defaultUserProfile('user1', new Date('2026-01-01')),
+      progression: undefined,
       exp: 100,
       sessionAggregate: { ...emptySessionAggregate(), exp: 50 },
     }
@@ -165,10 +166,21 @@ describe('canonical progression', () => {
   it('awards exp into the current rebirth cycle and lifetime total', () => {
     expect(
       awardProgressionExp(
-        { currentExp: 0, totalExpEarned: 5000, highestLevel: 100, rebirthCount: 1, perkPointsEarned: 1 },
+        {
+          currentExp: 0,
+          totalExpEarned: 5000,
+          highestLevel: 100,
+          rebirthCount: 1,
+          perkPointsEarned: 1,
+        },
         50,
       ),
-    ).toMatchObject({ currentExp: 50, totalExpEarned: 5050, rebirthCount: 1, perkPointsEarned: 1 })
+    ).toMatchObject({
+      currentExp: 50,
+      totalExpEarned: 5050,
+      rebirthCount: 1,
+      perkPointsEarned: 1,
+    })
   })
 })
 
@@ -216,7 +228,10 @@ describe('userSettingsSchema', () => {
 
   it('rejects an invalid keyboard sound pack', () => {
     expect(() =>
-      userSettingsSchema.parse({ ...makeValidSettings(), keyboardSoundPack: 'bluealps' }),
+      userSettingsSchema.parse({
+        ...makeValidSettings(),
+        keyboardSoundPack: 'bluealps',
+      }),
     ).toThrow()
   })
 })

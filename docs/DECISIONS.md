@@ -1494,8 +1494,9 @@ operation IDs serialize, and only the first can consume the eligible cycle.
 Guest-to-account migration stores a pending decision keyed by `guestId`: if
 Cloud has no progression activity, it adopts the Guest cycle once; otherwise
 Cloud's `currentExp` remains authoritative. Rebirth records are imported by
-operation ID, then a transaction reconciles `rebirthCount` and
-`perkPointsEarned` from the actual unique record count. Unmatched Guest session
+operation ID, then migration reads the record set and a profile transaction
+reconciles `rebirthCount` and `perkPointsEarned` from the actual unique record
+count. Unmatched Guest session
 receipts contribute to `totalExpEarned`; they contribute to `currentExp` only
 when neither side has Rebirth history. A migration marker is terminal only
 after reconciliation and receipt import complete.
@@ -1512,4 +1513,8 @@ is still owner-writable, so this is not an anti-tamper guarantee against a
 malicious signed-in client. Perk spending, allocation, Rank, and achievements
 are not implemented. The legacy `completeLesson` award path has not yet moved
 to receipt-gated canonical progression; until it does, new Rebirth-safe EXP
-guarantees apply to the receipt-backed Lesson/Home submission paths.
+guarantees apply to the receipt-backed Lesson/Home submission paths. The Web
+Firestore SDK cannot read a collection query inside a transaction, so a
+simultaneous Rebirth after the migration record-set read can temporarily leave
+its aggregate counter stale; a later reconciliation is required to repair that
+race.

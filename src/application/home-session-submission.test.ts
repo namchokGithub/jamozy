@@ -43,6 +43,7 @@ describe('submitHomeSession', () => {
     const profile = defaultUserProfile('user1', now)
     await deps.userProfileRepo.saveUserProfile('user1', {
       ...profile,
+      progression: undefined,
       sessionAggregate: { ...emptySessionAggregate(), exp: 630 },
     })
 
@@ -50,6 +51,7 @@ describe('submitHomeSession', () => {
     // The adapter has already added the first submission to the aggregate.
     await deps.userProfileRepo.saveUserProfile('user1', {
       ...profile,
+      progression: undefined,
       sessionAggregate: { ...emptySessionAggregate(), exp: 800 },
     })
     const retry = await submitHomeSession(deps, 'user1', input)
