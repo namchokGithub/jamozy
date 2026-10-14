@@ -1,4 +1,11 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { HomePlayerData } from '../../application/get-home-player'
 import type { HomeContent } from '../../domain/models/home-content'
@@ -14,7 +21,11 @@ const { playSound, loadSound, unlockSound } = vi.hoisted(() => ({
   unlockSound: vi.fn(async () => undefined),
 }))
 vi.mock('../../infrastructure/audio/keyboard-sound-player', () => ({
-  keyboardSoundPlayer: { play: playSound, load: loadSound, unlock: unlockSound },
+  keyboardSoundPlayer: {
+    play: playSound,
+    load: loadSound,
+    unlock: unlockSound,
+  },
 }))
 
 const exercise = (id: string, targetText: string) => ({
@@ -86,7 +97,10 @@ const completed = (lessonId: string): Progress => ({
 function setup(
   overrides: Partial<HomePlayerData> = {},
   liveProgress: Promise<Progress[] | null> = Promise.resolve(null),
-  settings: { soundEnabled: boolean; keyboardSoundPack: 'turquoise' | 'mxblack' | 'mxblue' } = { soundEnabled: false, keyboardSoundPack: 'turquoise' },
+  settings: {
+    soundEnabled: boolean
+    keyboardSoundPack: 'turquoise' | 'mxblack' | 'mxblue'
+  } = { soundEnabled: false, keyboardSoundPack: 'turquoise' },
 ) {
   const services: HomeServices = {
     recordExercise: vi.fn(),
@@ -103,7 +117,12 @@ function setup(
   const view = render(
     <SnackbarProvider>
       <HomeServicesProvider value={services}>
-        <HomePlayer data={data} liveProgress={liveProgress} random={() => 0} settings={settings} />
+        <HomePlayer
+          data={data}
+          liveProgress={liveProgress}
+          random={() => 0}
+          settings={settings}
+        />
       </HomeServicesProvider>
     </SnackbarProvider>,
   )
@@ -112,8 +131,8 @@ function setup(
 
 const type = (code: string) =>
   fireEvent.keyDown(window, { code, shiftKey: false })
-const badge = (lessonTitle: string) =>
-  screen.getByRole('button', { name: new RegExp(lessonTitle) }).textContent
+const lessonCard = (lessonTitle: string) =>
+  screen.getByRole('button', { name: new RegExp(lessonTitle) })
 
 describe('HomePlayer', () => {
   beforeEach(() => {
@@ -129,8 +148,13 @@ describe('HomePlayer', () => {
   })
 
   it('plays a virtual key with the saved Home sound settings', async () => {
-    setup({}, Promise.resolve(null), { soundEnabled: true, keyboardSoundPack: 'mxblue' })
-    await waitFor(() => expect(useHomePlayerStore.getState().session?.status).toBe('typing'))
+    setup({}, Promise.resolve(null), {
+      soundEnabled: true,
+      keyboardSoundPack: 'mxblue',
+    })
+    await waitFor(() =>
+      expect(useHomePlayerStore.getState().session?.status).toBe('typing'),
+    )
 
     fireEvent.click(screen.getByRole('button', { name: 'r' }))
 
@@ -161,7 +185,9 @@ describe('HomePlayer', () => {
       lesson: content.units[0].lessons[0],
       result: expect.objectContaining({ exerciseId: 'e1' }),
     })
-    expect(badge('First')).toContain('1/1')
+    expect(
+      within(lessonCard('First')).getByText(/^1\s*\/\s*1$/),
+    ).toBeInTheDocument()
   })
 
   it('moves to the next lesson when a session ends, with a top notification', async () => {
@@ -235,7 +261,9 @@ describe('HomePlayer', () => {
 
     await act(async () => resolveLive([completed('l2')]))
 
-    expect(badge('Second')).toContain('1/1')
+    expect(
+      within(lessonCard('Second')).getByText(/^1\s*\/\s*1$/),
+    ).toBeInTheDocument()
     expect(useHomePlayerStore.getState().session).toBe(session)
   })
 

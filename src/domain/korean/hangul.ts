@@ -1,17 +1,86 @@
 export const CHOSEONG_LIST = [
-  'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ',
-  'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ',
+  'ㄱ',
+  'ㄲ',
+  'ㄴ',
+  'ㄷ',
+  'ㄸ',
+  'ㄹ',
+  'ㅁ',
+  'ㅂ',
+  'ㅃ',
+  'ㅅ',
+  'ㅆ',
+  'ㅇ',
+  'ㅈ',
+  'ㅉ',
+  'ㅊ',
+  'ㅋ',
+  'ㅌ',
+  'ㅍ',
+  'ㅎ',
 ] as const
 
 export const JUNGSEONG_LIST = [
-  'ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ',
-  'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ',
+  'ㅏ',
+  'ㅐ',
+  'ㅑ',
+  'ㅒ',
+  'ㅓ',
+  'ㅔ',
+  'ㅕ',
+  'ㅖ',
+  'ㅗ',
+  'ㅘ',
+  'ㅙ',
+  'ㅚ',
+  'ㅛ',
+  'ㅜ',
+  'ㅝ',
+  'ㅞ',
+  'ㅟ',
+  'ㅠ',
+  'ㅡ',
+  'ㅢ',
+  'ㅣ',
 ] as const
 
+/** Modern compatibility jamo that have a 2-beolsik key and standalone glyph. */
+export function isBasicCompatibilityJamo(value: string): boolean {
+  return (
+    CHOSEONG_LIST.includes(value as (typeof CHOSEONG_LIST)[number]) ||
+    JUNGSEONG_LIST.includes(value as (typeof JUNGSEONG_LIST)[number])
+  )
+}
+
 export const JONGSEONG_LIST = [
-  '', 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ',
-  'ㄻ', 'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ',
-  'ㅆ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ',
+  '',
+  'ㄱ',
+  'ㄲ',
+  'ㄳ',
+  'ㄴ',
+  'ㄵ',
+  'ㄶ',
+  'ㄷ',
+  'ㄹ',
+  'ㄺ',
+  'ㄻ',
+  'ㄼ',
+  'ㄽ',
+  'ㄾ',
+  'ㄿ',
+  'ㅀ',
+  'ㅁ',
+  'ㅂ',
+  'ㅄ',
+  'ㅅ',
+  'ㅆ',
+  'ㅇ',
+  'ㅈ',
+  'ㅊ',
+  'ㅋ',
+  'ㅌ',
+  'ㅍ',
+  'ㅎ',
 ] as const
 
 const HANGUL_BASE = 0xac00
@@ -39,10 +108,20 @@ export function decomposeSyllable(
   }
 }
 
-export function composeSyllable(choseong: string, jungseong: string, jongseong = ''): string {
-  const choseongIndex = CHOSEONG_LIST.indexOf(choseong as (typeof CHOSEONG_LIST)[number])
-  const jungseongIndex = JUNGSEONG_LIST.indexOf(jungseong as (typeof JUNGSEONG_LIST)[number])
-  const jongseongIndex = JONGSEONG_LIST.indexOf(jongseong as (typeof JONGSEONG_LIST)[number])
+export function composeSyllable(
+  choseong: string,
+  jungseong: string,
+  jongseong = '',
+): string {
+  const choseongIndex = CHOSEONG_LIST.indexOf(
+    choseong as (typeof CHOSEONG_LIST)[number],
+  )
+  const jungseongIndex = JUNGSEONG_LIST.indexOf(
+    jungseong as (typeof JUNGSEONG_LIST)[number],
+  )
+  const jongseongIndex = JONGSEONG_LIST.indexOf(
+    jongseong as (typeof JONGSEONG_LIST)[number],
+  )
 
   if (choseongIndex < 0 || jungseongIndex < 0 || jongseongIndex < 0) {
     throw new Error(
@@ -50,7 +129,9 @@ export function composeSyllable(choseong: string, jungseong: string, jongseong =
     )
   }
 
-  const offset = (choseongIndex * JUNGSEONG_COUNT + jungseongIndex) * JONGSEONG_COUNT + jongseongIndex
+  const offset =
+    (choseongIndex * JUNGSEONG_COUNT + jungseongIndex) * JONGSEONG_COUNT +
+    jongseongIndex
   return String.fromCodePoint(HANGUL_BASE + offset)
 }
 

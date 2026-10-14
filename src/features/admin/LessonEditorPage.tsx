@@ -20,6 +20,7 @@ import { AdminTopBar } from './AdminTopBar'
 import { useAdminTranslation } from './i18n/admin-i18n'
 import { AdminSortableList } from './AdminSortableList'
 import { lessonTypes } from './lesson-types'
+import { ExercisePreviewModal } from './ExercisePreviewModal'
 import {
   lessonXlsxTemplate,
   parseLessonExerciseWorkbook,
@@ -45,6 +46,9 @@ export default function LessonEditorPage() {
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(
     null,
   )
+  const [previewExerciseId, setPreviewExerciseId] = useState<string | null>(
+    null,
+  )
   const [hasPendingExerciseOrder, setHasPendingExerciseOrder] = useState(false)
   const [titleError, setTitleError] = useState<string | null>(null)
   const [exerciseErrors, setExerciseErrors] = useState<Record<string, string>>(
@@ -58,7 +62,19 @@ export default function LessonEditorPage() {
   const hasUnsavedChanges =
     title !== lesson.title ||
     type !== lesson.type ||
-    JSON.stringify(exercises) !== JSON.stringify(lesson.exercises)
+    exercises.length !== lesson.exercises.length ||
+    exercises.some((exercise, index) => {
+      const saved = lesson.exercises[index]
+      return (
+        exercise.id !== saved.id ||
+        exercise.targetText !== saved.targetText ||
+        exercise.romanization !== saved.romanization ||
+        exercise.meaningTh !== saved.meaningTh ||
+        exercise.meaningEn !== saved.meaningEn ||
+        exercise.difficulty !== saved.difficulty ||
+        exercise.hint !== saved.hint
+      )
+    })
   const unsavedChangesBlocker = useAdminUnsavedChanges(
     hasUnsavedChanges,
     t('feedback.unsavedChangesWarning'),
@@ -187,6 +203,12 @@ export default function LessonEditorPage() {
   return (
     <PageSurface className="px-6 lg:px-8" contentClassName="max-w-[1200px]">
       <AdminUnsavedChangesDialog blocker={unsavedChangesBlocker} />
+      <ExercisePreviewModal
+        exercises={visibleExercises}
+        selectedId={previewExerciseId}
+        onSelect={setPreviewExerciseId}
+        onClose={() => setPreviewExerciseId(null)}
+      />
       <Modal
         open={Boolean(xlsxImport)}
         title={t('lesson.xlsxImport.title')}
@@ -548,6 +570,13 @@ export default function LessonEditorPage() {
                     </p>
                   </div>
                   <div className="flex flex-wrap justify-end gap-1">
+                    <Button
+                      variant="secondary"
+                      disabled={isPending || !exercise.targetText.trim()}
+                      onClick={() => setPreviewExerciseId(exercise.id)}
+                    >
+                      {t('action.previewExercise')}
+                    </Button>
                     <Button
                       variant="secondary"
                       disabled={isPending}

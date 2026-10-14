@@ -49,6 +49,21 @@ test('fetches one shard for syllables that share a choseong', async () => {
   expect([...(loaded?.glyphs.keys() ?? [])]).toEqual(['가', '거'])
 })
 
+test('fetches the standalone-jamo shard for compatibility jamo', async () => {
+  const fetchMock = vi.fn(() =>
+    respond(shard({ ㅝ: { width: 1770, paths: [{ jamo: 'ㅝ', d: 'M0 0' }] } })),
+  )
+  vi.stubGlobal('fetch', fetchMock)
+
+  const loaded = await loadJamoSvgGlyphs(['ㅝ'])
+
+  expect(fetchMock).toHaveBeenCalledWith(
+    '/jamo-svg/pretendard-600/standalone-jamo.json',
+    expect.objectContaining({ signal: expect.any(AbortSignal) }),
+  )
+  expect(loaded?.glyphs.has('ㅝ')).toBe(true)
+})
+
 test('shares one request between concurrent and later calls', async () => {
   const fetchMock = vi.fn(() => respond(shard({ 가: glyph })))
   vi.stubGlobal('fetch', fetchMock)

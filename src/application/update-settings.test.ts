@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { updateSettings } from './update-settings'
 import { FakeUserProfileRepository } from '../test/fakes'
-import { defaultUserProfile, type UserProfile, type UserSettings } from '../domain/models/user-profile'
+import {
+  defaultUserProfile,
+  type UserProfile,
+  type UserSettings,
+} from '../domain/models/user-profile'
 
 function makeSettings(overrides: Partial<UserSettings> = {}): UserSettings {
   return {
@@ -46,6 +50,7 @@ describe('updateSettings', () => {
     expect(updated?.exp).toBe(350)
     expect(updated?.stats).toEqual(existing.stats)
     expect(updated?.createdAt).toEqual(existing.createdAt)
+    expect(updated?.updatedAt).toEqual(now)
   })
 
   it('creates a new profile from defaultUserProfile when none exists yet, with the submitted settings', async () => {

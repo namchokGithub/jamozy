@@ -1,5 +1,6 @@
 import { Info } from 'lucide-react'
 import { motion } from 'motion/react'
+import ExerciseHint from './ExerciseHint'
 
 type Finger = 'Pinky' | 'Ring' | 'Middle' | 'Index' | 'Thumb'
 
@@ -60,6 +61,8 @@ const FINGERS: Finger[] = ['Pinky', 'Ring', 'Middle', 'Index', 'Thumb']
 interface FingerPlacementGuideProps {
   nextKey?: { code: string; shift: boolean }
   pressedCodes: ReadonlySet<string>
+  hint?: string | null
+  exerciseId?: string
 }
 
 function activeFingerFor(
@@ -161,6 +164,8 @@ function HandSilhouette({
 export default function FingerPlacementGuide({
   nextKey,
   pressedCodes,
+  hint,
+  exerciseId,
 }: FingerPlacementGuideProps) {
   return (
     <section
@@ -179,6 +184,7 @@ export default function FingerPlacementGuide({
           pressedCodes={pressedCodes}
         />
       </div>
+      <ExerciseHint key={exerciseId} hint={hint ?? null} />
       <div className="group absolute right-3 top-3">
         <button
           type="button"

@@ -195,6 +195,646 @@
       "nearestApprovedSyllables": []
     },
     {
+      "syllable": "ㄱ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㄲ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㄴ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㄷ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㄸ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㄹ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅁ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅂ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅃ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅅ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅆ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅇ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅈ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅉ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅊ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅋ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅌ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅍ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅎ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅏ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅐ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅑ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅒ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅓ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅔ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅕ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅖ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅗ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅘ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 2,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅙ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 2,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅚ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 2,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅛ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅜ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅝ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 2,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅞ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 2,
+        "contourRelation": "surplus"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅟ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 2,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅠ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅡ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅢ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 2,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
+      "syllable": "ㅣ",
+      "priority": 5,
+      "reasons": [
+        "basic-jamo"
+      ],
+      "queueKey": {
+        "medialLayout": "standalone",
+        "hasFinal": false,
+        "compoundMedial": null,
+        "compoundFinal": null,
+        "physicalStepCount": 1,
+        "contourRelation": "aligned"
+      },
+      "nearestApprovedSyllables": []
+    },
+    {
       "syllable": "것",
       "priority": 5,
       "reasons": [
@@ -18890,7 +19530,9 @@
         "physicalStepCount": 3,
         "contourRelation": "aligned"
       },
-      "nearestApprovedSyllables": []
+      "nearestApprovedSyllables": [
+        "곌"
+      ]
     },
     {
       "syllable": "곪",

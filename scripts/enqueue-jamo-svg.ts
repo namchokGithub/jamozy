@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { parseArgs } from 'node:util'
 import {
   addToCache,
+  basicJamo,
   mergeQueueEntries,
   parseWordList,
   syllablesByFirstAppearance,
@@ -18,6 +19,7 @@ const { values } = parseArgs({
     words: { type: 'string', default: 'docs/informations/korean_words.txt' },
     top: { type: 'string' },
     reason: { type: 'string', default: 'frequency-list:korean-5800' },
+    'include-basic-jamo': { type: 'boolean', default: false },
     'dry-run': { type: 'boolean', default: false },
   },
 })
@@ -28,10 +30,19 @@ const queueFile = join(root, 'tools/jamo-svg/queue/pretendard-600/queue.json')
 const top = values.top === undefined ? Infinity : Number(values.top)
 if (!Number.isInteger(top) && top !== Infinity)
   throw new Error(`--top must be an integer, received ${values.top}.`)
-const words = parseWordList(
-  await readFile(join(root, values.words), 'utf8'),
-).slice(0, top)
-const wanted = syllablesByFirstAppearance(words)
+const words =
+  top === 0
+    ? []
+    : parseWordList(await readFile(join(root, values.words), 'utf8')).slice(
+        0,
+        top,
+      )
+const wanted: Array<{ syllable: string; rank?: number }> = [
+  ...syllablesByFirstAppearance(words),
+  ...(values['include-basic-jamo']
+    ? basicJamo().map((syllable) => ({ syllable }))
+    : []),
+]
 const manifest = JSON.parse(
   await readFile(join(reviewsRoot, 'manifest.json'), 'utf8'),
 ) as ReviewManifest
@@ -59,12 +70,15 @@ const added = merged.slice(existing.length)
 if (added.length)
   console.log(
     added
-      .map(({ syllable, sourceRank }) => `  ${syllable}  word ${sourceRank}`)
+      .map(
+        ({ syllable, sourceRank }) =>
+          `  ${syllable}  ${sourceRank === undefined ? 'basic jamo' : `word ${sourceRank}`}`,
+      )
       .join('\n'),
   )
 if (values['dry-run']) {
   console.log(
-    `${words.length} words → ${wanted.length} syllables; would add ${added.length}, queue would be ${merged.length}. Nothing written.`,
+    `${words.length} words → ${wanted.length} glyphs; would add ${added.length}, queue would be ${merged.length}. Nothing written.`,
   )
   process.exit(0)
 }
@@ -74,5 +88,5 @@ await addToCache(
 )
 await queue.save(merged)
 console.log(
-  `${words.length} words → ${wanted.length} syllables; added ${merged.length - existing.length}, queue now ${merged.length}.`,
+  `${words.length} words → ${wanted.length} glyphs; added ${merged.length - existing.length}, queue now ${merged.length}.`,
 )

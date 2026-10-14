@@ -145,6 +145,19 @@ describe('getComposedText', () => {
     state = pressKey(state, 'Comma', false)
     expect(getComposedText(state)).toBe('가,')
   })
+
+  it('requires Shift+Slash for a question mark literal', () => {
+    let state = startTypingSession('가?')
+    state = pressKey(state, 'KeyR', false)
+    state = pressKey(state, 'KeyK', false)
+    state = pressKey(state, 'Slash', false)
+    expect(state.keyIndex).toBe(2)
+    expect(state.mistakes).toHaveLength(1)
+
+    state = pressKey(state, 'Slash', true)
+    expect(state.status).toBe('completed')
+    expect(getComposedText(state)).toBe('가?')
+  })
 })
 
 describe('getCharacterStates', () => {

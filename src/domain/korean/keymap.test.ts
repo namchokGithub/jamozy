@@ -18,6 +18,7 @@ describe('KEY_TO_JAMO', () => {
   it('maps punctuation and space with no jamo role', () => {
     expect(KEY_TO_JAMO.Comma).toEqual({ base: ',' })
     expect(KEY_TO_JAMO.Period).toEqual({ base: '.' })
+    expect(KEY_TO_JAMO.Slash).toEqual({ base: '/', shift: '?' })
     expect(KEY_TO_JAMO.Space).toEqual({ base: ' ' })
   })
 })
@@ -33,6 +34,10 @@ describe('JAMO_TO_KEY', () => {
 
   it('inverts punctuation with shift: false', () => {
     expect(JAMO_TO_KEY[',']).toEqual({ code: 'Comma', shift: false })
+  })
+
+  it('inverts a shifted question mark key', () => {
+    expect(JAMO_TO_KEY['?']).toEqual({ code: 'Slash', shift: true })
   })
 })
 
@@ -51,9 +56,12 @@ describe('isKoreanJamoKey', () => {
 })
 
 describe('isTypingInputKey', () => {
-  it('accepts Korean jamo positions and Space only', () => {
+  it('accepts Korean jamo positions and mapped literal keys', () => {
     expect(isTypingInputKey('KeyR')).toBe(true)
     expect(isTypingInputKey('Space')).toBe(true)
-    expect(isTypingInputKey('Period')).toBe(false)
+    expect(isTypingInputKey('Comma')).toBe(true)
+    expect(isTypingInputKey('Period')).toBe(true)
+    expect(isTypingInputKey('Slash')).toBe(true)
+    expect(isTypingInputKey('Enter')).toBe(false)
   })
 })

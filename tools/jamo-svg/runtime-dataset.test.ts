@@ -7,6 +7,7 @@ import { extractGlyph } from './extract'
 import type { ReviewManifest, ReviewShard } from './review-store'
 import {
   buildRuntimeShards,
+  buildStandaloneJamoShard,
   roundPathNumbers,
   serializeRuntimeShard,
   type ApprovedEntry,
@@ -38,6 +39,42 @@ const entry = async (
 })
 
 describe('runtime dataset compiler', () => {
+  test('compiles an approved standalone jamo into its dedicated runtime shard', async () => {
+    const glyph = await extractGlyph('ㄱ')
+    const review: GlyphReview = {
+      reviewSchemaVersion: 2,
+      syllable: glyph.syllable,
+      source: {
+        extraction: glyph.extraction,
+        sourceGlyphHash: glyph.sourceGlyphHash,
+      },
+      status: 'approved',
+      blockers: [],
+      steps: [
+        {
+          order: 0,
+          jamo: 'ㄱ',
+          geometry: glyph.contours.map(({ id: contourId }) => ({
+            kind: 'contour' as const,
+            contourId,
+          })),
+        },
+      ],
+      splitRecipes: [],
+      approved: {
+        at: '2026-10-12T00:00:00.000Z',
+        reviewer: 'test',
+        validatorVersion: 1,
+        validationHash: 'test',
+      },
+    }
+
+    const shard = buildStandaloneJamoShard([{ glyph, review }], META)
+
+    expect(Object.keys(shard.glyphs)).toEqual(['ㄱ'])
+    expect(shard.glyphs['ㄱ'].paths.map(({ jamo }) => jamo)).toEqual(['ㄱ'])
+  })
+
   test('compiles only approved reviews into 19 choseong shards sorted by code point', async () => {
     const shards = buildRuntimeShards(
       [
@@ -116,6 +153,17 @@ describe('writeRuntimeShards', () => {
     expect(await readFile(join(outDir, '00.json'), 'utf8')).toBe('new 0\n')
     expect(await readFile(join(outDir, '18.json'), 'utf8')).toBe('new 18\n')
     expect((await readdir(outDir)).sort()).toHaveLength(19)
+  })
+
+  test('writes the standalone-jamo shard with the syllable shard set', async () => {
+    const outDir = await mkdtemp(join(tmpdir(), 'jamo-runtime-'))
+
+    await writeRuntimeShards(outDir, texts, 'standalone\n')
+
+    expect(await readFile(join(outDir, 'standalone-jamo.json'), 'utf8')).toBe(
+      'standalone\n',
+    )
+    expect((await readdir(outDir)).sort()).toHaveLength(20)
   })
 
   test('leaves the old set untouched when any write fails', async () => {

@@ -5,13 +5,37 @@ import {
   getChoseongShardIndex,
   shardFileName,
 } from '../../src/domain/korean/hangul'
-import type { RuntimeJamoSvgShard } from '../../src/domain/korean/jamo-svg-runtime'
+import {
+  STANDALONE_JAMO_SHARD_FILE,
+  type RuntimeJamoSvgShard,
+} from '../../src/domain/korean/jamo-svg-runtime'
 import { compileReview, validateReview } from './compile'
 import { extractGlyph, fontUnitsPerEm } from './extract'
 import type { ReviewManifest, ReviewShard } from './review-store'
 import type { CachedGlyph, GlyphReview } from './types'
 
 export type ApprovedEntry = { glyph: CachedGlyph; review: GlyphReview }
+export { STANDALONE_JAMO_SHARD_FILE }
+
+function addCompiledGlyph(
+  shard: RuntimeJamoSvgShard,
+  glyph: CachedGlyph,
+  review: GlyphReview,
+) {
+  const { blockers } = validateReview(glyph, review)
+  if (blockers.length)
+    throw new Error(
+      `${glyph.syllable} is approved but fails validation: ${blockers.join(', ')}`,
+    )
+  const compiled = compileReview(glyph, review)
+  shard.glyphs[glyph.syllable] = {
+    width: compiled.width,
+    paths: compiled.paths.map(({ jamo, d }) => ({
+      jamo,
+      d: roundPathNumbers(d),
+    })),
+  }
+}
 
 export function roundPathNumbers(d: string) {
   // Whole SVG numbers, including leading-dot (.5) and exponent (1e-7) forms.
@@ -44,21 +68,32 @@ export function buildRuntimeShards(
     const index = getChoseongShardIndex(glyph.syllable)
     if (index === undefined)
       throw new Error(`${glyph.syllable} is not a Hangul syllable.`)
-    const { blockers } = validateReview(glyph, review)
-    if (blockers.length)
-      throw new Error(
-        `${glyph.syllable} is approved but fails validation: ${blockers.join(', ')}`,
-      )
-    const compiled = compileReview(glyph, review)
-    shards[index].glyphs[glyph.syllable] = {
-      width: compiled.width,
-      paths: compiled.paths.map(({ jamo, d }) => ({
-        jamo,
-        d: roundPathNumbers(d),
-      })),
-    }
+    addCompiledGlyph(shards[index], glyph, review)
   }
   return shards
+}
+
+/** Builds the dedicated runtime shard for approved standalone compatibility jamo. */
+export function buildStandaloneJamoShard(
+  entries: ApprovedEntry[],
+  meta: { fontSha256: string; unitsPerEm: number },
+): RuntimeJamoSvgShard {
+  const shard: RuntimeJamoSvgShard = {
+    datasetSchemaVersion: 1,
+    fontSha256: meta.fontSha256,
+    unitsPerEm: meta.unitsPerEm,
+    glyphs: {},
+  }
+  for (const { glyph, review } of [...entries]
+    .filter(({ glyph }) => glyph.kind === 'standalone-jamo')
+    .sort(
+      (a, b) =>
+        (a.glyph.syllable.codePointAt(0) ?? 0) -
+        (b.glyph.syllable.codePointAt(0) ?? 0),
+    )) {
+    if (review.status === 'approved') addCompiledGlyph(shard, glyph, review)
+  }
+  return shard
 }
 
 /** Stable text: fixed key order, one glyph per line, trailing newline. */
@@ -98,23 +133,43 @@ export async function compileRuntimeShards(reviewsRoot: string) {
       entries.push({ glyph, review })
     }
   }
-  return buildRuntimeShards(entries, {
+  const meta = {
     fontSha256: manifest.activeFontFingerprint,
     unitsPerEm: await fontUnitsPerEm(),
-  }).map(serializeRuntimeShard)
+  }
+  return {
+    syllableShards: buildRuntimeShards(
+      entries.filter(({ glyph }) => glyph.kind === 'syllable'),
+      meta,
+    ).map(serializeRuntimeShard),
+    standaloneJamoShard: serializeRuntimeShard(
+      buildStandaloneJamoShard(entries, meta),
+    ),
+  }
 }
 
 /**
  * Writes every shard to a staging file first and renames them into place only
  * after all writes succeed, so a failed run leaves the previous set intact.
  */
-export async function writeRuntimeShards(outDir: string, texts: string[]) {
+export async function writeRuntimeShards(
+  outDir: string,
+  texts: string[],
+  standaloneJamoText?: string,
+) {
   await mkdir(outDir, { recursive: true })
-  const files = texts.map((_, index) => join(outDir, shardFileName(index)))
+  const files = [
+    ...texts.map((_, index) => join(outDir, shardFileName(index))),
+    ...(standaloneJamoText === undefined
+      ? []
+      : [join(outDir, STANDALONE_JAMO_SHARD_FILE)]),
+  ]
+  const allTexts =
+    standaloneJamoText === undefined ? texts : [...texts, standaloneJamoText]
   const staged: string[] = []
   try {
     for (const [index, file] of files.entries()) {
-      await writeFile(`${file}.tmp`, texts[index])
+      await writeFile(`${file}.tmp`, allTexts[index])
       staged.push(`${file}.tmp`)
     }
   } catch (error) {

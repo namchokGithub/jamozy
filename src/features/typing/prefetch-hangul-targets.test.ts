@@ -24,10 +24,11 @@ describe('prefetchHangulTargets', () => {
     expect(loadJamoSvgGlyphs).toHaveBeenCalledWith(['가', '나', '다'])
   })
 
-  it('skips text the SVG renderer does not draw', () => {
+  it('prefetches standalone jamo but skips unsupported text', () => {
     prefetchHangulTargets(['ㄱ', 'abc', 'ᄀ'])
 
-    expect(loadJamoSvgGlyphs).not.toHaveBeenCalled()
+    expect(loadJamoSvgGlyphs).toHaveBeenCalledOnce()
+    expect(loadJamoSvgGlyphs).toHaveBeenCalledWith(['ㄱ'])
   })
 
   it('does nothing when the SVG renderer is off', () => {

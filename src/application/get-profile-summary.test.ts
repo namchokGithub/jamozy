@@ -105,7 +105,7 @@ describe('getProfileSummary', () => {
     })
   })
 
-  it('keeps legacy averages when the baseline has EXP but zero-valued stats', async () => {
+  it('derives WPM from session typing time when a legacy profile stored zero', async () => {
     const userProfileRepo = new FakeUserProfileRepository()
     await userProfileRepo.saveUserProfile('user1', {
       ...defaultUserProfile('user1', new Date('2025-01-01')),
@@ -116,6 +116,7 @@ describe('getProfileSummary', () => {
         acceptedKeystrokes: 30,
         rejectedKeystrokes: 2,
         totalTypingTimeSeconds: 90,
+        typingSeconds: 60,
         bestAccuracy: 93.75,
       },
     })
@@ -123,7 +124,7 @@ describe('getProfileSummary', () => {
     const summary = await getProfileSummary(userProfileRepo, 'user1')
 
     expect(summary.stats.averageAccuracy).toBe(0)
-    expect(summary.stats.averageSpeedWpm).toBe(0)
+    expect(summary.stats.averageSpeedWpm).toBe(6)
   })
 
   it('derives level 2 at exp 164 and level 3 at exp 165 (the DEC-048 curve boundary)', async () => {
@@ -155,12 +156,19 @@ describe('getProfileSummary', () => {
 
   it('treats a stored profile without stats as zero stats instead of failing', async () => {
     const userProfileRepo = new FakeUserProfileRepository()
-    const { stats: _stats, ...withoutStats } = defaultUserProfile('user1', new Date('2026-01-01'))
+    const { stats: _stats, ...withoutStats } = defaultUserProfile(
+      'user1',
+      new Date('2026-01-01'),
+    )
     void _stats
     await userProfileRepo.saveUserProfile('user1', withoutStats as UserProfile)
 
     const summary = await getProfileSummary(userProfileRepo, 'user1')
 
-    expect(summary.stats).toMatchObject({ lessonsCompleted: 0, averageAccuracy: 0, totalTypingTimeSeconds: 0 })
+    expect(summary.stats).toMatchObject({
+      lessonsCompleted: 0,
+      averageAccuracy: 0,
+      totalTypingTimeSeconds: 0,
+    })
   })
 })

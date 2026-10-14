@@ -30,6 +30,7 @@ export const KEY_TO_JAMO: Record<string, { base: string; shift?: string }> = {
   // Punctuation / space (no jamo role)
   Comma: { base: ',' },
   Period: { base: '.' },
+  Slash: { base: '/', shift: '?' },
   Space: { base: ' ' },
 }
 
@@ -37,9 +38,9 @@ export function isKoreanJamoKey(code: string): boolean {
   return code.startsWith('Key') && code in KEY_TO_JAMO
 }
 
-/** Physical keys accepted as lesson input: Korean jamo positions plus Space. */
+/** Physical keys accepted as lesson input: Korean jamo and mapped literals. */
 export function isTypingInputKey(code: string): boolean {
-  return isKoreanJamoKey(code) || code === 'Space'
+  return code in KEY_TO_JAMO
 }
 
 export const JAMO_TO_KEY: Record<string, { code: string; shift: boolean }> =

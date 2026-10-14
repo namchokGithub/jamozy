@@ -1,4 +1,7 @@
-import { getChoseongShardIndex } from '../../domain/korean/hangul'
+import {
+  getChoseongShardIndex,
+  isBasicCompatibilityJamo,
+} from '../../domain/korean/hangul'
 import type {
   LoadedJamoSvgGlyphs,
   RuntimeJamoSvgGlyph,
@@ -36,7 +39,11 @@ export function svgTargetSyllables(
   const result: SyllableGroup[] = []
   for (const [syllableIndex, jamo] of groups) {
     const syllable = characters[syllableIndex] ?? ''
-    if (syllable !== ' ' && getChoseongShardIndex(syllable) === undefined)
+    if (
+      syllable !== ' ' &&
+      getChoseongShardIndex(syllable) === undefined &&
+      !isBasicCompatibilityJamo(syllable)
+    )
       return undefined
     result.push({ syllable, jamo })
   }
