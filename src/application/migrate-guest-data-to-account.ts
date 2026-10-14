@@ -16,15 +16,28 @@ export async function migrateGuestDataToAccount(
   const marker = await destination.getMarker(accountId, guestId)
   if (marker) return { migrated: false, sessionCount: 0 }
   const snapshot = await source.getSnapshot(guestId)
-  await source.saveCheckpoint({ guestId, accountId, status: 'started', updatedAt: now })
+  await source.saveCheckpoint({
+    guestId,
+    accountId,
+    status: 'started',
+    updatedAt: now,
+  })
   await destination.mergeInitialState(accountId, guestId, snapshot)
-  for (const record of snapshot.rebirths) await destination.migrateRebirth(accountId, record)
+  for (const record of snapshot.rebirths)
+    await destination.migrateRebirth(accountId, guestId, record)
+  await destination.reconcileRebirths(accountId)
   for (const outcome of [...snapshot.sessionOutcomes].sort(
-    (left, right) => left.session.completedAt.getTime() - right.session.completedAt.getTime(),
+    (left, right) =>
+      left.session.completedAt.getTime() - right.session.completedAt.getTime(),
   )) {
-    await destination.migrateSessionOutcome(accountId, outcome)
+    await destination.migrateSessionOutcome(accountId, guestId, outcome)
   }
   await destination.markComplete({ guestId, accountId, completedAt: now })
-  await source.saveCheckpoint({ guestId, accountId, status: 'completed', updatedAt: now })
+  await source.saveCheckpoint({
+    guestId,
+    accountId,
+    status: 'completed',
+    updatedAt: now,
+  })
   return { migrated: true, sessionCount: snapshot.sessionOutcomes.length }
 }

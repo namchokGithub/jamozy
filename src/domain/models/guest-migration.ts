@@ -2,7 +2,7 @@ import type { Progress } from './progress'
 import type { ReviewItem } from './review-item'
 import type { LearningSession } from './learning-session'
 import type { SessionSubmissionOutcome } from '../repositories/session-submission-repository'
-import type { UserProfile } from './user-profile'
+import { progressionOf, type UserProfile } from './user-profile'
 import type { RebirthRecord } from './rebirth'
 
 export interface GuestMigrationSnapshot {
@@ -28,41 +28,71 @@ export interface MigrationMarker {
   completedAt: Date
 }
 
+export function shouldUseGuestProgression(cloud: UserProfile | null): boolean {
+  if (!cloud) return true
+  const progression = progressionOf(cloud)
+  return progression.rebirthCount === 0 && progression.totalExpEarned === 0
+}
+
 const later = (left: Date | null, right: Date | null): Date | null => {
   if (!left) return right
   if (!right) return left
   return left > right ? left : right
 }
 
-export function mergeProfile(cloud: UserProfile | null, guest: UserProfile | null): UserProfile | null {
+export function mergeProfile(
+  cloud: UserProfile | null,
+  guest: UserProfile | null,
+): UserProfile | null {
   if (!cloud) return guest
   if (!guest) return cloud
   const cloudBaseline = cloud.legacyBaseline
-  const guestBaseline = guest.legacyBaseline ?? { exp: guest.exp, stats: guest.stats }
+  const guestBaseline = guest.legacyBaseline ?? {
+    exp: guest.exp,
+    stats: guest.stats,
+  }
   const baseline = cloudBaseline ?? guestBaseline
-  const useGuestSettings = !cloud.updatedAt || (guest.updatedAt !== undefined && guest.updatedAt > cloud.updatedAt)
+  const useGuestSettings =
+    !cloud.updatedAt ||
+    (guest.updatedAt !== undefined && guest.updatedAt > cloud.updatedAt)
   return {
     ...cloud,
-    displayName: cloud.displayName?.trim() ? cloud.displayName : guest.displayName,
+    displayName: cloud.displayName?.trim()
+      ? cloud.displayName
+      : guest.displayName,
     exp: baseline.exp,
     stats: baseline.stats,
     settings: useGuestSettings ? guest.settings : cloud.settings,
     timezone: cloud.timezone ?? guest.timezone,
     legacyBaseline: baseline,
-    updatedAt: later(cloud.updatedAt ?? null, guest.updatedAt ?? null) ?? cloud.createdAt,
-    progression:
-      cloud.progression?.rebirthCount || cloud.progression?.totalExpEarned
-        ? cloud.progression
-        : guest.progression,
+    updatedAt:
+      later(cloud.updatedAt ?? null, guest.updatedAt ?? null) ??
+      cloud.createdAt,
+    progression: shouldUseGuestProgression(cloud)
+      ? progressionOf(guest)
+      : progressionOf(cloud),
   }
 }
 
-const progressRank: Record<Progress['status'], number> = { unlocked: 1, completed: 2 }
+const progressRank: Record<Progress['status'], number> = {
+  unlocked: 1,
+  completed: 2,
+}
 
-export function mergeProgress(cloud: Progress | null, guest: Progress): Progress {
+export function mergeProgress(
+  cloud: Progress | null,
+  guest: Progress,
+): Progress {
   if (!cloud) return guest
-  const status = progressRank[guest.status] > progressRank[cloud.status] ? guest.status : cloud.status
-  const { completedExerciseIds: _ids, homePartialResult: _partial, ...cloudBase } = cloud
+  const status =
+    progressRank[guest.status] > progressRank[cloud.status]
+      ? guest.status
+      : cloud.status
+  const {
+    completedExerciseIds: _ids,
+    homePartialResult: _partial,
+    ...cloudBase
+  } = cloud
   void _ids
   void _partial
   return {
@@ -79,23 +109,46 @@ export function mergeProgress(cloud: Progress | null, guest: Progress): Progress
 
 // DEC-043: union completed exercises; a completed lesson keeps no partial
 // result, otherwise Cloud's wins unless absent.
-function mergeHomeExerciseProgress(cloud: Progress, guest: Progress, status: Progress['status']): Pick<Progress, 'completedExerciseIds' | 'homePartialResult'> {
-  const ids = [...new Set([...(cloud.completedExerciseIds ?? []), ...(guest.completedExerciseIds ?? [])])]
-  const partial = status === 'completed' ? undefined : cloud.homePartialResult ?? guest.homePartialResult
+function mergeHomeExerciseProgress(
+  cloud: Progress,
+  guest: Progress,
+  status: Progress['status'],
+): Pick<Progress, 'completedExerciseIds' | 'homePartialResult'> {
+  const ids = [
+    ...new Set([
+      ...(cloud.completedExerciseIds ?? []),
+      ...(guest.completedExerciseIds ?? []),
+    ]),
+  ]
+  const partial =
+    status === 'completed'
+      ? undefined
+      : (cloud.homePartialResult ?? guest.homePartialResult)
   return {
-    ...(cloud.completedExerciseIds || guest.completedExerciseIds ? { completedExerciseIds: ids } : {}),
+    ...(cloud.completedExerciseIds || guest.completedExerciseIds
+      ? { completedExerciseIds: ids }
+      : {}),
     ...(partial ? { homePartialResult: partial } : {}),
   }
 }
 
-export function mergeReviewItem(cloud: ReviewItem | null, guest: ReviewItem): ReviewItem {
+export function mergeReviewItem(
+  cloud: ReviewItem | null,
+  guest: ReviewItem,
+): ReviewItem {
   if (!cloud) return guest
   return {
     ...cloud,
-    nextReviewAt: cloud.nextReviewAt < guest.nextReviewAt ? cloud.nextReviewAt : guest.nextReviewAt,
+    nextReviewAt:
+      cloud.nextReviewAt < guest.nextReviewAt
+        ? cloud.nextReviewAt
+        : guest.nextReviewAt,
     box: Math.min(cloud.box, guest.box),
     mistakeCount: Math.max(cloud.mistakeCount, guest.mistakeCount),
-    lastMistakeAt: cloud.lastMistakeAt > guest.lastMistakeAt ? cloud.lastMistakeAt : guest.lastMistakeAt,
+    lastMistakeAt:
+      cloud.lastMistakeAt > guest.lastMistakeAt
+        ? cloud.lastMistakeAt
+        : guest.lastMistakeAt,
     resolved: cloud.resolved && guest.resolved,
   }
 }
