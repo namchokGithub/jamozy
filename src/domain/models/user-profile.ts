@@ -37,6 +37,15 @@ export interface UserProfile {
   sessionAggregate?: SessionAggregate
   timezone?: string
   playerStats?: PlayerStats
+  progression?: ProgressionState
+}
+
+export interface ProgressionState {
+  currentExp: number
+  totalExpEarned: number
+  highestLevel: number
+  rebirthCount: number
+  perkPointsEarned: number
 }
 
 export interface LevelProgress {
@@ -72,6 +81,40 @@ export function levelProgress(exp: number, rebirthCount = 0): LevelProgress {
 
 export function levelFromExp(exp: number, rebirthCount = 0): number {
   return levelProgress(exp, rebirthCount).level
+}
+
+const safeExp = (value: number) =>
+  Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0
+
+export function progressionOf(
+  profile: Pick<UserProfile, 'exp' | 'sessionAggregate' | 'progression'>,
+): ProgressionState {
+  if (profile.progression) return profile.progression
+  const exp = safeExp(profile.exp) + safeExp(profile.sessionAggregate?.exp ?? 0)
+  return {
+    currentExp: exp,
+    totalExpEarned: exp,
+    highestLevel: levelFromExp(exp),
+    rebirthCount: 0,
+    perkPointsEarned: 0,
+  }
+}
+
+export function awardProgressionExp(
+  state: ProgressionState,
+  amount: number,
+): ProgressionState {
+  const awarded = safeExp(amount)
+  const currentExp = state.currentExp + awarded
+  return {
+    ...state,
+    currentExp,
+    totalExpEarned: state.totalExpEarned + awarded,
+    highestLevel: Math.max(
+      state.highestLevel,
+      levelFromExp(currentExp, state.rebirthCount),
+    ),
+  }
 }
 
 // Legacy profile EXP plus EXP recorded through session submissions.
@@ -110,6 +153,13 @@ export function defaultUserProfile(
     },
     createdAt: now,
     updatedAt: now,
+    progression: {
+      currentExp: 0,
+      totalExpEarned: 0,
+      highestLevel: 1,
+      rebirthCount: 0,
+      perkPointsEarned: 0,
+    },
   }
 }
 

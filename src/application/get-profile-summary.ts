@@ -2,7 +2,7 @@ import type { UserProfileRepository } from '../domain/repositories/user-profile-
 import {
   defaultUserProfile,
   levelProgress,
-  totalExp,
+  progressionOf,
   type UserStats,
 } from '../domain/models/user-profile'
 import {
@@ -12,6 +12,9 @@ import {
 
 export interface ProfileSummary {
   exp: number
+  currentExp?: number
+  rebirthCount?: number
+  perkPointsEarned?: number
   level: number
   expIntoLevel: number
   expToNextLevel: number
@@ -31,7 +34,8 @@ export async function getProfileSummary(
     ? { ...profile, stats: profile.stats ?? fallback.stats }
     : fallback
   const sessionAggregate = resolved.sessionAggregate ?? emptySessionAggregate()
-  const exp = totalExp(resolved)
+  const progression = progressionOf(resolved)
+  const exp = progression.totalExpEarned
   const hasLegacyBaseline =
     resolved.exp > 0 || Object.values(resolved.stats).some((value) => value > 0)
   const sessionAttempts =
@@ -48,7 +52,10 @@ export async function getProfileSummary(
       : sessionAggregate.acceptedKeystrokes / 5 / (sessionTypingSeconds / 60)
   return {
     exp,
-    ...levelProgress(exp),
+    currentExp: progression.currentExp,
+    rebirthCount: progression.rebirthCount,
+    perkPointsEarned: progression.perkPointsEarned,
+    ...levelProgress(progression.currentExp, progression.rebirthCount),
     stats: {
       ...resolved.stats,
       wordsPracticed:

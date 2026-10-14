@@ -24,6 +24,7 @@ export function toUserProfile(id: string, data: Record<string, unknown>): UserPr
     sessionAggregate: data.sessionAggregate as UserProfile['sessionAggregate'],
     timezone: typeof data.timezone === 'string' ? data.timezone : undefined,
     playerStats: data.playerStats as PlayerStats | undefined,
+    progression: data.progression as UserProfile['progression'],
     createdAt: (data.createdAt as { toDate(): Date }).toDate(),
     updatedAt: data.updatedAt
       ? (data.updatedAt as { toDate(): Date }).toDate()
@@ -41,6 +42,7 @@ export function toUserProfileDoc(profile: UserProfile) {
     ...(profile.sessionAggregate ? { sessionAggregate: profile.sessionAggregate } : {}),
     ...(profile.timezone ? { timezone: profile.timezone } : {}),
     ...(profile.playerStats ? { playerStats: profile.playerStats } : {}),
+    ...(profile.progression ? { progression: profile.progression } : {}),
     createdAt: profile.createdAt,
     updatedAt: profile.updatedAt ?? profile.createdAt,
   }
