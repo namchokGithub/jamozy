@@ -5,6 +5,7 @@ import type { LearningSession } from '../../../domain/models/learning-session'
 import type { SessionSubmissionEffects, SessionSubmissionOutcome, SessionSubmissionRepository } from '../../../domain/repositories/session-submission-repository'
 import { readSessionStatsWrites } from './firestore-player-stats'
 import { readJamoStatsWrite } from './firestore-jamo-stats'
+import { awardProgressionExp, progressionOf } from '../../../domain/models/user-profile'
 
 type FirebaseSessionSubmissionDependencies = {
   db: typeof db
@@ -43,6 +44,14 @@ export class FirebaseSessionSubmissionRepository implements SessionSubmissionRep
       transaction.set(receipt, outcome)
       const profileUpdate: Record<string, unknown> = {
         sessionAggregate: addSessionAggregate(current, outcome.aggregate),
+        progression: awardProgressionExp(
+          progressionOf({
+            exp: typeof profileValues?.exp === 'number' ? profileValues.exp : 0,
+            sessionAggregate: current,
+            progression: profileValues?.progression as never,
+          }),
+          session.expGained,
+        ),
         ...writeStats(transaction),
       }
       if (!profileValues?.legacyBaseline && profileValues?.stats) {

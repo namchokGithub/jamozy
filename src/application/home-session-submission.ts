@@ -8,7 +8,7 @@ import { deviceTimeZone, sessionStatsFrom } from '../domain/models/player-stats'
 import {
   defaultUserProfile,
   levelFromExp,
-  totalExp,
+  progressionOf,
 } from '../domain/models/user-profile'
 
 export interface HomeSessionDeps {
@@ -83,8 +83,9 @@ export async function submitHomeSession(
     expGained: submission.session.expGained,
     // A duplicate's EXP is already in the profile's session aggregate.
     level: levelFromExp(
-      totalExp(profile) +
+      progressionOf(profile).currentExp +
         (submission.wasDuplicate ? 0 : submission.session.expGained),
+      progressionOf(profile).rebirthCount,
     ),
   }
 }

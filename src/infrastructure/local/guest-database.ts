@@ -4,6 +4,7 @@ import type { LearningSession } from '../../domain/models/learning-session'
 import { applySessionStats, FALLBACK_TIME_ZONE, localDateIn, type PeriodStats } from '../../domain/models/player-stats'
 import { applyJamoCounts, type JamoCounts, type JamoStats } from '../../domain/models/jamo-stat'
 import { rebirthProfile, type RebirthRecord, type RebirthResult } from '../../domain/models/rebirth'
+import { awardProgressionExp, progressionOf } from '../../domain/models/user-profile'
 
 const DB_NAME = 'jamozy-guest'
 const VERSION = 9
@@ -169,6 +170,10 @@ export class GuestDatabase {
                     ...currentProfile,
                     legacyBaseline: currentProfile.legacyBaseline ?? { exp: currentProfile.exp, stats: currentProfile.stats },
                     sessionAggregate: addSessionAggregate(currentProfile.sessionAggregate ?? emptySessionAggregate(), outcome.aggregate),
+                    progression: awardProgressionExp(
+                      progressionOf(currentProfile),
+                      session.expGained,
+                    ),
                     ...stats.profile,
                     updatedAt: new Date(),
                   }, `${userId}:`)

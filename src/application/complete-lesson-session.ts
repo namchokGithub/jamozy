@@ -10,7 +10,7 @@ import { nextReviewDate, type ReviewItem } from '../domain/models/review-item'
 import {
   defaultUserProfile,
   levelFromExp,
-  totalExp,
+  progressionOf,
 } from '../domain/models/user-profile'
 import type { CompleteLessonOutcome } from './complete-lesson'
 import {
@@ -166,8 +166,9 @@ export async function completeLessonSession(
     progress: persistedProgress,
     expGained: submission.session.expGained,
     level: levelFromExp(
-      totalExp(profile) +
+      progressionOf(profile).currentExp +
         (submission.wasDuplicate ? 0 : submission.session.expGained),
+      progressionOf(profile).rebirthCount,
     ),
     unlockedNextLessonId,
   }
