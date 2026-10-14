@@ -9,6 +9,10 @@ import {
 import type { ExerciseResult } from '../domain/korean/lesson-session'
 import type { LearningSession } from '../domain/models/learning-session'
 import type { SessionSubmissionEffects } from '../domain/repositories/session-submission-repository'
+import {
+  awardProgressionExp,
+  defaultUserProfile,
+} from '../domain/models/user-profile'
 
 const lesson = { id: 'lesson-1', exercises: [{ id: 'e1' }, { id: 'e2' }] }
 const result = (exerciseId: string): ExerciseResult => ({
@@ -30,6 +34,35 @@ class FlakySubmissions extends FakeSessionSubmissionRepository {
       throw new Error('offline')
     }
     return super.submit(userId, session, effects)
+  }
+}
+
+class RebirthAwareSubmissions extends FakeSessionSubmissionRepository {
+  constructor(
+    progressRepo: FakeProgressRepository,
+    private readonly profiles: FakeUserProfileRepository,
+  ) {
+    super(progressRepo)
+  }
+
+  override async submit(
+    userId: string,
+    session: LearningSession,
+    effects: SessionSubmissionEffects,
+  ) {
+    const outcome = await super.submit(userId, session, effects)
+    if (!outcome.wasDuplicate) {
+      const profile = await this.profiles.getUserProfile(userId)
+      if (profile)
+        await this.profiles.saveUserProfile(userId, {
+          ...profile,
+          progression: awardProgressionExp(
+            profile.progression!,
+            session.expGained,
+          ),
+        })
+    }
+    return outcome
   }
 }
 
@@ -287,5 +320,53 @@ describe('HomeOutbox', () => {
     expect(ordered[0].enqueuedAt.getTime()).toBeLessThan(
       ordered[1].enqueuedAt.getTime(),
     )
+  })
+
+  it('awards a delayed Home submission into the new Rebirth cycle once', async () => {
+    const progressRepo = new FakeProgressRepository()
+    const profiles = new FakeUserProfileRepository()
+    const profile = defaultUserProfile('u1', new Date('2026-10-14'))
+    profile.progression = {
+      currentExp: 0,
+      totalExpEarned: 500_000,
+      highestLevel: 100,
+      rebirthCount: 1,
+      perkPointsEarned: 1,
+    }
+    await profiles.saveUserProfile('u1', profile)
+    const submissions = new RebirthAwareSubmissions(progressRepo, profiles)
+    let jobNumber = 0
+    const outbox = new HomeOutbox({
+      jobs: new FakeHomeSyncJobRepository(),
+      useCases: {
+        progressRepo,
+        userProfileRepo: profiles,
+        sessionSubmissionRepo: submissions,
+      },
+      getActiveUser: async () => ({ uid: 'u1' }),
+      schedule: () => undefined,
+      now: () => new Date('2026-10-14T00:00:00Z'),
+      newId: () => `job-${(jobNumber += 1)}`,
+    })
+
+    await outbox.enqueueExercise({
+      userId: 'u1',
+      lesson,
+      result: result('e1'),
+      submissionId: 'delayed-home',
+    })
+    await outbox.enqueueExercise({
+      userId: 'u1',
+      lesson,
+      result: result('e2'),
+      submissionId: 'delayed-home',
+    })
+    await outbox.drain()
+    await outbox.drain()
+
+    const progression = (await profiles.getUserProfile('u1'))!.progression!
+    expect(progression.currentExp).toBeGreaterThan(0)
+    expect(progression.totalExpEarned - progression.currentExp).toBe(500_000)
+    expect(submissions.submissions).toHaveLength(1)
   })
 })
