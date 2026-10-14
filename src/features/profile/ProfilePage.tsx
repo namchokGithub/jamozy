@@ -111,18 +111,58 @@ export default function ProfilePage() {
           aria-label="EXP progress"
         />
         <dl className="mt-5 grid grid-cols-2 gap-3 text-sm text-[#667085]">
-          <div><dt>Rebirths</dt><dd className="font-bold text-[#253247]">{summary.rebirthCount ?? 0}</dd></div>
-          <div><dt>Perk Points earned</dt><dd className="font-bold text-[#253247]">{summary.perkPointsEarned ?? 0}</dd></div>
+          <div>
+            <dt>Rebirths</dt>
+            <dd className="font-bold text-[#253247]">
+              {summary.rebirthCount ?? 0}
+            </dd>
+          </div>
+          <div>
+            <dt>Perk Points earned</dt>
+            <dd className="font-bold text-[#253247]">
+              {summary.perkPointsEarned ?? 0}
+            </dd>
+          </div>
         </dl>
         {summary.level >= 100 && (
-          <Button className="mt-5" onClick={() => setConfirming(true)}>Rebirth</Button>
+          <Button className="mt-5" onClick={() => setConfirming(true)}>
+            Rebirth
+          </Button>
         )}
       </section>
-      <Modal open={confirming && !closesRebirthModal(fetcher.data)} title="Begin a new Rebirth?" onClose={() => setConfirming(false)}>
-        <p className="mt-3 text-sm leading-6 text-[#667085]">Your current cycle EXP resets to 0. Your learning progress and statistics stay. You earn 1 Perk Point. Pending Home results can add EXP to the new cycle.</p>
+      <Modal
+        open={confirming && !closesRebirthModal(fetcher.data)}
+        title="Begin a new Rebirth?"
+        onClose={() => setConfirming(false)}
+      >
+        <p className="mt-3 text-sm leading-6 text-[#667085]">
+          Your current cycle EXP resets to 0. Your learning progress and
+          statistics stay. You earn 1 Perk Point. Pending Home results can add
+          EXP to the new cycle.
+        </p>
+        {fetcher.data && 'error' in fetcher.data && (
+          <p
+            role="alert"
+            className="mt-4 rounded-xl bg-[#fde5e1] px-3 py-2 text-sm font-medium text-[#a85d4e]"
+          >
+            {fetcher.data.error}. Please try again.
+          </p>
+        )}
         <div className="mt-5 flex justify-end gap-2">
-          <Button variant="ghost" onClick={() => setConfirming(false)}>Cancel</Button>
-          <Button disabled={fetcher.state !== 'idle'} onClick={() => fetcher.submit({ operationId }, { method: 'post', encType: 'application/json' })}>Confirm Rebirth</Button>
+          <Button variant="ghost" onClick={() => setConfirming(false)}>
+            Cancel
+          </Button>
+          <Button
+            disabled={fetcher.state !== 'idle'}
+            onClick={() =>
+              fetcher.submit(
+                { operationId },
+                { method: 'post', encType: 'application/json' },
+              )
+            }
+          >
+            Confirm Rebirth
+          </Button>
         </div>
       </Modal>
 
