@@ -1,6 +1,5 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useLoaderData, useFetcher } from 'react-router'
-import { useState } from 'react'
 import { Award, BookOpen, Clock, Gauge, Keyboard, Target } from 'lucide-react'
 import type { ProfileLoaderData } from './ProfilePage.loader'
 import { formatTypingTime } from './format-typing-time'
@@ -8,6 +7,8 @@ import { PageNav } from '../../components/ui/PageNav'
 import { PageSurface } from '../../components/ui/PageSurface'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
+import type { RebirthActionData } from './ProfilePage.action'
+import { closesRebirthModal } from './rebirth-action-state'
 
 // Pastel accents follow Home: color stays on the icon, cards stay warm white.
 const accents = {
@@ -21,7 +22,7 @@ const cardClass =
 
 export default function ProfilePage() {
   const { summary } = useLoaderData() as ProfileLoaderData
-  const fetcher = useFetcher()
+  const fetcher = useFetcher<RebirthActionData>()
   const [confirming, setConfirming] = useState(false)
   const [operationId] = useState(() => crypto.randomUUID())
   const metrics: {
@@ -117,7 +118,7 @@ export default function ProfilePage() {
           <Button className="mt-5" onClick={() => setConfirming(true)}>Rebirth</Button>
         )}
       </section>
-      <Modal open={confirming} title="Begin a new Rebirth?" onClose={() => setConfirming(false)}>
+      <Modal open={confirming && !closesRebirthModal(fetcher.data)} title="Begin a new Rebirth?" onClose={() => setConfirming(false)}>
         <p className="mt-3 text-sm leading-6 text-[#667085]">Your current cycle EXP resets to 0. Your learning progress and statistics stay. You earn 1 Perk Point. Pending Home results can add EXP to the new cycle.</p>
         <div className="mt-5 flex justify-end gap-2">
           <Button variant="ghost" onClick={() => setConfirming(false)}>Cancel</Button>
