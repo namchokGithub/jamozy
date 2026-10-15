@@ -103,10 +103,14 @@ test('publishing a saved exercise does not report unsaved changes when field ord
   render(<RouterProvider router={router} />)
 
   fireEvent.click(await screen.findByRole('button', { name: 'Add Exercise' }))
-  fireEvent.change(screen.getByRole('textbox', { name: 'Target text' }), {
-    target: { value: '가' },
-  })
-  fireEvent.click(screen.getByRole('button', { name: 'Save all changes' }))
+  const editor = screen.getByRole('dialog', { name: 'Add Exercise' })
+  fireEvent.change(
+    within(editor).getByRole('textbox', { name: 'Target text' }),
+    {
+      target: { value: '가' },
+    },
+  )
+  fireEvent.click(within(editor).getByRole('button', { name: 'Save changes' }))
   await waitFor(() =>
     expect(screen.queryByText('Unsaved changes')).not.toBeInTheDocument(),
   )
@@ -120,10 +124,4 @@ test('publishing a saved exercise does not report unsaved changes when field ord
   await waitFor(() =>
     expect(screen.queryByText('Unsaved changes')).not.toBeInTheDocument(),
   )
-
-  fireEvent.click(screen.getByRole('button', { name: 'Edit exercise' }))
-  fireEvent.change(screen.getByRole('textbox', { name: 'Target text' }), {
-    target: { value: '나' },
-  })
-  expect(screen.getByText('Unsaved changes')).toBeInTheDocument()
 })

@@ -33,9 +33,12 @@ function deferred<T>() {
   const promise = new Promise<T>((done) => (resolve = done))
   return { promise, resolve }
 }
+// Each step's fill is a theme token; report the state it stands for.
 const fills = (container: HTMLElement) =>
-  [...container.querySelectorAll('path')].map((path) =>
-    path.getAttribute('fill'),
+  [...container.querySelectorAll('path')].map(
+    (path) =>
+      /--color-glyph-(correct|current|pending)/.exec(path.style.fill)?.[1] ??
+      null,
   )
 
 beforeEach(() => {
@@ -66,9 +69,9 @@ test('shows blank tiles, then SVG whose step fills follow keyIndex', async () =>
     request.resolve(loaded({ 가: glyph('ㄱ', 'ㅏ'), 나: glyph('ㄴ', 'ㅏ') })),
   )
   expect(container.querySelectorAll('svg')).toHaveLength(2)
-  expect(fills(container)).toEqual(['#c84f82', '#c7c3bc', '#c7c3bc', '#c7c3bc'])
+  expect(fills(container)).toEqual(['current', 'pending', 'pending', 'pending'])
   rerender(<HangulTarget session={pressKey(session, 'KeyR', false)} />)
-  expect(fills(container)).toEqual(['#20b981', '#c84f82', '#c7c3bc', '#c7c3bc'])
+  expect(fills(container)).toEqual(['correct', 'current', 'pending', 'pending'])
   expect(loadJamoSvgGlyphs).toHaveBeenCalledTimes(1)
 })
 
@@ -80,7 +83,7 @@ test('a completed session shows every step as correct', async () => {
   session = pressKey(pressKey(session, 'KeyR', false), 'KeyK', false)
   const { container } = render(<HangulTarget session={session} />)
   await act(async () => {})
-  expect(fills(container)).toEqual(['#20b981', '#20b981'])
+  expect(fills(container)).toEqual(['correct', 'correct'])
 })
 
 test('one missing syllable renders Canvas for the whole target', async () => {
@@ -103,7 +106,7 @@ test('a standalone compound vowel renders SVG when its approved data loads', asy
 
   expect(loadJamoSvgGlyphs).toHaveBeenCalledWith(['ㅝ'])
   expect(container.querySelectorAll('svg')).toHaveLength(1)
-  expect(fills(container)).toEqual(['#c84f82', '#c7c3bc'])
+  expect(fills(container)).toEqual(['current', 'pending'])
 })
 
 test('a target with a space renders SVG with a space step between words', async () => {
@@ -125,7 +128,7 @@ test('a target with a space renders SVG with a space step between words', async 
   expect(spaceMarker()).toBe('current')
   rerender(<HangulTarget session={pressKey(session, 'Space', false)} />)
   expect(spaceMarker()).toBe('correct')
-  expect(fills(container)).toEqual(['#20b981', '#20b981', '#c84f82', '#c7c3bc'])
+  expect(fills(container)).toEqual(['correct', 'correct', 'current', 'pending'])
 })
 
 test('punctuation still renders Canvas for the whole target', () => {
@@ -262,10 +265,10 @@ test('the same target in the next exercise keeps SVG without blank tiles', async
   )
   const { container, rerender } = render(<HangulTarget session={finished} />)
   await act(async () => {})
-  expect(fills(container)).toEqual(['#20b981', '#20b981'])
+  expect(fills(container)).toEqual(['correct', 'correct'])
   rerender(<HangulTarget session={startTypingSession('가')} />)
   expect(screen.queryByTestId('pending-hangul-tile')).toBeNull()
-  expect(fills(container)).toEqual(['#c84f82', '#c7c3bc'])
+  expect(fills(container)).toEqual(['current', 'pending'])
   await act(async () => {})
   expect(container.querySelectorAll('svg')).toHaveLength(1)
   expect(loadJamoSvgGlyphs).toHaveBeenCalledTimes(1)

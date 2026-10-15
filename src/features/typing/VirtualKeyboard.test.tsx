@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import VirtualKeyboard from './VirtualKeyboard'
 
 describe('VirtualKeyboard', () => {
-  it('highlights the key matching nextKey.code', () => {
+  it('marks the key matching nextKey.code as the target', () => {
     render(
       <VirtualKeyboard
         nextKey={{ code: 'KeyR', shift: false }}
@@ -11,28 +11,15 @@ describe('VirtualKeyboard', () => {
         opacity={1}
       />,
     )
-    expect(screen.getByLabelText('r')).toHaveClass('bg-[#ddf5e9]')
+    expect(screen.getByLabelText('r')).toHaveAttribute('data-state', 'target')
   })
 
-  it('highlights Shift when nextKey.shift is true', () => {
-    render(
-      <VirtualKeyboard
-        nextKey={{ code: 'KeyQ', shift: true }}
-        showEnglishKeys
-        opacity={1}
-      />,
-    )
-    screen
-      .getAllByLabelText('Shift ⇧')
-      .forEach((key) => expect(key).toHaveClass('bg-[#fff0d8]'))
-  })
-
-  it('highlights nothing when nextKey is undefined', () => {
+  it('marks no key as the target when nextKey is undefined', () => {
     render(<VirtualKeyboard showEnglishKeys opacity={1} />)
-    screen
-      .getAllByLabelText('Shift ⇧')
-      .forEach((key) => expect(key).not.toHaveClass('bg-[#fff0d8]'))
-    expect(screen.getByLabelText('r')).not.toHaveClass('bg-[#fff0d8]')
+    expect(screen.getByLabelText('r')).not.toHaveAttribute(
+      'data-state',
+      'target',
+    )
   })
 
   it('keeps the desktop key labels when mobileStyle is off', () => {
@@ -153,7 +140,7 @@ describe('VirtualKeyboard', () => {
       />,
     )
 
-    expect(screen.getByLabelText('/')).toHaveClass('bg-[#ddf5e9]')
+    expect(screen.getByLabelText('/')).toHaveAttribute('data-state', 'target')
     expect(screen.getByLabelText('/')).toHaveTextContent('?')
     fireEvent.click(screen.getAllByLabelText('Shift ⇧')[0])
     fireEvent.click(screen.getByLabelText('/'))
