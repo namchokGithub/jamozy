@@ -12,15 +12,25 @@
     -->
     <!--
       Paints the theme saved on this device before the app loads, so a dark
-      theme does not flash light. The key matches THEME_STORAGE_KEY in
+      theme does not flash light, and keeps following the device while the
+      choice is `system`. Key and attributes match
       src/features/settings/apply-theme.ts.
     -->
     <script>
       try {
-        if (localStorage.getItem('jamozy-theme') === 'dark')
-          document.documentElement.dataset.theme = 'dark'
+        var root = document.documentElement
+        var media = window.matchMedia('(prefers-color-scheme: dark)')
+        var paint = function () {
+          var setting = root.dataset.themeSetting
+          root.dataset.theme =
+            setting === 'system' ? (media.matches ? 'dark' : 'light') : setting
+        }
+        root.dataset.themeSetting =
+          localStorage.getItem('jamozy-theme') || 'light'
+        paint()
+        media.addEventListener('change', paint)
       } catch {
-        // Storage unavailable: start in the light theme.
+        // Storage or matchMedia unavailable: stay in the light theme.
       }
     </script>
     <script>

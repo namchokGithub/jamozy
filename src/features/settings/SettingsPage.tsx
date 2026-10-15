@@ -144,19 +144,12 @@ export default function SettingsPage() {
           icon={<SlidersHorizontal aria-hidden="true" size={18} />}
           accent="lavender"
           title="Appearance"
-          description="Light theme is styled for gentle, focused practice."
+          description="Pick a calm look, or let Jamozy follow your device."
         >
-          <DropdownRow>
-            <Dropdown
-              label="Theme"
-              value={settings.theme}
-              onChange={(value) => update('theme', value)}
-              options={[
-                { value: 'light', label: 'Light' },
-                { value: 'dark', label: 'Dark' },
-              ]}
-            />
-          </DropdownRow>
+          <ThemeChoice
+            value={settings.theme}
+            onChange={(value) => update('theme', value)}
+          />
         </SettingsSection>
       </div>
       <div className="mt-6 flex justify-end">
@@ -202,6 +195,59 @@ function SettingsSection({
       </div>
       <div className="mt-5 space-y-4 sm:pl-12">{children}</div>
     </section>
+  )
+}
+
+const themeOptions: {
+  value: UserSettings['theme']
+  label: string
+  hint: string
+}[] = [
+  { value: 'light', label: 'Light', hint: 'Cream and warm white' },
+  { value: 'dark', label: 'Dark', hint: 'Warm charcoal' },
+  { value: 'system', label: 'System', hint: 'Match this device' },
+]
+
+function ThemeChoice({
+  value,
+  onChange,
+}: {
+  value: UserSettings['theme']
+  onChange: (value: UserSettings['theme']) => void
+}) {
+  return (
+    <fieldset>
+      <legend className="text-sm font-semibold text-ink-soft">Theme</legend>
+      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        {themeOptions.map((option) => (
+          <label
+            key={option.value}
+            className="flex cursor-pointer items-center gap-3 rounded-2xl border border-line bg-surface/80 px-4 py-3 transition hover:border-lavender-400 has-checked:border-lavender-500 has-checked:bg-lavender-100 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-coral-500"
+          >
+            <input
+              type="radio"
+              name="theme"
+              value={option.value}
+              checked={value === option.value}
+              onChange={() => onChange(option.value)}
+              className="peer sr-only"
+            />
+            <span
+              aria-hidden="true"
+              className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-line-strong peer-checked:border-lavender-600 peer-checked:[&>span]:scale-100"
+            >
+              <span className="h-2 w-2 scale-0 rounded-full bg-lavender-600 transition-transform" />
+            </span>
+            <span>
+              <span className="block text-sm font-semibold text-ink">
+                {option.label}
+              </span>
+              <span className="block text-xs text-muted">{option.hint}</span>
+            </span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
   )
 }
 
