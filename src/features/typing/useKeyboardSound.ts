@@ -21,8 +21,9 @@ export function useKeyboardSound(
         event.metaKey ||
         event.ctrlKey ||
         event.altKey ||
-        !isKoreanJamoKey(event.code)
-      ) return
+        (!isKoreanJamoKey(event.code) && event.code !== 'Space')
+      )
+        return
       pressed.add(event.code)
       void keyboardSoundPlayer.unlock()
       keyboardSoundPlayer.play(pressSoundFor(pack, event.code))
@@ -42,6 +43,9 @@ export function useKeyboardSound(
     if (!enabled || !active) return
     void keyboardSoundPlayer.unlock()
     keyboardSoundPlayer.play(pressSoundFor(pack, code))
-    window.setTimeout(() => keyboardSoundPlayer.play(releaseSoundFor(pack, code)), 60)
+    window.setTimeout(
+      () => keyboardSoundPlayer.play(releaseSoundFor(pack, code)),
+      60,
+    )
   }
 }
