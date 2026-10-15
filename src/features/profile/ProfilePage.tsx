@@ -20,7 +20,8 @@ const accents = {
 
 const cardClass = 'rounded-3xl border border-line bg-card shadow-card'
 
-const ranks = [
+// eslint-disable-next-line react-refresh/only-export-components
+export const ranks = [
   {
     minimumLevel: 100,
     name: 'Genesis',
@@ -424,11 +425,12 @@ function formatExp(value: number): string {
   return new Intl.NumberFormat('en-US').format(value)
 }
 
-function rankForLevel(level: number) {
+// eslint-disable-next-line react-refresh/only-export-components
+export function rankForLevel(level: number) {
   return ranks.find((rank) => level >= rank.minimumLevel) ?? ranks.at(-1)!
 }
 
-function RankMascot({ rank }: { rank: (typeof ranks)[number] }) {
+export function RankMascot({ rank }: { rank: (typeof ranks)[number] }) {
   const reducedMotion = useReducedMotion()
   const animation = rankAnimations[rank.name]
   const glow = animation.glow

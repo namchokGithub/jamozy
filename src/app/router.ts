@@ -75,6 +75,7 @@ import LessonEditorPage from '../features/admin/LessonEditorPage'
 import { createLessonEditorLoader } from '../features/admin/LessonEditorPage.loader'
 import { createAdminAction } from '../features/admin/admin-action'
 import HangulGuideTunerPage from '../features/typing/HangulGuideTunerPage'
+import RankPreviewPage from '../features/profile/RankPreviewPage'
 
 const localUserProfileRepo = new LocalUserProfileRepository()
 const guestSessions = new GuestSessionRepository(
@@ -116,7 +117,10 @@ const learners = createLearnerRepositories({
     sessionSubmissionRepo: new FirebaseSessionSubmissionRepository(),
     jamoStatsRepo: new FirebaseJamoStatsRepository(),
   },
-  rebirth: { guest: new LocalRebirthRepository(), authenticated: new FirebaseRebirthRepository() },
+  rebirth: {
+    guest: new LocalRebirthRepository(),
+    authenticated: new FirebaseRebirthRepository(),
+  },
 })
 const {
   progressRepo,
@@ -161,6 +165,7 @@ export const homeServices = createHomeServices({
 const developmentRoutes = import.meta.env.DEV
   ? [
       { path: '/dev/hangul-guides', Component: HangulGuideTunerPage },
+      { path: '/dev/ranks', Component: RankPreviewPage },
       {
         path: '/dev/jamo-svg',
         lazy: async () => {
