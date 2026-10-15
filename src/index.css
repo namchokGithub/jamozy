@@ -89,6 +89,7 @@
   --color-primary: #a85d4e;
   --color-primary-hover: #8d4c43;
   --color-on-primary: #ffffff;
+  --color-hand: #dce4f1;
   --color-glyph-correct: #20b981;
   --color-glyph-current: #c84f82;
   --color-glyph-pending: #c7c3bc;
@@ -190,6 +191,7 @@
   --color-primary: #c27a6d;
   --color-primary-hover: #d79184;
   --color-on-primary: #171a1f;
+  --color-hand: #3a4352;
   --color-glyph-correct: #74bda4;
   --color-glyph-current: #e19ab7;
   --color-glyph-pending: #4a515c;

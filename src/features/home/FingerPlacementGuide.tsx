@@ -93,9 +93,7 @@ function HandSilhouette({
 
     return {
       animate: {
-        fill: isHighlighted
-          ? 'var(--color-mint-400)'
-          : 'var(--color-lavender-300)',
+        fill: isHighlighted ? 'var(--color-mint-400)' : 'var(--color-hand)',
         y: isPressed ? 4 : 0,
         scaleY: isPressed ? 0.94 : 1,
         opacity: isHighlighted && !isPressed ? [1, 0.84, 1] : 1,
@@ -130,7 +128,7 @@ function HandSilhouette({
         >
           <g transform="translate(4 4)">
             <path
-              className="fill-lavender-300"
+              className="fill-hand"
               d="M17 67 H76 L79 82 L90 64 C94 57 100 55 105 59 C110 63 110 69 106 74 L81 106 C77 112 72 114 65 114 H43 C29 114 19 105 17 91 Z"
             />
             <motion.g {...fingerMotion('Thumb')}>
