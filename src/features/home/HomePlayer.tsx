@@ -327,7 +327,7 @@ export default function HomePlayer({
 
   return (
     <section
-      className="mt-5 rounded-4xl border border-lavender-300 bg-card p-3 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:p-7 select-none!"
+      className="mt-5 rounded-4xl border border-lavender-300 bg-card p-3 shadow-panel sm:p-7 select-none!"
       aria-labelledby="home-player-heading"
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -346,7 +346,7 @@ export default function HomePlayer({
 
       {active && session && lesson ? (
         <div className="mt-1">
-          <div className="mt-2 rounded-3xl bg-cream-soft p-3 text-center sm:p-4 shadow-[0_0_30px_-20px_rgba(87,65,45,0.35)]">
+          <div className="mt-2 rounded-3xl bg-page-soft p-3 text-center sm:p-4 shadow-soft">
             <div className="flex min-h-5 flex-wrap justify-end gap-1.5">
               <span className="rounded-lg border border-line bg-card px-2 py-0.5 text-[10px] font-semibold text-faint">
                 WPM <strong className="ml-0.5 text-muted">{wpm}</strong>
@@ -449,7 +449,7 @@ export default function HomePlayer({
           </div>
         </div>
       ) : opened || !hasLessons ? (
-        <div className="mt-4 rounded-3xl border border-dashed border-line-strong bg-white/60 p-6 text-center text-sm text-muted">
+        <div className="mt-4 rounded-3xl border border-dashed border-line-strong bg-surface/60 p-6 text-center text-sm text-muted">
           Pick a lesson above to start.
         </div>
       ) : null}
@@ -506,7 +506,7 @@ export default function HomePlayer({
                     setCombo(0)
                     open({ unitId: visibleUnit.id, lessonId: entry.id })
                   }}
-                  className={`flex w-44 shrink-0 flex-col rounded-3xl border bg-card p-4 text-left shadow-[0_14px_35px_-28px_rgba(54,41,31,0.7)] transition hover:-translate-y-0.5 sm:w-auto ${current ? 'border-rose-400 ring-1 ring-rose-400' : look.border}`}
+                  className={`flex w-44 shrink-0 flex-col rounded-3xl border bg-card p-4 text-left shadow-card transition hover:-translate-y-0.5 sm:w-auto ${current ? 'border-rose-400 ring-1 ring-rose-400' : look.border}`}
                 >
                   <span className="w-fit rounded-lg bg-lavender-100 px-2 py-1 text-xs font-bold text-lavender-600">
                     {String(index + 1).padStart(2, '0')}

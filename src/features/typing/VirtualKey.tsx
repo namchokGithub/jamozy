@@ -173,7 +173,11 @@ function WrongKeyFeedback() {
       initial={{ opacity: 0 }}
       animate={{
         opacity: [0, 0.42, 0],
-        backgroundColor: ['#fde5e1', '#f8cec7', '#fde5e1'],
+        backgroundColor: [
+          'var(--color-coral-100)',
+          'var(--color-coral-200)',
+          'var(--color-coral-100)',
+        ],
       }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.22, ease: 'easeOut' }}
@@ -360,7 +364,7 @@ export default function VirtualKey({
               {hasHomeRowMarker && (
                 <span
                   aria-hidden="true"
-                  className="absolute bottom-1 h-0.5 w-5 rounded-full bg-gray-300/50 sm:bottom-1.5 sm:h-px sm:w-4"
+                  className="absolute bottom-1 h-0.5 w-5 rounded-full bg-line-strong/50 sm:bottom-1.5 sm:h-px sm:w-4"
                 />
               )}
             </>

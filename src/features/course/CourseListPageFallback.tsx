@@ -6,7 +6,7 @@ import { SiteFooter } from '../../components/ui/SiteFooter'
 export default function CourseListPageFallback() {
   return (
     <main
-      className="flex min-h-dvh flex-col overflow-hidden bg-cream px-4 py-5 text-ink sm:px-6 sm:py-8"
+      className="flex min-h-dvh flex-col overflow-hidden bg-page px-4 py-5 text-ink sm:px-6 sm:py-8"
       aria-busy="true"
     >
       <div

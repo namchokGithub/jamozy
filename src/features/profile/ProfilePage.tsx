@@ -17,8 +17,7 @@ const accents = {
   mint: 'bg-mint-100 text-mint-700',
 }
 
-const cardClass =
-  'rounded-3xl border border-line bg-card shadow-[0_14px_35px_-28px_rgba(54,41,31,0.7)]'
+const cardClass = 'rounded-3xl border border-line bg-card shadow-card'
 
 export default function ProfilePage() {
   const { summary } = useLoaderData() as ProfileLoaderData

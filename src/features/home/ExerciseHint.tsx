@@ -19,7 +19,7 @@ export default function ExerciseHint({ hint }: { hint: string | null }) {
       <div
         id={tooltipId}
         role="tooltip"
-        className="pointer-events-none absolute top-10 z-10 w-[min(24rem,calc(100vw-2rem))] rounded-2xl border border-peach-100 bg-cream-soft px-4 py-3 text-center text-sm leading-6 whitespace-pre-wrap text-peach-700 opacity-0 shadow-[0_18px_40px_-24px_rgba(54,41,31,0.5)] transition group-hover:opacity-100 group-focus-within:opacity-100"
+        className="pointer-events-none absolute top-10 z-10 w-[min(24rem,calc(100vw-2rem))] rounded-2xl border border-peach-100 bg-page-soft px-4 py-3 text-center text-sm leading-6 whitespace-pre-wrap text-peach-700 opacity-0 shadow-popover transition group-hover:opacity-100 group-focus-within:opacity-100"
       >
         {hint.trim()}
       </div>

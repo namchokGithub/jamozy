@@ -12,7 +12,7 @@ export default function WeakJamoCard({ overview }: { overview: JamoOverview }) {
   const { weakJamo } = overview
   if (weakJamo) {
     return (
-      <section className="mt-6 rounded-3xl border border-line bg-white/85 p-4 text-ink shadow-sm">
+      <section className="mt-6 rounded-3xl border border-line bg-card/85 p-4 text-ink shadow-sm">
         <h2 className="font-semibold">Practice weak jamo</h2>
         <p className="mt-1 text-sm text-muted">
           {weakJamo.targets
@@ -24,7 +24,7 @@ export default function WeakJamoCard({ overview }: { overview: JamoOverview }) {
         </p>
         <Link
           to="/review/weak-jamo"
-          className={`${buttonClasses} border-coral-600 bg-coral-600 text-white hover:bg-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500`}
+          className={`${buttonClasses} border-primary bg-primary text-on-primary hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500`}
         >
           Practice {weakJamo.available} exercises
         </Link>
@@ -33,7 +33,7 @@ export default function WeakJamoCard({ overview }: { overview: JamoOverview }) {
   }
   const nearest = nearestToUnlock(overview.stats)
   return (
-    <section className="mt-6 rounded-3xl border border-line bg-white/85 p-4 text-ink shadow-sm">
+    <section className="mt-6 rounded-3xl border border-line bg-card/85 p-4 text-ink shadow-sm">
       <h2 className="font-semibold">Practice weak jamo</h2>
       <p className="mt-1 text-sm text-muted">
         {nearest

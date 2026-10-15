@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* `dark:` follows the app's theme setting, not the OS preference. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
 /*
  * Jamozy light theme: cream surfaces, warm lines, slate ink, and pastel
  * mint / lavender / coral / rose accents. Each token becomes a Tailwind
@@ -8,7 +11,7 @@
  */
 @theme static {
   /* Surfaces */
-  --color-cream: #fffaf1;
+  --color-page: #fffaf1;
   --color-cream-soft: #fffaf6;
   --color-card: #fffdf9;
   --color-sand: #f7f2ec;
@@ -80,4 +83,119 @@
   --color-sky-700: #3f6fae;
 
   --color-danger: #a3403a;
+
+  /* Semantic roles whose light and dark values differ beyond the scale */
+  --color-surface: #ffffff;
+  --color-primary: #a85d4e;
+  --color-primary-hover: #8d4c43;
+  --color-on-primary: #ffffff;
+  --color-glyph-correct: #20b981;
+  --color-glyph-current: #c84f82;
+  --color-glyph-pending: #c7c3bc;
+}
+
+/* Warm shadows; dark theme swaps them for neutral ones. */
+:root {
+  --shadow-panel: 0 20px 55px -35px rgba(87, 65, 45, 0.45);
+  --shadow-card: 0 14px 35px -28px rgba(54, 41, 31, 0.7);
+  --shadow-soft: 0 0 24px -16px rgba(87, 65, 45, 0.35);
+  --shadow-popover: 0 18px 40px -24px rgba(54, 41, 31, 0.5);
+}
+
+@utility shadow-panel {
+  box-shadow: var(--shadow-panel);
+}
+@utility shadow-card {
+  box-shadow: var(--shadow-card);
+}
+@utility shadow-soft {
+  box-shadow: var(--shadow-soft);
+}
+@utility shadow-popover {
+  box-shadow: var(--shadow-popover);
+}
+
+/*
+ * Dark theme: warm charcoal surfaces, not pure black. Accents keep their hue;
+ * the high end of each scale gets lighter so it reads as text on dark.
+ */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-page: #171a1f;
+  --color-cream-soft: #1c2026;
+  --color-card: #20242b;
+  --color-sand: #262b33;
+  --color-blush: #3a2b2b;
+  --color-sage: #28352d;
+
+  --color-line: #343a43;
+  --color-line-soft: #2b3037;
+  --color-line-strong: #46505a;
+  --color-line-hover: #6b514c;
+
+  --color-ink: #f3f5f7;
+  --color-ink-soft: #d8dee7;
+  --color-ink-muted: #b5beca;
+  --color-muted: #9aa4b2;
+  --color-subtle: #7f8997;
+  --color-faint: #697382;
+  --color-ghost: #343941;
+
+  --color-lavender-50: #24202e;
+  --color-lavender-100: #2c2638;
+  --color-lavender-200: #3a3150;
+  --color-lavender-300: #51456e;
+  --color-lavender-400: #7565a0;
+  --color-lavender-500: #9d8bc8;
+  --color-lavender-600: #b3a4da;
+  --color-lavender-700: #c9bce8;
+
+  --color-mint-50: #17241f;
+  --color-mint-100: #1d3029;
+  --color-mint-150: #294039;
+  --color-mint-200: #35584b;
+  --color-mint-400: #5f9f89;
+  --color-mint-500: #74bda4;
+  --color-mint-600: #8fd0b8;
+  --color-mint-700: #a6dec9;
+  --color-mint-900: #d5f2e6;
+
+  --color-coral-50: #2f211f;
+  --color-coral-100: #3b2926;
+  --color-coral-200: #594039;
+  --color-coral-300: #7a554c;
+  --color-coral-400: #a56d61;
+  --color-coral-500: #c27a6d;
+  --color-coral-600: #d79184;
+  --color-coral-700: #e7aaa0;
+
+  --color-rose-50: #301d27;
+  --color-rose-200: #5b3346;
+  --color-rose-400: #a05274;
+  --color-rose-500: #c96b92;
+  --color-rose-700: #e19ab7;
+
+  --color-peach-50: #2e281c;
+  --color-peach-100: #3a3020;
+  --color-peach-300: #a87b48;
+  --color-peach-700: #e1b982;
+
+  --color-sky-100: #1b2736;
+  --color-sky-300: #5f8fce;
+  --color-sky-700: #9fc3f5;
+  --color-danger: #d66a63;
+
+  --color-surface: #262b33;
+  --color-primary: #c27a6d;
+  --color-primary-hover: #d79184;
+  --color-on-primary: #171a1f;
+  --color-glyph-correct: #74bda4;
+  --color-glyph-current: #e19ab7;
+  --color-glyph-pending: #4a515c;
+
+  --shadow-panel: 0 20px 55px -35px rgba(0, 0, 0, 0.7);
+  --shadow-card: 0 14px 35px -28px rgba(0, 0, 0, 0.8);
+  --shadow-soft: 0 0 24px -16px rgba(0, 0, 0, 0.6);
+  --shadow-popover: 0 18px 40px -24px rgba(0, 0, 0, 0.75);
 }

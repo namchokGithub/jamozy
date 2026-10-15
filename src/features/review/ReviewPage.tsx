@@ -84,7 +84,7 @@ export default function ReviewPage() {
               return (
                 <li
                   key={item.id}
-                  className="rounded-3xl border border-line bg-white/85 p-4 text-ink shadow-sm"
+                  className="rounded-3xl border border-line bg-card/85 p-4 text-ink shadow-sm"
                 >
                   <div>{item.targetText}</div>
                   {settings.romanizationEnabled && exercise?.romanization && (

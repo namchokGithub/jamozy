@@ -63,7 +63,7 @@ export default function JamoAccuracyGrid({
 }) {
   const drillable = new Set(practicable)
   return (
-    <section className="mt-6 rounded-3xl border border-line bg-white/85 p-4 text-ink shadow-sm">
+    <section className="mt-6 rounded-3xl border border-line bg-card/85 p-4 text-ink shadow-sm">
       <h2 className="font-semibold">Per-jamo accuracy</h2>
       <p className="mt-1 text-sm text-muted">
         Where you struggle. Tap a red or yellow key to practice it.

@@ -13,7 +13,7 @@ export function PageSurface({
 }: PageSurfaceProps) {
   return (
     <main
-      className={`relative flex min-h-dvh flex-col overflow-hidden bg-cream px-4 py-5 text-ink sm:px-6 sm:py-8 ${className}`}
+      className={`relative flex min-h-dvh flex-col overflow-hidden bg-page px-4 py-5 text-ink sm:px-6 sm:py-8 ${className}`}
     >
       <div
         className="pointer-events-none fixed inset-0 z-0 overflow-hidden"

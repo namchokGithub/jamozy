@@ -224,7 +224,7 @@ export default function OnePageLearningPlayer({
 
   return (
     <section
-      className="mt-2 rounded-4xl border border-lavender-300 bg-card p-5 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] select-none! sm:p-7"
+      className="mt-2 rounded-4xl border border-lavender-300 bg-card p-5 shadow-panel select-none! sm:p-7"
       aria-labelledby="one-page-player-heading"
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -249,7 +249,7 @@ export default function OnePageLearningPlayer({
           <Link
             key={course.id}
             to={`/?course=${encodeURIComponent(course.id)}`}
-            className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${course.id === courseId ? 'border-lavender-500 bg-lavender-200 text-lavender-700' : 'border-line bg-white text-muted hover:border-lavender-400'}`}
+            className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${course.id === courseId ? 'border-lavender-500 bg-lavender-200 text-lavender-700' : 'border-line bg-surface text-muted hover:border-lavender-400'}`}
           >
             {course.title}
           </Link>
@@ -261,7 +261,7 @@ export default function OnePageLearningPlayer({
           <p className="text-sm font-semibold text-coral-600">
             {active.lesson.title}
           </p>
-          <div className="mt-2 rounded-3xl bg-cream-soft p-4 text-center shadow-[0_0_30px_-20px_rgba(87,65,45,0.35)]">
+          <div className="mt-2 rounded-3xl bg-page-soft p-4 text-center shadow-soft">
             <div className="flex h-5 justify-end gap-1.5">
               <span className="rounded-lg border border-line bg-card px-2 py-0.5 text-[10px] font-semibold text-faint">
                 WPM <strong className="ml-0.5 text-muted">{wpm}</strong>
@@ -327,7 +327,7 @@ export default function OnePageLearningPlayer({
           />
         </div>
       ) : (
-        <div className="mt-6 rounded-3xl border border-dashed border-line-strong bg-white/60 p-6 text-center text-sm text-muted">
+        <div className="mt-6 rounded-3xl border border-dashed border-line-strong bg-surface/60 p-6 text-center text-sm text-muted">
           This course is complete. Choose another course or revisit a lesson
           below.
         </div>

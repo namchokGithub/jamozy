@@ -7,11 +7,11 @@ interface ButtonProps
 
 const variantClasses = {
   primary:
-    'border-coral-600 bg-coral-600 text-white hover:bg-coral-700 focus-visible:outline-coral-500',
+    'border-primary bg-primary text-on-primary hover:bg-primary-hover focus-visible:outline-coral-500',
   secondary:
-    'border-line bg-white/90 text-ink-soft hover:border-line-hover hover:text-coral-700 focus-visible:outline-coral-500',
+    'border-line bg-surface/90 text-ink-soft hover:border-line-hover hover:text-coral-700 focus-visible:outline-coral-500',
   ghost:
-    'border-transparent bg-transparent text-muted hover:bg-white/70 hover:text-coral-700 focus-visible:outline-coral-500',
+    'border-transparent bg-transparent text-muted hover:bg-surface/70 hover:text-coral-700 focus-visible:outline-coral-500',
 }
 
 export function Button({

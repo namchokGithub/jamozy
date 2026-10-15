@@ -146,7 +146,7 @@ function LessonDetailContent({
               return (
                 <li
                   key={exercise.id}
-                  className="rounded-3xl border border-line bg-white/85 p-5 shadow-sm"
+                  className="rounded-3xl border border-line bg-card/85 p-5 shadow-sm"
                 >
                   <div className="text-xl text-ink">{exercise.targetText}</div>
                   {settings.romanizationEnabled && exercise.romanization && (

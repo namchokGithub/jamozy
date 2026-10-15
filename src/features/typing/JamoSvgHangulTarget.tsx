@@ -7,13 +7,14 @@ import {
   type HangulTargetSize,
 } from './hangul-target-layout'
 
+// Theme tokens, so the glyph colors follow light and dark.
 const COLORS = {
-  correct: '#20b981',
-  current: '#c84f82',
-  pending: '#c7c3bc',
+  correct: 'var(--color-glyph-correct)',
+  current: 'var(--color-glyph-current)',
+  pending: 'var(--color-glyph-pending)',
 }
 const TILE_LOOK =
-  'rounded-md border border-lavender-100 bg-lavender-50 shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)]'
+  'rounded-md border border-lavender-100 bg-lavender-50 shadow-soft'
 
 const tileClass = (size: HangulTargetSize) =>
   `${HANGUL_TARGET_SIZES[size].tile} ${TILE_LOOK}`
@@ -128,7 +129,7 @@ export default function JamoSvgHangulTarget({
                   key={step}
                   d={path.d}
                   fillRule="evenodd"
-                  fill={fillFor(indexes[step], session.keyIndex)}
+                  style={{ fill: fillFor(indexes[step], session.keyIndex) }}
                 />
               ))}
             </svg>

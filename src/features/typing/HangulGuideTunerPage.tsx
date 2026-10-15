@@ -78,7 +78,7 @@ function GuideCanvas({
   return (
     <img
       src={imageUrl}
-      className="h-26 w-26 rounded-md border border-lavender-100 bg-lavender-50 shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)]"
+      className="h-26 w-26 rounded-md border border-lavender-100 bg-lavender-50 shadow-soft"
       aria-label={`${glyph} ${mode} inspection`}
     />
   )
@@ -105,12 +105,12 @@ function OperationEditor({
   }
 
   return (
-    <div className="rounded-lg border border-line bg-white p-3">
+    <div className="rounded-lg border border-line bg-surface p-3">
       <div className="flex flex-wrap gap-2">
         <label className="text-xs font-semibold text-muted">
           Mode
           <select
-            className="mt-1 block rounded border border-lavender-300 bg-white px-2 py-1 text-sm text-ink-soft"
+            className="mt-1 block rounded border border-lavender-300 bg-surface px-2 py-1 text-sm text-ink-soft"
             value={operation.mode}
             onChange={(event) =>
               onChange({ ...operation, mode: event.target.value as GuideMode })
@@ -123,7 +123,7 @@ function OperationEditor({
         <label className="text-xs font-semibold text-muted">
           Shape
           <select
-            className="mt-1 block rounded border border-lavender-300 bg-white px-2 py-1 text-sm text-ink-soft"
+            className="mt-1 block rounded border border-lavender-300 bg-surface px-2 py-1 text-sm text-ink-soft"
             value={operation.shape}
             onChange={(event) =>
               onChange({

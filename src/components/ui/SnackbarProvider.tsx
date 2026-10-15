@@ -49,7 +49,7 @@ export function SnackbarProvider({ children }: PropsWithChildren) {
         <div className="pointer-events-none fixed inset-x-4 top-5 z-60 flex justify-center sm:left-auto sm:right-6 sm:justify-end">
           <div
             role={message.kind === 'error' ? 'alert' : 'status'}
-            className={`pointer-events-auto flex max-w-sm items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold shadow-[0_18px_40px_-24px_rgba(54,41,31,0.5)] ${
+            className={`pointer-events-auto flex max-w-sm items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold shadow-popover ${
               message.kind === 'error'
                 ? 'border-coral-200 bg-coral-50 text-coral-700'
                 : 'border-mint-200 bg-mint-50 text-mint-700'

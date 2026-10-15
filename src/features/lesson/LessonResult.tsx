@@ -40,7 +40,7 @@ export default function LessonResult({
           {stats.map(({ label, value }) => (
             <div
               key={label}
-              className="flex flex-col-reverse rounded-2xl bg-cream-soft px-4 py-3"
+              className="flex flex-col-reverse rounded-2xl bg-page-soft px-4 py-3"
             >
               <dt className="mt-1 text-xs font-semibold text-faint">{label}</dt>{' '}
               <dd className="text-2xl font-bold tracking-tight text-ink">

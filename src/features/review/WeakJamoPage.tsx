@@ -85,7 +85,7 @@ function WeakJamoRound() {
             return (
               <li
                 key={jamo}
-                className="flex justify-between rounded-3xl border border-line bg-white/85 p-4 text-ink shadow-sm"
+                className="flex justify-between rounded-3xl border border-line bg-card/85 p-4 text-ink shadow-sm"
               >
                 <span className="text-xl">{jamo}</span>
                 <span className="text-sm text-muted">

@@ -93,7 +93,9 @@ function HandSilhouette({
 
     return {
       animate: {
-        fill: isHighlighted ? '#78bca6' : '#d9d1ed',
+        fill: isHighlighted
+          ? 'var(--color-mint-400)'
+          : 'var(--color-lavender-300)',
         y: isPressed ? 4 : 0,
         scaleY: isPressed ? 0.94 : 1,
         opacity: isHighlighted && !isPressed ? [1, 0.84, 1] : 1,
@@ -169,7 +171,7 @@ export default function FingerPlacementGuide({
 }: FingerPlacementGuideProps) {
   return (
     <section
-      className="relative mt-4 rounded-2xl bg-cream-soft p-3 shadow-[0_0_24px_-16px_rgba(87,65,45,0.3)]"
+      className="relative mt-4 rounded-2xl bg-page-soft p-3 shadow-soft"
       aria-label="Finger placement guide"
     >
       <div className="flex items-start justify-center gap-12 sm:gap-24">
@@ -190,19 +192,19 @@ export default function FingerPlacementGuide({
           type="button"
           aria-label="Show finger placement details"
           aria-describedby="finger-placement-tooltip"
-          className="flex h-7 w-7 items-center justify-center rounded-full border border-lavender-300 bg-white text-lavender-600 shadow-sm transition hover:bg-lavender-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
+          className="flex h-7 w-7 items-center justify-center rounded-full border border-lavender-300 bg-surface text-lavender-600 shadow-sm transition hover:bg-lavender-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
         >
           <Info aria-hidden="true" size={15} />
         </button>
         <div
           id="finger-placement-tooltip"
           role="tooltip"
-          className="pointer-events-none absolute right-0 top-9 z-10 grid w-[min(30rem,calc(100vw-1.5rem))] origin-top-right gap-3 rounded-2xl bg-card p-3 text-sm text-ink-muted opacity-0 shadow-[0_18px_40px_-24px_rgba(54,41,31,0.5)] transition group-hover:opacity-100 group-focus-within:opacity-100 sm:grid-cols-2 sm:p-4"
+          className="pointer-events-none absolute right-0 top-9 z-10 grid w-[min(30rem,calc(100vw-1.5rem))] origin-top-right gap-3 rounded-2xl bg-card p-3 text-sm text-ink-muted opacity-0 shadow-popover transition group-hover:opacity-100 group-focus-within:opacity-100 sm:grid-cols-2 sm:p-4"
         >
           {hands.map((hand) => (
             <div
               key={hand.title}
-              className="rounded-xl bg-lavender-50 p-3 shadow-[0_5px_14px_-12px_rgba(54,78,112,0.5)]"
+              className="rounded-xl bg-lavender-50 p-3 shadow-card"
             >
               <p className="font-bold text-ink-soft">{hand.title}</p>
               <dl className="mt-2.5 space-y-2">

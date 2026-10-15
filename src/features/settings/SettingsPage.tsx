@@ -9,6 +9,7 @@ import { Dropdown } from '../../components/ui/Dropdown'
 import { PageNav } from '../../components/ui/PageNav'
 import { PageSurface } from '../../components/ui/PageSurface'
 import { useSnackbar } from '../../components/ui/SnackbarProvider'
+import { applyTheme } from './apply-theme'
 
 // Pastel accents follow Home: only icons and switches carry a section's color.
 const accents = {
@@ -41,15 +42,21 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<UserSettings>(loadedSettings)
   const wasInFlight = useRef(false)
 
+  // The saved theme also reaches this device when Settings opens.
+  useEffect(() => {
+    applyTheme(loadedSettings.theme)
+  }, [loadedSettings.theme])
+
   useEffect(() => {
     if (wasInFlight.current && fetcher.state === 'idle' && fetcher.data) {
       if (isSaveError(fetcher.data)) showError(fetcher.data.error)
       else {
+        applyTheme(settings.theme)
         showSuccess('Settings saved')
       }
     }
     wasInFlight.current = fetcher.state !== 'idle'
-  }, [fetcher.state, fetcher.data, showError, showSuccess])
+  }, [fetcher.state, fetcher.data, settings.theme, showError, showSuccess])
 
   function update<K extends keyof UserSettings>(
     key: K,
@@ -70,7 +77,7 @@ export default function SettingsPage() {
           Choose a calm setup that helps you focus on your next character.
         </p>
       </header>
-      <div className="mt-5 divide-y divide-line-soft rounded-4xl border border-line bg-card px-5 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:px-7">
+      <div className="mt-5 divide-y divide-line-soft rounded-4xl border border-line bg-card px-5 shadow-panel sm:px-7">
         <SettingsSection
           icon={<Volume2 aria-hidden="true" size={18} />}
           accent="coral"

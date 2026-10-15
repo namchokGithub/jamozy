@@ -59,7 +59,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={`w-full ${sizeClassName} rounded-3xl border border-line bg-card p-6 shadow-[0_24px_60px_-30px_rgba(54,41,31,0.5)]`}
+        className={`w-full ${sizeClassName} rounded-3xl border border-line bg-card p-6 shadow-popover`}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4">

@@ -292,7 +292,7 @@ export default function LessonTypingSession({
           <button
             type="button"
             onClick={onExit}
-            className="flex items-center gap-1 rounded-full border border-line bg-white/80 px-3 py-1.5 text-xs font-semibold text-ink-muted transition hover:border-line-hover hover:text-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
+            className="flex items-center gap-1 rounded-full border border-line bg-surface/80 px-3 py-1.5 text-xs font-semibold text-ink-muted transition hover:border-line-hover hover:text-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
           >
             <X aria-hidden="true" size={13} />
             Exit lesson

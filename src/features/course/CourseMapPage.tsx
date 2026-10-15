@@ -90,7 +90,7 @@ function UnitSection({
                   <li key={lesson.id}>
                     <Link
                       to={`/lessons/${lesson.id}`}
-                      className="flex items-center justify-between gap-3 rounded-2xl bg-cream-soft px-4 py-3 transition hover:bg-coral-50"
+                      className="flex items-center justify-between gap-3 rounded-2xl bg-page-soft px-4 py-3 transition hover:bg-coral-50"
                     >
                       <span className="font-semibold text-ink-soft">
                         {lesson.title}

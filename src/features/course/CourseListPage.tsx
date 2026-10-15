@@ -32,7 +32,7 @@ export default function CourseListPage() {
     useLoaderData() as CourseListLoaderData
 
   return (
-    <main className="flex min-h-dvh flex-col overflow-hidden bg-cream px-4 py-5 text-ink sm:px-6 sm:py-8 select-none!">
+    <main className="flex min-h-dvh flex-col overflow-hidden bg-page px-4 py-5 text-ink sm:px-6 sm:py-8 select-none!">
       <div
         className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
         aria-hidden="true"
@@ -100,7 +100,7 @@ export default function CourseListPage() {
           </Await>
         </Suspense>
 
-        <section className="relative mt-5 overflow-hidden rounded-4xl border border-line-soft bg-card px-6 py-8 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:px-10 sm:py-11 select-none!">
+        <section className="relative mt-5 overflow-hidden rounded-4xl border border-line-soft bg-card px-6 py-8 shadow-panel sm:px-10 sm:py-11 select-none!">
           <div
             className="absolute -right-10 -top-12 h-52 w-52 rounded-full bg-peach-100/50"
             aria-hidden="true"
@@ -200,7 +200,7 @@ function AccountNav({
                 setDraftName(name)
                 setEditingName(true)
               }}
-              className="flex items-center gap-1 rounded-full border border-line bg-white/80 px-3 py-2 text-sm shadow-sm"
+              className="flex items-center gap-1 rounded-full border border-line bg-surface/80 px-3 py-2 text-sm shadow-sm"
             >
               <span className="hidden sm:inline">{name}</span>
               <Pencil aria-hidden="true" size={14} />
@@ -233,7 +233,7 @@ function AccountNav({
               aria-haspopup="menu"
               aria-expanded={userMenuOpen}
               onClick={() => setUserMenuOpen((open) => !open)}
-              className="flex items-center gap-2 rounded-full border border-line bg-white/80 px-3 py-2 text-sm font-medium text-ink-soft shadow-sm transition hover:border-line-hover hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
+              className="flex items-center gap-2 rounded-full border border-line bg-surface/80 px-3 py-2 text-sm font-medium text-ink-soft shadow-sm transition hover:border-line-hover hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
             >
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-lavender-100 text-lavender-600">
                 <UserRound aria-hidden="true" size={13} />
@@ -248,7 +248,7 @@ function AccountNav({
             {userMenuOpen && (
               <div
                 role="menu"
-                className="absolute right-0 top-full z-20 mt-2 w-36 rounded-2xl border border-line bg-card p-1.5 shadow-[0_14px_28px_-16px_rgba(54,41,31,0.45)]"
+                className="absolute right-0 top-full z-20 mt-2 w-36 rounded-2xl border border-line bg-card p-1.5 shadow-popover"
               >
                 <Link
                   to="/profile"
@@ -289,7 +289,7 @@ function AccountNav({
           <Link
             to="/profile"
             aria-label="Profile"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-white/80 text-ink-muted shadow-sm transition hover:-translate-y-0.5 hover:border-line-hover hover:text-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface/80 text-ink-muted shadow-sm transition hover:-translate-y-0.5 hover:border-line-hover hover:text-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
           >
             <UserRound aria-hidden="true" size={18} />
           </Link>
@@ -297,7 +297,7 @@ function AccountNav({
         <Link
           to="/settings"
           aria-label="Settings"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-white/80 text-ink-muted shadow-sm transition hover:-translate-y-0.5 hover:border-line-hover hover:text-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface/80 text-ink-muted shadow-sm transition hover:-translate-y-0.5 hover:border-line-hover hover:text-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
         >
           <Settings aria-hidden="true" size={18} />
         </Link>
@@ -331,7 +331,7 @@ function LearningPathSection({
           className="mt-5 flex items-center justify-between gap-4 rounded-2xl border border-peach-100 bg-peach-50 px-5 py-4 text-peach-700 transition hover:-translate-y-0.5 hover:bg-peach-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
         >
           <span className="flex items-center gap-3 text-sm font-semibold select-none!">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/70">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-surface/70">
               <BookOpen aria-hidden="true" size={18} />
             </span>
             {dueReviewCount} words due for review · ready when you are
@@ -357,14 +357,14 @@ function LearningPathSection({
             </h2>
           </div>
           {courses.length > 0 && (
-            <span className="rounded-full bg-white/70 px-3 py-1.5 text-sm font-medium text-muted">
+            <span className="rounded-full bg-surface/70 px-3 py-1.5 text-sm font-medium text-muted">
               {courses.length} {courses.length === 1 ? 'course' : 'courses'}
             </span>
           )}
         </div>
 
         {courses.length === 0 ? (
-          <div className="mt-5 rounded-3xl border border-dashed border-line-strong bg-white/60 px-6 py-10 text-center">
+          <div className="mt-5 rounded-3xl border border-dashed border-line-strong bg-surface/60 px-6 py-10 text-center">
             <Flower2
               className="mx-auto text-coral-300"
               aria-hidden="true"
@@ -384,7 +384,7 @@ function LearningPathSection({
               <li key={course.id}>
                 <Link
                   to={`/courses/${course.id}`}
-                  className="group flex h-full min-h-48 flex-col rounded-3xl border border-line bg-white/85 p-6 shadow-[0_14px_35px_-28px_rgba(54,41,31,0.7)] transition duration-200 hover:-translate-y-1 hover:border-line-hover hover:shadow-[0_20px_35px_-24px_rgba(145,93,76,0.45)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-coral-500"
+                  className="group flex h-full min-h-48 flex-col rounded-3xl border border-line bg-card/85 p-6 shadow-card transition duration-200 hover:-translate-y-1 hover:border-line-hover hover:shadow-[0_20px_35px_-24px_rgba(145,93,76,0.45)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-coral-500"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-lavender-200 text-lavender-600">
@@ -422,8 +422,8 @@ function LearningPathPlaceholder() {
       className="mt-10 grid gap-4 sm:grid-cols-2 select-none!"
       aria-hidden="true"
     >
-      <div className="h-48 animate-pulse rounded-3xl bg-white/70" />
-      <div className="h-48 animate-pulse rounded-3xl bg-white/70" />
+      <div className="h-48 animate-pulse rounded-3xl bg-surface/70" />
+      <div className="h-48 animate-pulse rounded-3xl bg-surface/70" />
     </div>
   )
 }
