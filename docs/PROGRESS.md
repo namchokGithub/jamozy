@@ -158,6 +158,6 @@ A fresh whole-branch review (Opus) found no Critical issues. The one Important f
 
 **Still open, not forgotten:** [[DEC-022]]'s vocabulary-backed `ReviewItem` identity is documented but not yet implemented or migrated. [[DEC-019]]'s review-system Minor findings remain deferred. Settings round's deferred Minor findings remain: Save re-enables during post-save loader revalidation; "Saved" can show a moment early when nothing was edited; `getSettings` does not merge stored settings over defaults field-by-field; a Save failure replaces the whole page via `RouteError`; no Firestore transaction wraps the settings read-modify-write; the multi-phase fetcher-state test does not separately assert the Save button was disabled mid-flight; "Saved" has no `aria-live`; and the opacity slider shows no numeric value. A stored profile without `stats`/`settings`/`exp` reads as defaults (fixed 2026-10-09 after a real `/profile` failure); one loader test has a harmless nondeterministic `createdAt` fixture.
 
-The latest user-reported full-suite run (2026-10-14) is 815 passed | 24 skipped (839). The browser audio check for keyboard sounds is still pending.
+The latest user-reported full-suite run (2026-10-14) is 828 passed | 24 skipped (852). The browser audio check for keyboard sounds is still pending.
 
 Next real steps, not blocked on each other: (1) manually verify keyboard sound across all typing modes and build real dark-mode CSS as a separate cross-cutting change, (2) a proper Lesson Result screen (currently an inline MVP result).
