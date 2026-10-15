@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { useLoaderData, useFetcher } from 'react-router'
 import { Award, BookOpen, Clock, Gauge, Keyboard, Target } from 'lucide-react'
+import { motion, useReducedMotion } from 'motion/react'
 import type { ProfileLoaderData } from './ProfilePage.loader'
 import { formatTypingTime } from './format-typing-time'
 import { PageNav } from '../../components/ui/PageNav'
@@ -93,6 +94,112 @@ const ranks = [
   },
 ] as const
 
+type RankName = (typeof ranks)[number]['name']
+
+interface RankAnimation {
+  floatDistance: number
+  floatDuration: number
+  glow: { color: string; minimumBlur: number; maximumBlur: number } | null
+  sparkleCount: number
+  sparkleClass: string
+}
+
+const rankAnimations: Record<RankName, RankAnimation> = {
+  Normal: {
+    floatDistance: 0,
+    floatDuration: 0,
+    glow: null,
+    sparkleCount: 0,
+    sparkleClass: '',
+  },
+  Uncommon: {
+    floatDistance: 2,
+    floatDuration: 3.4,
+    glow: null,
+    sparkleCount: 0,
+    sparkleClass: '',
+  },
+  Rare: {
+    floatDistance: 3,
+    floatDuration: 3,
+    glow: { color: 'rgba(63, 111, 174, 0.4)', minimumBlur: 5, maximumBlur: 10 },
+    sparkleCount: 0,
+    sparkleClass: '',
+  },
+  Epic: {
+    floatDistance: 3,
+    floatDuration: 3,
+    glow: {
+      color: 'rgba(157, 139, 200, 0.45)',
+      minimumBlur: 6,
+      maximumBlur: 12,
+    },
+    sparkleCount: 0,
+    sparkleClass: '',
+  },
+  Unique: {
+    floatDistance: 3,
+    floatDuration: 3,
+    glow: {
+      color: 'rgba(200, 79, 130, 0.45)',
+      minimumBlur: 6,
+      maximumBlur: 13,
+    },
+    sparkleCount: 1,
+    sparkleClass: 'text-rose-500',
+  },
+  Legendary: {
+    floatDistance: 3,
+    floatDuration: 3,
+    glow: {
+      color: 'rgba(227, 173, 115, 0.5)',
+      minimumBlur: 7,
+      maximumBlur: 14,
+    },
+    sparkleCount: 2,
+    sparkleClass: 'text-peach-300',
+  },
+  Mythic: {
+    floatDistance: 3,
+    floatDuration: 2.8,
+    glow: {
+      color: 'rgba(188, 108, 93, 0.62)',
+      minimumBlur: 8,
+      maximumBlur: 18,
+    },
+    sparkleCount: 2,
+    sparkleClass: 'text-coral-400',
+  },
+  Divine: {
+    floatDistance: 3,
+    floatDuration: 3.2,
+    glow: {
+      color: 'rgba(227, 173, 115, 0.58)',
+      minimumBlur: 8,
+      maximumBlur: 17,
+    },
+    sparkleCount: 3,
+    sparkleClass: 'text-peach-300',
+  },
+  Genesis: {
+    floatDistance: 2,
+    floatDuration: 4,
+    glow: {
+      color: 'rgba(200, 79, 130, 0.64)',
+      minimumBlur: 10,
+      maximumBlur: 21,
+    },
+    sparkleCount: 3,
+    sparkleClass: 'text-rose-500',
+  },
+}
+
+const sparklePositions = [
+  'left-0 top-1',
+  'right-0 top-4',
+  'bottom-0 right-4',
+] as const
+
 export default function ProfilePage() {
   const { summary } = useLoaderData() as ProfileLoaderData
   const fetcher = useFetcher<RebirthActionData>()
@@ -175,13 +282,7 @@ export default function ProfilePage() {
         <div
           className={`absolute right-5 top-5 flex h-20 w-20 items-center justify-center rounded-full border-4 sm:right-7 sm:top-7 sm:h-24 sm:w-24 ${rank.ringClass}`}
         >
-          <img
-            src={rank.image}
-            alt={`${rank.name} rank mascot`}
-            width="88"
-            height="88"
-            className="h-[72px] w-[72px] object-contain sm:h-[88px] sm:w-[88px]"
-          />
+          <RankMascot rank={rank} />
         </div>
         <p className="text-sm font-semibold text-coral-600">
           YOUR KOREAN CORNER
@@ -325,6 +426,72 @@ function formatExp(value: number): string {
 
 function rankForLevel(level: number) {
   return ranks.find((rank) => level >= rank.minimumLevel) ?? ranks.at(-1)!
+}
+
+function RankMascot({ rank }: { rank: (typeof ranks)[number] }) {
+  const reducedMotion = useReducedMotion()
+  const animation = rankAnimations[rank.name]
+  const glow = animation.glow
+  const animatedProperties = reducedMotion
+    ? undefined
+    : {
+        ...(animation.floatDistance > 0
+          ? { y: [0, -animation.floatDistance, 0] }
+          : {}),
+        ...(glow
+          ? {
+              filter: [
+                `drop-shadow(0 0 ${glow.minimumBlur}px ${glow.color})`,
+                `drop-shadow(0 0 ${glow.maximumBlur}px ${glow.color})`,
+                `drop-shadow(0 0 ${glow.minimumBlur}px ${glow.color})`,
+              ],
+            }
+          : {}),
+      }
+
+  return (
+    <>
+      <motion.img
+        src={rank.image}
+        alt={`${rank.name} rank mascot`}
+        width="88"
+        height="88"
+        className="h-[72px] w-[72px] object-contain sm:h-[88px] sm:w-[88px]"
+        animate={animatedProperties}
+        transition={{
+          y: {
+            duration: animation.floatDuration,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          },
+          filter: { duration: 3.2, repeat: Infinity, ease: 'easeInOut' },
+        }}
+      />
+      {!reducedMotion &&
+        Array.from({ length: animation.sparkleCount }, (_, index) => (
+          <motion.span
+            key={sparklePositions[index]}
+            aria-hidden="true"
+            className={`pointer-events-none absolute text-sm ${sparklePositions[index]} ${animation.sparkleClass}`}
+            initial={{ opacity: 0, scale: 0.5, rotate: -20 }}
+            animate={{
+              opacity: [0, 0, 1, 0],
+              scale: [0.5, 0.5, 1.1, 0.5],
+              rotate: [-20, -20, 20, 40],
+            }}
+            transition={{
+              duration: 3.6,
+              delay: index * 0.85,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              times: [0, 0.6, 0.78, 1],
+            }}
+          >
+            ✦
+          </motion.span>
+        ))}
+    </>
+  )
 }
 
 function SectionHeader({
