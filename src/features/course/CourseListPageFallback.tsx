@@ -6,15 +6,15 @@ import { SiteFooter } from '../../components/ui/SiteFooter'
 export default function CourseListPageFallback() {
   return (
     <main
-      className="flex min-h-dvh flex-col overflow-hidden bg-[#fffaf1] px-4 py-5 text-[#253247] sm:px-6 sm:py-8"
+      className="flex min-h-dvh flex-col overflow-hidden bg-cream px-4 py-5 text-ink sm:px-6 sm:py-8"
       aria-busy="true"
     >
       <div
         className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
         aria-hidden="true"
       >
-        <div className="absolute -left-24 top-12 h-72 w-72 rounded-full bg-[#f8d9d4]/50 blur-3xl" />
-        <div className="absolute -right-20 bottom-0 h-96 w-96 rounded-full bg-[#dce9c8]/50 blur-3xl" />
+        <div className="absolute -left-24 top-12 h-72 w-72 rounded-full bg-blush/50 blur-3xl" />
+        <div className="absolute -right-20 bottom-0 h-96 w-96 rounded-full bg-sage/50 blur-3xl" />
       </div>
 
       <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col">
@@ -28,8 +28,8 @@ export default function CourseListPageFallback() {
             <span className="text-xl font-bold tracking-tight">Jamozy</span>
           </div>
           <div className="flex gap-2" aria-hidden="true">
-            <div className="h-10 w-24 animate-pulse rounded-full bg-[#f2edf9]" />
-            <div className="h-10 w-10 animate-pulse rounded-full bg-[#f2edf9]" />
+            <div className="h-10 w-24 animate-pulse rounded-full bg-lavender-100" />
+            <div className="h-10 w-10 animate-pulse rounded-full bg-lavender-100" />
           </div>
         </header>
         <SiteFooter />

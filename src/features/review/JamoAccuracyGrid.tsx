@@ -7,11 +7,11 @@ import {
 } from '../../domain/practice/jamo-grid'
 
 const toneClasses: Record<JamoTone, string> = {
-  none: 'border-[#eadfd4] bg-[#f6f2ee] text-[#98a2b3]',
-  pending: 'border-[#eadfd4] bg-[#f6f2ee] text-[#667085]',
-  weak: 'border-[#f3c4bb] bg-[#fdecea] text-[#a3403a]',
-  fair: 'border-[#f1dfa8] bg-[#fff6dc] text-[#8a6414]',
-  strong: 'border-[#bfe5cf] bg-[#e8f7ee] text-[#2f7a50]',
+  none: 'border-line bg-sand text-faint',
+  pending: 'border-line bg-sand text-muted',
+  weak: 'border-coral-200 bg-coral-50 text-danger',
+  fair: 'border-peach-100 bg-peach-50 text-peach-700',
+  strong: 'border-mint-200 bg-mint-50 text-mint-600',
 }
 
 const legend: Array<{ tone: JamoTone; label: string }> = [
@@ -41,7 +41,7 @@ function Cell({ cell, drillable }: { cell: JamoCell; drillable: boolean }) {
     <Link
       to={`/review/weak-jamo?jamo=${encodeURIComponent(cell.jamo)}`}
       aria-label={`Practice ${cellLabel(cell)}`}
-      className={`${className} hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bc6c5d]`}
+      className={`${className} hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500`}
     >
       {content}
     </Link>
@@ -63,14 +63,14 @@ export default function JamoAccuracyGrid({
 }) {
   const drillable = new Set(practicable)
   return (
-    <section className="mt-6 rounded-3xl border border-[#eadfd4] bg-white/85 p-4 text-[#253247] shadow-sm">
+    <section className="mt-6 rounded-3xl border border-line bg-white/85 p-4 text-ink shadow-sm">
       <h2 className="font-semibold">Per-jamo accuracy</h2>
-      <p className="mt-1 text-sm text-[#667085]">
+      <p className="mt-1 text-sm text-muted">
         Where you struggle. Tap a red or yellow key to practice it.
       </p>
       {jamoGrid(stats).map((group) => (
         <div key={group.label} className="mt-4">
-          <h3 className="text-xs font-semibold tracking-wide text-[#667085] uppercase">
+          <h3 className="text-xs font-semibold tracking-wide text-muted uppercase">
             {group.label}
           </h3>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -87,7 +87,7 @@ export default function JamoAccuracyGrid({
           </div>
         </div>
       ))}
-      <ul className="mt-4 flex flex-wrap gap-3 text-xs text-[#667085]">
+      <ul className="mt-4 flex flex-wrap gap-3 text-xs text-muted">
         {legend.map(({ tone, label }) => (
           <li key={tone} className="flex items-center gap-1">
             <span

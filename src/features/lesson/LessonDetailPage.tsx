@@ -124,8 +124,8 @@ function LessonDetailContent({
     <PageSurface contentClassName="max-w-5xl">
       {nav}
       <PageHeading eyebrow="LESSON" title={lesson.title}>
-        <p className="mt-3 flex flex-wrap items-center gap-2 text-sm text-[#667085]">
-          <span className="rounded-full bg-[#f2edf9] px-3 py-1 text-xs font-semibold text-[#7863a8]">
+        <p className="mt-3 flex flex-wrap items-center gap-2 text-sm text-muted">
+          <span className="rounded-full bg-lavender-100 px-3 py-1 text-xs font-semibold text-lavender-600">
             {lessonTypeLabels[lesson.type]}
           </span>
           {lesson.exercises.length}{' '}
@@ -134,7 +134,7 @@ function LessonDetailContent({
       </PageHeading>
 
       {lesson.exercises.length === 0 ? (
-        <p className="mt-6 text-sm text-slate-500">No exercises yet.</p>
+        <p className="mt-6 text-sm text-subtle">No exercises yet.</p>
       ) : (
         <>
           <ul className="mt-6 space-y-4">
@@ -146,20 +146,18 @@ function LessonDetailContent({
               return (
                 <li
                   key={exercise.id}
-                  className="rounded-3xl border border-[#eadfd4] bg-white/85 p-5 shadow-sm"
+                  className="rounded-3xl border border-line bg-white/85 p-5 shadow-sm"
                 >
-                  <div className="text-xl text-slate-900">
-                    {exercise.targetText}
-                  </div>
+                  <div className="text-xl text-ink">{exercise.targetText}</div>
                   {settings.romanizationEnabled && exercise.romanization && (
-                    <div className="text-sm text-slate-500">
+                    <div className="text-sm text-subtle">
                       {exercise.romanization}
                     </div>
                   )}
                   {(meaning && (
-                    <div className="mt-2 text-sm text-slate-700">{meaning}</div>
+                    <div className="mt-2 text-sm text-ink-soft">{meaning}</div>
                   )) || (
-                    <div className="mt-2 text-sm italic text-[#7c8795]">
+                    <div className="mt-2 text-sm italic text-subtle">
                       No meaning yet
                     </div>
                   )}

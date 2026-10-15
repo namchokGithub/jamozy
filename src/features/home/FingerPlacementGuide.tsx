@@ -93,7 +93,7 @@ function HandSilhouette({
 
     return {
       animate: {
-        fill: isHighlighted ? '#78bca6' : '#dce4f1',
+        fill: isHighlighted ? '#78bca6' : '#d9d1ed',
         y: isPressed ? 4 : 0,
         scaleY: isPressed ? 0.94 : 1,
         opacity: isHighlighted && !isPressed ? [1, 0.84, 1] : 1,
@@ -128,7 +128,7 @@ function HandSilhouette({
         >
           <g transform="translate(4 4)">
             <path
-              className="fill-[#dce4f1]"
+              className="fill-lavender-300"
               d="M17 67 H76 L79 82 L90 64 C94 57 100 55 105 59 C110 63 110 69 106 74 L81 106 C77 112 72 114 65 114 H43 C29 114 19 105 17 91 Z"
             />
             <motion.g {...fingerMotion('Thumb')}>
@@ -149,11 +149,11 @@ function HandSilhouette({
           </g>
         </g>
       </svg>
-      <p className="text-xs font-semibold text-[#667085]">
+      <p className="text-xs font-semibold text-muted">
         {side === 'left' ? 'Left Hand' : 'Right Hand'}
       </p>
       <p
-        className={`rounded-full px-3 py-1 text-[10px] font-semibold ${activeFinger ? 'bg-[#ddf5e9] text-[#194d41]' : 'bg-[#f2edf9] text-[#98a2b3]'}`}
+        className={`rounded-full px-3 py-1 text-[10px] font-semibold ${activeFinger ? 'bg-mint-100 text-mint-900' : 'bg-lavender-100 text-faint'}`}
       >
         {activeFinger ?? 'Ready'}
       </p>
@@ -169,7 +169,7 @@ export default function FingerPlacementGuide({
 }: FingerPlacementGuideProps) {
   return (
     <section
-      className="relative mt-4 rounded-2xl bg-[#fffaf6] p-3 shadow-[0_0_24px_-16px_rgba(87,65,45,0.3)]"
+      className="relative mt-4 rounded-2xl bg-cream-soft p-3 shadow-[0_0_24px_-16px_rgba(87,65,45,0.3)]"
       aria-label="Finger placement guide"
     >
       <div className="flex items-start justify-center gap-12 sm:gap-24">
@@ -190,36 +190,36 @@ export default function FingerPlacementGuide({
           type="button"
           aria-label="Show finger placement details"
           aria-describedby="finger-placement-tooltip"
-          className="flex h-7 w-7 items-center justify-center rounded-full border border-[#d8e3f2] bg-white text-[#7863a8] shadow-sm transition hover:bg-[#f2edf9] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bc6c5d]"
+          className="flex h-7 w-7 items-center justify-center rounded-full border border-lavender-300 bg-white text-lavender-600 shadow-sm transition hover:bg-lavender-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
         >
           <Info aria-hidden="true" size={15} />
         </button>
         <div
           id="finger-placement-tooltip"
           role="tooltip"
-          className="pointer-events-none absolute right-0 top-9 z-10 grid w-[min(30rem,calc(100vw-1.5rem))] origin-top-right gap-3 rounded-2xl bg-[#fffdf9] p-3 text-sm text-[#596579] opacity-0 shadow-[0_18px_40px_-24px_rgba(54,41,31,0.5)] transition group-hover:opacity-100 group-focus-within:opacity-100 sm:grid-cols-2 sm:p-4"
+          className="pointer-events-none absolute right-0 top-9 z-10 grid w-[min(30rem,calc(100vw-1.5rem))] origin-top-right gap-3 rounded-2xl bg-card p-3 text-sm text-ink-muted opacity-0 shadow-[0_18px_40px_-24px_rgba(54,41,31,0.5)] transition group-hover:opacity-100 group-focus-within:opacity-100 sm:grid-cols-2 sm:p-4"
         >
           {hands.map((hand) => (
             <div
               key={hand.title}
-              className="rounded-xl bg-[#f7f9fd] p-3 shadow-[0_5px_14px_-12px_rgba(54,78,112,0.5)]"
+              className="rounded-xl bg-lavender-50 p-3 shadow-[0_5px_14px_-12px_rgba(54,78,112,0.5)]"
             >
-              <p className="font-bold text-[#39465b]">{hand.title}</p>
+              <p className="font-bold text-ink-soft">{hand.title}</p>
               <dl className="mt-2.5 space-y-2">
                 {hand.fingers.map(([finger, keys]) => (
                   <div
                     key={finger}
                     className="grid grid-cols-[3.75rem_1fr] gap-2"
                   >
-                    <dt className="pt-0.5 font-semibold text-[#a85d4e]">
+                    <dt className="pt-0.5 font-semibold text-coral-600">
                       {finger}
                     </dt>
-                    <dd className="flex flex-wrap items-center gap-1 text-xs font-medium leading-5 text-[#596579]">
+                    <dd className="flex flex-wrap items-center gap-1 text-xs font-medium leading-5 text-ink-muted">
                       {keys.map((key) =>
                         specialKeyLabels.has(key) ? (
                           <span
                             key={key}
-                            className="rounded-md bg-[#e9e1f8] px-1.5 py-0.5 text-[10px] font-semibold leading-4 text-[#5c4b88]"
+                            className="rounded-md bg-lavender-200 px-1.5 py-0.5 text-[10px] font-semibold leading-4 text-lavender-700"
                           >
                             {key}
                           </span>

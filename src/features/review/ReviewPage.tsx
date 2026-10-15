@@ -28,7 +28,7 @@ export default function ReviewPage() {
       <PageSurface contentClassName="max-w-5xl">
         {nav}
         <PageHeading eyebrow="NICE WORK" title="Review complete!">
-          <p className="mt-2 text-[#667085]">
+          <p className="mt-2 text-muted">
             {outcome.correctCount} correct, {outcome.needsPracticeCount} need
             more practice
           </p>
@@ -70,7 +70,7 @@ export default function ReviewPage() {
       )}
 
       {items.length === 0 ? (
-        <p className="mt-6 text-sm text-slate-500">
+        <p className="mt-6 text-sm text-subtle">
           Mistyped words are added to your Review queue and become available
           when due.
         </p>
@@ -84,18 +84,18 @@ export default function ReviewPage() {
               return (
                 <li
                   key={item.id}
-                  className="rounded-3xl border border-[#eadfd4] bg-white/85 p-4 text-[#253247] shadow-sm"
+                  className="rounded-3xl border border-line bg-white/85 p-4 text-ink shadow-sm"
                 >
                   <div>{item.targetText}</div>
                   {settings.romanizationEnabled && exercise?.romanization && (
-                    <div className="text-sm text-slate-500">
+                    <div className="text-sm text-subtle">
                       {exercise.romanization}
                     </div>
                   )}
                   {(meaning && (
-                    <div className="mt-1 text-sm text-slate-700">{meaning}</div>
+                    <div className="mt-1 text-sm text-ink-soft">{meaning}</div>
                   )) || (
-                    <div className="mt-1 text-sm italic text-[#7c8795]">
+                    <div className="mt-1 text-sm italic text-subtle">
                       No meaning yet
                     </div>
                   )}

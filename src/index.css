@@ -1,1 +1,83 @@
 @import 'tailwindcss';
+
+/*
+ * Jamozy light theme: cream surfaces, warm lines, slate ink, and pastel
+ * mint / lavender / coral / rose accents. Each token becomes a Tailwind
+ * utility (`bg-card`, `text-ink`, `border-line`, `bg-mint-100`, ...).
+ * `static` keeps every variable on :root so inline styles can use them.
+ */
+@theme static {
+  /* Surfaces */
+  --color-cream: #fffaf1;
+  --color-cream-soft: #fffaf6;
+  --color-card: #fffdf9;
+  --color-sand: #f7f2ec;
+  --color-blush: #f8d9d4;
+  --color-sage: #dce9c8;
+
+  /* Lines */
+  --color-line: #eadfd4;
+  --color-line-soft: #f0e6dc;
+  --color-line-strong: #dfcfc0;
+  --color-line-hover: #d8b3a9;
+
+  /* Ink */
+  --color-ink: #253247;
+  --color-ink-soft: #39465b;
+  --color-ink-muted: #596579;
+  --color-muted: #667085;
+  --color-subtle: #7c8795;
+  --color-faint: #98a2b3;
+  --color-ghost: #e4e2df;
+
+  /* Lavender */
+  --color-lavender-50: #f8f5ff;
+  --color-lavender-100: #f2edf9;
+  --color-lavender-200: #e9e1f8;
+  --color-lavender-300: #d9d1ed;
+  --color-lavender-400: #c8b9e7;
+  --color-lavender-500: #9d8bc8;
+  --color-lavender-600: #7863a8;
+  --color-lavender-700: #5c4b88;
+
+  /* Mint */
+  --color-mint-50: #e8f8ef;
+  --color-mint-100: #ddf5e9;
+  --color-mint-150: #d8e8e3;
+  --color-mint-200: #b9e2cf;
+  --color-mint-400: #78bca6;
+  --color-mint-500: #5fae94;
+  --color-mint-600: #3e8a70;
+  --color-mint-700: #2f7a62;
+  --color-mint-900: #194d41;
+
+  /* Coral */
+  --color-coral-50: #fff5f1;
+  --color-coral-100: #fde5e1;
+  --color-coral-200: #f2c5bb;
+  --color-coral-300: #e5a196;
+  --color-coral-400: #c97a6b;
+  --color-coral-500: #bc6c5d;
+  --color-coral-600: #a85d4e;
+  --color-coral-700: #8d4c43;
+
+  /* Rose */
+  --color-rose-50: #fdf0f5;
+  --color-rose-200: #f0b7cd;
+  --color-rose-400: #e08a9f;
+  --color-rose-500: #c84f82;
+  --color-rose-700: #a8396a;
+
+  /* Peach (Shift, notices) */
+  --color-peach-50: #fff6dc;
+  --color-peach-100: #fff0d8;
+  --color-peach-300: #e3ad73;
+  --color-peach-700: #8b6035;
+
+  /* Sky (correct-key feedback) */
+  --color-sky-100: #e8f1ff;
+  --color-sky-300: #8db7f4;
+  --color-sky-700: #3f6fae;
+
+  --color-danger: #a3403a;
+}

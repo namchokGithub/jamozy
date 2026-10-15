@@ -73,7 +73,7 @@ function WeakJamoRound() {
       <PageSurface contentClassName="max-w-5xl">
         {nav}
         <PageHeading eyebrow="NICE WORK" title="Practice complete!">
-          <p className="mt-2 text-[#667085]">
+          <p className="mt-2 text-muted">
             {finished.outcome.correctCount} correct,{' '}
             {finished.outcome.needsPracticeCount} need more practice
           </p>
@@ -85,10 +85,10 @@ function WeakJamoRound() {
             return (
               <li
                 key={jamo}
-                className="flex justify-between rounded-3xl border border-[#eadfd4] bg-white/85 p-4 text-[#253247] shadow-sm"
+                className="flex justify-between rounded-3xl border border-line bg-white/85 p-4 text-ink shadow-sm"
               >
                 <span className="text-xl">{jamo}</span>
-                <span className="text-sm text-[#667085]">
+                <span className="text-sm text-muted">
                   {total === 0
                     ? '–'
                     : `${Math.round((count.accepted / total) * 100)}% accuracy`}

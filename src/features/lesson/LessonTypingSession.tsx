@@ -43,32 +43,35 @@ interface LessonTypingSessionProps {
 const SLOW_SAVE_MS = 15000
 
 const statBadgeClass =
-  'rounded-lg border border-[#eadfd4] bg-[#fffdf9] px-2 py-0.5 text-[10px] font-semibold text-[#98a2b3]'
+  'rounded-lg border border-line bg-card px-2 py-0.5 text-[10px] font-semibold text-faint'
 
 const comboLook = (combo: number) => {
   if (combo >= 50)
     return {
       className:
-        'border-[#edc66a] bg-[#fff6d7] text-[#a66b12] shadow-[0_0_14px_rgba(231,181,57,0.32)]',
+        'border-peach-300 bg-peach-50 text-peach-700 shadow-[0_0_14px_rgba(231,181,57,0.32)]',
       scale: 1.25,
     }
   if (combo >= 20)
     return {
       className:
-        'border-[#f0b7cd] bg-[#fff0f6] text-[#c04e80] shadow-[0_0_12px_rgba(224,138,159,0.3)]',
+        'border-rose-200 bg-rose-50 text-rose-500 shadow-[0_0_12px_rgba(224,138,159,0.3)]',
       scale: 1.2,
     }
   if (combo >= 10)
     return {
-      className: 'border-[#f1c6b5] bg-[#fff1e9] text-[#c26e4e]',
+      className: 'border-coral-200 bg-coral-50 text-coral-500',
       scale: 1.1,
     }
   if (combo >= 5)
     return {
-      className: 'border-[#b9e2cf] bg-[#e8f8ef] text-[#3e8a70]',
+      className: 'border-mint-200 bg-mint-50 text-mint-600',
       scale: 1,
     }
-  return { className: 'border-[#d9d1ed] bg-[#f2edf9] text-[#7863a8]', scale: 1 }
+  return {
+    className: 'border-lavender-300 bg-lavender-100 text-lavender-600',
+    scale: 1,
+  }
 }
 
 export default function LessonTypingSession({
@@ -239,7 +242,7 @@ export default function LessonTypingSession({
       return (
         <div
           role="alert"
-          className="mt-5 rounded-3xl border border-[#f0d2c8] bg-[#fff5f1] p-5 text-sm text-[#8d4c43]"
+          className="mt-5 rounded-3xl border border-coral-200 bg-coral-50 p-5 text-sm text-coral-700"
         >
           <p>
             {saveError ?? 'Still saving… Check your connection and try again.'}
@@ -249,7 +252,7 @@ export default function LessonTypingSession({
           </Button>
         </div>
       )
-    return <p className="mt-4 text-sm text-slate-500">Saving…</p>
+    return <p className="mt-4 text-sm text-subtle">Saving…</p>
   }
 
   const acceptedKeystrokes =
@@ -283,13 +286,13 @@ export default function LessonTypingSession({
   const currentExercise = lesson.exercises[session.currentIndex]
 
   return (
-    <div className="mt-5 rounded-3xl border border-[#eadfd4] bg-[#fffdf9] p-3 shadow-sm sm:p-5">
+    <div className="mt-5 rounded-3xl border border-line bg-card p-3 shadow-sm sm:p-5">
       <div className="flex items-center justify-between gap-3">
         {onExit ? (
           <button
             type="button"
             onClick={onExit}
-            className="flex items-center gap-1 rounded-full border border-[#eadfd4] bg-white/80 px-3 py-1.5 text-xs font-semibold text-[#596579] transition hover:border-[#d8b3a9] hover:text-[#8d4c43] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bc6c5d]"
+            className="flex items-center gap-1 rounded-full border border-line bg-white/80 px-3 py-1.5 text-xs font-semibold text-ink-muted transition hover:border-line-hover hover:text-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
           >
             <X aria-hidden="true" size={13} />
             Exit lesson
@@ -299,10 +302,10 @@ export default function LessonTypingSession({
         )}
         <div className="flex flex-1 flex-wrap justify-end gap-1.5">
           <span className={statBadgeClass}>
-            WPM <strong className="ml-0.5 text-[#667085]">{wpm}</strong>
+            WPM <strong className="ml-0.5 text-muted">{wpm}</strong>
           </span>
           <span className={statBadgeClass}>
-            ACC <strong className="ml-0.5 text-[#667085]">{accuracy}%</strong>
+            ACC <strong className="ml-0.5 text-muted">{accuracy}%</strong>
           </span>
           <motion.span
             animate={{
@@ -319,7 +322,7 @@ export default function LessonTypingSession({
               <motion.span
                 key={comboBreak}
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0 bg-[#f28c78]"
+                className="pointer-events-none absolute inset-0 bg-coral-400"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: [0, 0.65, 0] }}
                 transition={{ duration: 0.42, ease: 'easeOut' }}
@@ -328,7 +331,7 @@ export default function LessonTypingSession({
             <Sparkles aria-hidden="true" size={12} strokeWidth={2.25} />
             <span className="relative">Combo x{combo}</span>
           </motion.span>
-          <span className="rounded-lg border border-[#eadfd4] bg-[#f2edf9] px-2 py-0.5 text-[10px] font-semibold text-[#7863a8]">
+          <span className="rounded-lg border border-line bg-lavender-100 px-2 py-0.5 text-[10px] font-semibold text-lavender-600">
             {progress.current} / {progress.total}
           </span>
         </div>
@@ -339,7 +342,7 @@ export default function LessonTypingSession({
         className="mt-4 text-3xl"
         size="compact"
       />
-      {/* <p className="mt-2 text-sm text-[#667085]">Typed: {composed}</p> */}
+      {/* <p className="mt-2 text-sm text-muted">Typed: {composed}</p> */}
       {keyboardSettings.showKeyboard && (
         <>
           <VirtualKeyboard

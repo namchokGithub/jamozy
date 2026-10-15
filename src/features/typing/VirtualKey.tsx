@@ -26,19 +26,19 @@ type FocusStyle = {
 
 const focusStyles: Record<KeyFocusLevel, FocusStyle> = {
   target: {
-    backgroundColor: '#ddf5e9',
-    borderColor: '#78bca6',
-    color: '#194d41',
+    backgroundColor: 'var(--color-mint-100)',
+    borderColor: 'var(--color-mint-400)',
+    color: 'var(--color-mint-900)',
   },
   nearby: {
-    backgroundColor: '#fffdf9',
-    borderColor: '#d8e8e3',
-    color: '#39465b',
+    backgroundColor: 'var(--color-card)',
+    borderColor: 'var(--color-mint-150)',
+    color: 'var(--color-ink-soft)',
   },
   other: {
-    backgroundColor: '#F7F4EC',
-    borderColor: '#CBDCD7',
-    color: '#39465b',
+    backgroundColor: 'var(--color-sand)',
+    borderColor: 'var(--color-mint-150)',
+    color: 'var(--color-ink-soft)',
     opacity: 0.9,
   },
 }
@@ -108,17 +108,17 @@ function getVisualState(
 function visualStateClass(state: KeyVisualState): string {
   switch (state) {
     case 'target':
-      return 'border-[#78bca6] bg-[#ddf5e9] text-[#194d41] shadow-[0_3px_10px_-5px_rgba(35,109,86,0.45)]'
+      return 'border-mint-400 bg-mint-100 text-mint-900 shadow-[0_3px_10px_-5px_rgba(35,109,86,0.45)]'
     case 'active':
-      return 'border-[#8db7f4] bg-[#e8f1ff] text-[#3f6fae] shadow-[0_3px_10px_-5px_rgba(63,111,174,0.35)]'
+      return 'border-sky-300 bg-sky-100 text-sky-700 shadow-[0_3px_10px_-5px_rgba(63,111,174,0.35)]'
     case 'previous':
-      return 'border-[#d8d0ec] bg-[#f3f0fa] text-[#746b8f]'
+      return 'border-lavender-300 bg-lavender-50 text-lavender-600'
     case 'wrong':
-      return 'border-[#e5a196] bg-[#fde5e1] text-[#8d4c43] shadow-[0_3px_10px_-5px_rgba(169,74,61,0.35)]'
+      return 'border-coral-300 bg-coral-100 text-coral-700 shadow-[0_3px_10px_-5px_rgba(169,74,61,0.35)]'
     case 'dimmed':
-      return 'border-[#ebe7df] bg-[#fbf9f4] text-[#66736c]'
+      return 'border-sand bg-sand text-muted'
     case 'idle':
-      return 'border-[#d8e8e3] bg-[#f7f4ec] text-[#39465b]'
+      return 'border-mint-150 bg-sand text-ink-soft'
   }
 }
 
@@ -159,7 +159,7 @@ function CorrectSparkle({
       initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
       animate={{ opacity: [0, 1, 0], scale: [0, 1, 0.5], x, y }}
       transition={{ duration: 0.16, delay, ease: 'easeOut' }}
-      className="absolute right-0 top-0 text-xs text-[#e8b85c]"
+      className="absolute right-0 top-0 text-xs text-peach-300"
     >
       ✦
     </motion.span>
@@ -221,7 +221,7 @@ export default function VirtualKey({
   const shouldPulseShift = isShiftKey && nextKey?.shift === true
   const shouldPulseTarget = visualState === 'target' && !isShiftKey
   const keyVisualClass = isActiveShift
-    ? 'border-[#e3ad73] bg-[#fff0d8] text-[#8b6035]'
+    ? 'border-peach-300 bg-peach-100 text-peach-700'
     : visualStateClass(visualState)
   const correctFeedbackId =
     feedback?.outcome === 'correct' && feedback.code === code
@@ -327,7 +327,7 @@ export default function VirtualKey({
             y: { type: 'spring', stiffness: 600, damping: 30 },
           }}
           style={focusStyle}
-          className={`relative flex w-full flex-col items-center justify-center border text-sm transition-[background-color,border-color,color,box-shadow] duration-200 ${keyShapeClass} ${keyVisualClass} ${isVirtualShiftSelected ? 'ring-2 ring-inset ring-[#c98950] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.65)]' : ''} ${canPress ? 'cursor-pointer touch-manipulation' : 'cursor-default'}`}
+          className={`relative flex w-full flex-col items-center justify-center border text-sm transition-[background-color,border-color,color,box-shadow] duration-200 ${keyShapeClass} ${keyVisualClass} ${isVirtualShiftSelected ? 'ring-2 ring-inset ring-peach-300 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.65)]' : ''} ${canPress ? 'cursor-pointer touch-manipulation' : 'cursor-default'}`}
           aria-label={displayLabel}
           aria-pressed={isShiftKey ? virtualShiftActive : undefined}
           disabled={!canPress}
@@ -337,7 +337,7 @@ export default function VirtualKey({
             <>
               {jamo.shift && (
                 <span
-                  className={`absolute top-1 right-1 text-[12px] leading-none text-[#a85d4e] ${desktopOnly}`}
+                  className={`absolute top-1 right-1 text-[12px] leading-none text-coral-600 ${desktopOnly}`}
                 >
                   {jamo.shift}
                 </span>
@@ -352,7 +352,7 @@ export default function VirtualKey({
               </span>
               {showEnglishKeys && (
                 <span
-                  className={`mt-0.5 text-[10px] leading-3 text-[#c7bfb2] ${hasHomeRowMarker ? 'mb-1.5' : ''} ${desktopOnly}`}
+                  className={`mt-0.5 text-[10px] leading-3 text-line-strong ${hasHomeRowMarker ? 'mb-1.5' : ''} ${desktopOnly}`}
                 >
                   {englishLabel(code)}
                 </span>
@@ -367,12 +367,12 @@ export default function VirtualKey({
           ) : (
             <>
               {mobileStyle && (
-                <span className="text-xs font-semibold text-[#667085] sm:hidden">
+                <span className="text-xs font-semibold text-muted sm:hidden">
                   {MOBILE_UTILITY_LABELS[code] ?? displayLabel}
                 </span>
               )}
               <span
-                className={`text-[11px] font-semibold text-[#667085] ${desktopOnly}`}
+                className={`text-[11px] font-semibold text-muted ${desktopOnly}`}
               >
                 {displayLabel}
               </span>

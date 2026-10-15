@@ -563,7 +563,7 @@ function SyllableCanvas({
       ref={canvasRef}
       width={TILE_SIZE}
       height={TILE_SIZE}
-      className={`${HANGUL_TARGET_SIZES[size].tile} rounded-md border border-[#D9CFF5] bg-[#FFFCF7] shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)]`}
+      className={`${HANGUL_TARGET_SIZES[size].tile} rounded-md border border-lavender-300 bg-cream-soft shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)]`}
       aria-hidden="true"
     />
   )

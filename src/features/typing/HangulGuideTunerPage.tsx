@@ -78,7 +78,7 @@ function GuideCanvas({
   return (
     <img
       src={imageUrl}
-      className="h-26 w-26 rounded-md border border-[#f0eaff] bg-[#f9f8ff] shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)]"
+      className="h-26 w-26 rounded-md border border-lavender-100 bg-lavender-50 shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)]"
       aria-label={`${glyph} ${mode} inspection`}
     />
   )
@@ -105,12 +105,12 @@ function OperationEditor({
   }
 
   return (
-    <div className="rounded-lg border border-[#eadfd4] bg-white p-3">
+    <div className="rounded-lg border border-line bg-white p-3">
       <div className="flex flex-wrap gap-2">
-        <label className="text-xs font-semibold text-[#667085]">
+        <label className="text-xs font-semibold text-muted">
           Mode
           <select
-            className="mt-1 block rounded border border-[#d8e3f2] bg-white px-2 py-1 text-sm text-[#39465b]"
+            className="mt-1 block rounded border border-lavender-300 bg-white px-2 py-1 text-sm text-ink-soft"
             value={operation.mode}
             onChange={(event) =>
               onChange({ ...operation, mode: event.target.value as GuideMode })
@@ -120,10 +120,10 @@ function OperationEditor({
             <option value="subtract">Subtract</option>
           </select>
         </label>
-        <label className="text-xs font-semibold text-[#667085]">
+        <label className="text-xs font-semibold text-muted">
           Shape
           <select
-            className="mt-1 block rounded border border-[#d8e3f2] bg-white px-2 py-1 text-sm text-[#39465b]"
+            className="mt-1 block rounded border border-lavender-300 bg-white px-2 py-1 text-sm text-ink-soft"
             value={operation.shape}
             onChange={(event) =>
               onChange({
@@ -146,14 +146,14 @@ function OperationEditor({
       </div>
       <div className="mt-3 grid grid-cols-4 gap-2">
         {(['x', 'y', 'w', 'h'] as const).map((field) => (
-          <label key={field} className="text-xs font-semibold text-[#667085]">
+          <label key={field} className="text-xs font-semibold text-muted">
             {field.toUpperCase()}
             <input
               type="number"
               step="0.01"
               value={operation.normRect[field]}
               onChange={(event) => updateNumber(field, event.target.value)}
-              className="mt-1 block w-full rounded border border-[#d8e3f2] px-2 py-1 text-sm text-[#39465b]"
+              className="mt-1 block w-full rounded border border-lavender-300 px-2 py-1 text-sm text-ink-soft"
             />
           </label>
         ))}
@@ -246,19 +246,19 @@ export default function HangulGuideTunerPage() {
     <PageSurface contentClassName="max-w-6xl">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase text-[#a85d4e]">
+          <p className="text-sm font-semibold uppercase text-coral-600">
             Development only
           </p>
-          <h1 className="mt-1 text-3xl font-bold text-[#39465b]">
+          <h1 className="mt-1 text-3xl font-bold text-ink-soft">
             Hangul guide tuner
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-[#667085]">
+          <p className="mt-2 max-w-2xl text-sm text-muted">
             Edit normalized guide operations and inspect the exact pixel
             ownership used by the learner renderer.
           </p>
         </div>
         <Link
-          className="text-sm font-semibold text-[#8d4c43] hover:underline"
+          className="text-sm font-semibold text-coral-700 hover:underline"
           to="/"
         >
           Back to learner
@@ -267,7 +267,7 @@ export default function HangulGuideTunerPage() {
 
       <Card className="mt-6">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-semibold text-[#39465b]">Syllable</span>
+          <span className="text-sm font-semibold text-ink-soft">Syllable</span>
           {TUNABLE_SYLLABLES.map((candidate) => (
             <Button
               key={candidate}
@@ -277,7 +277,7 @@ export default function HangulGuideTunerPage() {
               {candidate}
             </Button>
           ))}
-          <label className="ml-auto text-sm font-semibold text-[#39465b]">
+          <label className="ml-auto text-sm font-semibold text-ink-soft">
             Typing step {keyIndex + 1} / {expectedKeys.length + 1}
             <input
               className="ml-3 align-middle"
@@ -302,20 +302,20 @@ export default function HangulGuideTunerPage() {
                   mode === 'colored' ? reportDiagnostics : undefined
                 }
               />
-              <figcaption className="text-center text-xs font-semibold text-[#667085]">
+              <figcaption className="text-center text-xs font-semibold text-muted">
                 {label}
               </figcaption>
             </figure>
           ))}
         </div>
-        <p className="mt-4 text-xs text-[#667085]">
+        <p className="mt-4 text-xs text-muted">
           Ownership colors identify typing steps. Red pixels identify the
           relevant exception in each diagnostic view.
         </p>
       </Card>
 
       <Card className="mt-4">
-        <h2 className="text-lg font-bold text-[#39465b]">Pixel diagnostics</h2>
+        <h2 className="text-lg font-bold text-ink-soft">Pixel diagnostics</h2>
         <div className="mt-3 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
           {[
             ['Ink pixels', diagnostics?.inkPixels ?? 0, ''],
@@ -344,11 +344,14 @@ export default function HangulGuideTunerPage() {
               ),
             ],
           ].map(([label, count, share]) => (
-            <div key={label as string} className="rounded-lg bg-[#f7f8fb] p-3">
-              <p className="text-xs font-semibold uppercase text-[#667085]">
+            <div
+              key={label as string}
+              className="rounded-lg bg-lavender-50 p-3"
+            >
+              <p className="text-xs font-semibold uppercase text-muted">
                 {label}
               </p>
-              <p className="mt-1 text-lg font-bold text-[#39465b]">
+              <p className="mt-1 text-lg font-bold text-ink-soft">
                 {count}{' '}
                 {share && (
                   <span className="text-sm font-medium">({share})</span>
@@ -363,10 +366,10 @@ export default function HangulGuideTunerPage() {
         <Card>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-bold text-[#39465b]">
+              <h2 className="text-lg font-bold text-ink-soft">
                 Guide operations
               </h2>
-              <p className="mt-1 text-sm text-[#667085]">
+              <p className="mt-1 text-sm text-muted">
                 All coordinates are normalized to the glyph ink bounds.
               </p>
             </div>
@@ -381,10 +384,10 @@ export default function HangulGuideTunerPage() {
             {guide.steps.map((step, stepIndex) => (
               <section
                 key={`${step.order}-${step.key}`}
-                className="rounded-xl border border-[#d8e3f2] p-3"
+                className="rounded-xl border border-lavender-300 p-3"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="font-bold text-[#39465b]">
+                  <h3 className="font-bold text-ink-soft">
                     Step {step.order + 1}: {step.key}
                   </h3>
                   <div className="flex flex-wrap gap-1">
@@ -441,15 +444,15 @@ export default function HangulGuideTunerPage() {
           </div>
         </Card>
         <Card className="h-fit">
-          <h2 className="text-lg font-bold text-[#39465b]">Export</h2>
-          <p className="mt-2 text-sm text-[#667085]">
+          <h2 className="text-lg font-bold text-ink-soft">Export</h2>
+          <p className="mt-2 text-sm text-muted">
             Copy the tuned guide to place into the guide dataset after visual
             review.
           </p>
           <Button className="mt-4 w-full" onClick={() => void copyJson()}>
             Copy guide JSON
           </Button>
-          <pre className="mt-4 max-h-96 overflow-auto rounded-lg bg-[#1f2937] p-3 text-xs text-[#f8fafc]">
+          <pre className="mt-4 max-h-96 overflow-auto rounded-lg bg-ink p-3 text-xs text-lavender-50">
             {JSON.stringify({ [glyph]: guide }, null, 2)}
           </pre>
         </Card>

@@ -15,7 +15,7 @@ export function PageNav({ backTo, backLabel }: PageNavProps) {
     >
       <Link
         to="/"
-        className="flex items-center gap-2.5 rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#bc6c5d]"
+        className="flex items-center gap-2.5 rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-coral-500"
       >
         <img
           src="/templates/jamozy-hanguk-180x180.png"
@@ -26,7 +26,7 @@ export function PageNav({ backTo, backLabel }: PageNavProps) {
       </Link>
       <Link
         to={backTo}
-        className="flex shrink-0 items-center gap-1.5 rounded-full border border-[#eadfd4] bg-white/80 px-3 py-2 text-sm font-medium text-[#39465b] shadow-sm transition hover:border-[#d8b3a9] hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bc6c5d]"
+        className="flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-white/80 px-3 py-2 text-sm font-medium text-ink-soft shadow-sm transition hover:border-line-hover hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
       >
         <ArrowLeft aria-hidden="true" size={15} />
         {backLabel}

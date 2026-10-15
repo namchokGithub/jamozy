@@ -36,9 +36,9 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
 
   return <Modal open title={createAccount ? 'Create account' : 'Sign in'} onClose={onClose}>
     <div className="mt-5 space-y-3">
-      <label className="grid gap-1.5 text-sm font-semibold text-[#39465b]">Email<input value={email} onChange={(event) => setEmail(event.target.value)} type="email" className="rounded-2xl border border-[#eadfd4] bg-white px-3 py-2.5 font-normal outline-none focus:border-[#d8b3a9] focus:ring-2 focus:ring-[#f2c5bb]" /></label>
-      <label className="grid gap-1.5 text-sm font-semibold text-[#39465b]">Password<input value={password} onChange={(event) => setPassword(event.target.value)} type="password" className="rounded-2xl border border-[#eadfd4] bg-white px-3 py-2.5 font-normal outline-none focus:border-[#d8b3a9] focus:ring-2 focus:ring-[#f2c5bb]" /></label>
-      {fetcher.data?.error && <p className="text-sm font-medium text-[#a85d4e]">{fetcher.data.error}</p>}
+      <label className="grid gap-1.5 text-sm font-semibold text-ink-soft">Email<input value={email} onChange={(event) => setEmail(event.target.value)} type="email" className="rounded-2xl border border-line bg-white px-3 py-2.5 font-normal outline-none focus:border-line-hover focus:ring-2 focus:ring-coral-200" /></label>
+      <label className="grid gap-1.5 text-sm font-semibold text-ink-soft">Password<input value={password} onChange={(event) => setPassword(event.target.value)} type="password" className="rounded-2xl border border-line bg-white px-3 py-2.5 font-normal outline-none focus:border-line-hover focus:ring-2 focus:ring-coral-200" /></label>
+      {fetcher.data?.error && <p className="text-sm font-medium text-coral-600">{fetcher.data.error}</p>}
       <Button className="mt-2 w-full" onClick={() => submit(createAccount ? 'sign-up' : 'sign-in')} disabled={fetcher.state !== 'idle'}>{createAccount ? 'Create account' : 'Sign in'}</Button>
       <Button className="w-full" variant="secondary" onClick={() => submit('google')} disabled={fetcher.state !== 'idle'}>Continue with Google</Button>
       <Button className="w-full" variant="ghost" onClick={() => setCreateAccount((current) => !current)}>{createAccount ? 'Already have an account?' : 'Create account'}</Button>
