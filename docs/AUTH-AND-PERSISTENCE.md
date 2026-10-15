@@ -168,9 +168,9 @@ record immutability protects record retries, but the current owner-writable
 profile rule does not prevent a signed-in client from altering aggregate
 profile fields; authoritative anti-tamper enforcement would require trusted
 server writes. The receipt-backed Lesson/Home paths update canonical
-`ProgressionState`; the older `completeLesson` path is a known migration gap
-and must be moved before it can make the same Rebirth-safe EXP guarantee. See
-`docs/PROGRESS.md`.
+`ProgressionState`; the older `completeLesson` path also adds its EXP to
+`ProgressionState` and reports the Rebirth-aware level, but it has no session
+receipt, so a retried write can award EXP twice. See `docs/PROGRESS.md`.
 
 ## Historical implementation
 
