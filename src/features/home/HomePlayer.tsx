@@ -386,9 +386,7 @@ export default function HomePlayer({
             </div>
             <HangulTarget
               session={session.currentSession}
-              // The negative top margin keeps the tiles where the earlier
-              // 160% scale drew them, now that they take their real size.
-              className="mt-3 text-6xl font-bold tracking-wide sm:-mt-4.75 sm:text-7xl"
+              className="mt-3 text-6xl font-bold tracking-wide sm:text-7xl"
               size={homeTargetSize(session.currentSession.targetText)}
             />
             <div className="mx-auto mt-4 max-w-44 sm:mt-2.25">
