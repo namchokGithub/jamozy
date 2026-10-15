@@ -10,6 +10,29 @@
       StaticHomeContentRepository takes this promise once, so the file is
       requested a single time; a missing file resolves to null.
     -->
+    <!--
+      Paints the theme saved on this device before the app loads, so a dark
+      theme does not flash light, and keeps following the device while the
+      choice is `system`. Key and attributes match
+      src/features/settings/apply-theme.ts.
+    -->
+    <script>
+      try {
+        var root = document.documentElement
+        var media = window.matchMedia('(prefers-color-scheme: dark)')
+        var paint = function () {
+          var setting = root.dataset.themeSetting
+          root.dataset.theme =
+            setting === 'system' ? (media.matches ? 'dark' : 'light') : setting
+        }
+        root.dataset.themeSetting =
+          localStorage.getItem('jamozy-theme') || 'light'
+        paint()
+        media.addEventListener('change', paint)
+      } catch {
+        // Storage or matchMedia unavailable: stay in the light theme.
+      }
+    </script>
     <script>
       window.__jamozyHomeContent = fetch('%BASE_URL%content/home.json')
         .then((response) => (response.ok ? response.json() : null))

@@ -146,31 +146,6 @@ test('Preview navigation follows the visible filtered exercises', async () => {
   expect(within(dialog).getByText('2 / 2')).toBeInTheDocument()
 })
 
-test('Preview reads the unsaved target text from the exercise editor', async () => {
-  const router = createMemoryRouter(
-    [
-      {
-        path: '/',
-        Component: LessonEditorPage,
-        loader: () => ({ lesson, unit: null, course: null }),
-      },
-    ],
-    { initialEntries: ['/'] },
-  )
-  render(<RouterProvider router={router} />)
-
-  await screen.findByPlaceholderText(
-    'Search text, romanization, or translation',
-  )
-  fireEvent.click(screen.getAllByRole('button', { name: 'Edit exercise' })[0])
-  fireEvent.change(screen.getByRole('textbox', { name: 'Target text' }), {
-    target: { value: 'ㅝ' },
-  })
-  fireEvent.click(screen.getAllByRole('button', { name: 'Preview' })[0])
-  const dialog = screen.getByRole('dialog', { name: /ㅝ/ })
-  expect(await within(dialog).findByText('Canvas')).toBeInTheDocument()
-})
-
 test('preview colors approved SVG steps and uses Canvas for standalone vowels', async () => {
   vi.mocked(loadJamoSvgGlyphs).mockResolvedValue({
     unitsPerEm: 2048,

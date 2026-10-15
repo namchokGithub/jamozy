@@ -40,21 +40,21 @@ interface HomePlayerProps {
 const lessonCardLooks = {
   completed: {
     label: 'Completed',
-    border: 'border-[#b9e2cf]',
-    bar: 'bg-[#5fae94]',
-    chip: 'bg-[#ddf5e9] text-[#2f7a62]',
+    border: 'border-mint-200',
+    bar: 'bg-mint-500',
+    chip: 'bg-mint-100 text-mint-700',
   },
   inProgress: {
     label: 'In progress',
-    border: 'border-[#eadfd4]',
-    bar: 'bg-[#e08a9f]',
-    chip: 'bg-[#fdf0f5] text-[#a8396a]',
+    border: 'border-line',
+    bar: 'bg-rose-400',
+    chip: 'bg-rose-50 text-rose-700',
   },
   notStarted: {
     label: 'Not started',
-    border: 'border-[#eadfd4]',
-    bar: 'bg-[#d8d2ca]',
-    chip: 'bg-[#f3f0eb] text-[#8a94a6]',
+    border: 'border-line',
+    bar: 'bg-line-strong',
+    chip: 'bg-sand text-subtle',
   },
 }
 
@@ -65,26 +65,29 @@ const comboLook = (combo: number) => {
   if (combo >= 50)
     return {
       className:
-        'border-[#edc66a] bg-[#fff6d7] text-[#a66b12] shadow-[0_0_14px_rgba(231,181,57,0.32)]',
+        'border-peach-300 bg-peach-50 text-peach-700 shadow-[0_0_14px_rgba(231,181,57,0.32)]',
       scale: 1.25,
     }
   if (combo >= 20)
     return {
       className:
-        'border-[#f0b7cd] bg-[#fff0f6] text-[#c04e80] shadow-[0_0_12px_rgba(224,138,159,0.3)]',
+        'border-rose-200 bg-rose-50 text-rose-500 shadow-[0_0_12px_rgba(224,138,159,0.3)]',
       scale: 1.2,
     }
   if (combo >= 10)
     return {
-      className: 'border-[#f1c6b5] bg-[#fff1e9] text-[#c26e4e]',
+      className: 'border-coral-200 bg-coral-50 text-coral-500',
       scale: 1.1,
     }
   if (combo >= 5)
     return {
-      className: 'border-[#b9e2cf] bg-[#e8f8ef] text-[#3e8a70]',
+      className: 'border-mint-200 bg-mint-50 text-mint-600',
       scale: 1,
     }
-  return { className: 'border-[#d9d1ed] bg-[#f2edf9] text-[#7863a8]', scale: 1 }
+  return {
+    className: 'border-lavender-300 bg-lavender-100 text-lavender-600',
+    scale: 1,
+  }
 }
 
 // Plays the static Home course (DEC-043). The player owns its session from
@@ -324,17 +327,17 @@ export default function HomePlayer({
 
   return (
     <section
-      className="mt-5 rounded-4xl border border-[#d9d1ed] bg-[#fffdf9] p-3 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:p-7 select-none!"
+      className="mt-5 rounded-4xl border border-lavender-300 bg-card p-3 shadow-panel sm:p-7 select-none!"
       aria-labelledby="home-player-heading"
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-[#7863a8]">
+          <p className="text-sm font-semibold text-lavender-600">
             TYPE, ONE STEP AT A TIME
           </p>
           <h2
             id="home-player-heading"
-            className="mt-1 text-2xl font-bold tracking-tight text-[#253247]"
+            className="mt-1 text-2xl font-bold tracking-tight text-ink"
           >
             {content.course.title}
           </h2>
@@ -343,14 +346,13 @@ export default function HomePlayer({
 
       {active && session && lesson ? (
         <div className="mt-1">
-          <div className="mt-2 rounded-3xl bg-[#fffaf6] p-3 text-center sm:p-4 shadow-[0_0_30px_-20px_rgba(87,65,45,0.35)]">
+          <div className="mt-2 rounded-3xl bg-page-soft p-3 text-center sm:p-4 shadow-soft">
             <div className="flex min-h-5 flex-wrap justify-end gap-1.5">
-              <span className="rounded-lg border border-[#eadfd4] bg-[#fffdf9] px-2 py-0.5 text-[10px] font-semibold text-[#98a2b3]">
-                WPM <strong className="ml-0.5 text-[#667085]">{wpm}</strong>
+              <span className="rounded-lg border border-line bg-card px-2 py-0.5 text-[10px] font-semibold text-faint">
+                WPM <strong className="ml-0.5 text-muted">{wpm}</strong>
               </span>
-              <span className="rounded-lg border border-[#eadfd4] bg-[#fffdf9] px-2 py-0.5 text-[10px] font-semibold text-[#98a2b3]">
-                ACC{' '}
-                <strong className="ml-0.5 text-[#667085]">{accuracy}%</strong>
+              <span className="rounded-lg border border-line bg-card px-2 py-0.5 text-[10px] font-semibold text-faint">
+                ACC <strong className="ml-0.5 text-muted">{accuracy}%</strong>
               </span>
               <motion.span
                 animate={{
@@ -367,7 +369,7 @@ export default function HomePlayer({
                   <motion.span
                     key={comboBreak}
                     aria-hidden="true"
-                    className="pointer-events-none absolute inset-0 bg-[#f28c78]"
+                    className="pointer-events-none absolute inset-0 bg-coral-400"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: [0, 0.65, 0] }}
                     transition={{ duration: 0.42, ease: 'easeOut' }}
@@ -378,7 +380,7 @@ export default function HomePlayer({
               </motion.span>
 
               {session && lesson && (
-                <span className="rounded-lg border border-[#eadfd4] bg-[#f2edf9] px-2 py-0.5 text-[10px] font-semibold text-[#7863a8]!">
+                <span className="rounded-lg border border-line bg-lavender-100 px-2 py-0.5 text-[10px] font-semibold text-lavender-600!">
                   {Math.min(session.currentIndex + 1, exercises.length)} /{' '}
                   {exercises.length}
                 </span>
@@ -390,11 +392,11 @@ export default function HomePlayer({
               size={homeTargetSize(session.currentSession.targetText)}
             />
             <div className="mx-auto mt-4 max-w-44 sm:mt-2.25">
-              <p className="text-[10px] font-semibold text-[#98a2b3]">
+              <p className="text-[10px] font-semibold text-faint">
                 {completedSteps} / {totalSteps} steps
               </p>
               <div
-                className="mt-1 h-1 overflow-hidden rounded-full bg-[#f2edf9]"
+                className="mt-1 h-1 overflow-hidden rounded-full bg-lavender-100"
                 role="progressbar"
                 aria-label="Typing progress"
                 aria-valuemin={0}
@@ -402,20 +404,20 @@ export default function HomePlayer({
                 aria-valuenow={completedSteps}
               >
                 <div
-                  className="h-full rounded-full bg-[#c84f82] transition-[width] duration-150"
+                  className="h-full rounded-full bg-rose-500 transition-[width] duration-150"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
             </div>
             <div className="mt-5 grid h-9 grid-rows-2">
-              <div className="h-4 max-w-full truncate text-xs text-[#98a2b3]">
+              <div className="h-4 max-w-full truncate text-xs text-faint">
                 {meaning || (
-                  <span className="italic text-[#e4e2df]">No meaning</span>
+                  <span className="italic text-ghost">No meaning</span>
                 )}
               </div>
-              <div className="h-4 max-w-full truncate text-xs italic text-[#a293bd]">
+              <div className="h-4 max-w-full truncate text-xs italic text-lavender-500">
                 {active.romanization || (
-                  <span className="italic text-[#e4e2df]">No meaning</span>
+                  <span className="italic text-ghost">No meaning</span>
                 )}
               </div>
             </div>
@@ -447,7 +449,7 @@ export default function HomePlayer({
           </div>
         </div>
       ) : opened || !hasLessons ? (
-        <div className="mt-4 rounded-3xl border border-dashed border-[#dfcfc0] bg-white/60 p-6 text-center text-sm text-[#667085]">
+        <div className="mt-4 rounded-3xl border border-dashed border-line-strong bg-surface/60 p-6 text-center text-sm text-muted">
           Pick a lesson above to start.
         </div>
       ) : null}
@@ -462,7 +464,7 @@ export default function HomePlayer({
             type="button"
             aria-pressed={unit.id === visibleUnit?.id}
             onClick={() => selectUnit(unit.id)}
-            className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-2 text-sm font-semibold transition sm:shrink sm:whitespace-normal ${unit.id === visibleUnit?.id ? 'border-[#9d8bc8] bg-[#e9e1f8] text-[#4b3a7a]' : 'border-[#f0e6dc] bg-transparent text-[#8a94a6] hover:border-[#c8b9e7] hover:text-[#667085]'}`}
+            className={`shrink-0 whitespace-nowrap rounded-full border px-3.5 py-2 text-sm font-semibold transition sm:shrink sm:whitespace-normal ${unit.id === visibleUnit?.id ? 'border-lavender-500 bg-lavender-200 text-lavender-700' : 'border-line-soft bg-transparent text-subtle hover:border-lavender-400 hover:text-muted'}`}
           >
             {unit.title}
           </button>
@@ -470,14 +472,12 @@ export default function HomePlayer({
       </nav>
 
       {visibleUnit && (
-        <div className="mt-5 border-t border-[#f0e6dc] pt-5">
-          <h3 className="text-xl font-bold tracking-tight text-[#253247]">
+        <div className="mt-5 border-t border-line-soft pt-5">
+          <h3 className="text-xl font-bold tracking-tight text-ink">
             {visibleUnit.title}
           </h3>
           {visibleUnit.description && (
-            <p className="mt-1 text-sm text-[#667085]">
-              {visibleUnit.description}
-            </p>
+            <p className="mt-1 text-sm text-muted">{visibleUnit.description}</p>
           )}
           <nav
             className="-mx-1 mt-4 flex gap-3 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] sm:overflow-visible sm:px-0 sm:pb-0"
@@ -506,16 +506,16 @@ export default function HomePlayer({
                     setCombo(0)
                     open({ unitId: visibleUnit.id, lessonId: entry.id })
                   }}
-                  className={`flex w-44 shrink-0 flex-col rounded-3xl border bg-[#fffdf9] p-4 text-left shadow-[0_14px_35px_-28px_rgba(54,41,31,0.7)] transition hover:-translate-y-0.5 sm:w-auto ${current ? 'border-[#e08a9f] ring-1 ring-[#e08a9f]' : look.border}`}
+                  className={`flex w-44 shrink-0 flex-col rounded-3xl border bg-card p-4 text-left shadow-card transition hover:-translate-y-0.5 sm:w-auto ${current ? 'border-rose-400 ring-1 ring-rose-400' : look.border}`}
                 >
-                  <span className="w-fit rounded-lg bg-[#f2edf9] px-2 py-1 text-xs font-bold text-[#7863a8]">
+                  <span className="w-fit rounded-lg bg-lavender-100 px-2 py-1 text-xs font-bold text-lavender-600">
                     {String(index + 1).padStart(2, '0')}
                   </span>
-                  <span className="mt-3 text-base font-bold text-[#253247]">
+                  <span className="mt-3 text-base font-bold text-ink">
                     {entry.title}
                   </span>
                   <span className="mt-3 flex items-center gap-2">
-                    <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#efeae4]">
+                    <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-sand">
                       <span
                         className={`block h-full rounded-full ${look.bar}`}
                         style={{
@@ -523,7 +523,7 @@ export default function HomePlayer({
                         }}
                       />
                     </span>
-                    <span className="text-xs font-semibold text-[#667085]">
+                    <span className="text-xs font-semibold text-muted">
                       {done} / {total}
                     </span>
                   </span>

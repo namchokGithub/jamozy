@@ -13,14 +13,14 @@ export function PageSurface({
 }: PageSurfaceProps) {
   return (
     <main
-      className={`relative flex min-h-dvh flex-col overflow-hidden bg-[#fffaf1] px-4 py-5 text-[#253247] sm:px-6 sm:py-8 ${className}`}
+      className={`relative flex min-h-dvh flex-col overflow-hidden bg-page px-4 py-5 text-ink sm:px-6 sm:py-8 ${className}`}
     >
       <div
         className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
         aria-hidden="true"
       >
-        <div className="absolute -left-24 top-12 h-72 w-72 rounded-full bg-[#f8d9d4]/50 blur-3xl" />
-        <div className="absolute -right-20 bottom-0 h-96 w-96 rounded-full bg-[#dce9c8]/50 blur-3xl" />
+        <div className="absolute -left-24 top-12 h-72 w-72 rounded-full bg-blush/50 blur-3xl" />
+        <div className="absolute -right-20 bottom-0 h-96 w-96 rounded-full bg-sage/50 blur-3xl" />
       </div>
       <div
         className={`relative z-10 mx-auto flex w-full flex-1 flex-col ${contentClassName}`}

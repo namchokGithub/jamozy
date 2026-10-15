@@ -492,7 +492,7 @@ are separate from `UserProfile`; do not store `email`, provider details, or
 | keyboardOpacity     | number                                 | 0–1                                                                               |
 | romanizationEnabled | boolean                                |                                                                                   |
 | meaningLanguage     | `'th' \| 'en' \| 'both'`               |                                                                                   |
-| theme               | `'light' \| 'dark'`                    |                                                                                   |
+| theme               | `'light' \| 'dark' \| 'system'`         | `system` follows the device's color-scheme preference; defaults to `'light'`      |
 
 Replaces the earlier single `keyboardLayoutHint` field with the current settings list. English physical-key labels are always shown alongside Hangul labels, so `showEnglishKeys` is not a user setting ([[DEC-027]]). "Reset Progress" (requirement.md #13) is an action, not a setting — it's a future `application/` use case, not a `UserSettings` field.
 

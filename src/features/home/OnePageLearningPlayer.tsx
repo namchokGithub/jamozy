@@ -224,22 +224,22 @@ export default function OnePageLearningPlayer({
 
   return (
     <section
-      className="mt-2 rounded-4xl border border-[#d9d1ed] bg-[#fffdf9] p-5 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] select-none! sm:p-7"
+      className="mt-2 rounded-4xl border border-lavender-300 bg-card p-5 shadow-panel select-none! sm:p-7"
       aria-labelledby="one-page-player-heading"
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-[#7863a8]">
+          <p className="text-sm font-semibold text-lavender-600">
             TYPE, ONE STEP AT A TIME
           </p>
           <h2
             id="one-page-player-heading"
-            className="mt-1 text-2xl font-bold tracking-tight text-[#253247]"
+            className="mt-1 text-2xl font-bold tracking-tight text-ink"
           >
             Your practice room
           </h2>
         </div>
-        <p className="rounded-full bg-[#f2edf9] px-3 py-1.5 text-sm font-semibold text-[#7863a8]">
+        <p className="rounded-full bg-lavender-100 px-3 py-1.5 text-sm font-semibold text-lavender-600">
           {completedCount} typed
         </p>
       </div>
@@ -249,7 +249,7 @@ export default function OnePageLearningPlayer({
           <Link
             key={course.id}
             to={`/?course=${encodeURIComponent(course.id)}`}
-            className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${course.id === courseId ? 'border-[#9d8bc8] bg-[#e9e1f8] text-[#5c4b88]' : 'border-[#eadfd4] bg-white text-[#667085] hover:border-[#c8b9e7]'}`}
+            className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${course.id === courseId ? 'border-lavender-500 bg-lavender-200 text-lavender-700' : 'border-line bg-surface text-muted hover:border-lavender-400'}`}
           >
             {course.title}
           </Link>
@@ -258,17 +258,16 @@ export default function OnePageLearningPlayer({
 
       {active && session && !finished ? (
         <div className="mt-4">
-          <p className="text-sm font-semibold text-[#a85d4e]">
+          <p className="text-sm font-semibold text-coral-600">
             {active.lesson.title}
           </p>
-          <div className="mt-2 rounded-3xl bg-[#fffaf6] p-4 text-center shadow-[0_0_30px_-20px_rgba(87,65,45,0.35)]">
+          <div className="mt-2 rounded-3xl bg-page-soft p-4 text-center shadow-soft">
             <div className="flex h-5 justify-end gap-1.5">
-              <span className="rounded-lg border border-[#eadfd4] bg-[#fffdf9] px-2 py-0.5 text-[10px] font-semibold text-[#98a2b3]">
-                WPM <strong className="ml-0.5 text-[#667085]">{wpm}</strong>
+              <span className="rounded-lg border border-line bg-card px-2 py-0.5 text-[10px] font-semibold text-faint">
+                WPM <strong className="ml-0.5 text-muted">{wpm}</strong>
               </span>
-              <span className="rounded-lg border border-[#eadfd4] bg-[#fffdf9] px-2 py-0.5 text-[10px] font-semibold text-[#98a2b3]">
-                ACC{' '}
-                <strong className="ml-0.5 text-[#667085]">{accuracy}%</strong>
+              <span className="rounded-lg border border-line bg-card px-2 py-0.5 text-[10px] font-semibold text-faint">
+                ACC <strong className="ml-0.5 text-muted">{accuracy}%</strong>
               </span>
             </div>
             <HangulTarget
@@ -276,11 +275,11 @@ export default function OnePageLearningPlayer({
               className="mt-1 origin-center scale-120 text-4xl font-bold tracking-wide sm:text-5xl"
             />
             <div className="mx-auto mt-3 max-w-44">
-              <p className="text-[10px] font-semibold text-[#98a2b3]">
+              <p className="text-[10px] font-semibold text-faint">
                 {completedSteps} / {totalSteps} steps
               </p>
               <div
-                className="mt-1 h-1 overflow-hidden rounded-full bg-[#f2edf9]"
+                className="mt-1 h-1 overflow-hidden rounded-full bg-lavender-100"
                 role="progressbar"
                 aria-label="Typing progress"
                 aria-valuemin={0}
@@ -288,24 +287,24 @@ export default function OnePageLearningPlayer({
                 aria-valuenow={completedSteps}
               >
                 <div
-                  className="h-full rounded-full bg-[#c84f82] transition-[width] duration-150"
+                  className="h-full rounded-full bg-rose-500 transition-[width] duration-150"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
             </div>
             <div className="mt-5 grid h-9 grid-rows-2">
-              <div className="h-4 max-w-full truncate text-xs text-[#98a2b3]">
+              <div className="h-4 max-w-full truncate text-xs text-faint">
                 {meaning || (
-                  <span className="italic text-[#e4e2df]">No meaning</span>
+                  <span className="italic text-ghost">No meaning</span>
                 )}
               </div>
-              <div className="h-4 max-w-full truncate text-xs italic text-[#a293bd]">
+              <div className="h-4 max-w-full truncate text-xs italic text-lavender-500">
                 {active.exercise.romanization || (
-                  <span className="italic text-[#e4e2df]">No romanization</span>
+                  <span className="italic text-ghost">No romanization</span>
                 )}
               </div>
             </div>
-            {/* <p className="mt-4 text-xs text-[#98a2b3]">Typed: {getComposedText(session.currentSession)}</p> */}
+            {/* <p className="mt-4 text-xs text-faint">Typed: {getComposedText(session.currentSession)}</p> */}
           </div>
           <VirtualKeyboard
             nextKey={nextKey}
@@ -328,7 +327,7 @@ export default function OnePageLearningPlayer({
           />
         </div>
       ) : (
-        <div className="mt-6 rounded-3xl border border-dashed border-[#dfcfc0] bg-white/60 p-6 text-center text-sm text-[#667085]">
+        <div className="mt-6 rounded-3xl border border-dashed border-line-strong bg-surface/60 p-6 text-center text-sm text-muted">
           This course is complete. Choose another course or revisit a lesson
           below.
         </div>

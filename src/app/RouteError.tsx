@@ -25,10 +25,10 @@ export default function RouteError() {
         <h1 className="mt-4 text-xl font-bold">
           {unauthorized ? 'Unauthorized' : 'Something went wrong'}
         </h1>
-        <p className="mt-2 text-[#667085]">{message}</p>
+        <p className="mt-2 text-muted">{message}</p>
         <Link
           to="/"
-          className="mt-5 inline-block rounded-full bg-[#a85d4e] px-4 py-2 text-sm font-semibold text-white"
+          className="mt-5 inline-block rounded-full bg-primary px-4 py-2 text-sm font-semibold text-on-primary"
         >
           Back home
         </Link>

@@ -146,7 +146,7 @@ export default function ReviewTypingSession<Outcome extends object>({
     // The same body keeps the submission id, so the retry cannot count twice.
     return (
       <div className="mt-4">
-        <p className="text-sm text-[#a85d4e]">{saveError}</p>
+        <p className="text-sm text-coral-600">{saveError}</p>
         <Button
           type="button"
           className="mt-3"
@@ -164,7 +164,7 @@ export default function ReviewTypingSession<Outcome extends object>({
   }
 
   if (!session || session.status === 'completed') {
-    return <p className="mt-4 text-sm text-slate-500">Saving…</p>
+    return <p className="mt-4 text-sm text-subtle">Saving…</p>
   }
 
   const progress = getLessonProgress(session)
@@ -173,8 +173,8 @@ export default function ReviewTypingSession<Outcome extends object>({
     session.currentSession.expectedKeys[session.currentSession.keyIndex]
 
   return (
-    <div className="mt-5 rounded-3xl border border-[#eadfd4] bg-[#fffdf9] p-3 shadow-sm sm:p-5">
-      <p className="text-sm font-semibold text-[#a85d4e]">
+    <div className="mt-5 rounded-3xl border border-line bg-card p-3 shadow-sm sm:p-5">
+      <p className="text-sm font-semibold text-coral-600">
         {progress.current} / {progress.total}
       </p>
 
@@ -184,7 +184,7 @@ export default function ReviewTypingSession<Outcome extends object>({
         size="compact"
       />
 
-      {/* <p className="mt-2 text-sm text-[#667085]">Typed: {composed}</p> */}
+      {/* <p className="mt-2 text-sm text-muted">Typed: {composed}</p> */}
       {keyboardSettings.showKeyboard && (
         <>
           <VirtualKeyboard

@@ -184,7 +184,7 @@ export default function VirtualKeyboard({
 
   return (
     <div
-      className={`rounded-2xl shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)] select-none sm:p-5 ${mobileStyle ? 'mt-4 bg-[#EFE8DD] px-1 py-2 sm:mt-6 sm:bg-[#FFF8EF]' : 'mt-6 bg-[#FFF8EF] p-4'}`}
+      className={`rounded-2xl shadow-soft select-none sm:p-5 ${mobileStyle ? 'mt-4 bg-sand px-1 py-2 sm:mt-6 sm:bg-page-soft' : 'mt-6 bg-page-soft p-4'}`}
       aria-label="Virtual Korean keyboard"
       style={{ opacity }}
     >

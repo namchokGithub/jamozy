@@ -32,20 +32,20 @@ export default function CourseListPage() {
     useLoaderData() as CourseListLoaderData
 
   return (
-    <main className="flex min-h-dvh flex-col overflow-hidden bg-[#fffaf1] px-4 py-5 text-[#253247] sm:px-6 sm:py-8 select-none!">
+    <main className="flex min-h-dvh flex-col overflow-hidden bg-page px-4 py-5 text-ink sm:px-6 sm:py-8 select-none!">
       <div
         className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
         aria-hidden="true"
       >
-        <div className="absolute -left-24 top-12 h-72 w-72 rounded-full bg-[#f8d9d4]/50 blur-3xl" />
-        <div className="absolute -right-20 bottom-0 h-96 w-96 rounded-full bg-[#dce9c8]/50 blur-3xl" />
+        <div className="absolute -left-24 top-12 h-72 w-72 rounded-full bg-blush/50 blur-3xl" />
+        <div className="absolute -right-20 bottom-0 h-96 w-96 rounded-full bg-sage/50 blur-3xl" />
       </div>
 
       <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col">
         <header className="flex items-center justify-between">
           <Link
             to="/"
-            className="flex items-center gap-2.5 rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#bc6c5d]"
+            className="flex items-center gap-2.5 rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-coral-500"
           >
             <img
               src="/templates/jamozy-hanguk-180x180.png"
@@ -100,20 +100,20 @@ export default function CourseListPage() {
           </Await>
         </Suspense>
 
-        <section className="relative mt-5 overflow-hidden rounded-4xl border border-[#f0dfd1] bg-[#fffdf9] px-6 py-8 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:px-10 sm:py-11 select-none!">
+        <section className="relative mt-5 overflow-hidden rounded-4xl border border-line-soft bg-card px-6 py-8 shadow-panel sm:px-10 sm:py-11 select-none!">
           <div
-            className="absolute -right-10 -top-12 h-52 w-52 rounded-full bg-[#f5dfb7]/50"
+            className="absolute -right-10 -top-12 h-52 w-52 rounded-full bg-peach-100/50"
             aria-hidden="true"
           />
           <div className="relative max-w-xl">
-            <p className="flex items-center gap-2 text-sm font-semibold text-[#a85d4e]">
+            <p className="flex items-center gap-2 text-sm font-semibold text-coral-600">
               <Sparkles aria-hidden="true" size={16} />
               YOUR KOREAN CORNER
             </p>
-            <h1 className="mt-3 text-4xl font-bold tracking-tight text-[#253247] sm:text-5xl">
+            <h1 className="mt-3 text-4xl font-bold tracking-tight text-ink sm:text-5xl">
               Learn Hangul, at your pace.
             </h1>
-            <p className="mt-4 max-w-lg text-base leading-7 text-[#667085] sm:text-lg">
+            <p className="mt-4 max-w-lg text-base leading-7 text-muted sm:text-lg">
               A calm little space to build your Korean typing confidence, one
               lesson at a time.
             </p>
@@ -200,7 +200,7 @@ function AccountNav({
                 setDraftName(name)
                 setEditingName(true)
               }}
-              className="flex items-center gap-1 rounded-full border border-[#eadfd4] bg-white/80 px-3 py-2 text-sm shadow-sm"
+              className="flex items-center gap-1 rounded-full border border-line bg-surface/80 px-3 py-2 text-sm shadow-sm"
             >
               <span className="hidden sm:inline">{name}</span>
               <Pencil aria-hidden="true" size={14} />
@@ -233,9 +233,9 @@ function AccountNav({
               aria-haspopup="menu"
               aria-expanded={userMenuOpen}
               onClick={() => setUserMenuOpen((open) => !open)}
-              className="flex items-center gap-2 rounded-full border border-[#eadfd4] bg-white/80 px-3 py-2 text-sm font-medium text-[#39465b] shadow-sm transition hover:border-[#d8b3a9] hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bc6c5d]"
+              className="flex items-center gap-2 rounded-full border border-line bg-surface/80 px-3 py-2 text-sm font-medium text-ink-soft shadow-sm transition hover:border-line-hover hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
             >
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#f2edf9] text-[#7863a8]">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-lavender-100 text-lavender-600">
                 <UserRound aria-hidden="true" size={13} />
               </span>
               <span className="hidden max-w-32 truncate sm:inline">{name}</span>
@@ -248,13 +248,13 @@ function AccountNav({
             {userMenuOpen && (
               <div
                 role="menu"
-                className="absolute right-0 top-full z-20 mt-2 w-36 rounded-2xl border border-[#eadfd4] bg-[#fffdf9] p-1.5 shadow-[0_14px_28px_-16px_rgba(54,41,31,0.45)]"
+                className="absolute right-0 top-full z-20 mt-2 w-36 rounded-2xl border border-line bg-card p-1.5 shadow-popover"
               >
                 <Link
                   to="/profile"
                   role="menuitem"
                   onClick={() => setUserMenuOpen(false)}
-                  className="flex rounded-xl px-3 py-2 text-sm font-medium text-[#39465b] transition hover:bg-[#f7f0e8] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#bc6c5d]"
+                  className="flex rounded-xl px-3 py-2 text-sm font-medium text-ink-soft transition hover:bg-sand focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-coral-500"
                 >
                   Profile
                 </Link>
@@ -262,7 +262,7 @@ function AccountNav({
                   to="/review"
                   role="menuitem"
                   onClick={() => setUserMenuOpen(false)}
-                  className="flex rounded-xl px-3 py-2 text-sm font-medium text-[#39465b] transition hover:bg-[#f7f0e8] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#bc6c5d]"
+                  className="flex rounded-xl px-3 py-2 text-sm font-medium text-ink-soft transition hover:bg-sand focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-coral-500"
                 >
                   Review
                 </Link>
@@ -277,7 +277,7 @@ function AccountNav({
                       { method: 'post', encType: 'application/json' },
                     )
                   }}
-                  className="flex w-full rounded-xl px-3 py-2 text-left text-sm text-[#8b6b62] transition hover:bg-[#fff1e8] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#bc6c5d]"
+                  className="flex w-full rounded-xl px-3 py-2 text-left text-sm text-coral-700 transition hover:bg-coral-50 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-coral-500"
                 >
                   Sign out
                 </button>
@@ -289,7 +289,7 @@ function AccountNav({
           <Link
             to="/profile"
             aria-label="Profile"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-[#eadfd4] bg-white/80 text-[#596579] shadow-sm transition hover:-translate-y-0.5 hover:border-[#d8b3a9] hover:text-[#8d4c43] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bc6c5d]"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface/80 text-ink-muted shadow-sm transition hover:-translate-y-0.5 hover:border-line-hover hover:text-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
           >
             <UserRound aria-hidden="true" size={18} />
           </Link>
@@ -297,7 +297,7 @@ function AccountNav({
         <Link
           to="/settings"
           aria-label="Settings"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-[#eadfd4] bg-white/80 text-[#596579] shadow-sm transition hover:-translate-y-0.5 hover:border-[#d8b3a9] hover:text-[#8d4c43] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bc6c5d]"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface/80 text-ink-muted shadow-sm transition hover:-translate-y-0.5 hover:border-line-hover hover:text-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
         >
           <Settings aria-hidden="true" size={18} />
         </Link>
@@ -310,8 +310,8 @@ function AccountNav({
 function AccountNavPlaceholder() {
   return (
     <div className="flex gap-2" aria-hidden="true">
-      <div className="h-10 w-24 animate-pulse rounded-full bg-[#f2edf9]" />
-      <div className="h-10 w-10 animate-pulse rounded-full bg-[#f2edf9]" />
+      <div className="h-10 w-24 animate-pulse rounded-full bg-lavender-100" />
+      <div className="h-10 w-10 animate-pulse rounded-full bg-lavender-100" />
     </div>
   )
 }
@@ -328,10 +328,10 @@ function LearningPathSection({
       {dueReviewCount > 0 && (
         <Link
           to="/review"
-          className="mt-5 flex items-center justify-between gap-4 rounded-2xl border border-[#f1d5af] bg-[#fff1dc] px-5 py-4 text-[#7f5632] transition hover:-translate-y-0.5 hover:bg-[#ffe9c7] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bc6c5d]"
+          className="mt-5 flex items-center justify-between gap-4 rounded-2xl border border-peach-100 bg-peach-50 px-5 py-4 text-peach-700 transition hover:-translate-y-0.5 hover:bg-peach-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
         >
           <span className="flex items-center gap-3 text-sm font-semibold select-none!">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/70">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-surface/70">
               <BookOpen aria-hidden="true" size={18} />
             </span>
             {dueReviewCount} words due for review · ready when you are
@@ -346,35 +346,35 @@ function LearningPathSection({
       >
         <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-[#a85d4e]">
+            <p className="text-sm font-semibold text-coral-600">
               START WHERE YOU ARE
             </p>
             <h2
               id="learning-path-heading"
-              className="mt-1 text-2xl font-bold tracking-tight text-[#253247]"
+              className="mt-1 text-2xl font-bold tracking-tight text-ink"
             >
               Your learning path
             </h2>
           </div>
           {courses.length > 0 && (
-            <span className="rounded-full bg-white/70 px-3 py-1.5 text-sm font-medium text-[#667085]">
+            <span className="rounded-full bg-surface/70 px-3 py-1.5 text-sm font-medium text-muted">
               {courses.length} {courses.length === 1 ? 'course' : 'courses'}
             </span>
           )}
         </div>
 
         {courses.length === 0 ? (
-          <div className="mt-5 rounded-3xl border border-dashed border-[#dfcfc0] bg-white/60 px-6 py-10 text-center">
+          <div className="mt-5 rounded-3xl border border-dashed border-line-strong bg-surface/60 px-6 py-10 text-center">
             <Flower2
-              className="mx-auto text-[#c98578]"
+              className="mx-auto text-coral-300"
               aria-hidden="true"
               size={28}
             />
-            <p className="mt-3 font-semibold text-[#39465b]">
+            <p className="mt-3 font-semibold text-ink-soft">
               Your courses will bloom here.
             </p>
-            <p className="mt-1 text-sm text-[#667085]">No courses yet.</p>
-            <p className="mt-1 text-sm text-[#667085]">
+            <p className="mt-1 text-sm text-muted">No courses yet.</p>
+            <p className="mt-1 text-sm text-muted">
               Check back soon for your next lesson.
             </p>
           </div>
@@ -384,25 +384,25 @@ function LearningPathSection({
               <li key={course.id}>
                 <Link
                   to={`/courses/${course.id}`}
-                  className="group flex h-full min-h-48 flex-col rounded-3xl border border-[#eadfd4] bg-white/85 p-6 shadow-[0_14px_35px_-28px_rgba(54,41,31,0.7)] transition duration-200 hover:-translate-y-1 hover:border-[#d6aa9f] hover:shadow-[0_20px_35px_-24px_rgba(145,93,76,0.45)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#bc6c5d]"
+                  className="group flex h-full min-h-48 flex-col rounded-3xl border border-line bg-card/85 p-6 shadow-card transition duration-200 hover:-translate-y-1 hover:border-line-hover hover:shadow-[0_20px_35px_-24px_rgba(145,93,76,0.45)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-coral-500"
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e9e1f8] text-[#7863a8]">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-lavender-200 text-lavender-600">
                       <span className="text-sm font-bold">
                         {String(index + 1).padStart(2, '0')}
                       </span>
                     </span>
                     <ArrowUpRight
-                      className="text-[#a7a0a0] transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#a85d4e]"
+                      className="text-faint transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-coral-600"
                       aria-hidden="true"
                       size={20}
                     />
                   </div>
                   <div className="mt-auto pt-8">
-                    <h3 className="text-xl font-bold tracking-tight text-[#253247]">
+                    <h3 className="text-xl font-bold tracking-tight text-ink">
                       {course.title}
                     </h3>
-                    <p className="mt-2 text-sm leading-6 text-[#667085]">
+                    <p className="mt-2 text-sm leading-6 text-muted">
                       {course.description}
                     </p>
                   </div>
@@ -422,8 +422,8 @@ function LearningPathPlaceholder() {
       className="mt-10 grid gap-4 sm:grid-cols-2 select-none!"
       aria-hidden="true"
     >
-      <div className="h-48 animate-pulse rounded-3xl bg-white/70" />
-      <div className="h-48 animate-pulse rounded-3xl bg-white/70" />
+      <div className="h-48 animate-pulse rounded-3xl bg-surface/70" />
+      <div className="h-48 animate-pulse rounded-3xl bg-surface/70" />
     </div>
   )
 }

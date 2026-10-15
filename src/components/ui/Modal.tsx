@@ -50,7 +50,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-[#253247]/30 p-4"
+      className="fixed inset-0 z-50 grid place-items-center bg-ink/30 p-4"
       onClick={onClose}
     >
       <section
@@ -59,13 +59,13 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={`w-full ${sizeClassName} rounded-3xl border border-[#eadfd4] bg-[#fffdf9] p-6 shadow-[0_24px_60px_-30px_rgba(54,41,31,0.5)]`}
+        className={`w-full ${sizeClassName} rounded-3xl border border-line bg-card p-6 shadow-popover`}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4">
           <h2
             id={titleId}
-            className="text-xl font-bold tracking-tight text-[#253247]"
+            className="text-xl font-bold tracking-tight text-ink"
           >
             {title}
           </h2>

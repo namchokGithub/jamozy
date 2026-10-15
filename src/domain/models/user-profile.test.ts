@@ -220,6 +220,15 @@ describe('userSettingsSchema', () => {
     ).toThrow()
   })
 
+  it.each(['light', 'dark', 'system'] as const)(
+    'accepts the %s theme',
+    (theme) => {
+      expect(() =>
+        userSettingsSchema.parse({ ...makeValidSettings(), theme }),
+      ).not.toThrow()
+    },
+  )
+
   it('rejects an invalid theme value', () => {
     expect(() =>
       userSettingsSchema.parse({ ...makeValidSettings(), theme: 'blue' }),

@@ -13,7 +13,8 @@ export interface UserSettings {
   keyboardOpacity: number
   romanizationEnabled: boolean
   meaningLanguage: 'th' | 'en' | 'both'
-  theme: 'light' | 'dark'
+  // `system` follows the device's light or dark preference.
+  theme: 'light' | 'dark' | 'system'
 }
 
 export interface UserStats {
@@ -171,12 +172,15 @@ export const userSettingsSchema = z.object({
   keyboardOpacity: z.number().min(0).max(1),
   romanizationEnabled: z.boolean(),
   meaningLanguage: z.enum(['th', 'en', 'both']),
-  theme: z.enum(['light', 'dark']),
+  theme: z.enum(['light', 'dark', 'system']),
 })
 
 export function normalizeUserSettings(
   settings: Omit<UserSettings, 'keyboardSoundPack'> &
     Partial<Pick<UserSettings, 'keyboardSoundPack'>>,
 ): UserSettings {
-  return { ...settings, keyboardSoundPack: settings.keyboardSoundPack ?? 'turquoise' }
+  return {
+    ...settings,
+    keyboardSoundPack: settings.keyboardSoundPack ?? 'turquoise',
+  }
 }

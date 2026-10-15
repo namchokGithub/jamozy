@@ -46,12 +46,16 @@ function renderPage(
 
 describe('SettingsPage', () => {
   it('renders every field seeded from the loaded settings', async () => {
-    renderPage(makeSettings({ theme: 'dark', meaningLanguage: 'th', keyboardSoundPack: 'mxblack' }))
+    renderPage(
+      makeSettings({
+        theme: 'dark',
+        meaningLanguage: 'th',
+        keyboardSoundPack: 'mxblack',
+      }),
+    )
 
     expect(await screen.findByLabelText('Sound')).toBeChecked()
-    expect(
-      screen.getByRole('button', { name: 'Theme: Dark' }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /Dark/ })).toBeChecked()
     expect(
       screen.getByRole('button', { name: 'Meaning language: Thai' }),
     ).toBeInTheDocument()
@@ -63,17 +67,17 @@ describe('SettingsPage', () => {
   it('shows sound packs in the specified order and submits the selected pack', async () => {
     let submitted: UserSettings | undefined
     renderPage(makeSettings(), async ({ request }) => {
-      submitted = await request.json() as UserSettings
+      submitted = (await request.json()) as UserSettings
       return submitted
     })
 
-    const trigger = await screen.findByRole('button', { name: 'Keyboard sound: Turquoise Tealio' })
+    const trigger = await screen.findByRole('button', {
+      name: 'Keyboard sound: Turquoise Tealio',
+    })
     fireEvent.click(trigger)
-    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
-      'Turquoise Tealio',
-      'Cherry MX Blacks',
-      'Cherry MX Blues',
-    ])
+    expect(
+      screen.getAllByRole('option').map((option) => option.textContent),
+    ).toEqual(['Turquoise Tealio', 'Cherry MX Blacks', 'Cherry MX Blues'])
 
     fireEvent.click(screen.getByRole('option', { name: 'Cherry MX Blues' }))
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))

@@ -41,15 +41,30 @@ export type GuideInspectionMode =
 
 const TILE_SIZE = 104
 const HORIZONTAL_VOWELS = new Set(['ㅗ', 'ㅛ', 'ㅜ', 'ㅠ', 'ㅡ'])
-const COLORS = {
+const FALLBACK_COLORS = {
   correct: '#20b981',
   current: '#c84f82',
   pending: '#c7c3bc',
 }
-const COLOR_CHANNELS = {
-  correct: [32, 185, 129],
-  current: [200, 79, 130],
-  pending: [199, 195, 188],
+type GlyphColor = keyof typeof FALLBACK_COLORS
+
+// Canvas cannot use CSS variables, so the theme's glyph colors are read at
+// draw time; a theme change shows on the next redraw.
+function glyphColors(): Record<GlyphColor, string> {
+  const style = getComputedStyle(document.documentElement)
+  const read = (name: GlyphColor) =>
+    style.getPropertyValue(`--color-glyph-${name}`).trim() ||
+    FALLBACK_COLORS[name]
+  return {
+    correct: read('correct'),
+    current: read('current'),
+    pending: read('pending'),
+  }
+}
+
+function colorChannels(hex: string): number[] {
+  const value = Number.parseInt(hex.replace('#', ''), 16)
+  return [(value >> 16) & 255, (value >> 8) & 255, value & 255]
 }
 
 function colorFor(index: number, keyIndex: number) {
@@ -356,6 +371,7 @@ function drawGuideRaster(
     overlappingPixels: 0,
     fallbackPixels: 0,
   }
+  const colors = glyphColors()
   for (let y = bounds.top; y < bounds.top + bounds.height; y += 1) {
     for (let x = bounds.left; x < bounds.left + bounds.width; x += 1) {
       const offset = (y * backingSize + x) * 4
@@ -379,8 +395,9 @@ function drawGuideRaster(
           sourcePixels.data[offset + 2],
         ]
       } else if (mode === 'colored') {
-        channels =
-          COLOR_CHANNELS[colorFor(keys[ownership.step.order].index, keyIndex)]
+        channels = colorChannels(
+          colors[colorFor(keys[ownership.step.order].index, keyIndex)],
+        )
       } else if (mode === 'ownership') {
         channels =
           ownership.ownerCount > 1
@@ -445,8 +462,9 @@ function drawFallback(
   keyIndex: number,
   placement: { x: number; y: number },
 ) {
-  const paint = (color: keyof typeof COLORS) => {
-    context.fillStyle = COLORS[color]
+  const colors = glyphColors()
+  const paint = (color: GlyphColor) => {
+    context.fillStyle = colors[color]
     context.fillText(glyph, placement.x, placement.y)
   }
   paint('pending')
@@ -563,7 +581,7 @@ function SyllableCanvas({
       ref={canvasRef}
       width={TILE_SIZE}
       height={TILE_SIZE}
-      className={`${HANGUL_TARGET_SIZES[size].tile} rounded-md border border-[#D9CFF5] bg-[#FFFCF7] shadow-[0_0_24px_-16px_rgba(87,65,45,0.35)]`}
+      className={`${HANGUL_TARGET_SIZES[size].tile} rounded-md border border-lavender-300 bg-page-soft shadow-soft`}
       aria-hidden="true"
     />
   )

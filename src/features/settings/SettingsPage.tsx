@@ -9,20 +9,21 @@ import { Dropdown } from '../../components/ui/Dropdown'
 import { PageNav } from '../../components/ui/PageNav'
 import { PageSurface } from '../../components/ui/PageSurface'
 import { useSnackbar } from '../../components/ui/SnackbarProvider'
+import { applyTheme } from './apply-theme'
 
 // Pastel accents follow Home: only icons and switches carry a section's color.
 const accents = {
   coral: {
-    icon: 'bg-[#fde5e1] text-[#a85d4e]',
-    switchOn: 'peer-checked:bg-[#c97a6b]',
+    icon: 'bg-coral-100 text-coral-600',
+    switchOn: 'peer-checked:bg-coral-400',
   },
   mint: {
-    icon: 'bg-[#ddf5e9] text-[#2f7a62]',
-    switchOn: 'peer-checked:bg-[#5fae94]',
+    icon: 'bg-mint-100 text-mint-700',
+    switchOn: 'peer-checked:bg-mint-500',
   },
   lavender: {
-    icon: 'bg-[#f2edf9] text-[#7863a8]',
-    switchOn: 'peer-checked:bg-[#9d8bc8]',
+    icon: 'bg-lavender-100 text-lavender-600',
+    switchOn: 'peer-checked:bg-lavender-500',
   },
 }
 
@@ -41,15 +42,21 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<UserSettings>(loadedSettings)
   const wasInFlight = useRef(false)
 
+  // The saved theme also reaches this device when Settings opens.
+  useEffect(() => {
+    applyTheme(loadedSettings.theme)
+  }, [loadedSettings.theme])
+
   useEffect(() => {
     if (wasInFlight.current && fetcher.state === 'idle' && fetcher.data) {
       if (isSaveError(fetcher.data)) showError(fetcher.data.error)
       else {
+        applyTheme(settings.theme)
         showSuccess('Settings saved')
       }
     }
     wasInFlight.current = fetcher.state !== 'idle'
-  }, [fetcher.state, fetcher.data, showError, showSuccess])
+  }, [fetcher.state, fetcher.data, settings.theme, showError, showSuccess])
 
   function update<K extends keyof UserSettings>(
     key: K,
@@ -62,15 +69,15 @@ export default function SettingsPage() {
     <PageSurface contentClassName="max-w-5xl">
       <PageNav backTo="/" backLabel="Home" />
       <header>
-        <p className="text-sm font-semibold text-[#a85d4e]">MAKE IT YOURS</p>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight text-[#253247]">
+        <p className="text-sm font-semibold text-coral-600">MAKE IT YOURS</p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight text-ink">
           Settings
         </h1>
-        <p className="mt-1 text-sm leading-6 text-[#667085]">
+        <p className="mt-1 text-sm leading-6 text-muted">
           Choose a calm setup that helps you focus on your next character.
         </p>
       </header>
-      <div className="mt-5 divide-y divide-[#f0e6dc] rounded-4xl border border-[#eadfd4] bg-[#fffdf9] px-5 shadow-[0_20px_55px_-35px_rgba(87,65,45,0.45)] sm:px-7">
+      <div className="mt-5 divide-y divide-line-soft rounded-4xl border border-line bg-card px-5 shadow-panel sm:px-7">
         <SettingsSection
           icon={<Volume2 aria-hidden="true" size={18} />}
           accent="coral"
@@ -137,19 +144,12 @@ export default function SettingsPage() {
           icon={<SlidersHorizontal aria-hidden="true" size={18} />}
           accent="lavender"
           title="Appearance"
-          description="Light theme is styled for gentle, focused practice."
+          description="Pick a calm look, or let Jamozy follow your device."
         >
-          <DropdownRow>
-            <Dropdown
-              label="Theme"
-              value={settings.theme}
-              onChange={(value) => update('theme', value)}
-              options={[
-                { value: 'light', label: 'Light' },
-                { value: 'dark', label: 'Dark' },
-              ]}
-            />
-          </DropdownRow>
+          <ThemeChoice
+            value={settings.theme}
+            onChange={(value) => update('theme', value)}
+          />
         </SettingsSection>
       </div>
       <div className="mt-6 flex justify-end">
@@ -189,12 +189,65 @@ function SettingsSection({
           {icon}
         </span>
         <div>
-          <h2 className="font-bold text-[#253247]">{title}</h2>
-          <p className="text-sm text-[#667085]">{description}</p>
+          <h2 className="font-bold text-ink">{title}</h2>
+          <p className="text-sm text-muted">{description}</p>
         </div>
       </div>
       <div className="mt-5 space-y-4 sm:pl-12">{children}</div>
     </section>
+  )
+}
+
+const themeOptions: {
+  value: UserSettings['theme']
+  label: string
+  hint: string
+}[] = [
+  { value: 'light', label: 'Light', hint: 'Cream and warm white' },
+  { value: 'dark', label: 'Dark', hint: 'Warm charcoal' },
+  { value: 'system', label: 'System', hint: 'Match this device' },
+]
+
+function ThemeChoice({
+  value,
+  onChange,
+}: {
+  value: UserSettings['theme']
+  onChange: (value: UserSettings['theme']) => void
+}) {
+  return (
+    <fieldset>
+      <legend className="text-sm font-semibold text-ink-soft">Theme</legend>
+      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        {themeOptions.map((option) => (
+          <label
+            key={option.value}
+            className="flex cursor-pointer items-center gap-3 rounded-2xl border border-line bg-surface/80 px-4 py-3 transition hover:border-lavender-400 has-checked:border-lavender-500 has-checked:bg-lavender-100 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-coral-500"
+          >
+            <input
+              type="radio"
+              name="theme"
+              value={option.value}
+              checked={value === option.value}
+              onChange={() => onChange(option.value)}
+              className="peer sr-only"
+            />
+            <span
+              aria-hidden="true"
+              className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-line-strong peer-checked:border-lavender-600 peer-checked:[&>span]:scale-100"
+            >
+              <span className="h-2 w-2 scale-0 rounded-full bg-lavender-600 transition-transform" />
+            </span>
+            <span>
+              <span className="block text-sm font-semibold text-ink">
+                {option.label}
+              </span>
+              <span className="block text-xs text-muted">{option.hint}</span>
+            </span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
   )
 }
 
@@ -219,7 +272,7 @@ function Switch({
   onChange: (value: boolean) => void
 }) {
   return (
-    <label className="flex cursor-pointer items-center justify-between gap-4 text-sm font-semibold text-[#39465b]">
+    <label className="flex cursor-pointer items-center justify-between gap-4 text-sm font-semibold text-ink-soft">
       <span>{label}</span>
       <span className="relative inline-flex shrink-0">
         <input
@@ -232,7 +285,7 @@ function Switch({
         />
         <span
           aria-hidden="true"
-          className={`h-6 w-11 rounded-full bg-[#e4ddd4] transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#bc6c5d] ${accents[accent].switchOn}`}
+          className={`h-6 w-11 rounded-full bg-line transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral-500 ${accents[accent].switchOn}`}
         />
         <span
           aria-hidden="true"

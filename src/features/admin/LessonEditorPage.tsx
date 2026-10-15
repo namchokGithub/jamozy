@@ -43,17 +43,18 @@ export default function LessonEditorPage() {
   const [exerciseSearch, setExerciseSearch] = useState('')
   const [difficultyFilter, setDifficultyFilter] = useState('all')
   const [editingDetails, setEditingDetails] = useState(false)
-  const [editingExerciseId, setEditingExerciseId] = useState<string | null>(
-    null,
-  )
+  // The exercise open in the add/edit modal. Edits stay in this draft until
+  // it is saved, so Cancel only has to close the modal.
+  const [draft, setDraft] = useState<{
+    exercise: LessonExercise
+    isNew: boolean
+  } | null>(null)
+  const [draftError, setDraftError] = useState<string | null>(null)
   const [previewExerciseId, setPreviewExerciseId] = useState<string | null>(
     null,
   )
   const [hasPendingExerciseOrder, setHasPendingExerciseOrder] = useState(false)
   const [titleError, setTitleError] = useState<string | null>(null)
-  const [exerciseErrors, setExerciseErrors] = useState<Record<string, string>>(
-    {},
-  )
   const [xlsxImport, setXlsxImport] = useState<LessonXlsxImportResult | null>(
     null,
   )
@@ -88,30 +89,27 @@ export default function LessonEditorPage() {
         setType(lesson.type)
         setExercises(lesson.exercises)
         setEditingDetails(false)
-        setEditingExerciseId(null)
+        setDraft(null)
         setHasPendingExerciseOrder(false)
       }
     },
     [lesson],
   )
   useAdminFeedback(fetcher, handleSuccess)
-  const validate = () => {
-    const firstInvalidExercise = exercises.find(
+  const validate = (items: LessonExercise[]) => {
+    const firstInvalidExercise = items.find(
       (exercise) => !exercise.targetText.trim(),
-    )
-    const nextExerciseErrors = Object.fromEntries(
-      exercises
-        .filter((exercise) => !exercise.targetText.trim())
-        .map((exercise) => [exercise.id, t('error.fieldRequired')]),
     )
     const nextTitleError = title.trim() ? null : t('error.fieldRequired')
     setTitleError(nextTitleError)
-    setExerciseErrors(nextExerciseErrors)
-    if (firstInvalidExercise) setEditingExerciseId(firstInvalidExercise.id)
-    return !nextTitleError && Object.keys(nextExerciseErrors).length === 0
+    if (firstInvalidExercise) {
+      setDraft({ exercise: firstInvalidExercise, isNew: false })
+      setDraftError(t('error.fieldRequired'))
+    }
+    return !nextTitleError && !firstInvalidExercise
   }
-  const submit = (intent: string) => {
-    if (isPending || (intent === 'save' && !validate())) return
+  const submit = (intent: string, items: LessonExercise[] = exercises) => {
+    if (isPending || (intent === 'save' && !validate(items))) return
     fetcher.submit(
       {
         intent,
@@ -119,7 +117,7 @@ export default function LessonEditorPage() {
         id: lesson.id,
         title,
         type,
-        exercises: JSON.stringify(exercises),
+        exercises: JSON.stringify(items),
       },
       { method: 'post' },
     )
@@ -142,18 +140,51 @@ export default function LessonEditorPage() {
     const bytes = await file.arrayBuffer()
     setXlsxImport(parseLessonExerciseWorkbook(bytes, () => crypto.randomUUID()))
   }
-  const update = (index: number, field: keyof LessonExercise, value: string) =>
-    setExercises((items) =>
-      items.map((item, current) =>
-        current === index
-          ? {
-              ...item,
-              [field]:
-                value ||
-                (field === 'romanization' || field === 'hint' ? null : value),
-            }
-          : item,
-      ),
+  const openDraft = (exercise: LessonExercise, isNew: boolean) => {
+    setDraft({ exercise, isNew })
+    setDraftError(null)
+  }
+  const closeDraft = () => {
+    if (isPending) return
+    setDraft(null)
+    setDraftError(null)
+  }
+  const updateDraft = (field: keyof LessonExercise, value: string) => {
+    if (field === 'targetText') setDraftError(null)
+    setDraft(
+      (current) =>
+        current && {
+          ...current,
+          exercise: {
+            ...current.exercise,
+            [field]:
+              value ||
+              (field === 'romanization' || field === 'hint' ? null : value),
+          },
+        },
+    )
+  }
+  // Puts the draft into the list and saves the Lesson, like the earlier
+  // inline Save; other unsaved edits on the page are saved with it.
+  const saveDraft = () => {
+    if (!draft || isPending) return
+    if (!draft.exercise.targetText.trim()) {
+      setDraftError(t('error.fieldRequired'))
+      return
+    }
+    const next = exercises.some(({ id }) => id === draft.exercise.id)
+      ? exercises.map((exercise) =>
+          exercise.id === draft.exercise.id ? draft.exercise : exercise,
+        )
+      : [...exercises, draft.exercise]
+    setExercises(next)
+    submit('save', next)
+  }
+  const draftSaved = exercises.find(({ id }) => id === draft?.exercise.id)
+  const draftChanged =
+    !draftSaved ||
+    (Object.keys(draftSaved) as (keyof LessonExercise)[]).some(
+      (key) => draftSaved[key] !== draft?.exercise[key],
     )
   const moveExercise = (activeId: string, targetId: string) => {
     setExercises((items) => {
@@ -171,19 +202,6 @@ export default function LessonEditorPage() {
       setHasPendingExerciseOrder(true)
       return next
     })
-  }
-  const cancelExercise = (exerciseId: string) => {
-    const original = lesson.exercises.find(
-      (exercise) => exercise.id === exerciseId,
-    )
-    setExercises((items) =>
-      original
-        ? items.map((exercise) =>
-            exercise.id === exerciseId ? original : exercise,
-          )
-        : items.filter((exercise) => exercise.id !== exerciseId),
-    )
-    setEditingExerciseId(null)
   }
   const difficultyCounts = exercises.reduce(
     (counts, exercise) => {
@@ -305,6 +323,136 @@ export default function LessonEditorPage() {
               </Button>
             </div>
           </div>
+        )}
+      </Modal>
+      <Modal
+        open={Boolean(draft)}
+        title={
+          draft?.isNew ? t('action.addExercise') : t('action.editExercise')
+        }
+        sizeClassName="max-w-2xl"
+        onClose={closeDraft}
+      >
+        {draft && (
+          <form
+            className="mt-5 grid gap-5"
+            onSubmit={(event) => {
+              event.preventDefault()
+              saveDraft()
+            }}
+          >
+            <fieldset className="grid gap-3">
+              <legend className="text-sm font-bold text-[#39465b]">
+                {t('lesson.exerciseContent')}
+              </legend>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="grid gap-1 text-sm font-semibold">
+                  <span>
+                    {t('field.targetText')}{' '}
+                    <span aria-hidden="true" className="text-[#a85d4e]">
+                      *
+                    </span>
+                  </span>
+                  <input
+                    value={draft.exercise.targetText}
+                    aria-invalid={Boolean(draftError)}
+                    aria-required="true"
+                    autoFocus
+                    onChange={(event) =>
+                      updateDraft('targetText', event.target.value)
+                    }
+                    disabled={isPending}
+                    className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
+                  />
+                  {draftError && (
+                    <p className="text-sm font-normal text-[#a85d4e]">
+                      {draftError}
+                    </p>
+                  )}
+                </label>
+                <label className="grid gap-1 text-sm font-semibold">
+                  {t('field.romanization')}
+                  <input
+                    value={draft.exercise.romanization ?? ''}
+                    onChange={(event) =>
+                      updateDraft('romanization', event.target.value)
+                    }
+                    disabled={isPending}
+                    className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
+                  />
+                </label>
+              </div>
+            </fieldset>
+            <fieldset className="grid gap-3">
+              <legend className="text-sm font-bold text-[#39465b]">
+                {t('lesson.exerciseTranslation')}
+              </legend>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="grid gap-1 text-sm font-semibold">
+                  {t('field.meaningTh')}
+                  <input
+                    value={draft.exercise.meaningTh}
+                    onChange={(event) =>
+                      updateDraft('meaningTh', event.target.value)
+                    }
+                    disabled={isPending}
+                    className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
+                  />
+                </label>
+                <label className="grid gap-1 text-sm font-semibold">
+                  {t('field.meaningEn')}
+                  <input
+                    value={draft.exercise.meaningEn}
+                    onChange={(event) =>
+                      updateDraft('meaningEn', event.target.value)
+                    }
+                    disabled={isPending}
+                    className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
+                  />
+                </label>
+              </div>
+            </fieldset>
+            <fieldset className="grid gap-3">
+              <legend className="text-sm font-bold text-[#39465b]">
+                {t('lesson.exerciseMetadata')}
+              </legend>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Dropdown
+                  label={t('field.difficulty')}
+                  value={draft.exercise.difficulty}
+                  onChange={(value) => updateDraft('difficulty', value)}
+                  disabled={isPending}
+                  options={difficulties.map((value) => ({
+                    value,
+                    label: t(`difficulty.${value}`),
+                  }))}
+                />
+                <label className="grid gap-1 text-sm font-semibold">
+                  {t('field.hint')}
+                  <input
+                    value={draft.exercise.hint ?? ''}
+                    onChange={(event) =>
+                      updateDraft('hint', event.target.value)
+                    }
+                    disabled={isPending}
+                    className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
+                  />
+                </label>
+              </div>
+            </fieldset>
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button
+                variant="secondary"
+                disabled={isPending}
+                onClick={closeDraft}
+              >
+                {t('action.cancel')}
+              </Button>
+              <Button type="submit" disabled={isPending || !draftChanged}>
+                {isPending ? t('action.saving') : t('action.saveChanges')}
+              </Button>
+            </div>
+          </form>
         )}
       </Modal>
       <AdminTopBar
@@ -443,9 +591,7 @@ export default function LessonEditorPage() {
             <Button
               disabled={isPending}
               onClick={() => {
-                const exercise = makeExercise(crypto.randomUUID())
-                setExercises((items) => [...items, exercise])
-                setEditingExerciseId(exercise.id)
+                openDraft(makeExercise(crypto.randomUUID()), true)
               }}
             >
               {t('action.addExercise')}
@@ -532,7 +678,6 @@ export default function LessonEditorPage() {
               disabled={isPending}
               onClick={() => {
                 setExercises(lesson.exercises)
-                setEditingExerciseId(null)
                 setHasPendingExerciseOrder(false)
               }}
             >
@@ -580,153 +725,26 @@ export default function LessonEditorPage() {
                     <Button
                       variant="secondary"
                       disabled={isPending}
-                      onClick={() => setEditingExerciseId(exercise.id)}
+                      onClick={() => openDraft(exercise, false)}
                     >
                       {t('action.editExercise')}
                     </Button>
                   </div>
                 </div>
-                {editingExerciseId === exercise.id ? (
-                  <div className="grid gap-5">
-                    <fieldset className="grid gap-3">
-                      <legend className="text-sm font-bold text-[#39465b]">
-                        {t('lesson.exerciseContent')}
-                      </legend>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <label className="grid gap-1 text-sm font-semibold">
-                          <span>
-                            {t('field.targetText')}{' '}
-                            <span aria-hidden="true" className="text-[#a85d4e]">
-                              *
-                            </span>
-                          </span>
-                          <input
-                            value={exercise.targetText}
-                            aria-invalid={Boolean(exerciseErrors[exercise.id])}
-                            aria-required="true"
-                            onChange={(event) => {
-                              update(index, 'targetText', event.target.value)
-                              setExerciseErrors((errors) => {
-                                const next = { ...errors }
-                                delete next[exercise.id]
-                                return next
-                              })
-                            }}
-                            disabled={isPending}
-                            className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
-                          />
-                          {exerciseErrors[exercise.id] && (
-                            <p className="text-sm font-normal text-[#a85d4e]">
-                              {exerciseErrors[exercise.id]}
-                            </p>
-                          )}
-                        </label>
-                        <label className="grid gap-1 text-sm font-semibold">
-                          {t('field.romanization')}
-                          <input
-                            value={exercise.romanization ?? ''}
-                            onChange={(event) =>
-                              update(index, 'romanization', event.target.value)
-                            }
-                            disabled={isPending}
-                            className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
-                          />
-                        </label>
-                      </div>
-                    </fieldset>
-                    <fieldset className="grid gap-3">
-                      <legend className="text-sm font-bold text-[#39465b]">
-                        {t('lesson.exerciseTranslation')}
-                      </legend>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <label className="grid gap-1 text-sm font-semibold">
-                          {t('field.meaningTh')}
-                          <input
-                            value={exercise.meaningTh}
-                            onChange={(event) =>
-                              update(index, 'meaningTh', event.target.value)
-                            }
-                            disabled={isPending}
-                            className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
-                          />
-                        </label>
-                        <label className="grid gap-1 text-sm font-semibold">
-                          {t('field.meaningEn')}
-                          <input
-                            value={exercise.meaningEn}
-                            onChange={(event) =>
-                              update(index, 'meaningEn', event.target.value)
-                            }
-                            disabled={isPending}
-                            className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
-                          />
-                        </label>
-                      </div>
-                    </fieldset>
-                    <fieldset className="grid gap-3">
-                      <legend className="text-sm font-bold text-[#39465b]">
-                        {t('lesson.exerciseMetadata')}
-                      </legend>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <Dropdown
-                          label={t('field.difficulty')}
-                          value={exercise.difficulty}
-                          onChange={(value) =>
-                            update(index, 'difficulty', value)
-                          }
-                          disabled={isPending}
-                          options={difficulties.map((value) => ({
-                            value,
-                            label: t(`difficulty.${value}`),
-                          }))}
-                        />
-                        <label className="grid gap-1 text-sm font-semibold">
-                          {t('field.hint')}
-                          <input
-                            value={exercise.hint ?? ''}
-                            onChange={(event) =>
-                              update(index, 'hint', event.target.value)
-                            }
-                            disabled={isPending}
-                            className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
-                          />
-                        </label>
-                      </div>
-                    </fieldset>
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        disabled={isPending || !hasUnsavedChanges}
-                        onClick={() => submit('save')}
-                      >
-                        {isPending
-                          ? t('action.saving')
-                          : t('action.saveChanges')}
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        disabled={isPending}
-                        onClick={() => cancelExercise(exercise.id)}
-                      >
-                        {t('action.cancel')}
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-1 text-sm text-[#667085]">
-                    <p className="font-semibold text-[#39465b]">
-                      {exercise.targetText || t('lesson.untitledExercise')}
-                    </p>
-                    <p>
-                      {exercise.romanization ?? t('lesson.noRomanization')} ·{' '}
-                      {t(`difficulty.${exercise.difficulty}`)}
-                    </p>
-                    <p>
-                      {exercise.meaningTh ||
-                        exercise.meaningEn ||
-                        t('lesson.noMeaning')}
-                    </p>
-                  </div>
-                )}
+                <div className="space-y-1 text-sm text-[#667085]">
+                  <p className="font-semibold text-[#39465b]">
+                    {exercise.targetText || t('lesson.untitledExercise')}
+                  </p>
+                  <p>
+                    {exercise.romanization ?? t('lesson.noRomanization')} ·{' '}
+                    {t(`difficulty.${exercise.difficulty}`)}
+                  </p>
+                  <p>
+                    {exercise.meaningTh ||
+                      exercise.meaningEn ||
+                      t('lesson.noMeaning')}
+                  </p>
+                </div>
               </div>
             )
           }}
@@ -748,102 +766,20 @@ export default function LessonEditorPage() {
                     {t('action.editExercise')}
                   </span>
                 </div>
-                {editingExerciseId === exercise.id ? (
-                  <div className="grid gap-5">
-                    <fieldset className="grid gap-3">
-                      <legend className="text-sm font-bold text-[#39465b]">
-                        {t('lesson.exerciseContent')}
-                      </legend>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <label className="grid gap-1 text-sm font-semibold">
-                          {t('field.targetText')}
-                          <input
-                            value={exercise.targetText}
-                            readOnly
-                            className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
-                          />
-                        </label>
-                        <label className="grid gap-1 text-sm font-semibold">
-                          {t('field.romanization')}
-                          <input
-                            value={exercise.romanization ?? ''}
-                            readOnly
-                            className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
-                          />
-                        </label>
-                      </div>
-                    </fieldset>
-                    <fieldset className="grid gap-3">
-                      <legend className="text-sm font-bold text-[#39465b]">
-                        {t('lesson.exerciseTranslation')}
-                      </legend>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <label className="grid gap-1 text-sm font-semibold">
-                          {t('field.meaningTh')}
-                          <input
-                            value={exercise.meaningTh}
-                            readOnly
-                            className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
-                          />
-                        </label>
-                        <label className="grid gap-1 text-sm font-semibold">
-                          {t('field.meaningEn')}
-                          <input
-                            value={exercise.meaningEn}
-                            readOnly
-                            className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
-                          />
-                        </label>
-                      </div>
-                    </fieldset>
-                    <fieldset className="grid gap-3">
-                      <legend className="text-sm font-bold text-[#39465b]">
-                        {t('lesson.exerciseMetadata')}
-                      </legend>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <label className="grid gap-1 text-sm font-semibold">
-                          {t('field.difficulty')}
-                          <input
-                            value={t(`difficulty.${exercise.difficulty}`)}
-                            readOnly
-                            className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
-                          />
-                        </label>
-                        <label className="grid gap-1 text-sm font-semibold">
-                          {t('field.hint')}
-                          <input
-                            value={exercise.hint ?? ''}
-                            readOnly
-                            className="rounded-xl border border-[#eadfd4] bg-white px-3 py-2 font-normal"
-                          />
-                        </label>
-                      </div>
-                    </fieldset>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="inline-flex items-center justify-center rounded-full border border-[#a85d4e] bg-[#a85d4e] px-4 py-2 text-sm font-semibold text-white">
-                        {t('action.saveChanges')}
-                      </span>
-                      <span className="inline-flex items-center justify-center rounded-full border border-[#eadfd4] bg-white/90 px-4 py-2 text-sm font-semibold text-[#39465b]">
-                        {t('action.cancel')}
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-1 text-sm text-[#667085]">
-                    <p className="font-semibold text-[#39465b]">
-                      {exercise.targetText || t('lesson.untitledExercise')}
-                    </p>
-                    <p>
-                      {exercise.romanization ?? t('lesson.noRomanization')} ·{' '}
-                      {t(`difficulty.${exercise.difficulty}`)}
-                    </p>
-                    <p>
-                      {exercise.meaningTh ||
-                        exercise.meaningEn ||
-                        t('lesson.noMeaning')}
-                    </p>
-                  </div>
-                )}
+                <div className="space-y-1 text-sm text-[#667085]">
+                  <p className="font-semibold text-[#39465b]">
+                    {exercise.targetText || t('lesson.untitledExercise')}
+                  </p>
+                  <p>
+                    {exercise.romanization ?? t('lesson.noRomanization')} ·{' '}
+                    {t(`difficulty.${exercise.difficulty}`)}
+                  </p>
+                  <p>
+                    {exercise.meaningTh ||
+                      exercise.meaningEn ||
+                      t('lesson.noMeaning')}
+                  </p>
+                </div>
               </div>
             )
           }}

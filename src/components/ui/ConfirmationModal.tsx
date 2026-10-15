@@ -30,7 +30,7 @@ export function ConfirmationModal({
 
   return (
     <Modal open={open} title={title} closeLabel={closeLabel} onClose={close}>
-      <p className="mt-3 text-sm leading-6 text-[#667085]">{body}</p>
+      <p className="mt-3 text-sm leading-6 text-muted">{body}</p>
       <div className="mt-5 flex justify-end gap-2">
         <Button variant="secondary" disabled={isConfirming} onClick={close}>
           {cancelLabel}

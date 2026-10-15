@@ -20,10 +20,10 @@ function StatusPill({ status }: { status: LessonProgressStatus | undefined }) {
   const label = statusLabel(status)
   const classes =
     label === 'Completed'
-      ? 'bg-[#e7f1d8] text-[#58733f]'
+      ? 'bg-mint-100 text-mint-700'
       : label === 'Unlocked'
-        ? 'bg-[#fff0d8] text-[#8b6035]'
-        : 'bg-[#eeeaf5] text-[#7863a8]'
+        ? 'bg-peach-100 text-peach-700'
+        : 'bg-lavender-100 text-lavender-600'
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${classes}`}
@@ -70,29 +70,29 @@ function UnitSection({
         >
           <div>
             <p className="font-bold">{mapUnit.unit.title}</p>
-            <p className="mt-1 text-sm text-[#667085]">
+            <p className="mt-1 text-sm text-muted">
               {mapUnit.unit.description}
             </p>
           </div>
           <ChevronDown
             aria-hidden="true"
-            className={`shrink-0 text-[#a85d4e] ${open ? 'rotate-180' : ''}`}
+            className={`shrink-0 text-coral-600 ${open ? 'rotate-180' : ''}`}
             size={20}
           />
         </button>
         {open && (
-          <div className="border-t border-[#f0dfd1] p-4">
+          <div className="border-t border-line-soft p-4">
             {mapUnit.lessons.length === 0 ? (
-              <p className="text-sm text-[#667085]">No lessons yet.</p>
+              <p className="text-sm text-muted">No lessons yet.</p>
             ) : (
               <ul className="space-y-2">
                 {mapUnit.lessons.map(({ lesson, progress }) => (
                   <li key={lesson.id}>
                     <Link
                       to={`/lessons/${lesson.id}`}
-                      className="flex items-center justify-between gap-3 rounded-2xl bg-[#fffaf5] px-4 py-3 transition hover:bg-[#fff1e8]"
+                      className="flex items-center justify-between gap-3 rounded-2xl bg-page-soft px-4 py-3 transition hover:bg-coral-50"
                     >
-                      <span className="font-semibold text-[#39465b]">
+                      <span className="font-semibold text-ink-soft">
                         {lesson.title}
                       </span>
                       <StatusPill status={progress?.status} />
@@ -114,12 +114,12 @@ export default function CourseMapPage() {
     <PageSurface contentClassName="max-w-5xl">
       <PageNav backTo="/" backLabel="Home" />
       <PageHeading eyebrow="YOUR LEARNING PATH" title={courseMap.course.title}>
-        <p className="mt-2 text-[#667085]">{courseMap.course.description}</p>
+        <p className="mt-2 text-muted">{courseMap.course.description}</p>
       </PageHeading>
       {courseMap.units.length === 0 ? (
         <Card className="mt-6 text-center">
           <p className="font-bold">Your next unit will bloom here.</p>
-          <p className="mt-1 text-sm text-[#667085]">No units yet.</p>
+          <p className="mt-1 text-sm text-muted">No units yet.</p>
         </Card>
       ) : (
         <ul className="mt-6 space-y-4">

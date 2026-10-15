@@ -31,7 +31,7 @@ export default function LessonResult({
   return (
     <>
       <PageHeading eyebrow="NICE WORK" title="Lesson complete!">
-        <p className="mt-2 text-[#667085]">
+        <p className="mt-2 text-muted">
           +{outcome.expGained} EXP — now level {outcome.level}
         </p>
       </PageHeading>
@@ -40,27 +40,25 @@ export default function LessonResult({
           {stats.map(({ label, value }) => (
             <div
               key={label}
-              className="flex flex-col-reverse rounded-2xl bg-[#fffaf5] px-4 py-3"
+              className="flex flex-col-reverse rounded-2xl bg-page-soft px-4 py-3"
             >
-              <dt className="mt-1 text-xs font-semibold text-[#98a2b3]">
-                {label}
-              </dt>{' '}
-              <dd className="text-2xl font-bold tracking-tight text-[#253247]">
+              <dt className="mt-1 text-xs font-semibold text-faint">{label}</dt>{' '}
+              <dd className="text-2xl font-bold tracking-tight text-ink">
                 {value}
               </dd>
             </div>
           ))}
         </dl>
         {result.mistakes.length === 0 ? (
-          <p className="mt-4 text-sm font-semibold text-[#58733f]">
+          <p className="mt-4 text-sm font-semibold text-mint-700">
             No mistakes — nice work!
           </p>
         ) : (
           <>
-            <h2 className="mt-4 text-sm font-bold text-[#39465b]">
+            <h2 className="mt-4 text-sm font-bold text-ink-soft">
               Words to review
             </h2>
-            <ul className="mt-1 list-disc pl-5 text-sm text-[#596579]">
+            <ul className="mt-1 list-disc pl-5 text-sm text-ink-muted">
               {mistypedWords.map((targetText) => (
                 <li key={targetText}>{targetText}</li>
               ))}
@@ -69,7 +67,7 @@ export default function LessonResult({
         )}
       </Card>
       {outcome.unlockedNextLessonId && (
-        <p className="mt-4 text-sm font-semibold text-[#8b6035]">
+        <p className="mt-4 text-sm font-semibold text-peach-700">
           Next lesson unlocked.
         </p>
       )}
