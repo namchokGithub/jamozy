@@ -63,6 +63,11 @@ service cloud.firestore {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
 
+      match /rebirths/{rebirthId} {
+        allow read, create: if request.auth != null && request.auth.uid == userId;
+        allow update, delete: if false;
+      }
+
       match /dailyStats/{date} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }

@@ -237,8 +237,8 @@ field exists in MVP.
 | rejectedKeystrokes | number | incremented for rejected input while this jamo was expected |
 | firstPracticedAt   | Date   | first submitted session containing this expected jamo       |
 | lastPracticedAt    | Date   | latest submitted session containing this expected jamo      |
-| recentAccepted?    | number | decayed recent count: earlier sessions × 0.9, plus this one   |
-| recentRejected?    | number | as `recentAccepted`, for rejected input                       |
+| recentAccepted?    | number | decayed recent count: earlier sessions × 0.9, plus this one |
+| recentRejected?    | number | as `recentAccepted`, for rejected input                     |
 
 Accuracy is derived from the raw counters. Keyboard Position is a view/filter
 over shared jamo and keyboard metadata; it has no separate progress entity.
@@ -305,26 +305,26 @@ again after `expAwarded` is true.
 supports Learning Path, Home, and Review; other contexts below remain
 target-model work).
 
-| Field              | Type                     | Notes                                                                                           |
-| ------------------ | ------------------------ | ----------------------------------------------------------------------------------------------- |
-| id                 | string                   | document ID, generated when the active session starts; retained when its logical submit retries |
-| context            | `LearningSessionContext` | discriminated source/mode context below                                                         |
-| startedAt          | Date                     | active session start time                                                                       |
-| completedAt        | Date                     | submitted completion time                                                                       |
-| durationSeconds    | number                   | non-negative active-session duration                                                            |
-| exercisesAttempted | number                   | submitted exercises in this activity                                                            |
-| acceptedKeystrokes | number                   | raw accepted input in this activity                                                             |
-| rejectedKeystrokes | number                   | raw rejected input in this activity                                                             |
-| expGained          | number                   | EXP actually awarded by this submitted activity;`0` when none is awarded                        |
-| localDate?         | string                   | `'YYYY-MM-DD'` of `completedAt` in `timeZone`, fixed at submit ([[DEC-049]])                     |
-| timeZone?          | string                   | IANA zone used for `localDate`                                                                  |
-| typingSeconds?     | number                   | per exercise, first to last keystroke; gaps over 10 seconds skipped                             |
-| learningSeconds?   | number                   | Home only: sum of per-exercise elapsed time; otherwise Learning Time is `durationSeconds`       |
-| charactersTyped?   | number                   | Hangul syllables of finished targets, spaces excluded                                           |
-| wordsPracticed?    | number                   | finished exercises from `word` lessons                                                          |
-| sentencesPracticed?| number                   | finished exercises from `phrase`/`sentence` lessons                                             |
-| exerciseMistakes?  | number[]                 | mistakes per exercise in play order (drives the perfect streak)                                 |
-| isReplay?          | boolean                  | lesson modes: the lesson was already completed before this session                              |
+| Field               | Type                     | Notes                                                                                           |
+| ------------------- | ------------------------ | ----------------------------------------------------------------------------------------------- |
+| id                  | string                   | document ID, generated when the active session starts; retained when its logical submit retries |
+| context             | `LearningSessionContext` | discriminated source/mode context below                                                         |
+| startedAt           | Date                     | active session start time                                                                       |
+| completedAt         | Date                     | submitted completion time                                                                       |
+| durationSeconds     | number                   | non-negative active-session duration                                                            |
+| exercisesAttempted  | number                   | submitted exercises in this activity                                                            |
+| acceptedKeystrokes  | number                   | raw accepted input in this activity                                                             |
+| rejectedKeystrokes  | number                   | raw rejected input in this activity                                                             |
+| expGained           | number                   | EXP actually awarded by this submitted activity;`0` when none is awarded                        |
+| localDate?          | string                   | `'YYYY-MM-DD'` of `completedAt` in `timeZone`, fixed at submit ([[DEC-049]])                    |
+| timeZone?           | string                   | IANA zone used for `localDate`                                                                  |
+| typingSeconds?      | number                   | per exercise, first to last keystroke; gaps over 10 seconds skipped                             |
+| learningSeconds?    | number                   | Home only: sum of per-exercise elapsed time; otherwise Learning Time is `durationSeconds`       |
+| charactersTyped?    | number                   | Hangul syllables of finished targets, spaces excluded                                           |
+| wordsPracticed?     | number                   | finished exercises from `word` lessons                                                          |
+| sentencesPracticed? | number                   | finished exercises from `phrase`/`sentence` lessons                                             |
+| exerciseMistakes?   | number[]                 | mistakes per exercise in play order (drives the perfect streak)                                 |
+| isReplay?           | boolean                  | lesson modes: the lesson was already completed before this session                              |
 
 `LearningSessionContext` is a discriminated union, persisted as an embedded
 object:
@@ -358,19 +358,19 @@ retain the same ID for future account migration. See `docs/SESSION-AND-HISTORY.m
 **Path:** `users/{userId}/reviewItems/{itemId}`
 **File:** `domain/models/review-item.ts`
 
-| Field            | Type                                    | Notes                                                                                                       |
-| ---------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| id               | string                                  | Firestore doc ID; deterministic identity, defined below                                                     |
-| sourceLessonId   | string                                  | `Lesson.id` that first created this item                                                                    |
-| sourceExerciseId | string                                  | `LessonExercise.id` that first created this item                                                            |
-| vocabularyId     | string\| null                           | linked`VocabularyEntry.id`; `null` for non-vocabulary content                                               |
-| targetText       | string                                  | the mistyped Korean text (denormalized for quick review UI)                                                 |
-| mistakeCount     | number                                  | incremented each time it's mistyped again                                                                   |
-| lastMistakeAt    | Date                                    |                                                                                                             |
-| reason           | `'mistake' \| 'slow' \| 'low-accuracy'` | why this word entered review ([[DEC-012]])                                                                  |
-| box              | number                                  | Leitner box, 1–5 ([[DEC-008]]); starts at 1, +1 on a correct review (capped at 5), resets to 1 on a mistake |
-| nextReviewAt     | Date                                    | when this item is next due; computed from`box` at write time                                                |
-| sourceLessonType?| `LessonType`                            | type of the source lesson, for Review word/sentence stats ([[DEC-049]]); absent on older items, key omitted |
+| Field             | Type                                    | Notes                                                                                                       |
+| ----------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| id                | string                                  | Firestore doc ID; deterministic identity, defined below                                                     |
+| sourceLessonId    | string                                  | `Lesson.id` that first created this item                                                                    |
+| sourceExerciseId  | string                                  | `LessonExercise.id` that first created this item                                                            |
+| vocabularyId      | string\| null                           | linked`VocabularyEntry.id`; `null` for non-vocabulary content                                               |
+| targetText        | string                                  | the mistyped Korean text (denormalized for quick review UI)                                                 |
+| mistakeCount      | number                                  | incremented each time it's mistyped again                                                                   |
+| lastMistakeAt     | Date                                    |                                                                                                             |
+| reason            | `'mistake' \| 'slow' \| 'low-accuracy'` | why this word entered review ([[DEC-012]])                                                                  |
+| box               | number                                  | Leitner box, 1–5 ([[DEC-008]]); starts at 1, +1 on a correct review (capped at 5), resets to 1 on a mistake |
+| nextReviewAt      | Date                                    | when this item is next due; computed from`box` at write time                                                |
+| sourceLessonType? | `LessonType`                            | type of the source lesson, for Review word/sentence stats ([[DEC-049]]); absent on older items, key omitted |
 
 **Identity and deduplication ([[DEC-022]]):** a vocabulary-backed item has `id === vocabularyId`, yielding one review history per learner per reusable word across all lessons. A non-vocabulary item has `id === \`${sourceLessonId}:${sourceExerciseId}\``, yielding one review history per lesson exercise. Therefore the deduplication rule is one active item per vocabulary entry, or one active item per non-vocabulary exercise.
 
@@ -392,19 +392,46 @@ qualify an item. No experience owns a separate review queue.
 
 Not in README's original domain file list, but required to home EXP/Level and Settings ([[DEC-048]], [[DEC-007]]).
 
-| Field       | Type           | Notes                                                                                                |
-| ----------- | -------------- | ---------------------------------------------------------------------------------------------------- |
-| id          | string         | Firebase Auth UID for an authenticated user; locally generated`guestId` for a Guest                  |
-| displayName | string         | required player-facing name; never auth identity                                                     |
-| exp         | number         | accumulated EXP awarded under[[DEC-045]]; `level` is never persisted ([[DEC-048]])                  |
-| settings    | `UserSettings` | see below                                                                                            |
-| stats       | `UserStats`    | see below ([[DEC-011]])                                                                              |
-| createdAt   | Date           |                                                                                                      |
-| updatedAt   | Date           | set with`createdAt` on creation; changed on every persisted profile mutation ([[DEC-023]])           |
-| timezone?   | string         | IANA zone for `localDate`; filled from the first submitted session ([[DEC-049]])                       |
-| playerStats?| `PlayerStats`  | non-additive Player Stats state, see below ([[DEC-049]])                                             |
+| Field        | Type               | Notes                                                                                         |
+| ------------ | ------------------ | --------------------------------------------------------------------------------------------- |
+| id           | string             | Firebase Auth UID for an authenticated user; locally generated`guestId` for a Guest           |
+| displayName  | string             | required player-facing name; never auth identity                                              |
+| exp          | number             | legacy pre-progression EXP compatibility field; never reset by Rebirth                        |
+| progression? | `ProgressionState` | canonical EXP/cycle state; absent legacy profiles derive it from `exp + sessionAggregate.exp` |
+| settings     | `UserSettings`     | see below                                                                                     |
+| stats        | `UserStats`        | see below ([[DEC-011]])                                                                       |
+| createdAt    | Date               |                                                                                               |
+| updatedAt    | Date               | set with`createdAt` on creation; changed on every persisted profile mutation ([[DEC-023]])    |
+| timezone?    | string             | IANA zone for `localDate`; filled from the first submitted session ([[DEC-049]])              |
+| playerStats? | `PlayerStats`      | non-additive Player Stats state, see below ([[DEC-049]])                                      |
 
-**Level formula ([[DEC-048]]):** `level` is derived, not stored. It uses the LEVELING.md curve: the EXP to go from `level` to `level + 1` is `round(50 × level^1.2 × (1 + 0.15 × rebirthCount) × softCap)`, where `softCap` is `1` below Level 100 and `3^(floor((level − 100) / 10) + 1)` from Level 100. `levelFromExp(cycleExp, rebirthCount)` returns the highest level whose cumulative requirement from Level 1 is no greater than `cycleExp`. Until rebirth state exists, `rebirthCount` is `0` and `exp` is the cycle EXP. Lives as pure functions next to `UserProfile` in `domain/models/user-profile.ts` (`expRequiredForNextLevel`, `levelProgress`, `levelFromExp`); the EXP input is `totalExp(profile)`, legacy `exp` plus `sessionAggregate.exp`. Changing the curve needs no data migration because no level value is persisted.
+`ProgressionState` ([[DEC-053]]) is persisted atomically with a newly accepted session receipt or Rebirth:
+
+| Field              | Type   | Notes                                                                 |
+| ------------------ | ------ | --------------------------------------------------------------------- |
+| `currentExp`       | number | EXP in the active Rebirth cycle; reset to `0` by a successful Rebirth |
+| `totalExpEarned`   | number | lifetime awarded EXP; never reset                                     |
+| `highestLevel`     | number | greatest derived Level reached in any cycle                           |
+| `rebirthCount`     | number | number of unique persisted Rebirth records                            |
+| `perkPointsEarned` | number | equals `rebirthCount`; no Perk spending/allocation exists yet         |
+
+**Level formula ([[DEC-048]], [[DEC-053]]):** `level` is derived, not stored. It uses the LEVELING.md curve: the EXP to go from `level` to `level + 1` is `round(50 × level^1.2 × (1 + 0.15 × rebirthCount) × softCap)`, where `softCap` is `1` below Level 100 and `3^(floor((level − 100) / 10) + 1)` from Level 100. `levelFromExp(currentExp, rebirthCount)` returns the highest level whose cumulative requirement from Level 1 is no greater than `currentExp`. Older profiles without `progression` derive a compatibility state from `exp + sessionAggregate.exp`, with `rebirthCount: 0`. Changing the curve needs no data migration because no level value is persisted.
+
+### RebirthRecord
+
+**Authenticated path:** `users/{userId}/rebirths/{operationId}`
+**Guest store:** IndexedDB `rebirths`, key `${guestId}:${operationId}`
+**File:** `domain/models/rebirth.ts`
+
+| Field          | Type   | Notes                                                                                  |
+| -------------- | ------ | -------------------------------------------------------------------------------------- |
+| id             | string | stable caller-generated `operationId`; deduplication identity                          |
+| rebirthNumber  | number | ordinal at creation time; counters are reconciled from unique records during migration |
+| levelAtRebirth | number | derived Level at the successful command; always at least 100                           |
+| expAtRebirth   | number | active-cycle EXP immediately before the reset                                          |
+| createdAt      | Date   | command timestamp                                                                      |
+
+A Rebirth command is eligible only at derived Level 100 or above. A transaction checks an existing record before eligibility, so retrying the same operation ID returns the original record and cannot award another point. A distinct concurrent command sees the reset cycle and is ineligible. Firestore permits the owner to create/read records but denies update/delete; its owner-writable profile remains a client-trust boundary, not tamper-proof enforcement.
 
 **Player Stats ([[DEC-049]]):** every submitted session runs the pure
 `applySessionStats` (`domain/models/player-stats.ts`) inside its submit
@@ -445,8 +472,8 @@ the same numeric fields:
 
 A day doc that exists marks an active day.
 
-Highest Level and Rank are not stored: they equal the current values until
-Rebirth exists.
+`ProgressionState.highestLevel` preserves the greatest derived Level reached
+across cycles; Rank is not stored or implemented.
 
 **Cross-checked against `docs/requirement.md`:** that doc's own example ("Level 7, 430/600 EXP") implies an increasing per-level curve (~`level × 100` to reach the next level), not this flat formula, and separately lists "Level" as something to save (implying a stored field). Both reaffirmed against the flat, derived-only formula — 2026-09-23. Revisit the curve shape later if game-design balance needs it; the derived approach means no migration either way.
 
@@ -457,15 +484,15 @@ are separate from `UserProfile`; do not store `email`, provider details, or
 
 `UserSettings` (embedded in the profile, [[DEC-007]]):
 
-| Field               | Type                     | Notes                                 |
-| ------------------- | ------------------------ | ------------------------------------- |
-| soundEnabled        | boolean                  |                                       |
+| Field               | Type                                   | Notes                                                                             |
+| ------------------- | -------------------------------------- | --------------------------------------------------------------------------------- |
+| soundEnabled        | boolean                                |                                                                                   |
 | keyboardSoundPack   | `'turquoise' \| 'mxblack' \| 'mxblue'` | persisted mechanical-key sound pack; defaults to `'turquoise'` (Turquoise Tealio) |
-| showKeyboard        | boolean                  | show/hide the virtual keyboard widget |
-| keyboardOpacity     | number                   | 0–1                                   |
-| romanizationEnabled | boolean                  |                                       |
-| meaningLanguage     | `'th' \| 'en' \| 'both'` |                                       |
-| theme               | `'light' \| 'dark'`      |                                       |
+| showKeyboard        | boolean                                | show/hide the virtual keyboard widget                                             |
+| keyboardOpacity     | number                                 | 0–1                                                                               |
+| romanizationEnabled | boolean                                |                                                                                   |
+| meaningLanguage     | `'th' \| 'en' \| 'both'`               |                                                                                   |
+| theme               | `'light' \| 'dark'`                    |                                                                                   |
 
 Replaces the earlier single `keyboardLayoutHint` field with the current settings list. English physical-key labels are always shown alongside Hangul labels, so `showEnglishKeys` is not a user setting ([[DEC-027]]). "Reset Progress" (requirement.md #13) is an action, not a setting — it's a future `application/` use case, not a `UserSettings` field.
 
@@ -525,7 +552,7 @@ receipt-gated.
 
 Previously open, now decided — see `docs/DECISIONS.md` for full rationale:
 
-1. **EXP/Level** ([[DEC-048]], superseding [[DEC-006]]) — `level` derived, never stored; curve from LEVELING.md (soft cap from Level 100, rebirth multiplier). Replaces the original flat `1 + floor(exp / 100)`.
+1. **EXP/Level and Rebirth** ([[DEC-048]], [[DEC-053]], superseding [[DEC-006]]) — `level` derived, never stored; canonical progression keeps cycle/lifetime EXP and record-backed Rebirth counters. Curve from LEVELING.md (soft cap from Level 100, rebirth multiplier). Replaces the original flat `1 + floor(exp / 100)`.
 2. **Settings location** ([[DEC-007]], [[DEC-027]]) — embedded in `UserProfile`, whether that profile is stored in Guest IndexedDB or authenticated Firestore; never a separate settings collection.
 3. **Review scheduling and identity** ([[DEC-008]], [[DEC-022]]) — Leitner-style spaced repetition, `box` + `nextReviewAt`, no `resolved` state; vocabulary-backed items are deduplicated by `vocabularyId`, other items by lesson/exercise identity.
 4. **Unlock rule** ([[DEC-009]], [[DEC-025]]) — next lesson unlocks when the previous lesson's Progress becomes `'completed'`; a missing document represents locked, while persisted states are `'unlocked'/'completed'`.

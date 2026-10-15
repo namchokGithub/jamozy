@@ -11,10 +11,10 @@ cases use the same domain models for every learner.
 
 ## Learner modes
 
-| Mode | Identity | Persistence | Access |
-| --- | --- | --- | --- |
-| Guest | locally generated `guestId` | IndexedDB on this device | all current learning features |
-| Authenticated | Firebase Auth UID | Firestore | the same learning features, plus future account-oriented history, summaries, and analytics |
+| Mode          | Identity                    | Persistence              | Access                                                                                     |
+| ------------- | --------------------------- | ------------------------ | ------------------------------------------------------------------------------------------ |
+| Guest         | locally generated `guestId` | IndexedDB on this device | all current learning features                                                              |
+| Authenticated | Firebase Auth UID           | Firestore                | the same learning features, plus future account-oriented history, summaries, and analytics |
 
 A Guest must supply a player-facing `displayName` before normal play. The name
 is not identity and must not be used as a document key. Guest uses no Firebase
@@ -28,19 +28,18 @@ learner profile:
 
 ```ts
 type UserSession =
-  | { kind: 'guest'; userId: string }
-  | { kind: 'authenticated'; userId: string };
+  { kind: 'guest'; userId: string } | { kind: 'authenticated'; userId: string }
 ```
 
 Guest retention metadata is a local session record, not `UserProfile` data:
 
 ```ts
 type GuestSession = {
-  guestId: string;
-  displayName: string;
-  createdAt: Date;
-  lastActiveAt: Date;
-};
+  guestId: string
+  displayName: string
+  createdAt: Date
+  lastActiveAt: Date
+}
 ```
 
 `UserProfile` is shared learner state. It contains `id`, `displayName`, EXP,
@@ -71,9 +70,9 @@ React components must not copy IndexedDB records into Firestore. Content
 repositories remain shared read access; learner-state repositories select the
 local or Firebase adapter based on the session. IndexedDB, not `localStorage`,
 is the primary local store for guest lesson progress, vocabulary progress,
-review items, jamo stats, daily quests, learning-session history, user stats,
+review items, jamo stats, Rebirth records, daily quests, learning-session history, user stats,
 profile, and Player Stats day/month records (`dailyStats`, `monthlyStats`
-stores) and jamo stats (`learnerStats` store, DB version 8). `localStorage` may hold only small UI/session hints
+stores) and jamo stats (`learnerStats` store, DB version 9). `localStorage` may hold only small UI/session hints
 where appropriate. Each adapter stores `UserProfile.timezone` with its profile
 (Guest: IndexedDB; account: Firestore); it is filled from the first submitted
 session's device zone ([[DEC-049]]).
@@ -113,7 +112,8 @@ Firebase repositories
 The use case—not a React component—owns orchestration. It is provider-neutral,
 idempotent, retry-safe, and non-destructive. It stores a local IndexedDB
 checkpoint keyed by `(guestId, uid)` and writes the terminal Cloud marker at
-`users/{uid}/migrations/{guestId}` only after every session receipt succeeds.
+`users/{uid}/migrations/{guestId}` only after Rebirth reconciliation and every
+session receipt succeeds.
 A failed or interrupted attempt retains the local Guest data and is retried on
 the next authenticated session. Cleanup is separately deferred: this feature
 never deletes or makes Guest data unavailable.
@@ -131,22 +131,23 @@ deterministic identity. A migration must be idempotent: repeating it produces
 the same destination state and never duplicates a reward, aggregate, or
 history record.
 
-| Data | Merge rule |
-| --- | --- |
-| `LessonProgress` | Keep the furthest state: `completed` > `unlocked` > `missing`. |
-| Home `completedExerciseIds` | Union ([[DEC-043]]). |
-| Home `homePartialResult` | Drop it if either side is `completed`; otherwise keep Cloud's, or Guest's when Cloud has none. |
-| EXP | Do not add Guest and Cloud totals directly. Aggregate only submitted sessions whose `sessionId` has not already contributed to the destination. |
-| `UserStats` raw counters | Like EXP, aggregate only from sessions not already aggregated in the destination; derive averages from the resulting raw counters. |
-| `ReviewItem` | Union by deterministic identity. Keep the state that makes review due sooner (the earlier `nextReviewAt`); preserve one item only. |
-| `DailyQuestProgress` | Union by `dateKey`; `completed` and `expAwarded` are each true when either side is true. |
-| Settings | Use the most recently updated values when trustworthy `updatedAt` values exist; otherwise prefer Cloud settings. |
-| `displayName` | Prefer Cloud; use the Guest name only when the account has no name. |
-| `bestAccuracy` / `bestWpm` | Keep the maximum value. |
-| `LearningSession` | Union by the original `sessionId`; do not recreate a record during migration or retry. |
-| Player Stats ([[DEC-049]]) | Never merge Guest `playerStats` or period docs directly. Re-apply each not-yet-migrated session outcome, oldest `completedAt` first, in its receipt transaction. A Guest session dated before the account's `lastActiveDate` adds to its day but leaves the streak. |
-| `timezone` | Prefer Cloud; use the Guest zone only when the account has none. |
-| Jamo stats ([[DEC-050]]) | Not migrated: the account keeps its own `learnerStats/jamo`. Guest jamo counts stay only in the Guest receipts. |
+| Data                        | Merge rule                                                                                                                                                                                                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LessonProgress`            | Keep the furthest state: `completed` > `unlocked` > `missing`.                                                                                                                                                                                                      |
+| Home `completedExerciseIds` | Union ([[DEC-043]]).                                                                                                                                                                                                                                                |
+| Home `homePartialResult`    | Drop it if either side is `completed`; otherwise keep Cloud's, or Guest's when Cloud has none.                                                                                                                                                                      |
+| `ProgressionState` / EXP    | If the Cloud learner has no progression activity, seed the Guest cycle once. Otherwise preserve Cloud `currentExp`; import each unmatched Guest session receipt into `totalExpEarned`, and into `currentExp` only when neither side has Rebirth history.            |
+| Rebirth records             | Union `users/{uid}/rebirths` and Guest records by `operationId`. After import, reconcile `rebirthCount` and `perkPointsEarned` from the unique record count; retain the largest `highestLevel`.                                                                     |
+| `UserStats` raw counters    | Like EXP, aggregate only from sessions not already aggregated in the destination; derive averages from the resulting raw counters.                                                                                                                                  |
+| `ReviewItem`                | Union by deterministic identity. Keep the state that makes review due sooner (the earlier `nextReviewAt`); preserve one item only.                                                                                                                                  |
+| `DailyQuestProgress`        | Union by `dateKey`; `completed` and `expAwarded` are each true when either side is true.                                                                                                                                                                            |
+| Settings                    | Use the most recently updated values when trustworthy `updatedAt` values exist; otherwise prefer Cloud settings.                                                                                                                                                    |
+| `displayName`               | Prefer Cloud; use the Guest name only when the account has no name.                                                                                                                                                                                                 |
+| `bestAccuracy` / `bestWpm`  | Keep the maximum value.                                                                                                                                                                                                                                             |
+| `LearningSession`           | Union by the original `sessionId`; do not recreate a record during migration or retry.                                                                                                                                                                              |
+| Player Stats ([[DEC-049]])  | Never merge Guest `playerStats` or period docs directly. Re-apply each not-yet-migrated session outcome, oldest `completedAt` first, in its receipt transaction. A Guest session dated before the account's `lastActiveDate` adds to its day but leaves the streak. |
+| `timezone`                  | Prefer Cloud; use the Guest zone only when the account has none.                                                                                                                                                                                                    |
+| Jamo stats ([[DEC-050]])    | Not migrated: the account keeps its own `learnerStats/jamo`. Guest jamo counts stay only in the Guest receipts.                                                                                                                                                     |
 
 Local Guest data remains until migration succeeds; it must never be deleted
 before a successful, durable Cloud write.
@@ -156,13 +157,19 @@ before a successful, durable Cloud write.
 Guest IndexedDB persistence plus Email/password and Google Sign-In now ship.
 They select local or Firebase learner repositories through the active session.
 Automatic Guest-to-account migration now ships for the entities present on this
-branch: UserProfile, Progress, ReviewItem, LearningSession, and session
-receipts. Lesson/Review LearningSession history, aggregate, and exactly-once
+branch: UserProfile/ProgressionState, Progress, ReviewItem, LearningSession,
+session receipts, and Rebirth records. Lesson/Review LearningSession history, aggregate, and exactly-once
 checkpoint persistence ship for both adapters. The `legacyBaseline` /
 `sessionAggregate` profile compatibility layer remains intentionally in place;
 it is not retired by a Guest migration. Cleanup, future-mode records, account
 linking, and history UI remain deferred. Firebase Console provider configuration
-and deployment of the checked-in Firestore rules remain user-owned. See
+and deployment of the checked-in Firestore rules remain user-owned. Rebirth
+record immutability protects record retries, but the current owner-writable
+profile rule does not prevent a signed-in client from altering aggregate
+profile fields; authoritative anti-tamper enforcement would require trusted
+server writes. The receipt-backed Lesson/Home paths update canonical
+`ProgressionState`; the older `completeLesson` path is a known migration gap
+and must be moved before it can make the same Rebirth-safe EXP guarantee. See
 `docs/PROGRESS.md`.
 
 ## Historical implementation

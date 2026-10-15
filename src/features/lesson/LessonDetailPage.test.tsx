@@ -207,6 +207,20 @@ describe('LessonDetailPage', () => {
     )
   })
 
+  it('keeps a temporary resume token only while a lesson is being typed', async () => {
+    window.sessionStorage.clear()
+    renderPage(makeLesson())
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Start Lesson' }))
+    await waitForTypingTarget('가')
+    expect(window.sessionStorage.getItem('jamozy:lesson-resume')).toContain(
+      'l1',
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Exit lesson' }))
+    expect(window.sessionStorage.getItem('jamozy:lesson-resume')).toBeNull()
+  })
+
   it('passes keyboard settings into the typing session', async () => {
     const router = createMemoryRouter(
       [

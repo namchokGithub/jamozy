@@ -162,6 +162,7 @@ interface VirtualKeyboardProps {
   showEnglishKeys: boolean
   opacity: number
   onKeyPress?: (code: string, shiftKey: boolean) => void
+  onUtilityKeyPress?: (code: string) => void
   pressedCodes?: ReadonlySet<string>
   // Below `sm`, draws the keyboard like a phone keyboard; `sm` and up is unchanged.
   mobileStyle?: boolean
@@ -174,6 +175,7 @@ export default function VirtualKeyboard({
   showEnglishKeys,
   opacity,
   onKeyPress,
+  onUtilityKeyPress,
   pressedCodes = new Set(),
   mobileStyle = false,
 }: VirtualKeyboardProps) {
@@ -201,6 +203,7 @@ export default function VirtualKeyboard({
             pressedCodes={pressedCodes}
             focusLevels={focusLevels}
             onKeyPress={onKeyPress}
+            onUtilityKeyPress={onUtilityKeyPress}
             onVirtualShiftChange={setVirtualShiftActive}
             mobileStyle={mobileStyle}
           />

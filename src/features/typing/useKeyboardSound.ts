@@ -5,6 +5,16 @@ import { keyboardSoundAssets } from './keyboard-sound-assets'
 import { pressSoundFor, releaseSoundFor } from './keyboard-sound-map'
 import { isKoreanJamoKey } from '../../domain/korean/keymap'
 
+const soundOnlyKeyCodes = new Set([
+  'Tab',
+  'CapsLock',
+  'ShiftLeft',
+  'ShiftRight',
+  'Enter',
+  'NumpadEnter',
+  'Space',
+])
+
 export function useKeyboardSound(
   enabled: boolean,
   pack: KeyboardSoundPack,
@@ -21,8 +31,9 @@ export function useKeyboardSound(
         event.metaKey ||
         event.ctrlKey ||
         event.altKey ||
-        !isKoreanJamoKey(event.code)
-      ) return
+        (!isKoreanJamoKey(event.code) && !soundOnlyKeyCodes.has(event.code))
+      )
+        return
       pressed.add(event.code)
       void keyboardSoundPlayer.unlock()
       keyboardSoundPlayer.play(pressSoundFor(pack, event.code))
@@ -42,6 +53,9 @@ export function useKeyboardSound(
     if (!enabled || !active) return
     void keyboardSoundPlayer.unlock()
     keyboardSoundPlayer.play(pressSoundFor(pack, code))
-    window.setTimeout(() => keyboardSoundPlayer.play(releaseSoundFor(pack, code)), 60)
+    window.setTimeout(
+      () => keyboardSoundPlayer.play(releaseSoundFor(pack, code)),
+      60,
+    )
   }
 }

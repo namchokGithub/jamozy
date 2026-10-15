@@ -78,4 +78,17 @@ describe('FirebaseSessionSubmissionRepository', () => {
     expect(documents.get('users/user-1')?.sessionAggregate).toMatchObject({ exp: 100, exercisesAttempted: 1 })
     expect([...documents.keys()].filter((path) => path.includes('/reviewItems/'))).toHaveLength(1)
   })
+
+  it('awards accepted session EXP to the canonical rebirth cycle once', async () => {
+    const { repository, documents } = createRepository()
+
+    await repository.submit('user-1', session, effects)
+    await repository.submit('user-1', session, effects)
+
+    expect(documents.get('users/user-1')?.progression).toMatchObject({
+      currentExp: 140,
+      totalExpEarned: 140,
+      rebirthCount: 0,
+    })
+  })
 })

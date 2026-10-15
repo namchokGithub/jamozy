@@ -22,7 +22,7 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC     | Decision                                                                                                                                                          | Status                                                                                                 | Date       |
 | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------- |
 | DEC-002 | Layered architecture: domain / application / infrastructure / features                                                                                            | Accepted                                                                                               | 2026-09-23 |
-| DEC-003 | Keystroke-level state stays client-side; Firestore writes only at checkpoints                                                                                     | Accepted (Home exercise-completion checkpoint: DEC-043)                                                | 2026-09-23 |
+| DEC-003 | Keystroke-level state stays client-side; Firestore writes only at checkpoints                                                                                     | Accepted (refresh-resume consequence amended by DEC-054; Home exercise-completion checkpoint: DEC-043) | 2026-09-23 |
 | DEC-004 | MVP excludes multiplayer, leaderboards, and social/competitive features                                                                                           | Accepted                                                                                               | 2026-09-23 |
 | DEC-005 | Pin`@vitejs/plugin-react` to 5.2.0, not latest                                                                                                                    | Accepted                                                                                               | 2026-09-23 |
 | DEC-007 | Settings live as a field on the user doc                                                                                                                          | Accepted                                                                                               | 2026-09-23 |
@@ -67,6 +67,8 @@ Status values: `Accepted`, `Superseded by DEC-00X`, `Rejected`.
 | DEC-050 | Key-level jamo stats live in one map document, updated in the submit transaction                                                                                  | Accepted                                                                                               | 2026-10-09 |
 | DEC-051 | Weak Jamo practice picks Home exercises by the learner's weakest key-level jamo                                                                                   | Accepted                                                                                               | 2026-10-09 |
 | DEC-052 | Vite-bundled Web Audio buffers provide configurable keyboard sound packs                                                                                          | Accepted                                                                                               | 2026-10-10 |
+| DEC-053 | Canonical Rebirth cycle state, immutable operation records, and migration reconciliation                                                                          | Accepted                                                                                               | 2026-10-14 |
+| DEC-054 | Learning Path lesson refresh resume stays tab-local and restarts the session                                                                                      | Accepted                                                                                               | 2026-10-14 |
 
 ## Superseded index (history only)
 
@@ -120,7 +122,10 @@ implementation context only, not the target architecture.
 
 **Why:** Avoids excessive Firestore write costs/rate limits and keeps typing feedback latency independent of network round-trips.
 
-**Consequences:** In-progress lesson state is lost on hard refresh/crash before a checkpoint. Acceptable for MVP; no mid-lesson resume requirement.
+**Consequences:** In-progress lesson state is not persisted as learner state.
+Learning Path may offer its narrowly scoped, tab-local refresh resume under
+[[DEC-054]]; it always starts a fresh typing session rather than restoring
+keystrokes, errors, or elapsed time.
 
 ---
 
@@ -1240,9 +1245,8 @@ to go from `level` to `level + 1` in the current rebirth cycle is:
 function expRequiredForNextLevel(level: number, rebirthCount: number): number {
   const baseExp = 50 * level ** 1.2
   const rebirthMultiplier = 1 + 0.15 * rebirthCount
-  const softCapMultiplier = level < 100
-    ? 1
-    : 3 ** (Math.floor((level - 100) / 10) + 1)
+  const softCapMultiplier =
+    level < 100 ? 1 : 3 ** (Math.floor((level - 100) / 10) + 1)
 
   return Math.round(baseExp * rebirthMultiplier * softCapMultiplier)
 }
@@ -1268,9 +1272,9 @@ displayed Level of existing learners; their EXP and session history are not
 rewritten. Implemented 2026-10-08 in `domain/models/user-profile.ts`
 (`expRequiredForNextLevel`, `levelProgress`, `levelFromExp`); the Profile
 progress bar shows `expIntoLevel / expToNextLevel`, and level outcomes count
-legacy plus session-tracked EXP (`totalExp`). Rebirth, Rank, Perk, and `ProgressionState` schema remain
-scoped by `docs/superpowers/specs/2026-10-06-player-progression-models-design.md`
-and are not adopted here. Alternative considered: starting the soft cap at
+legacy plus session-tracked EXP (`totalExp`). Rebirth and `ProgressionState`
+are adopted by [[DEC-053]]; Rank and Perk allocation remain out of scope.
+Alternative considered: starting the soft cap at
 Level 110; rejected, the Level 100 wall is intended.
 
 ## DEC-049 — Player stats fold into lifetime, daily, and monthly state in the submit transaction
@@ -1297,15 +1301,15 @@ function updates three things together:
 
 `sessionAggregate` gains lifetime sums and maximums.
 
-| Topic | Rule |
-| --- | --- |
-| Words / sentences / characters | By lesson type: `word` → words; `phrase`/`sentence` → sentences. Characters are Hangul syllables of finished targets, spaces excluded. Review uses each item's `sourceLessonType`, and counts characters only when it is absent. |
-| Perfect lesson | Lesson modes (`learning-path`, `home`) with `rejectedKeystrokes === 0`, replays included; Review never. |
-| Perfect streak | Exercises without a mistake in a row, continuing across sessions. |
-| Typing vs Learning Time | Typing runs from the first to the last keystroke per exercise, skipping gaps over 10 seconds. Learning is session length (`sessionAggregate.totalTypingTimeSeconds` keeps its name). Home uses summed per-exercise elapsed time, so a lesson resumed the next day does not count the night. |
-| Active day / streak | A `localDate` with at least one submitted session in any mode. A late session adds to its day but never changes the streak. |
-| Timezone | `UserProfile.timezone` (IANA) per adapter, filled from the first session's device zone. `localDate` is fixed on the session at submit. |
-| Old data | Not backfilled; all new stats start at zero on deploy. |
+| Topic                          | Rule                                                                                                                                                                                                                                                                                        |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Words / sentences / characters | By lesson type: `word` → words; `phrase`/`sentence` → sentences. Characters are Hangul syllables of finished targets, spaces excluded. Review uses each item's `sourceLessonType`, and counts characters only when it is absent.                                                            |
+| Perfect lesson                 | Lesson modes (`learning-path`, `home`) with `rejectedKeystrokes === 0`, replays included; Review never.                                                                                                                                                                                     |
+| Perfect streak                 | Exercises without a mistake in a row, continuing across sessions.                                                                                                                                                                                                                           |
+| Typing vs Learning Time        | Typing runs from the first to the last keystroke per exercise, skipping gaps over 10 seconds. Learning is session length (`sessionAggregate.totalTypingTimeSeconds` keeps its name). Home uses summed per-exercise elapsed time, so a lesson resumed the next day does not count the night. |
+| Active day / streak            | A `localDate` with at least one submitted session in any mode. A late session adds to its day but never changes the streak.                                                                                                                                                                 |
+| Timezone                       | `UserProfile.timezone` (IANA) per adapter, filled from the first session's device zone. `localDate` is fixed on the session at submit.                                                                                                                                                      |
+| Old data                       | Not backfilled; all new stats start at zero on deploy.                                                                                                                                                                                                                                      |
 
 **Why:** Day and month totals, streaks, and records need the current state, so
 blind `increment()` writes would still need reads. That would also split the
@@ -1470,3 +1474,79 @@ accuracy grid.
 
 **Alternatives rejected:** Recreating `<audio>` elements for each key and adding an audio dependency add playback or maintenance complexity; moving the files to `public/` and fetching hard-coded paths bypasses Vite's asset URLs.
 
+---
+
+## DEC-053 — Canonical Rebirth cycle state, immutable operation records, and migration reconciliation
+
+**Date:** 2026-10-14
+**Status:** Accepted
+**Amends:** [[DEC-048]], [[DEC-030]]
+
+**Decision:** `UserProfile.progression` is the canonical persisted progression
+state: `{ currentExp, totalExpEarned, highestLevel, rebirthCount,
+perkPointsEarned }`. `level` remains derived from `currentExp` and
+`rebirthCount`; `exp`, `legacyBaseline`, and `sessionAggregate` remain a
+read-compatible legacy layer for profiles that lack `progression`.
+
+At Level 100 or above, `rebirth(operationId)` creates one immutable
+`RebirthRecord` and atomically resets `currentExp` to zero, preserves
+`totalExpEarned`, records the greatest achieved level, and adds one Perk Point.
+The record ID is the caller's stable operation ID. The repository reads it
+before testing eligibility, so a retry returns `already-applied`; competing
+operation IDs serialize, and only the first can consume the eligible cycle.
+
+Guest-to-account migration stores a pending decision keyed by `guestId`: if
+Cloud has no progression activity, it adopts the Guest cycle once; otherwise
+Cloud's `currentExp` remains authoritative. Rebirth records are imported by
+operation ID, then migration reads the record set and a profile transaction
+reconciles `rebirthCount` and `perkPointsEarned` from the actual unique record
+count. Unmatched Guest session
+receipts contribute to `totalExpEarned`; they contribute to `currentExp` only
+when neither side has Rebirth history. A migration marker is terminal only
+after reconciliation and receipt import complete.
+
+**Why:** Cycle EXP and lifetime EXP have different meanings after a Rebirth.
+Record-based idempotency makes retried commands and resumed migrations safe,
+while reconciling the counter from records repairs stale aggregate values
+instead of trusting an increment history.
+
+**Consequences:** Guest IndexedDB is schema version 9 and has a `rebirths`
+store. Authenticated records live at `users/{uid}/rebirths/{operationId}`;
+Rules permit owner read/create but deny update/delete. The parent user profile
+is still owner-writable, so this is not an anti-tamper guarantee against a
+malicious signed-in client. Perk spending, allocation, Rank, and achievements
+are not implemented. The legacy `completeLesson` award path has not yet moved
+to receipt-gated canonical progression; until it does, new Rebirth-safe EXP
+guarantees apply to the receipt-backed Lesson/Home submission paths. The Web
+Firestore SDK cannot read a collection query inside a transaction, so a
+simultaneous Rebirth after the migration record-set read can temporarily leave
+its aggregate counter stale; a later reconciliation is required to repair that
+race.
+
+---
+
+## DEC-054 — Learning Path lesson refresh resume stays tab-local and restarts the session
+
+**Date:** 2026-10-14
+**Status:** Accepted
+**Amends:** [[DEC-003]]
+
+**Decision:** When a learner starts a Learning Path lesson, retain only its
+`lessonId` and a five-minute expiry in browser `sessionStorage`. Reloading the
+same lesson route before expiry opens its typing player automatically, then
+renews the five-minute window and starts a new lesson session from its first
+exercise. It does not restore typed keys, mistakes, per-exercise progress, or
+elapsed time.
+
+The token is tab-local: a newly opened tab, ordinary navigation, or a different
+lesson never resumes it. Exit, successful lesson completion, a mismatched
+lesson, and expiry clear the token.
+
+**Why:** A short reload grace period prevents an accidental refresh from
+dropping a learner at the lesson preview, while preserving the existing
+checkpoint-only persistence model and avoiding cross-tab ambiguity.
+
+**Consequences:** This narrowly replaces DEC-003's former hard-refresh-loss
+consequence for Learning Path lesson selection only. It adds no Firebase,
+IndexedDB, or per-keystroke writes, does not resume after a browser session is
+closed, and does not interrupt an already-active typing session in another tab.

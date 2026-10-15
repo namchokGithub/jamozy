@@ -4,6 +4,7 @@ import type { Progress } from '../../domain/models/progress'
 import type { ReviewItem } from '../../domain/models/review-item'
 import type { SessionSubmissionOutcome } from '../../domain/repositories/session-submission-repository'
 import type { UserProfile } from '../../domain/models/user-profile'
+import type { RebirthRecord } from '../../domain/models/rebirth'
 import type { GuestMigrationRepository } from '../../domain/repositories/guest-migration-repository'
 import { GuestDatabase, guestDatabase } from './guest-database'
 
@@ -15,14 +16,15 @@ export class LocalGuestMigrationRepository implements GuestMigrationRepository {
 
   async getSnapshot(guestId: string): Promise<GuestMigrationSnapshot> {
     const prefix = userPrefix(guestId)
-    const [profile, progress, reviewItems, sessions, sessionOutcomes] = await Promise.all([
+    const [profile, progress, reviewItems, sessions, sessionOutcomes, rebirths] = await Promise.all([
       this.database.get<UserProfile>('profiles', prefix),
       this.database.getAll<Progress>('progress', prefix),
       this.database.getAll<ReviewItem>('reviewItems', prefix),
       this.database.getAll<LearningSession>('learningSessions', prefix),
       this.database.getAll<SessionSubmissionOutcome>('sessionOutcomes', prefix),
+      this.database.getAll<RebirthRecord>('rebirths', prefix),
     ])
-    return { guestId, profile, progress, reviewItems, sessions, sessionOutcomes }
+    return { guestId, profile, progress, reviewItems, sessions, sessionOutcomes, rebirths }
   }
 
   getCheckpoint(guestId: string, accountId: string) {

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { X } from 'lucide-react'
+import { Sparkles, X } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useFetcher } from 'react-router'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
 import {
@@ -44,6 +45,32 @@ const SLOW_SAVE_MS = 15000
 const statBadgeClass =
   'rounded-lg border border-[#eadfd4] bg-[#fffdf9] px-2 py-0.5 text-[10px] font-semibold text-[#98a2b3]'
 
+const comboLook = (combo: number) => {
+  if (combo >= 50)
+    return {
+      className:
+        'border-[#edc66a] bg-[#fff6d7] text-[#a66b12] shadow-[0_0_14px_rgba(231,181,57,0.32)]',
+      scale: 1.25,
+    }
+  if (combo >= 20)
+    return {
+      className:
+        'border-[#f0b7cd] bg-[#fff0f6] text-[#c04e80] shadow-[0_0_12px_rgba(224,138,159,0.3)]',
+      scale: 1.2,
+    }
+  if (combo >= 10)
+    return {
+      className: 'border-[#f1c6b5] bg-[#fff1e9] text-[#c26e4e]',
+      scale: 1.1,
+    }
+  if (combo >= 5)
+    return {
+      className: 'border-[#b9e2cf] bg-[#e8f8ef] text-[#3e8a70]',
+      scale: 1,
+    }
+  return { className: 'border-[#d9d1ed] bg-[#f2edf9] text-[#7863a8]', scale: 1 }
+}
+
 export default function LessonTypingSession({
   lesson,
   onComplete,
@@ -62,6 +89,8 @@ export default function LessonTypingSession({
   const submittedPayload = useRef<Record<string, unknown> | null>(null)
   const [slowSave, setSlowSave] = useState(false)
   const [nowMs, setNowMs] = useState(0)
+  const [combo, setCombo] = useState(0)
+  const [comboBreak, setComboBreak] = useState(0)
   const hasStarted = useRef(false)
   const hasSubmitted = useRef(false)
   const completedResult = useRef<LessonResult | null>(null)
@@ -89,13 +118,27 @@ export default function LessonTypingSession({
 
   const handleKeyPress = useCallback(
     (code: string, shiftKey: boolean) => {
-      const currentSession =
-        useLessonSessionStore.getState().session?.currentSession
-      recordAttempt(
-        currentSession?.expectedKeys[currentSession.keyIndex],
-        code,
-        shiftKey,
-      )
+      const store = useLessonSessionStore.getState()
+      const lessonSession = store.session
+      const currentSession = lessonSession?.currentSession
+      const expected = currentSession?.expectedKeys[currentSession.keyIndex]
+      const correct =
+        expected &&
+        expected.code === code &&
+        (!expected.strictShift || expected.shift === shiftKey)
+      recordAttempt(expected, code, shiftKey)
+      if (correct && currentSession) {
+        const completesLesson =
+          currentSession.keyIndex + 1 === currentSession.expectedKeys.length &&
+          lessonSession &&
+          lessonSession.currentIndex + 1 === lessonSession.exercises.length
+        if (completesLesson) {
+          setCombo(0)
+          setComboBreak((count) => count + 1)
+        } else {
+          setCombo((count) => count + 1)
+        }
+      }
       pressKey(code, shiftKey)
     },
     [pressKey, recordAttempt],
@@ -233,6 +276,7 @@ export default function LessonTypingSession({
   const wpm = Math.round(acceptedKeystrokes / 5 / (elapsedSeconds / 60))
 
   const progress = getLessonProgress(session)
+  const comboStyle = comboLook(combo)
   // const composed = getComposedText(session.currentSession)
   const nextKey =
     session.currentSession.expectedKeys[session.currentSession.keyIndex]
@@ -253,13 +297,37 @@ export default function LessonTypingSession({
         ) : (
           <span />
         )}
-        <div className="flex gap-1.5">
+        <div className="flex flex-1 flex-wrap justify-end gap-1.5">
           <span className={statBadgeClass}>
             WPM <strong className="ml-0.5 text-[#667085]">{wpm}</strong>
           </span>
           <span className={statBadgeClass}>
             ACC <strong className="ml-0.5 text-[#667085]">{accuracy}%</strong>
           </span>
+          <motion.span
+            animate={{
+              scale: [
+                comboStyle.scale,
+                comboStyle.scale * 1.12,
+                comboStyle.scale,
+              ],
+            }}
+            transition={{ duration: 0.24, ease: 'easeOut' }}
+            className={`relative inline-flex items-center gap-1 overflow-hidden rounded-lg border px-2 py-0.5 text-[10px] font-bold ${comboStyle.className}`}
+          >
+            {comboBreak > 0 && (
+              <motion.span
+                key={comboBreak}
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 bg-[#f28c78]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0, 0.65, 0] }}
+                transition={{ duration: 0.42, ease: 'easeOut' }}
+              />
+            )}
+            <Sparkles aria-hidden="true" size={12} strokeWidth={2.25} />
+            <span className="relative">Combo x{combo}</span>
+          </motion.span>
           <span className="rounded-lg border border-[#eadfd4] bg-[#f2edf9] px-2 py-0.5 text-[10px] font-semibold text-[#7863a8]">
             {progress.current} / {progress.total}
           </span>
@@ -286,6 +354,7 @@ export default function LessonTypingSession({
               playVirtualKey(code)
               handleKeyPress(code, shiftKey)
             }}
+            onUtilityKeyPress={playVirtualKey}
             pressedCodes={pressedCodes}
             mobileStyle
           />

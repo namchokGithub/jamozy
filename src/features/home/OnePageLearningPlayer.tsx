@@ -317,6 +317,7 @@ export default function OnePageLearningPlayer({
               playVirtualKey(code)
               handleKeyPress(code, shiftKey)
             }}
+            onUtilityKeyPress={playVirtualKey}
             pressedCodes={pressedCodes}
           />
           <FingerPlacementGuide

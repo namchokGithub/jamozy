@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   defaultUserProfile,
+  progressionOf,
+  awardProgressionExp,
   expRequiredForNextLevel,
   levelFromExp,
   levelProgress,
@@ -8,6 +10,7 @@ import {
   totalExp,
   userSettingsSchema,
 } from './user-profile'
+import { emptySessionAggregate } from './session-aggregate'
 
 describe('expRequiredForNextLevel', () => {
   it('follows 50 × level^1.2 below the soft cap', () => {
@@ -115,6 +118,68 @@ describe('defaultUserProfile', () => {
       },
       createdAt: now,
       updatedAt: now,
+      progression: {
+        currentExp: 0,
+        totalExpEarned: 0,
+        highestLevel: 1,
+        rebirthCount: 0,
+        perkPointsEarned: 0,
+      },
+    })
+  })
+})
+
+describe('canonical progression', () => {
+  it('normalizes legacy lifetime exp once', () => {
+    const profile = {
+      ...defaultUserProfile('user1', new Date('2026-01-01')),
+      progression: undefined,
+      exp: 100,
+      sessionAggregate: { ...emptySessionAggregate(), exp: 50 },
+    }
+
+    expect(progressionOf(profile)).toMatchObject({
+      currentExp: 150,
+      totalExpEarned: 150,
+      rebirthCount: 0,
+      perkPointsEarned: 0,
+    })
+  })
+
+  it('uses canonical cycle exp after rebirth instead of legacy totals', () => {
+    const profile = {
+      ...defaultUserProfile('user1', new Date('2026-01-01')),
+      exp: 1000000,
+      progression: {
+        currentExp: 0,
+        totalExpEarned: 1000000,
+        highestLevel: 100,
+        rebirthCount: 1,
+        perkPointsEarned: 1,
+      },
+    }
+
+    expect(progressionOf(profile)).toEqual(profile.progression)
+    expect(levelFromExp(progressionOf(profile).currentExp, 1)).toBe(1)
+  })
+
+  it('awards exp into the current rebirth cycle and lifetime total', () => {
+    expect(
+      awardProgressionExp(
+        {
+          currentExp: 0,
+          totalExpEarned: 5000,
+          highestLevel: 100,
+          rebirthCount: 1,
+          perkPointsEarned: 1,
+        },
+        50,
+      ),
+    ).toMatchObject({
+      currentExp: 50,
+      totalExpEarned: 5050,
+      rebirthCount: 1,
+      perkPointsEarned: 1,
     })
   })
 })
@@ -163,7 +228,10 @@ describe('userSettingsSchema', () => {
 
   it('rejects an invalid keyboard sound pack', () => {
     expect(() =>
-      userSettingsSchema.parse({ ...makeValidSettings(), keyboardSoundPack: 'bluealps' }),
+      userSettingsSchema.parse({
+        ...makeValidSettings(),
+        keyboardSoundPack: 'bluealps',
+      }),
     ).toThrow()
   })
 })

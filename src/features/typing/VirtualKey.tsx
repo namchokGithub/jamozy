@@ -60,6 +60,7 @@ interface VirtualKeyProps {
   focusLevel: KeyFocusLevel
   canInteract: boolean
   onPress: (code: string, shiftKey: boolean) => void
+  onUtilityPress?: (code: string) => void
   onShiftToggle: () => void
   // Below `sm`, draws the key like a phone keyboard; `sm` and up is unchanged.
   mobileStyle?: boolean
@@ -192,6 +193,7 @@ export default function VirtualKey({
   focusLevel,
   canInteract,
   onPress,
+  onUtilityPress,
   onShiftToggle,
   mobileStyle = false,
 }: VirtualKeyProps) {
@@ -200,11 +202,13 @@ export default function VirtualKey({
   const isShiftKey = code === 'ShiftLeft' || code === 'ShiftRight'
   const isJamoKey = isKoreanJamoKey(code)
   const isTypingKey = isTypingInputKey(code)
+  const isSoundUtilityKey = ['Tab', 'CapsLock', 'Enter'].includes(code)
   const displayLabel = label ?? englishLabel(code)
   const hasHomeRowMarker = code === 'KeyF' || code === 'KeyJ'
   const wrongAnimation = useAnimationControls()
   const shouldReduceMotion = useReducedMotion()
-  const canPress = canInteract && (isTypingKey || isShiftKey)
+  const canPress =
+    canInteract && (isTypingKey || isShiftKey || isSoundUtilityKey)
   const visualState = getVisualState(
     code,
     isJamoKey,
@@ -266,10 +270,12 @@ export default function VirtualKey({
   const handleClick = () => {
     if (!canInteract) return
     if (isShiftKey) {
+      onUtilityPress?.(code)
       onShiftToggle()
       return
     }
     if (isTypingKey) onPress(code, virtualShiftActive)
+    if (isSoundUtilityKey) onUtilityPress?.(code)
   }
 
   return (
