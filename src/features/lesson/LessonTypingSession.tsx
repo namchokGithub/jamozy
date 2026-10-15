@@ -354,6 +354,7 @@ export default function LessonTypingSession({
               playVirtualKey(code)
               handleKeyPress(code, shiftKey)
             }}
+            onUtilityKeyPress={playVirtualKey}
             pressedCodes={pressedCodes}
             mobileStyle
           />

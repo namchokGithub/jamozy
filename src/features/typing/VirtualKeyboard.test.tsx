@@ -107,6 +107,30 @@ describe('VirtualKeyboard', () => {
     expect(onKeyPress).toHaveBeenCalledWith('Space', false)
   })
 
+  it('sends touched utility keys to the sound callback without typing them', () => {
+    const onKeyPress = vi.fn()
+    const onUtilityKeyPress = vi.fn()
+    render(
+      <VirtualKeyboard
+        showEnglishKeys
+        opacity={1}
+        onKeyPress={onKeyPress}
+        onUtilityKeyPress={onUtilityKeyPress}
+      />,
+    )
+
+    fireEvent.click(screen.getByLabelText('Tab'))
+    fireEvent.click(screen.getByLabelText('Caps Lock'))
+    fireEvent.click(screen.getAllByLabelText('Shift ⇧')[0])
+    fireEvent.click(screen.getByLabelText('Enter ↵'))
+
+    expect(onUtilityKeyPress).toHaveBeenNthCalledWith(1, 'Tab')
+    expect(onUtilityKeyPress).toHaveBeenNthCalledWith(2, 'CapsLock')
+    expect(onUtilityKeyPress).toHaveBeenNthCalledWith(3, 'ShiftLeft')
+    expect(onUtilityKeyPress).toHaveBeenNthCalledWith(4, 'Enter')
+    expect(onKeyPress).not.toHaveBeenCalled()
+  })
+
   it('sends a touched punctuation key through the supplied physical-key callback', () => {
     const onKeyPress = vi.fn()
     render(

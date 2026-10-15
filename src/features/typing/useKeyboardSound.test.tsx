@@ -37,6 +37,20 @@ describe('useKeyboardSound', () => {
     expect(play).toHaveBeenNthCalledWith(2, 'release/GENERIC')
   })
 
+  it.each([
+    ['Tab', 'press/GENERIC_R2'],
+    ['CapsLock', 'press/GENERIC_R3'],
+    ['ShiftLeft', 'press/GENERIC_R4'],
+    ['ShiftRight', 'press/GENERIC_R4'],
+    ['Enter', 'press/GENERIC_R3'],
+  ])('plays physical %s with the MX Blue row sound', (code, pressSound) => {
+    renderHook(() => useKeyboardSound(true, 'mxblue'))
+    act(() => window.dispatchEvent(new KeyboardEvent('keydown', { code })))
+    act(() => window.dispatchEvent(new KeyboardEvent('keyup', { code })))
+    expect(play).toHaveBeenNthCalledWith(1, pressSound)
+    expect(play).toHaveBeenNthCalledWith(2, 'release/GENERIC')
+  })
+
   it('does not play a repeated keydown or load audio when disabled', () => {
     renderHook(() => useKeyboardSound(false, 'turquoise'))
     act(() =>

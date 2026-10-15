@@ -12,6 +12,7 @@ interface KeyboardRowProps {
   pressedCodes: ReadonlySet<string>
   focusLevels: ReadonlyMap<string, KeyFocusLevel>
   onKeyPress?: (code: string, shiftKey: boolean) => void
+  onUtilityKeyPress?: (code: string) => void
   onVirtualShiftChange: Dispatch<SetStateAction<boolean>>
   mobileStyle?: boolean
 }
@@ -26,6 +27,7 @@ export default function KeyboardRow({
   pressedCodes,
   focusLevels,
   onKeyPress,
+  onUtilityKeyPress,
   onVirtualShiftChange,
   mobileStyle = false,
 }: KeyboardRowProps) {
@@ -49,6 +51,7 @@ export default function KeyboardRow({
             onKeyPress?.(code, shiftKey)
             onVirtualShiftChange(() => false)
           }}
+          onUtilityPress={onUtilityKeyPress}
           onShiftToggle={() => onVirtualShiftChange((current) => !current)}
           mobileStyle={mobileStyle}
         />

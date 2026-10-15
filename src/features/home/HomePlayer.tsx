@@ -430,6 +430,7 @@ export default function HomePlayer({
               playVirtualKey(code)
               handleKeyPress(code, shiftKey)
             }}
+            onUtilityKeyPress={playVirtualKey}
             pressedCodes={pressedCodes}
             mobileStyle
           />

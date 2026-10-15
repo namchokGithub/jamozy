@@ -199,6 +199,7 @@ export default function ReviewTypingSession<Outcome extends object>({
               playVirtualKey(code)
               handleKeyPress(code, shiftKey)
             }}
+            onUtilityKeyPress={playVirtualKey}
             pressedCodes={pressedCodes}
             mobileStyle
           />
