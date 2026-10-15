@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Check } from 'lucide-react'
+import { Check, Sparkles } from 'lucide-react'
+import { motion } from 'motion/react'
 import type { HomePlayerData } from '../../application/get-home-player'
 import {
   homeLessonProgress,
@@ -60,6 +61,32 @@ const lessonCardLooks = {
 const toProgressMap = (progress: Progress[]) =>
   new Map(progress.map((entry) => [entry.lessonId, entry]))
 
+const comboLook = (combo: number) => {
+  if (combo >= 50)
+    return {
+      className:
+        'border-[#edc66a] bg-[#fff6d7] text-[#a66b12] shadow-[0_0_14px_rgba(231,181,57,0.32)]',
+      scale: 1.25,
+    }
+  if (combo >= 20)
+    return {
+      className:
+        'border-[#f0b7cd] bg-[#fff0f6] text-[#c04e80] shadow-[0_0_12px_rgba(224,138,159,0.3)]',
+      scale: 1.2,
+    }
+  if (combo >= 10)
+    return {
+      className: 'border-[#f1c6b5] bg-[#fff1e9] text-[#c26e4e]',
+      scale: 1.1,
+    }
+  if (combo >= 5)
+    return {
+      className: 'border-[#b9e2cf] bg-[#e8f8ef] text-[#3e8a70]',
+      scale: 1,
+    }
+  return { className: 'border-[#d9d1ed] bg-[#f2edf9] text-[#7863a8]', scale: 1 }
+}
+
 // Plays the static Home course (DEC-043). The player owns its session from
 // mount on: later loader data never restarts it (DEC-042), and every write
 // goes to the background outbox through HomeServices.
@@ -112,6 +139,8 @@ export default function HomePlayer({
   // Exercises completed on this device that the outbox may not have written.
   const [localDone, setLocalDone] = useState(initialPending)
   const [nowMs, setNowMs] = useState(0)
+  const [combo, setCombo] = useState(0)
+  const [comboBreak, setComboBreak] = useState(0)
   const { feedback, previousFeedback, recordAttempt } = useKeyboardFeedback()
 
   useEffect(() => {
@@ -188,11 +217,24 @@ export default function HomePlayer({
     (code: string, shiftKey: boolean) => {
       const current = useHomePlayerStore.getState()
       const currentSession = current.session?.currentSession
-      recordAttempt(
-        currentSession?.expectedKeys[currentSession.keyIndex],
-        code,
-        shiftKey,
-      )
+      const expected = currentSession?.expectedKeys[currentSession.keyIndex]
+      const correct =
+        expected &&
+        expected.code === code &&
+        (!expected.strictShift || expected.shift === shiftKey)
+      recordAttempt(expected, code, shiftKey)
+      if (correct && currentSession) {
+        const completesLesson =
+          currentSession.keyIndex + 1 === currentSession.expectedKeys.length &&
+          current.session &&
+          current.session.currentIndex + 1 === current.session.exercises.length
+        if (completesLesson) {
+          setCombo(0)
+          setComboBreak((count) => count + 1)
+        } else {
+          setCombo((count) => count + 1)
+        }
+      }
       const { result, finished } = pressKey(code, shiftKey)
       if (!result || !current.lesson) return
       const played = current.lesson
@@ -271,6 +313,7 @@ export default function HomePlayer({
             100,
         )
   const wpm = Math.round(acceptedKeystrokes / 5 / (elapsedSeconds / 60))
+  const comboStyle = comboLook(combo)
   const completedSteps = session?.currentSession.keyIndex ?? 0
   const totalSteps = session?.currentSession.expectedKeys.length ?? 0
   const progressPercent =
@@ -301,7 +344,7 @@ export default function HomePlayer({
       {active && session && lesson ? (
         <div className="mt-1">
           <div className="mt-2 rounded-3xl bg-[#fffaf6] p-3 text-center sm:p-4 shadow-[0_0_30px_-20px_rgba(87,65,45,0.35)]">
-            <div className="flex h-5 justify-end gap-1.5">
+            <div className="flex min-h-5 flex-wrap justify-end gap-1.5">
               <span className="rounded-lg border border-[#eadfd4] bg-[#fffdf9] px-2 py-0.5 text-[10px] font-semibold text-[#98a2b3]">
                 WPM <strong className="ml-0.5 text-[#667085]">{wpm}</strong>
               </span>
@@ -309,6 +352,30 @@ export default function HomePlayer({
                 ACC{' '}
                 <strong className="ml-0.5 text-[#667085]">{accuracy}%</strong>
               </span>
+              <motion.span
+                animate={{
+                  scale: [
+                    comboStyle.scale,
+                    comboStyle.scale * 1.12,
+                    comboStyle.scale,
+                  ],
+                }}
+                transition={{ duration: 0.24, ease: 'easeOut' }}
+                className={`relative inline-flex items-center gap-1 overflow-hidden rounded-lg border px-2 py-0.5 text-[10px] font-bold ${comboStyle.className}`}
+              >
+                {comboBreak > 0 && (
+                  <motion.span
+                    key={comboBreak}
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 bg-[#f28c78]"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: [0, 0.65, 0] }}
+                    transition={{ duration: 0.42, ease: 'easeOut' }}
+                  />
+                )}
+                <Sparkles aria-hidden="true" size={12} strokeWidth={2.25} />
+                <span className="relative">Combo x{combo}</span>
+              </motion.span>
 
               {session && lesson && (
                 <span className="rounded-lg border border-[#eadfd4] bg-[#f2edf9] px-2 py-0.5 text-[10px] font-semibold text-[#7863a8]!">
@@ -436,9 +503,10 @@ export default function HomePlayer({
                   key={entry.id}
                   type="button"
                   aria-current={current ? 'true' : undefined}
-                  onClick={() =>
+                  onClick={() => {
+                    setCombo(0)
                     open({ unitId: visibleUnit.id, lessonId: entry.id })
-                  }
+                  }}
                   className={`flex w-44 shrink-0 flex-col rounded-3xl border bg-[#fffdf9] p-4 text-left shadow-[0_14px_35px_-28px_rgba(54,41,31,0.7)] transition hover:-translate-y-0.5 sm:w-auto ${current ? 'border-[#e08a9f] ring-1 ring-[#e08a9f]' : look.border}`}
                 >
                   <span className="w-fit rounded-lg bg-[#f2edf9] px-2 py-1 text-xs font-bold text-[#7863a8]">
