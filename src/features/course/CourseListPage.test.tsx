@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import CourseListPage from './CourseListPage'
@@ -184,5 +184,42 @@ describe('CourseListPage', () => {
 
     const link = await screen.findByRole('link', { name: 'Profile' })
     expect(link).toHaveAttribute('href', '/profile')
+  })
+
+  it('closes the sign-in modal when revalidation confirms authentication', async () => {
+    let isAuthenticated = false
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/',
+          Component: CourseListPage,
+          loader: async () => ({
+            page: Promise.resolve({
+              courses: [],
+              dueReviewCount: 0,
+              displayName: 'Learner',
+              isAuthenticated,
+            }),
+            settings: Promise.resolve(defaultSettings()),
+          }),
+        },
+      ],
+      { initialEntries: ['/'] },
+    )
+    render(<RouterProvider router={router} />)
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Sign in' }))
+    expect(screen.getByRole('dialog', { name: 'Sign in' })).toBeInTheDocument()
+
+    isAuthenticated = true
+    await act(async () => {
+      router.revalidate()
+    })
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('dialog', { name: 'Sign in' }),
+      ).not.toBeInTheDocument(),
+    )
   })
 })

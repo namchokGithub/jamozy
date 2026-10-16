@@ -63,6 +63,7 @@ export default function CourseListPage() {
             <Await resolve={page}>
               {({ displayName, isAuthenticated }) => (
                 <AccountNav
+                  key={isAuthenticated ? 'authenticated' : 'guest'}
                   displayName={displayName}
                   isAuthenticated={isAuthenticated}
                   settings={settings}

@@ -265,8 +265,6 @@ export const router = createBrowserRouter([
       userProfileRepo,
       ensureUser: getActiveUser,
       auth: firebaseAuthRepo,
-      getActiveSession: () => sessionManager.getActiveSession(),
-      migrateGuestData,
       onePage: {
         courseRepo,
         lessonRepo,
