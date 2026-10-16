@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { useLoaderData, useFetcher } from 'react-router'
 import { Award, BookOpen, Clock, Gauge, Keyboard, Target } from 'lucide-react'
+import { motion, useReducedMotion } from 'motion/react'
 import type { ProfileLoaderData } from './ProfilePage.loader'
 import { formatTypingTime } from './format-typing-time'
 import { PageNav } from '../../components/ui/PageNav'
@@ -18,6 +19,187 @@ const accents = {
 }
 
 const cardClass = 'rounded-3xl border border-line bg-card shadow-card'
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const ranks = [
+  {
+    minimumLevel: 100,
+    name: 'Genesis',
+    image: '/ranking/WebP/128w/9-Genesis@128.webp',
+    badgeClass: 'border-rose-200 bg-rose-50 text-rose-700',
+    ringClass:
+      'border-rose-400 bg-rose-50 shadow-[0_0_28px_-8px_rgba(200,79,130,0.65)]',
+  },
+  {
+    minimumLevel: 90,
+    name: 'Divine',
+    image: '/ranking/WebP/128w/8-Divine@128.webp',
+    badgeClass: 'border-peach-300 bg-peach-50 text-peach-700',
+    ringClass:
+      'border-peach-300 bg-peach-50 shadow-[0_0_28px_-8px_rgba(227,173,115,0.7)]',
+  },
+  {
+    minimumLevel: 80,
+    name: 'Mythic',
+    image: '/ranking/WebP/128w/7-Mythic@128.webp',
+    badgeClass: 'border-coral-200 bg-coral-50 text-coral-700',
+    ringClass:
+      'border-coral-300 bg-coral-50 shadow-[0_0_28px_-8px_rgba(188,108,93,0.65)]',
+  },
+  {
+    minimumLevel: 65,
+    name: 'Legendary',
+    image: '/ranking/WebP/128w/6-Legendary@128.webp',
+    badgeClass: 'border-peach-300 bg-peach-50 text-peach-700',
+    ringClass:
+      'border-peach-300 bg-peach-50 shadow-[0_0_28px_-8px_rgba(227,173,115,0.7)]',
+  },
+  {
+    minimumLevel: 50,
+    name: 'Unique',
+    image: '/ranking/WebP/128w/5-Unique@128.webp',
+    badgeClass: 'border-rose-200 bg-rose-50 text-rose-700',
+    ringClass:
+      'border-rose-400 bg-rose-50 shadow-[0_0_28px_-8px_rgba(200,79,130,0.65)]',
+  },
+  {
+    minimumLevel: 35,
+    name: 'Epic',
+    image: '/ranking/WebP/128w/4-Epic@128.webp',
+    badgeClass: 'border-lavender-300 bg-lavender-100 text-lavender-700',
+    ringClass:
+      'border-lavender-400 bg-lavender-100 shadow-[0_0_28px_-8px_rgba(157,139,200,0.65)]',
+  },
+  {
+    minimumLevel: 20,
+    name: 'Rare',
+    image: '/ranking/WebP/128w/3-Rare@128.webp',
+    badgeClass: 'border-sky-300 bg-sky-100 text-sky-700',
+    ringClass:
+      'border-sky-300 bg-sky-100 shadow-[0_0_28px_-8px_rgba(63,111,174,0.45)]',
+  },
+  {
+    minimumLevel: 10,
+    name: 'Uncommon',
+    image: '/ranking/WebP/128w/2-Uncommon@128.webp',
+    badgeClass: 'border-mint-200 bg-mint-50 text-mint-700',
+    ringClass:
+      'border-mint-400 bg-mint-50 shadow-[0_0_28px_-8px_rgba(95,174,148,0.6)]',
+  },
+  {
+    minimumLevel: 1,
+    name: 'Normal',
+    image: '/ranking/WebP/128w/1-Normal@128.webp',
+    badgeClass: 'border-line bg-sand text-ink-muted',
+    ringClass: 'border-line-strong bg-sand shadow-card',
+  },
+] as const
+
+type RankName = (typeof ranks)[number]['name']
+
+interface RankAnimation {
+  floatDistance: number
+  floatDuration: number
+  glow: { color: string; minimumBlur: number; maximumBlur: number } | null
+  sparkleCount: number
+  sparkleClass: string
+}
+
+const rankAnimations: Record<RankName, RankAnimation> = {
+  Normal: {
+    floatDistance: 0,
+    floatDuration: 0,
+    glow: null,
+    sparkleCount: 0,
+    sparkleClass: '',
+  },
+  Uncommon: {
+    floatDistance: 2,
+    floatDuration: 3.4,
+    glow: null,
+    sparkleCount: 0,
+    sparkleClass: '',
+  },
+  Rare: {
+    floatDistance: 3,
+    floatDuration: 3,
+    glow: { color: 'rgba(63, 111, 174, 0.4)', minimumBlur: 5, maximumBlur: 10 },
+    sparkleCount: 0,
+    sparkleClass: '',
+  },
+  Epic: {
+    floatDistance: 3,
+    floatDuration: 3,
+    glow: {
+      color: 'rgba(157, 139, 200, 0.45)',
+      minimumBlur: 6,
+      maximumBlur: 12,
+    },
+    sparkleCount: 0,
+    sparkleClass: '',
+  },
+  Unique: {
+    floatDistance: 3,
+    floatDuration: 3,
+    glow: {
+      color: 'rgba(200, 79, 130, 0.45)',
+      minimumBlur: 6,
+      maximumBlur: 13,
+    },
+    sparkleCount: 1,
+    sparkleClass: 'text-rose-500',
+  },
+  Legendary: {
+    floatDistance: 3,
+    floatDuration: 3,
+    glow: {
+      color: 'rgba(227, 173, 115, 0.5)',
+      minimumBlur: 7,
+      maximumBlur: 14,
+    },
+    sparkleCount: 2,
+    sparkleClass: 'text-peach-300',
+  },
+  Mythic: {
+    floatDistance: 3,
+    floatDuration: 2.8,
+    glow: {
+      color: 'rgba(188, 108, 93, 0.62)',
+      minimumBlur: 8,
+      maximumBlur: 18,
+    },
+    sparkleCount: 2,
+    sparkleClass: 'text-coral-400',
+  },
+  Divine: {
+    floatDistance: 3,
+    floatDuration: 3.2,
+    glow: {
+      color: 'rgba(227, 173, 115, 0.58)',
+      minimumBlur: 8,
+      maximumBlur: 17,
+    },
+    sparkleCount: 3,
+    sparkleClass: 'text-peach-300',
+  },
+  Genesis: {
+    floatDistance: 2,
+    floatDuration: 4,
+    glow: {
+      color: 'rgba(200, 79, 130, 0.64)',
+      minimumBlur: 10,
+      maximumBlur: 21,
+    },
+    sparkleCount: 3,
+    sparkleClass: 'text-rose-500',
+  },
+}
+
+const sparklePositions = [
+  'left-0 top-1',
+  'right-0 top-4',
+  'bottom-0 right-4',
+] as const
 
 export default function ProfilePage() {
   const { summary } = useLoaderData() as ProfileLoaderData
@@ -68,6 +250,12 @@ export default function ProfilePage() {
     },
   ]
   const aggregate = summary.sessionAggregate
+  const rank = rankForLevel(summary.level)
+  const expRemaining = Math.max(
+    summary.expToNextLevel - summary.expIntoLevel,
+    0,
+  )
+  const canRebirth = summary.level >= 100
   const aggregateStats = [
     { label: 'EXP earned', value: `+${aggregate.exp}` },
     {
@@ -91,17 +279,33 @@ export default function ProfilePage() {
   return (
     <PageSurface contentClassName="max-w-5xl">
       <PageNav backTo="/" backLabel="Home" />
-      <section className={`${cardClass} p-7`}>
+      <section className={`${cardClass} relative overflow-hidden p-7`}>
+        <div
+          className={`absolute right-5 top-5 flex h-20 w-20 items-center justify-center rounded-full border-4 sm:right-7 sm:top-7 sm:h-24 sm:w-24 ${rank.ringClass}`}
+        >
+          <RankMascot rank={rank} />
+        </div>
         <p className="text-sm font-semibold text-coral-600">
           YOUR KOREAN CORNER
         </p>
-        <h1 className="mt-1 text-3xl font-bold tracking-tight text-ink">
+        <h1 className="mt-1 pr-24 text-3xl font-bold tracking-tight text-ink sm:pr-32">
           Level {summary.level}
         </h1>
-        <div className="mt-5 flex justify-end">
-          <p className="text-sm font-semibold text-muted">
+        <div className="mt-2 flex items-center gap-2">
+          <span className="text-sm font-medium text-muted">Rank:</span>
+          <span
+            className={`rounded-full border px-2.5 py-1 text-xs font-bold tracking-wide ${rank.badgeClass}`}
+          >
+            {rank.name}
+          </span>
+        </div>
+        <div className="mt-6 flex items-end justify-between gap-4">
+          <p className="text-sm font-bold text-ink">
             {formatExp(summary.expIntoLevel)} /{' '}
             {formatExp(summary.expToNextLevel)} EXP
+          </p>
+          <p className="text-xs font-medium text-muted">
+            {formatExp(expRemaining)} EXP to next level
           </p>
         </div>
         <progress
@@ -110,23 +314,38 @@ export default function ProfilePage() {
           className="mt-2 block h-3 w-full appearance-none overflow-hidden rounded-full bg-mint-50 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-mint-500 [&::-webkit-progress-bar]:bg-mint-50 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-mint-500"
           aria-label="EXP progress"
         />
-        <dl className="mt-5 grid grid-cols-2 gap-3 text-sm text-muted">
-          <div>
-            <dt>Rebirths</dt>
-            <dd className="font-bold text-ink">{summary.rebirthCount ?? 0}</dd>
+        <dl className="mt-5 grid grid-cols-2 gap-3">
+          <div className="rounded-2xl border border-line-soft bg-sand/70 px-4 py-3">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-muted">
+              Rebirths
+            </dt>
+            <dd className="mt-1 text-xl font-bold text-ink">
+              {summary.rebirthCount ?? 0}
+            </dd>
           </div>
-          <div>
-            <dt>Perk Points earned</dt>
-            <dd className="font-bold text-ink">
+          <div className="rounded-2xl border border-line-soft bg-sand/70 px-4 py-3">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-muted">
+              Perk Points
+            </dt>
+            <dd className="mt-1 text-xl font-bold text-ink">
               {summary.perkPointsEarned ?? 0}
             </dd>
           </div>
         </dl>
-        {summary.level >= 100 && (
-          <Button className="mt-5" onClick={() => setConfirming(true)}>
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <Button
+            variant={canRebirth ? 'primary' : 'secondary'}
+            disabled={!canRebirth}
+            onClick={() => setConfirming(true)}
+          >
             Rebirth
           </Button>
-        )}
+          {!canRebirth && (
+            <p className="text-xs font-medium text-muted">
+              Unlocks at Level 100
+            </p>
+          )}
+        </div>
       </section>
       <Modal
         open={confirming && !closesRebirthModal(fetcher.data)}
@@ -203,10 +422,78 @@ export default function ProfilePage() {
 }
 
 function formatExp(value: number): string {
-  if (value < 1_000) return String(value)
-  if (value < 1_000_000) return `${(value / 1_000).toFixed(2)}K`
-  if (value < 1_000_000_000) return `${(value / 1_000_000).toFixed(2)}M`
-  return `${(value / 1_000_000_000).toFixed(2)}B`
+  return new Intl.NumberFormat('en-US').format(value)
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export function rankForLevel(level: number) {
+  return ranks.find((rank) => level >= rank.minimumLevel) ?? ranks.at(-1)!
+}
+
+export function RankMascot({ rank }: { rank: (typeof ranks)[number] }) {
+  const reducedMotion = useReducedMotion()
+  const animation = rankAnimations[rank.name]
+  const glow = animation.glow
+  const animatedProperties = reducedMotion
+    ? undefined
+    : {
+        ...(animation.floatDistance > 0
+          ? { y: [0, -animation.floatDistance, 0] }
+          : {}),
+        ...(glow
+          ? {
+              filter: [
+                `drop-shadow(0 0 ${glow.minimumBlur}px ${glow.color})`,
+                `drop-shadow(0 0 ${glow.maximumBlur}px ${glow.color})`,
+                `drop-shadow(0 0 ${glow.minimumBlur}px ${glow.color})`,
+              ],
+            }
+          : {}),
+      }
+
+  return (
+    <>
+      <motion.img
+        src={rank.image}
+        alt={`${rank.name} rank mascot`}
+        width="88"
+        height="88"
+        className="h-[72px] w-[72px] object-contain sm:h-[88px] sm:w-[88px]"
+        animate={animatedProperties}
+        transition={{
+          y: {
+            duration: animation.floatDuration,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          },
+          filter: { duration: 3.2, repeat: Infinity, ease: 'easeInOut' },
+        }}
+      />
+      {!reducedMotion &&
+        Array.from({ length: animation.sparkleCount }, (_, index) => (
+          <motion.span
+            key={sparklePositions[index]}
+            aria-hidden="true"
+            className={`pointer-events-none absolute text-sm ${sparklePositions[index]} ${animation.sparkleClass}`}
+            initial={{ opacity: 0, scale: 0.5, rotate: -20 }}
+            animate={{
+              opacity: [0, 0, 1, 0],
+              scale: [0.5, 0.5, 1.1, 0.5],
+              rotate: [-20, -20, 20, 40],
+            }}
+            transition={{
+              duration: 3.6,
+              delay: index * 0.85,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              times: [0, 0.6, 0.78, 1],
+            }}
+          >
+            ✦
+          </motion.span>
+        ))}
+    </>
+  )
 }
 
 function SectionHeader({

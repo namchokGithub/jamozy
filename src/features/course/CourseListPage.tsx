@@ -20,6 +20,8 @@ import OnePageLearningPlayer from '../home/OnePageLearningPlayer'
 import HomePlayer from '../home/HomePlayer'
 import HomePlayerSkeleton from '../home/HomePlayerSkeleton'
 import { SiteFooter } from '../../components/ui/SiteFooter'
+import { QuickSettingsModal } from '../settings/QuickSettingsModal'
+import type { UserSettings } from '../../domain/models/user-profile'
 
 type CourseListActionData = {
   displayName?: string
@@ -63,6 +65,7 @@ export default function CourseListPage() {
                 <AccountNav
                   displayName={displayName}
                   isAuthenticated={isAuthenticated}
+                  settings={settings}
                 />
               )}
             </Await>
@@ -145,9 +148,11 @@ export default function CourseListPage() {
 function AccountNav({
   displayName,
   isAuthenticated,
+  settings,
 }: {
   displayName: string
   isAuthenticated: boolean
+  settings: Promise<UserSettings>
 }) {
   const fetcher = useFetcher<CourseListActionData>()
   const { showError, showSuccess } = useSnackbar()
@@ -156,6 +161,7 @@ function AccountNav({
   const [draftName, setDraftName] = useState(name)
   const [showAuth, setShowAuth] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [showQuickSettings, setShowQuickSettings] = useState(false)
   const signOutPending = useRef(false)
 
   useEffect(() => {
@@ -294,13 +300,29 @@ function AccountNav({
             <UserRound aria-hidden="true" size={18} />
           </Link>
         )}
-        <Link
-          to="/settings"
-          aria-label="Settings"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface/80 text-ink-muted shadow-sm transition hover:-translate-y-0.5 hover:border-line-hover hover:text-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
-        >
-          <Settings aria-hidden="true" size={18} />
-        </Link>
+        <div className="relative">
+          <button
+            type="button"
+            aria-label="Settings"
+            aria-expanded={showQuickSettings}
+            onClick={() => setShowQuickSettings((open) => !open)}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-line bg-surface/80 text-ink-muted shadow-sm transition hover:-translate-y-0.5 hover:border-line-hover hover:text-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
+          >
+            <Settings aria-hidden="true" size={18} />
+          </button>
+          {showQuickSettings && (
+            <Suspense fallback={null}>
+              <Await resolve={settings}>
+                {(loadedSettings) => (
+                  <QuickSettingsModal
+                    settings={loadedSettings}
+                    onClose={() => setShowQuickSettings(false)}
+                  />
+                )}
+              </Await>
+            </Suspense>
+          )}
+        </div>
       </nav>
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </>

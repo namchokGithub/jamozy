@@ -3,7 +3,13 @@ import type { LessonRepository } from '../domain/repositories/lesson-repository'
 import type { ProgressRepository } from '../domain/repositories/progress-repository'
 import type { UserProfileRepository } from '../domain/repositories/user-profile-repository'
 import type { Progress } from '../domain/models/progress'
-import { defaultUserProfile, levelFromExp, type UserProfile } from '../domain/models/user-profile'
+import {
+  awardProgressionExp,
+  defaultUserProfile,
+  levelFromExp,
+  progressionOf,
+  type UserProfile,
+} from '../domain/models/user-profile'
 import { updateProgress, type AttemptResult } from './update-progress'
 import { findContiguousFrontier, getOrderedLearningPath } from './learning-path-order'
 
@@ -71,11 +77,15 @@ export async function completeLesson(
   )
 
   if (wasAlreadyCompleted) {
-    const profile = await deps.userProfileRepo.getUserProfile(userId)
+    const profile =
+      (await deps.userProfileRepo.getUserProfile(userId)) ??
+      defaultUserProfile(userId, now)
+    const progression = progressionOf(profile)
     return {
       progress,
       expGained: 0,
-      level: levelFromExp(profile?.exp ?? 0),
+      // Level of the current Rebirth cycle (docs/LEVELING.md, Level Curve).
+      level: levelFromExp(progression.currentExp, progression.rebirthCount),
       unlockedNextLessonId: null,
     }
   }
@@ -101,9 +111,11 @@ export async function completeLesson(
     defaultUserProfile(userId, now)
   const wordsInLesson = lesson?.exercises.length ?? 0
   const priorCompleted = profile.stats.lessonsCompleted
+  const progression = awardProgressionExp(progressionOf(profile), expGained)
   const updatedProfile: UserProfile = {
     ...profile,
     exp: profile.exp + expGained,
+    progression,
     stats: {
       lessonsCompleted: priorCompleted + 1,
       wordsPracticed: profile.stats.wordsPracticed + wordsInLesson,
@@ -123,7 +135,7 @@ export async function completeLesson(
   return {
     progress: completedProgress,
     expGained,
-    level: levelFromExp(updatedProfile.exp),
+    level: levelFromExp(progression.currentExp, progression.rebirthCount),
     unlockedNextLessonId: nextLessonId,
   }
 }

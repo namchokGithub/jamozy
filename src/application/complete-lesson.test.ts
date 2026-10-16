@@ -7,6 +7,7 @@ import {
   FakeUserProfileRepository,
 } from '../test/fakes'
 import type { Course } from '../domain/models/course'
+import { defaultUserProfile } from '../domain/models/user-profile'
 import type { Unit } from '../domain/models/unit'
 import type { Lesson, LessonExercise } from '../domain/models/lesson'
 
@@ -180,4 +181,39 @@ describe('completeLesson', () => {
     expect(profile?.stats.wordsPracticed).toBe(2)
     expect(profile?.stats.totalTypingTimeSeconds).toBe(60)
   })
+
+  describe('Level Curve (docs/LEVELING.md)', () => {
+    // Rebirth 1 needs 57 EXP for Lv.2 and 132 more for Lv.3; Rebirth 0 needs 50 and 115.
+    async function withProgression(deps: CompleteLessonDeps, currentExp: number, rebirthCount: number) {
+      await deps.userProfileRepo.saveUserProfile('u1', {
+        ...defaultUserProfile('u1', now),
+        exp: 999_999,
+        progression: { currentExp, totalExpEarned: currentExp, highestLevel: 1, rebirthCount, perkPointsEarned: rebirthCount },
+      })
+    }
+
+    it('adds first-completion EXP to the current cycle and levels with the Rebirth multiplier', async () => {
+      const deps = makeDeps()
+      await withProgression(deps, 0, 1)
+
+      const outcome = await completeLesson(deps, 'u1', 'l1', { accuracy: 100, speedWpm: 30, durationSeconds: 60 }, now)
+
+      expect(outcome.expGained).toBe(170)
+      expect(outcome.level).toBe(2)
+      const profile = await deps.userProfileRepo.getUserProfile('u1')
+      expect(profile?.progression).toMatchObject({ currentExp: 170, totalExpEarned: 170, highestLevel: 2, rebirthCount: 1 })
+    })
+
+    it('reports the level of the current cycle for an already completed lesson', async () => {
+      const deps = makeDeps()
+      await markCompleted(deps, 'u1', 'l1')
+      await withProgression(deps, 170, 1)
+
+      const outcome = await completeLesson(deps, 'u1', 'l1', { accuracy: 100, speedWpm: 30, durationSeconds: 60 }, now)
+
+      expect(outcome.expGained).toBe(0)
+      expect(outcome.level).toBe(2)
+    })
+  })
 })
+

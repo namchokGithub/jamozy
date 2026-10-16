@@ -1,8 +1,9 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import CourseListPage from './CourseListPage'
 import type { Course } from '../../domain/models/course'
+import type { UserSettings } from '../../domain/models/user-profile'
 
 function makeCourse(id: string): Course {
   return {
@@ -24,6 +25,20 @@ function pageData(courses: Course[], dueReviewCount: number) {
       displayName: 'Guest',
       isAuthenticated: false,
     }),
+    settings: Promise.resolve(defaultSettings()),
+  }
+}
+
+function defaultSettings(): UserSettings {
+  return {
+    soundEnabled: true,
+    keyboardSoundPack: 'turquoise',
+    showKeyboard: true,
+    showEnglishKeys: true,
+    keyboardOpacity: 1,
+    romanizationEnabled: true,
+    meaningLanguage: 'both',
+    theme: 'light',
   }
 }
 
@@ -131,7 +146,7 @@ describe('CourseListPage', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('always shows a Settings link', async () => {
+  it('opens quick settings and links to the full settings page', async () => {
     const router = createMemoryRouter(
       [
         {
@@ -144,8 +159,14 @@ describe('CourseListPage', () => {
     )
     render(<RouterProvider router={router} />)
 
-    const link = await screen.findByRole('link', { name: 'Settings' })
-    expect(link).toHaveAttribute('href', '/settings')
+    fireEvent.click(await screen.findByRole('button', { name: 'Settings' }))
+
+    expect(
+      await screen.findByRole('dialog', { name: 'Quick settings' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: 'Open all settings →' }),
+    ).toHaveAttribute('href', '/settings')
   })
 
   it('always shows a Profile link', async () => {

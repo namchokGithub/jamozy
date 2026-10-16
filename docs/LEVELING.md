@@ -346,6 +346,28 @@ Lv.90–99    Divine ✦✦✦
 Lv.100+     Genesis ✦✦✦
 ```
 
+### EXP ที่ต้องใช้ต่อ Rank (โดยประมาณ)
+
+EXP สะสมตั้งแต่ Lv.1 ของรอบ Rebirth ปัจจุบัน จนถึง Level แรกของแต่ละ Rank
+คำนวณจาก Level Curve ด้านบน
+
+| Rank      | ถึง Level | Rebirth 0 | Rebirth 1 (×1.15) | Rebirth 5 (×1.75) |
+| --------- | --------: | --------: | ----------------: | ----------------: |
+| Normal    |      Lv.1 |         0 |                 0 |                 0 |
+| Uncommon  |     Lv.10 |     ~3.2k |             ~3.7k |             ~5.6k |
+| Rare      |     Lv.20 |      ~16k |              ~18k |              ~27k |
+| Epic      |     Lv.35 |      ~55k |              ~63k |              ~96k |
+| Unique    |     Lv.50 |     ~122k |             ~140k |             ~213k |
+| Legendary |     Lv.65 |     ~218k |             ~250k |             ~381k |
+| Mythic    |     Lv.80 |     ~345k |             ~396k |             ~603k |
+| Divine    |     Lv.90 |     ~447k |             ~514k |             ~783k |
+| Genesis   |    Lv.100 |     ~565k |             ~649k |             ~988k |
+
+หลัง Lv.100 Soft Cap ทำให้ EXP เพิ่มเร็วมาก: Lv.110 ≈ 962k และ Lv.120 ≈ 2.29M
+(Rebirth 0)
+
+Rebirth อื่นคูณตามสัดส่วน: EXP ที่ต้องใช้ ≈ ค่า Rebirth 0 × (1 + 0.15 × Rebirth)
+
 ### Color Information
 
 #### Prismatic Pastel
