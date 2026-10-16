@@ -63,12 +63,11 @@ A lesson session plays all of its exercises once in a fresh shuffled order,
 then moves on to the next lesson (and unit) with a short notice, looping back
 to the first lesson after the last one. A lesson
 completes once every exercise has been typed at least once, across sessions
-and devices: first completion grants difficulty-based EXP per exercise, with
-an additional bonus for a perfect exercise; a full replay awards each exercise
-by its difficulty. Home lessons create no review items. See
-[`docs/LEVELING.md`](docs/LEVELING.md), [[DEC-045]], and [[DEC-046]] for the
-reward amounts and bonus calculation. Every save runs in the background through a retrying
-local outbox.
+and devices: first completion grants EXP based on the lesson's accuracy, and
+a full replay grants a flat 15 EXP. Home lessons create no review items.
+Difficulty-based EXP per exercise ([`docs/LEVELING.md`](docs/LEVELING.md),
+[[DEC-045]], [[DEC-046]]) is approved but not implemented yet. Every save runs
+in the background through a retrying local outbox.
 
 When no Home course is published, Home falls back to the Learning Path player
 ([[DEC-042]]). The Hero and learning-path cards remain below the player.
@@ -426,28 +425,18 @@ are implemented. Player Stats ([[DEC-049]]), key-level jamo stats
 ([[DEC-050]]), and Weak Jamo practice with a per-jamo accuracy grid
 ([[DEC-051]]) record data for every mode. Keyboard sound feedback is
 implemented with three persisted pack choices and Turquoise Tealio as the
-default ([[DEC-052]]). The Home player
-and keyboard sounds are awaiting final manual verification. See the
-[Progress Tracker](docs/PROGRESS.md) for the detailed current status.
+default ([[DEC-052]]). Light, Dark, and System themes apply across the app.
+See the [Progress Tracker](docs/PROGRESS.md) for the detailed current status.
 
 ### MVP
 
-MVP is complete apart from final user-owned verification of the Home player and
-keyboard sounds. See [Progress Tracker](docs/PROGRESS.md) for the verification
-checklist and post-MVP roadmap.
+MVP is complete apart from difficulty-based EXP rewards. See
+[Progress Tracker](docs/PROGRESS.md) for open work and the post-MVP roadmap.
 
 ### Next / Post-MVP
 
-- Complete the Home player's manual verification.
-- Deploy the updated Firestore Rules (content delete denied) and manually verify
-  the Admin BO hardening pass.
-- Deploy `firestore.indexes.json` (new `order` DESC indexes for Units and
-  Lessons) before the Admin code that creates content with them.
-- Deploy the content-counter code, then run `pnpm content:backfill-counts`
-  ([[DEC-047]]).
 - Set up a Cloudflare Pages deployment pipeline and use Preview deployments
   for release checks.
-- Dark-mode CSS
 - Dedicated Lesson Result visual redesign
 - Difficulty-based EXP rewards ([[DEC-045]], [[DEC-046]])
 - Profile UI for Player Stats (today/week/month, streaks, records, jamo
