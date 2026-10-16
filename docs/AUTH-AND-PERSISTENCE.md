@@ -167,10 +167,10 @@ and deployment of the checked-in Firestore rules remain user-owned. Rebirth
 record immutability protects record retries, but the current owner-writable
 profile rule does not prevent a signed-in client from altering aggregate
 profile fields; authoritative anti-tamper enforcement would require trusted
-server writes. The receipt-backed Lesson/Home paths update canonical
-`ProgressionState`; the older `completeLesson` path also adds its EXP to
-`ProgressionState` and reports the Rebirth-aware level, but it has no session
-receipt, so a retried write can award EXP twice. See `docs/PROGRESS.md`.
+server writes. Every EXP award goes through a receipt-backed session
+submission that updates canonical `ProgressionState`; the legacy
+`completeLesson` path without a receipt was removed on 2026-10-16. See
+`docs/PROGRESS.md`.
 
 ## Historical implementation
 

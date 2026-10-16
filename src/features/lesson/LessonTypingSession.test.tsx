@@ -7,7 +7,7 @@ import LessonTypingSession, {
 } from './LessonTypingSession'
 import { useLessonSessionStore } from '../typing/lesson-session-store'
 import type { Lesson } from '../../domain/models/lesson'
-import type { CompleteLessonOutcome } from '../../application/complete-lesson'
+import type { CompleteLessonOutcome } from '../../application/complete-lesson-session'
 import type { UserSettings } from '../../domain/models/user-profile'
 
 const { playSound, loadSound, unlockSound } = vi.hoisted(() => ({

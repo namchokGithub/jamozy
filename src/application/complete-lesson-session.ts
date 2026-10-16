@@ -12,7 +12,6 @@ import {
   levelFromExp,
   progressionOf,
 } from '../domain/models/user-profile'
-import type { CompleteLessonOutcome } from './complete-lesson'
 import {
   findContiguousFrontier,
   getOrderedLearningPath,
@@ -27,6 +26,13 @@ export interface CompleteLessonSessionDeps {
   userProfileRepo: UserProfileRepository
   reviewRepo: ReviewRepository
   sessionSubmissionRepo: SessionSubmissionRepository
+}
+
+export interface CompleteLessonOutcome {
+  progress: Progress
+  expGained: number
+  level: number
+  unlockedNextLessonId: string | null
 }
 
 export function expForAccuracy(accuracy: number): number {

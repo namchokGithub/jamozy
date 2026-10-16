@@ -1517,7 +1517,9 @@ is still owner-writable, so this is not an anti-tamper guarantee against a
 malicious signed-in client. Perk spending, allocation, Rank, and achievements
 are not implemented. The legacy `completeLesson` award path has not yet moved
 to receipt-gated canonical progression; until it does, new Rebirth-safe EXP
-guarantees apply to the receipt-backed Lesson/Home submission paths. The Web
+guarantees apply to the receipt-backed Lesson/Home submission paths. (Update
+2026-10-16: the legacy `completeLesson` path had no production caller and was
+removed, so every EXP award is now receipt-gated.) The Web
 Firestore SDK cannot read a collection query inside a transaction, so a
 simultaneous Rebirth after the migration record-set read can temporarily leave
 its aggregate counter stale; a later reconciliation is required to repair that
