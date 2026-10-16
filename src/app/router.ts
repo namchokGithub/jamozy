@@ -322,6 +322,7 @@ export const router = createBrowserRouter([
     }),
     action: createSubmitReviewSessionAction({
       reviewRepo,
+      lessonRepo,
       sessionSubmissionRepo,
       userProfileRepo,
       ensureUser: getActiveUser,

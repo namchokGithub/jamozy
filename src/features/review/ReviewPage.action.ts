@@ -5,6 +5,7 @@ import {
   submitReviewSession,
   type SubmitReviewSessionOutcome,
 } from '../../application/submit-review-session'
+import type { LessonRepository } from '../../domain/repositories/lesson-repository'
 import type { ReviewRepository } from '../../domain/repositories/review-repository'
 import type { SessionSubmissionRepository } from '../../domain/repositories/session-submission-repository'
 import type { UserProfileRepository } from '../../domain/repositories/user-profile-repository'
@@ -31,6 +32,7 @@ const reviewSessionResultSchema = z.object({
 
 export function createSubmitReviewSessionAction(deps: {
   reviewRepo: ReviewRepository
+  lessonRepo: LessonRepository
   sessionSubmissionRepo: SessionSubmissionRepository
   userProfileRepo?: UserProfileRepository
   ensureUser: () => Promise<{ uid: string }>

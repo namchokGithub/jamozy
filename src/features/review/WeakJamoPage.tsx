@@ -38,9 +38,7 @@ function WeakJamoRound() {
     [],
   )
   const title = `Practice ${targets.map((target) => target.jamo).join(' ')}`
-  const lessonTypes = new Map(
-    exercises.map((exercise) => [exercise.id, exercise.lessonType]),
-  )
+  const byId = new Map(exercises.map((exercise) => [exercise.id, exercise]))
 
   const buildBody = ({
     submissionId,
@@ -57,7 +55,8 @@ function WeakJamoRound() {
     results: results.map((result) => ({
       exerciseId: result.exerciseId,
       targetText: result.targetText,
-      lessonType: lessonTypes.get(result.exerciseId) ?? 'word',
+      lessonType: byId.get(result.exerciseId)?.lessonType ?? 'word',
+      difficulty: byId.get(result.exerciseId)?.difficulty,
       wasCorrect: result.mistakes.length === 0,
       mistakeCount: result.mistakes.length,
       typingSeconds: result.typingSeconds ?? 0,

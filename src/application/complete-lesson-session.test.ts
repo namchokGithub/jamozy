@@ -25,6 +25,31 @@ function makeUnit(id: string): Unit {
   }
 }
 
+function makeExercise(
+  id: string,
+  difficulty: Lesson['exercises'][number]['difficulty'],
+): Lesson['exercises'][number] {
+  return {
+    id,
+    targetText: '가',
+    romanization: null,
+    meaningTh: '',
+    meaningEn: '',
+    difficulty,
+    hint: null,
+  }
+}
+
+function exerciseResult(exerciseId: string | undefined, mistakeCount: number) {
+  return {
+    ...(exerciseId ? { exerciseId } : {}),
+    targetText: '가',
+    mistakeCount,
+    typingSeconds: 1,
+    elapsedSeconds: 1,
+  }
+}
+
 function makeLesson(id: string, unitId: string): Lesson {
   return {
     id,
@@ -49,6 +74,86 @@ function makeLesson(id: string, unitId: string): Lesson {
 }
 
 describe('completeLessonSession', () => {
+  function difficultyDeps() {
+    const lesson = {
+      ...makeLesson('l1', 'u1'),
+      exercises: [makeExercise('e1', 'easy'), makeExercise('e2', 'hard')],
+    }
+    return {
+      courseRepo: new FakeCourseRepository([], [makeUnit('u1')]),
+      lessonRepo: new FakeLessonRepository([lesson]),
+      progressRepo: new FakeProgressRepository(),
+      userProfileRepo: new FakeUserProfileRepository(),
+      reviewRepo: new FakeReviewRepository(),
+      sessionSubmissionRepo: new FakeSessionSubmissionRepository(),
+    }
+  }
+
+  function resultWith(exercises: ReturnType<typeof exerciseResult>[]) {
+    return {
+      accuracy: 90,
+      speedWpm: 20,
+      durationSeconds: 30,
+      startedAtMs: 0,
+      exercisesAttempted: exercises.length,
+      acceptedKeystrokes: 4,
+      rejectedKeystrokes: 1,
+      mistakes: [],
+      exercises,
+    }
+  }
+
+  it('awards difficulty EXP with a perfect bonus on first completion', async () => {
+    const deps = difficultyDeps()
+
+    const outcome = await completeLessonSession(
+      deps,
+      'user1',
+      'l1',
+      resultWith([exerciseResult('e1', 0), exerciseResult('e2', 1)]),
+      'first',
+    )
+
+    expect(outcome.expGained).toBe(50)
+  })
+
+  it('awards practice EXP per exercise on a replay', async () => {
+    const deps = difficultyDeps()
+    await deps.progressRepo.saveProgress('user1', {
+      lessonId: 'l1',
+      status: 'completed',
+      bestAccuracy: 100,
+      bestSpeedWpm: 20,
+      attempts: 1,
+      lastAttemptAt: new Date('2026-01-01'),
+      completedAt: new Date('2026-01-01'),
+    })
+
+    const outcome = await completeLessonSession(
+      deps,
+      'user1',
+      'l1',
+      resultWith([exerciseResult('e1', 0), exerciseResult('e2', 1)]),
+      'replay',
+    )
+
+    expect(outcome.expGained).toBe(13)
+  })
+
+  it('counts an unknown or missing exercise id as easy', async () => {
+    const deps = difficultyDeps()
+
+    const outcome = await completeLessonSession(
+      deps,
+      'user1',
+      'l1',
+      resultWith([exerciseResult('gone', 1), exerciseResult(undefined, 1)]),
+      'unknown',
+    )
+
+    expect(outcome.expGained).toBe(30)
+  })
+
   it('completes the lesson and creates a review item for each reported mistake', async () => {
     const deps = {
       courseRepo: new FakeCourseRepository([], [makeUnit('u1')]),
@@ -149,8 +254,9 @@ describe('completeLessonSession', () => {
       'retry-me',
     )
 
-    expect(first.expGained).toBe(170)
-    expect(retry.expGained).toBe(170)
+    // No per-exercise results: each attempted exercise counts as easy.
+    expect(first.expGained).toBe(15)
+    expect(retry.expGained).toBe(15)
     expect(deps.sessionSubmissionRepo.submissions).toHaveLength(1)
   })
 
@@ -191,7 +297,7 @@ describe('completeLessonSession', () => {
     await deps.userProfileRepo.saveUserProfile('user1', {
       ...profile,
       progression: undefined,
-      sessionAggregate: { ...emptySessionAggregate(), exp: 800 },
+      sessionAggregate: { ...emptySessionAggregate(), exp: 645 },
     })
     const retry = await completeLessonSession(
       deps,
@@ -205,7 +311,7 @@ describe('completeLessonSession', () => {
     expect(retry.level).toBe(5)
   })
 
-  it('awards 15 EXP for an intentional replay of a completed lesson', async () => {
+  it('awards practice EXP for an intentional replay of a completed lesson', async () => {
     const deps = {
       courseRepo: new FakeCourseRepository([], [makeUnit('u1')]),
       lessonRepo: new FakeLessonRepository([makeLesson('l1', 'u1')]),
@@ -242,7 +348,7 @@ describe('completeLessonSession', () => {
       new Date('2026-01-02'),
     )
 
-    expect(outcome.expGained).toBe(15)
+    expect(outcome.expGained).toBe(3)
     expect(outcome.progress.status).toBe('completed')
     expect(outcome.unlockedNextLessonId).toBeNull()
     expect(deps.sessionSubmissionRepo.submissions[0]?.session.isReplay).toBe(

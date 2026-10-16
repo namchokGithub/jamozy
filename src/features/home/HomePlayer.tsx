@@ -257,6 +257,7 @@ export default function HomePlayer({
           lessonId: played.id,
           lessonType: played.type,
           totals: homeReplayTotals(finishedSession),
+          difficulties: played.exercises.map(({ difficulty }) => difficulty),
         })
       // After the last lesson, Home loops back to the first one.
       const next = nextHomeLesson(content.units, played.id)

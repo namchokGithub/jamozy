@@ -21,6 +21,7 @@ const weakJamoSessionSchema = z.object({
         exerciseId: z.string().min(1),
         targetText: z.string(),
         lessonType: z.enum(['character', 'syllable', 'word', 'phrase', 'sentence']),
+        difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
         wasCorrect: z.boolean(),
         mistakeCount: z.number().int().min(0),
         typingSeconds: z.number().min(0),

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createSubmitReviewSessionAction } from './ReviewPage.action'
-import { FakeReviewRepository, FakeSessionSubmissionRepository } from '../../test/fakes'
+import { FakeLessonRepository, FakeReviewRepository, FakeSessionSubmissionRepository } from '../../test/fakes'
 import type { ReviewItem } from '../../domain/models/review-item'
 
 function makeItem(id: string, overrides: Partial<ReviewItem> = {}): ReviewItem {
@@ -24,7 +24,7 @@ describe('createSubmitReviewSessionAction', () => {
     const reviewRepo = new FakeReviewRepository()
     await reviewRepo.addReviewItem('user1', makeItem('a'))
     const ensureUser = vi.fn().mockResolvedValue({ uid: 'user1' })
-    const action = createSubmitReviewSessionAction({ reviewRepo, sessionSubmissionRepo: new FakeSessionSubmissionRepository(), ensureUser })
+    const action = createSubmitReviewSessionAction({ reviewRepo, lessonRepo: new FakeLessonRepository(), sessionSubmissionRepo: new FakeSessionSubmissionRepository(), ensureUser })
 
     const request = new Request('http://localhost/review', {
       method: 'POST',
@@ -41,6 +41,7 @@ describe('createSubmitReviewSessionAction', () => {
     const reviewRepo = new FakeReviewRepository()
     const action = createSubmitReviewSessionAction({
       reviewRepo,
+      lessonRepo: new FakeLessonRepository(),
       sessionSubmissionRepo: new FakeSessionSubmissionRepository(),
       ensureUser: vi.fn().mockResolvedValue({ uid: 'user1' }),
     })
@@ -54,7 +55,7 @@ describe('createSubmitReviewSessionAction', () => {
 
   it('passes valid jamo counts and drops invalid ones without failing the review', async () => {
     const sessionSubmissionRepo = new FakeSessionSubmissionRepository()
-    const action = createSubmitReviewSessionAction({ reviewRepo: new FakeReviewRepository(), sessionSubmissionRepo, ensureUser: async () => ({ uid: 'user1' }) })
+    const action = createSubmitReviewSessionAction({ reviewRepo: new FakeReviewRepository(), lessonRepo: new FakeLessonRepository(), sessionSubmissionRepo, ensureUser: async () => ({ uid: 'user1' }) })
     const body = (submissionId: string, jamoCounts: unknown) => new Request('http://localhost/review', {
       method: 'POST',
       body: JSON.stringify({ submissionId, startedAtMs: 0, durationSeconds: 30, exercisesAttempted: 0, acceptedKeystrokes: 0, rejectedKeystrokes: 0, results: [], jamoCounts }),

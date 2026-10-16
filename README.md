@@ -63,11 +63,11 @@ A lesson session plays all of its exercises once in a fresh shuffled order,
 then moves on to the next lesson (and unit) with a short notice, looping back
 to the first lesson after the last one. A lesson
 completes once every exercise has been typed at least once, across sessions
-and devices: first completion grants EXP based on the lesson's accuracy, and
-a full replay grants a flat 15 EXP. Home lessons create no review items.
-Difficulty-based EXP per exercise ([`docs/LEVELING.md`](docs/LEVELING.md),
-[[DEC-045]], [[DEC-046]]) is approved but not implemented yet. Every save runs
-in the background through a retrying local outbox.
+and devices: first completion grants Easy 15, Medium 25, or Hard 30 EXP per
+exercise, plus 5 for an exercise typed without mistakes; a full replay grants
+Easy 3, Medium 5, or Hard 10 EXP per exercise. Home lessons create no review
+items. See [`docs/LEVELING.md`](docs/LEVELING.md), [[DEC-045]], and
+[[DEC-046]]. Every save runs in the background through a retrying local outbox.
 
 When no Home course is published, Home falls back to the Learning Path player
 ([[DEC-042]]). The Hero and learning-path cards remain below the player.
@@ -430,15 +430,14 @@ See the [Progress Tracker](docs/PROGRESS.md) for the detailed current status.
 
 ### MVP
 
-MVP is complete apart from difficulty-based EXP rewards. See
-[Progress Tracker](docs/PROGRESS.md) for open work and the post-MVP roadmap.
+MVP is complete. See [Progress Tracker](docs/PROGRESS.md) for open work and
+the post-MVP roadmap.
 
 ### Next / Post-MVP
 
 - Set up a Cloudflare Pages deployment pipeline and use Preview deployments
   for release checks.
 - Dedicated Lesson Result visual redesign
-- Difficulty-based EXP rewards ([[DEC-045]], [[DEC-046]])
 - Profile UI for Player Stats (today/week/month, streaks, records, jamo
   rankings) and session history
 - Learning Modes: VocabularyProgress, Topic/Keyboard Position practice, and

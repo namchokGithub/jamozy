@@ -41,6 +41,7 @@ describe('createHomeServices', () => {
     expect(services.recordExercise({ lesson, result })).toBeUndefined()
     services.recordReplay({
       lessonId: 'l1',
+      difficulties: ['hard'],
       totals: {
         startedAtMs: 0,
         durationSeconds: 1,
@@ -63,13 +64,17 @@ describe('createHomeServices', () => {
         lesson: expect.objectContaining({
           id: 'l1',
           type: 'character',
-          exercises: [{ id: 'e1' }],
+          exercises: [{ id: 'e1', difficulty: 'easy' }],
         }),
         result,
       }),
     )
     expect(outbox.enqueueReplay).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: 'u1', lessonId: 'l1' }),
+      expect.objectContaining({
+        userId: 'u1',
+        lessonId: 'l1',
+        difficulties: ['hard'],
+      }),
     )
   })
 

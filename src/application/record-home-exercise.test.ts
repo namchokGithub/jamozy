@@ -141,10 +141,11 @@ describe('recordHomeExercise', () => {
       exercisesAttempted: 3,
       acceptedKeystrokes: 10,
       rejectedKeystrokes: 0,
-      expGained: 170,
+      // Exercises without a difficulty count as easy: (15 + 5 perfect) × 3.
+      expGained: 60,
     })
     expect(submissions[0].effects.reviewItems).toEqual([])
-    expect(outcome.completed?.expGained).toBe(170)
+    expect(outcome.completed?.expGained).toBe(60)
     const progress = await progressRepo.getProgress('u1', 'lesson-1')
     expect(progress).toMatchObject({
       status: 'completed',
@@ -231,6 +232,36 @@ describe('recordHomeExercise', () => {
     expect(submissions[0].effects.jamoCounts).toEqual({ ㄱ: { accepted: 1, rejected: 0 }, ㅏ: { accepted: 1, rejected: 0 } })
   })
 
+  it('awards difficulty EXP with a perfect bonus on completion', async () => {
+    const { deps, submissions } = setup()
+    const rated = {
+      id: 'lesson-1',
+      exercises: [
+        { id: 'a', difficulty: 'medium' as const },
+        { id: 'b', difficulty: 'hard' as const },
+      ],
+    }
+
+    await recordHomeExercise(deps, { userId: 'u1', lesson: rated, result: result('a', 4, 0), submissionId: 's1', now: at(0) })
+    await recordHomeExercise(deps, { userId: 'u1', lesson: rated, result: result('b', 4, 2), submissionId: 's2', now: at(10) })
+
+    expect(submissions[0].session.expGained).toBe(60)
+  })
+
+  it('gives no perfect bonus for a partial saved without per-exercise stats', async () => {
+    const { deps, progressRepo, submissions } = setup()
+    const pair = { id: 'lesson-1', exercises: [{ id: 'a' }, { id: 'b' }] }
+    await progressRepo.saveProgress('u1', {
+      lessonId: 'lesson-1', status: 'unlocked', bestAccuracy: 0, bestSpeedWpm: 0, attempts: 0, lastAttemptAt: at(0), completedAt: null,
+      completedExerciseIds: ['a'],
+      homePartialResult: { submissionId: 's-old', startedAtMs: at(0).getTime(), acceptedKeystrokes: 4, rejectedKeystrokes: 0 },
+    })
+
+    await recordHomeExercise(deps, { userId: 'u1', lesson: pair, result: result('b'), submissionId: 'x', now: at(10) })
+
+    expect(submissions[0].session.expGained).toBe(30)
+  })
+
   it('rejects an exercise that is not part of the lesson', async () => {
     const { deps } = setup()
     await expect(
@@ -267,7 +298,22 @@ describe('submitHomeReplay', () => {
     return context
   }
 
-  it('grants 15 EXP for a full session of a completed lesson without changing completion', async () => {
+  it('awards practice EXP per replayed exercise by difficulty', async () => {
+    const { deps } = await completedSetup()
+
+    const outcome = await submitHomeReplay(deps, {
+      userId: 'u1',
+      lessonId: 'lesson-1',
+      sessionId: 'replay-rated',
+      totals,
+      difficulties: ['easy', 'medium', 'hard'],
+      now: at(130),
+    })
+
+    expect(outcome?.expGained).toBe(18)
+  })
+
+  it('counts each attempted exercise as easy for a replay without difficulties, without changing completion', async () => {
     const { deps, progressRepo, submissions } = await completedSetup()
     const before = await progressRepo.getProgress('u1', 'lesson-1')
 
@@ -279,11 +325,11 @@ describe('submitHomeReplay', () => {
       now: at(130),
     })
 
-    expect(outcome?.expGained).toBe(15)
+    expect(outcome?.expGained).toBe(9)
     expect(submissions.at(-1)?.session).toMatchObject({
       id: 'replay-1',
       context: { mode: 'home', lessonId: 'lesson-1' },
-      expGained: 15,
+      expGained: 9,
       exercisesAttempted: 3,
     })
     expect(submissions.at(-1)?.effects.reviewItems).toEqual([])

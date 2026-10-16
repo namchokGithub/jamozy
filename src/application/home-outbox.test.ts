@@ -133,6 +133,36 @@ describe('HomeOutbox', () => {
     ).toEqual(['s1'])
   })
 
+  it('passes replay job difficulties to the replay submit', async () => {
+    const { outbox, sessionSubmissionRepo } = setup()
+    for (const id of ['e1', 'e2'])
+      await outbox.enqueueExercise({
+        userId: 'u1',
+        lesson,
+        result: result(id),
+        submissionId: id,
+      })
+    await outbox.enqueueReplay({
+      userId: 'u1',
+      lessonId: 'lesson-1',
+      sessionId: 'r1',
+      totals: {
+        startedAtMs: 0,
+        durationSeconds: 1,
+        exercisesAttempted: 1,
+        acceptedKeystrokes: 2,
+        rejectedKeystrokes: 0,
+      },
+      difficulties: ['hard'],
+    })
+    await outbox.drain()
+
+    expect(sessionSubmissionRepo.submissions.at(-1)?.session).toMatchObject({
+      id: 'r1',
+      expGained: 10,
+    })
+  })
+
   it('keeps a failed job, backs off, and succeeds on a later drain', async () => {
     const {
       outbox,

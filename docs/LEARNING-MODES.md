@@ -96,7 +96,7 @@ from `/review` and play it at `/review/weak-jamo`.
 - **Recording:** each session is a `LearningSession` with context
   `{ mode: 'weak-jamo' }` and counts as `practicesCompleted` in Player Stats.
   It records jamo stats, never touches `ReviewItem` or `LessonProgress`, and
-  awards no EXP until practice EXP ([[DEC-045]]) ships for every practice mode.
+  awards practice EXP for each correct exercise by difficulty ([[DEC-045]]).
 
 ### Daily Quest
 
@@ -179,11 +179,13 @@ concrete timezone policy remains undecided.
 | Home | Same first-completed exercise reward; replayed exercise: Easy 3, Medium 5, Hard 10 EXP | No |
 | Daily Quest | Sum of item rewards once per quest: Easy 5, Medium 10, Hard 15 EXP | No |
 | Topic / Keyboard Position / Random Practice | Per completed item: Easy 3, Medium 5, Hard 10 EXP | No |
-| Review | Per completed item: Easy 3, Medium 5, Hard 10 EXP | No |
+| Review | Per correctly typed item: Easy 3, Medium 5, Hard 10 EXP | No |
 
 Apply flat bonuses before percentage bonuses, then round once:
 `round((Base EXP + Flat Bonus) × (1 + Total EXP Bonus))`. Bonus sources and
 values are defined in [[DEC-045]] and `docs/LEVELING.md`; bonuses the learner
-has not earned or that are not available contribute zero. EXP is global player
+has not earned or that are not available contribute zero. Review and Practice
+reward only correctly typed items, and a missing difficulty counts as Easy
+(DEC-045 amendment). Daily Quest rewards are not implemented yet. EXP is global player
 progression; it is not curriculum progression. Level is derived with the
 LEVELING.md curve ([[DEC-048]]).

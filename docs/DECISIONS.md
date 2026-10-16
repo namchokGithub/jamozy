@@ -1175,6 +1175,13 @@ documentation decision and require a separately scoped implementation and
 rollout. `LearningSession.expGained` continues to record the amount actually
 awarded by the implementation in effect for that submission.
 
+**Amendment (2026-10-16, implemented):** Learning Path, Home, Review, and Weak
+Jamo practice award these amounts. Review and Practice reward only items typed
+correctly. "Perfect" means the exercise had no mistakes. A missing difficulty
+(an unknown or deleted source exercise, or data queued before this shipped)
+counts as Easy. Daily Quest rewards and Perk/Achievement bonuses are not
+implemented, so bonuses other than the perfect bonus contribute zero.
+
 ---
 
 ## DEC-046 — Difficulty-based EXP rewards for completed-lesson replays
@@ -1197,6 +1204,12 @@ changes lesson completion, unlocks, or first-completion review effects. The
 replay session receipt records the final total and its per-exercise reward
 inputs so a retry cannot duplicate or recalculate the reward. Existing code
 continues to award flat 15 EXP until a separately scoped implementation ships.
+
+**Amendment (2026-10-16, implemented):** The receipt stores only the total
+`expGained`, not per-exercise reward inputs: the receipt keyed by session ID
+already returns the original outcome on retry, so the reward is never
+duplicated or recalculated. A Home replay queued before this change carries no
+difficulties and awards Easy for each attempted exercise.
 
 ---
 

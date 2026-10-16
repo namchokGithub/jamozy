@@ -18,6 +18,7 @@ import {
 } from './learning-path-order'
 import { deviceTimeZone, sessionStatsFrom } from '../domain/models/player-stats'
 import type { LessonType } from '../domain/models/lesson'
+import { sessionRewardExp, type ExpRewardItem } from '../domain/models/exp-reward'
 
 export interface CompleteLessonSessionDeps {
   courseRepo: CourseRepository
@@ -35,8 +36,25 @@ export interface CompleteLessonOutcome {
   unlockedNextLessonId: string | null
 }
 
-export function expForAccuracy(accuracy: number): number {
-  return 100 + (accuracy > 90 ? 20 : 0) + (accuracy === 100 ? 50 : 0)
+// One reward per played exercise (DEC-045, DEC-046): first completion by
+// difficulty with a perfect bonus, a replay at the practice rate. An unknown
+// exercise, or a result without per-exercise stats, counts as easy.
+function lessonRewardItems(
+  result: LessonResult,
+  exercises: Array<{ id: string; difficulty: ExpRewardItem['difficulty'] }>,
+  isReplay: boolean,
+): ExpRewardItem[] {
+  const kind = isReplay ? 'practice' : 'first-completion'
+  const difficulty = new Map(exercises.map((e) => [e.id, e.difficulty]))
+  if (!result.exercises)
+    return Array.from({ length: result.exercisesAttempted }, () => ({ kind }))
+  return result.exercises.map((exercise) => ({
+    kind,
+    difficulty: exercise.exerciseId
+      ? difficulty.get(exercise.exerciseId)
+      : undefined,
+    perfect: exercise.mistakeCount === 0,
+  }))
 }
 
 async function reviewEffects(
@@ -137,7 +155,9 @@ export async function completeLessonSession(
       })
     }
   }
-  const expGained = wasAlreadyCompleted ? 15 : expForAccuracy(result.accuracy)
+  const expGained = sessionRewardExp(
+    lessonRewardItems(result, lesson?.exercises ?? [], wasAlreadyCompleted),
+  )
   const profile =
     (await deps.userProfileRepo.getUserProfile(userId)) ??
     defaultUserProfile(userId, now)

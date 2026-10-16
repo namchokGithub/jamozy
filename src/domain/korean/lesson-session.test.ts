@@ -120,6 +120,7 @@ describe('exercise timing', () => {
     state = pressKey(state, 'KeyK', false, 2_000)
     expect(getLessonResult(state).exercises).toEqual([
       {
+        exerciseId: 'e1',
         targetText: '가',
         mistakeCount: 1,
         typingSeconds: 2,
@@ -232,6 +233,11 @@ describe('lessonResultSchema', () => {
     expect(() =>
       lessonResultSchema.parse({ accuracy: 90, speedWpm: 2, durationSeconds: 60, startedAtMs: 0, exercisesAttempted: 1, acceptedKeystrokes: 10, rejectedKeystrokes: 0, mistakes: [] }),
     ).not.toThrow()
+  })
+
+  it('keeps per-exercise ids', () => {
+    const parsed = lessonResultSchema.parse({ accuracy: 90, speedWpm: 2, durationSeconds: 60, startedAtMs: 0, exercisesAttempted: 1, acceptedKeystrokes: 10, rejectedKeystrokes: 0, mistakes: [], exercises: [{ exerciseId: 'e1', targetText: '가', mistakeCount: 0, typingSeconds: 1, elapsedSeconds: 1 }] })
+    expect(parsed.exercises?.[0]?.exerciseId).toBe('e1')
   })
 
   it('rejects an out-of-range accuracy', () => {
