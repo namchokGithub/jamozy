@@ -20,8 +20,8 @@ function renderPage(action: () => Promise<unknown>) {
   const loader = vi.fn(async (): Promise<WeakJamoLoaderData> => {
     loads += 1
     const exercises = [
-      { id: 'l:a', targetText: '가', lessonType: 'word' as const },
-      { id: 'l:b', targetText: '가', lessonType: 'word' as const },
+      { id: 'l:a', targetText: '가', lessonType: 'word' as const, difficulty: 'easy' as const },
+      { id: 'l:b', targetText: '가', lessonType: 'word' as const, difficulty: 'easy' as const },
     ]
     return {
       targets: [target],

@@ -241,6 +241,7 @@ describe('HomePlayer', () => {
     expect(services.recordReplay).toHaveBeenCalledWith({
       lessonId: 'l1',
       lessonType: 'character',
+      difficulties: ['easy'],
       totals: expect.objectContaining({
         exercisesAttempted: 1,
         acceptedKeystrokes: 1,

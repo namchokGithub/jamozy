@@ -10,7 +10,7 @@ import { describe, expect, it, vi } from 'vitest'
 import LessonDetailPage from './LessonDetailPage'
 import type { Lesson } from '../../domain/models/lesson'
 import type { UserSettings } from '../../domain/models/user-profile'
-import type { CompleteLessonOutcome } from '../../application/complete-lesson'
+import type { CompleteLessonOutcome } from '../../application/complete-lesson-session'
 
 function makeLesson(overrides: Partial<Lesson> = {}): Lesson {
   return {

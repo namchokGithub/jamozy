@@ -1,12 +1,11 @@
 import { jamoCountsFrom, mergeJamoCounts } from '../domain/models/jamo-stat'
 import { ValidationError } from '../domain/errors'
 import type { ExerciseResult } from '../domain/korean/lesson-session'
-import type { LessonType } from '../domain/models/lesson'
+import type { ExerciseDifficulty, LessonType } from '../domain/models/lesson'
+import { sessionRewardExp, type ExpRewardItem } from '../domain/models/exp-reward'
 import type { HomePartialResult, Progress } from '../domain/models/progress'
 import type { ProgressRepository } from '../domain/repositories/progress-repository'
-import { expForAccuracy } from './complete-lesson-session'
 import {
-  accuracyOf,
   homeAttemptProgress,
   submitHomeSession,
   type HomeSessionDeps,
@@ -19,7 +18,12 @@ export interface RecordHomeExerciseDeps extends HomeSessionDeps {
 
 export interface RecordHomeExerciseInput {
   userId: string
-  lesson: { id: string; type?: LessonType; exercises: Array<{ id: string }> }
+  // difficulty is absent on jobs queued before DEC-045 shipped; it counts as easy.
+  lesson: {
+    id: string
+    type?: LessonType
+    exercises: Array<{ id: string; difficulty?: ExerciseDifficulty }>
+  }
   result: ExerciseResult
   // Used only when this is the lesson's first recorded exercise; it becomes
   // the first-completion session ID.
@@ -34,7 +38,8 @@ export interface RecordHomeExerciseOutcome {
 
 // Records one completed Home exercise (DEC-043). Distinct exercises and the
 // raw totals of their first completions accumulate on Progress; when they
-// first cover the lesson, one session is submitted with accuracy-based EXP.
+// first cover the lesson, one session is submitted with difficulty-based EXP
+// (DEC-045).
 // Repeated or post-completion exercises change nothing, so retries are safe.
 export async function recordHomeExercise(
   deps: RecordHomeExerciseDeps,
@@ -104,11 +109,28 @@ export async function recordHomeExercise(
     sessionId: partial.submissionId,
     lessonId: lesson.id,
     totals,
-    expGained: expForAccuracy(accuracyOf(totals)),
+    expGained: sessionRewardExp(firstCompletionItems(lesson, ids, partial)),
     progress,
     now,
     lessonType: lesson.type,
     isReplay: false,
   })
   return { progress: completed.progress, completed }
+}
+
+// One first-completion reward per exercise. Per-exercise stats line up with
+// the completed IDs because both grow together; a partial saved before those
+// stats existed cannot tell which exercise was perfect, so it earns none.
+function firstCompletionItems(
+  lesson: RecordHomeExerciseInput['lesson'],
+  ids: string[],
+  partial: HomePartialResult,
+): ExpRewardItem[] {
+  const difficulty = new Map(lesson.exercises.map((e) => [e.id, e.difficulty]))
+  const stats = partial.exercises?.length === ids.length ? partial.exercises : []
+  return ids.map((id, index) => ({
+    kind: 'first-completion',
+    difficulty: difficulty.get(id),
+    perfect: stats[index]?.mistakeCount === 0,
+  }))
 }

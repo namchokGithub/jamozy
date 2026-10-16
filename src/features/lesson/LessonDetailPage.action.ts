@@ -1,9 +1,9 @@
 import type { ActionFunctionArgs } from 'react-router'
 import {
   completeLessonSession,
+  type CompleteLessonOutcome,
   type CompleteLessonSessionDeps,
 } from '../../application/complete-lesson-session'
-import type { CompleteLessonOutcome } from '../../application/complete-lesson'
 import { lessonResultSchema } from '../../domain/korean/lesson-session'
 
 // A failed save comes back as data, so the page keeps the learner's result

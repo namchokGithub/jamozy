@@ -5,7 +5,7 @@ import {
   recentMistakeRate,
   type JamoStats,
 } from '../models/jamo-stat'
-import type { LessonType } from '../models/lesson'
+import type { ExerciseDifficulty, LessonType } from '../models/lesson'
 
 // Weak Jamo practice (DEC-051): picks the learner's weakest key-level jamo and
 // Home exercises that drill them. Policy numbers are not schema.
@@ -24,6 +24,7 @@ export interface PracticeExercise {
   id: string
   targetText: string
   lessonType: LessonType
+  difficulty: ExerciseDifficulty
 }
 
 export function weakJamoTargets(stats: JamoStats): WeakJamoTarget[] {
@@ -95,6 +96,7 @@ export function homePracticeExercises(
         id: `${lesson.id}:${exercise.id}`,
         targetText: exercise.targetText,
         lessonType: lesson.type,
+        difficulty: exercise.difficulty,
       })),
     ),
   )

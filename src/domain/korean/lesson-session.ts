@@ -189,7 +189,8 @@ export interface LessonResult {
   acceptedKeystrokes: number
   rejectedKeystrokes: number
   mistakes: MistakeReport[]
-  exercises?: ExerciseStat[]
+  // exerciseId lets the submit look up each exercise's difficulty (DEC-045).
+  exercises?: Array<ExerciseStat & { exerciseId?: string }>
   jamoCounts?: JamoCounts
 }
 
@@ -218,6 +219,7 @@ export function getLessonResult(state: LessonSessionState, now: Date = new Date(
     rejectedKeystrokes: totalMistakes,
     mistakes,
     exercises: state.completedResults.map((result) => ({
+      exerciseId: result.exerciseId,
       targetText: result.targetText,
       mistakeCount: result.mistakes.length,
       typingSeconds: result.typingSeconds ?? 0,
@@ -248,6 +250,7 @@ export const lessonResultSchema = z.object({
   exercises: z
     .array(
       z.object({
+        exerciseId: z.string().optional(),
         targetText: z.string(),
         mistakeCount: z.number().int().min(0),
         typingSeconds: z.number().min(0),

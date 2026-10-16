@@ -1,5 +1,8 @@
 import type { JamoCounts } from '../domain/models/jamo-stat'
+import type { LessonRepository } from '../domain/repositories/lesson-repository'
 import type { ReviewRepository } from '../domain/repositories/review-repository'
+import { sessionRewardExp } from '../domain/models/exp-reward'
+import type { ExerciseDifficulty } from '../domain/models/lesson'
 import type { SessionSubmissionRepository } from '../domain/repositories/session-submission-repository'
 import { nextBox, nextReviewDate, type ReviewItem } from '../domain/models/review-item'
 import type { UserProfileRepository } from '../domain/repositories/user-profile-repository'
@@ -41,8 +44,35 @@ function updatedReview(item: ReviewItem, wasCorrect: boolean, now: Date): Review
   }
 }
 
+// Each correct item earns practice EXP by its source exercise's difficulty
+// (DEC-045); a missing source lesson or exercise counts as easy. Each source
+// lesson is read once, and a failed read also counts as easy so the review
+// itself always saves.
+async function sourceDifficulties(
+  lessonRepo: LessonRepository,
+  items: ReviewItem[],
+): Promise<Array<ExerciseDifficulty | undefined>> {
+  if (items.length === 0) return []
+  const lessonIds = [...new Set(items.map((item) => item.sourceLessonId))]
+  const lessons = new Map(
+    await Promise.all(
+      lessonIds.map(
+        async (id) =>
+          [id, await lessonRepo.getLessonById(id).catch(() => null)] as const,
+      ),
+    ),
+  )
+  return items.map(
+    (item) =>
+      lessons
+        .get(item.sourceLessonId)
+        ?.exercises.find((exercise) => exercise.id === item.sourceExerciseId)
+        ?.difficulty,
+  )
+}
+
 export async function submitReviewSession(
-  deps: { reviewRepo: ReviewRepository; sessionSubmissionRepo: SessionSubmissionRepository; userProfileRepo?: UserProfileRepository },
+  deps: { reviewRepo: ReviewRepository; lessonRepo: LessonRepository; sessionSubmissionRepo: SessionSubmissionRepository; userProfileRepo?: UserProfileRepository },
   userId: string,
   input: SubmitReviewSessionInput,
   now: Date = new Date(),
@@ -51,6 +81,7 @@ export async function submitReviewSession(
   let needsPracticeCount = 0
   const reviewItems: ReviewItem[] = []
   const stats: ExerciseStat[] = []
+  const correctItems: ReviewItem[] = []
 
   for (const result of input.results) {
     const { itemId, wasCorrect } = result
@@ -61,6 +92,7 @@ export async function submitReviewSession(
 
     reviewItems.push(updatedReview(item, wasCorrect, now))
     if (wasCorrect) {
+      correctItems.push(item)
       correctCount += 1
     } else {
       needsPracticeCount += 1
@@ -77,7 +109,9 @@ export async function submitReviewSession(
     exercisesAttempted: input.exercisesAttempted,
     acceptedKeystrokes: input.acceptedKeystrokes,
     rejectedKeystrokes: input.rejectedKeystrokes,
-    expGained: 0,
+    expGained: sessionRewardExp(
+      (await sourceDifficulties(deps.lessonRepo, correctItems)).map((difficulty) => ({ kind: 'practice', difficulty })),
+    ),
     ...sessionStatsFrom(stats, undefined, timeZone, now),
   }, { progress: [], reviewItems, ...(input.jamoCounts ? { jamoCounts: input.jamoCounts } : {}) })
 

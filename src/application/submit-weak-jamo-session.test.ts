@@ -16,6 +16,20 @@ const input = {
 }
 
 describe('submitWeakJamoSession', () => {
+  it('awards practice EXP for correct exercises by difficulty', async () => {
+    const sessionSubmissionRepo = new FakeSessionSubmissionRepository()
+    const [correct, wrong] = input.results
+    await submitWeakJamoSession({ sessionSubmissionRepo }, 'u1', {
+      ...input,
+      results: [
+        { ...correct, difficulty: 'hard' as const },
+        { ...wrong, difficulty: 'medium' as const },
+        { ...correct, exerciseId: 'l3:e1' },
+      ],
+    })
+    expect(sessionSubmissionRepo.submissions[0].session.expGained).toBe(13)
+  })
+
   it('submits a weak-jamo session with stats and no learner-state effects', async () => {
     const sessionSubmissionRepo = new FakeSessionSubmissionRepository()
     const outcome = await submitWeakJamoSession(
@@ -29,7 +43,8 @@ describe('submitWeakJamoSession', () => {
     expect(submission.session).toMatchObject({
       id: 'wj-1',
       context: { mode: 'weak-jamo' },
-      expGained: 0,
+      // Only the correct, undifficultied exercise earns EXP: easy practice.
+      expGained: 3,
       charactersTyped: 4,
       wordsPracticed: 1,
       sentencesPracticed: 1,

@@ -1,5 +1,6 @@
 import type { JamoCounts } from '../domain/models/jamo-stat'
-import type { LessonType } from '../domain/models/lesson'
+import type { ExerciseDifficulty, LessonType } from '../domain/models/lesson'
+import { sessionRewardExp } from '../domain/models/exp-reward'
 import {
   deviceTimeZone,
   sessionStatsFrom,
@@ -11,6 +12,8 @@ export interface WeakJamoResult {
   exerciseId: string
   targetText: string
   lessonType: LessonType
+  // Absent counts as easy (DEC-045).
+  difficulty?: ExerciseDifficulty
   wasCorrect: boolean
   mistakeCount: number
   typingSeconds: number
@@ -33,9 +36,9 @@ export interface SubmitWeakJamoSessionOutcome {
   needsPracticeCount: number
 }
 
-// Weak Jamo practice (DEC-051): records history and stats only. It never
-// touches ReviewItems or Progress, and awards no EXP until practice EXP
-// (DEC-045) ships for every practice mode.
+// Weak Jamo practice (DEC-051): records history and stats, and awards
+// practice EXP for each correct exercise by difficulty (DEC-045). It never
+// touches ReviewItems or Progress.
 export async function submitWeakJamoSession(
   deps: {
     sessionSubmissionRepo: SessionSubmissionRepository
@@ -68,7 +71,11 @@ export async function submitWeakJamoSession(
       exercisesAttempted: input.exercisesAttempted,
       acceptedKeystrokes: input.acceptedKeystrokes,
       rejectedKeystrokes: input.rejectedKeystrokes,
-      expGained: 0,
+      expGained: sessionRewardExp(
+        input.results
+          .filter((result) => result.wasCorrect)
+          .map(({ difficulty }) => ({ kind: 'practice', difficulty })),
+      ),
       ...sessionStatsFrom(stats, undefined, timeZone, now),
     },
     {

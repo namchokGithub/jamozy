@@ -25,14 +25,17 @@ export function createHomeServices(deps: {
           lesson: {
             id: lesson.id,
             type: lesson.type,
-            exercises: lesson.exercises.map(({ id }) => ({ id })),
+            exercises: lesson.exercises.map(({ id, difficulty }) => ({
+              id,
+              difficulty,
+            })),
           },
           result,
           // Used only if this is the lesson's first recorded exercise.
           submissionId: crypto.randomUUID(),
         })
       }),
-    recordReplay: ({ lessonId, lessonType, totals }) =>
+    recordReplay: ({ lessonId, lessonType, totals, difficulties }) =>
       inBackground(async () => {
         const { uid } = await deps.getActiveUser()
         await deps.outbox.enqueueReplay({
@@ -41,6 +44,7 @@ export function createHomeServices(deps: {
           sessionId: crypto.randomUUID(),
           totals,
           lessonType,
+          difficulties,
         })
       }),
     saveResume: (resume) =>

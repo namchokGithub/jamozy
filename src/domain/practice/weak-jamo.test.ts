@@ -62,6 +62,7 @@ describe('selectWeakJamoExercises', () => {
     id,
     targetText,
     lessonType: 'word',
+    difficulty: 'easy',
   })
 
   it('skips zero scores and duplicates and returns at most 10', () => {
@@ -129,15 +130,17 @@ describe('homePracticeExercises', () => {
               title: '',
               type: 'sentence',
               order: 1,
-              exercises: [{ id: 'e1', targetText: '어 어', ...fields }],
+              exercises: [
+                { id: 'e1', targetText: '어 어', ...fields, difficulty: 'hard' },
+              ],
             },
           ],
         },
       ],
     }
     expect(homePracticeExercises(content)).toEqual([
-      { id: 'l1:e1', targetText: '어', lessonType: 'word' },
-      { id: 'l2:e1', targetText: '어 어', lessonType: 'sentence' },
+      { id: 'l1:e1', targetText: '어', lessonType: 'word', difficulty: 'easy' },
+      { id: 'l2:e1', targetText: '어 어', lessonType: 'sentence', difficulty: 'hard' },
     ])
   })
 })

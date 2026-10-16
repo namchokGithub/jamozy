@@ -1,6 +1,6 @@
 import type { ExerciseResult } from '../korean/lesson-session'
 import type { ExerciseStat } from './player-stats'
-import type { LessonType } from './lesson'
+import type { ExerciseDifficulty, LessonType } from './lesson'
 import type { JamoCounts } from './jamo-stat'
 
 export interface HomeSessionTotals {
@@ -27,7 +27,12 @@ export type HomeSyncJob = HomeSyncJobBase &
   (
     | {
         kind: 'exercise'
-        lesson: { id: string; type?: LessonType; exercises: Array<{ id: string }> }
+        lesson: {
+          id: string
+          type?: LessonType
+          // Absent on jobs queued before DEC-045 shipped.
+          exercises: Array<{ id: string; difficulty?: ExerciseDifficulty }>
+        }
         result: ExerciseResult
         submissionId: string
       }
@@ -37,5 +42,7 @@ export type HomeSyncJob = HomeSyncJobBase &
         sessionId: string
         totals: HomeSessionTotals
         lessonType?: LessonType
+        // Absent on jobs queued before DEC-046 shipped.
+        difficulties?: ExerciseDifficulty[]
       }
   )
